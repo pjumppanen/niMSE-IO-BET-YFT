@@ -1,0 +1,8 @@
+# ignore binary files
+*.dch
+*.sdf
+.vs
+x64
+Win32
+work
+
