@@ -1,0 +1,8 @@
+# ignore zip files
+*.zip
+
+# ignore YFT folder
+YFT/**
+
+# ignore BET folder
+BET/**
