@@ -93,10 +93,10 @@ setClass("MseDefinition",
 
 # -----------------------------------------------------------------------------
 
-setGeneric("createMseFramework", function(.Object, Report=FALSE, UseMSYss=0) standardGeneric("createMseFramework"))
+setGeneric("createMseFramework", function(.Object, ...) standardGeneric("createMseFramework"))
 
 setMethod("createMseFramework", "MseDefinition",
-  function(.Object, Report=FALSE, UseMSYss=0)
+  function(.Object, Report=FALSE, UseCluster=NA, UseMSYss=0)
   {
     if ((.Object@firstMPYr - .Object@lastCalendarYr) < 2)
     {
@@ -104,6 +104,6 @@ setMethod("createMseFramework", "MseDefinition",
       stop()
     }
 
-    return (new("MseFramework", .Object, Report, UseMSYss))
+    return (new("MseFramework", .Object, Report, UseCluster, UseMSYss))
   }
 )

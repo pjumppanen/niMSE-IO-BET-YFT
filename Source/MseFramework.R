@@ -194,6 +194,50 @@ setMethod("runMse", c("MseFramework"),
       clusterEvalQ(cluster, eval(parse("Source/MseMain.R")))
     }
 
+    runModels <- function(StockSynthesisModels, MPs, tune, interval, Report, CppMethod, EffortCeiling, TACTime, rULim)
+    {
+      if (UseCluster)
+      {
+        runJob <- function(om)
+        {
+          # In a cluster context we re-direct output to file so we can then play
+          # it back in the host
+          StdOutFileName <- paste("projStdOutFile", om@ModelData@which, ".txt", sep="")
+          sink(file=StdOutFileName, append=FALSE, type=c("output", "message"))
+
+          om <- runMse(om, .Object@MseDef, MPs, tune, interval, Report, CppMethod, cluster=NA, EffortCeiling, TACTime, rULim)
+
+          print("\n")
+          sink()
+
+          return (om)
+        }
+
+        printJobOutput <- function(om)
+        {
+          StdOutFileName <- paste("projStdOutFile", om@ModelData@which, ".txt", sep="")
+
+          if (file.exists(StdOutFileName))
+          {
+            Con <- file(StdOutFileName, "rt")
+
+            writeLines(readLines(Con))
+            close(Con)
+            unlink(StdOutFileName)
+          }
+        }
+
+        StockSynthesisModels <- parLapply(cluster, StockSynthesisModels, fun=runJob)
+        lapply(StockSynthesisModels, FUN=printJobOutput)
+      }
+      else
+      {
+        StockSynthesisModels <- lapply(StockSynthesisModels, FUN=function(om) {return(runMse(om, .Object@MseDef, MPs, tune, interval, Report, CppMethod, cluster=NA, EffortCeiling, TACTime, rULim))})
+      }
+
+      return (StockSynthesisModels)
+    }
+
     .Object@tune <- rep(1.0, times=length(MPs))
 
     if (class(TuningPars) == "TuningParameters")
@@ -253,7 +297,7 @@ setMethod("runMse", c("MseFramework"),
         optimiseObjFn <- function(tuneLog10, MP)
         {
           tune                         <- 10 ^ tuneLog10
-          .Object@StockSynthesisModels <- lapply(.Object@StockSynthesisModels, FUN=function(om){return(runMse(om, .Object, MP, tune, interval, Report, CppMethod, cluster, EffortCeiling, TACTime, rULim))})
+          .Object@StockSynthesisModels <- runModels(.Object@StockSynthesisModels, MP, tune, interval, Report, CppMethod, EffortCeiling, TACTime, rULim)
 
           tuneValue <- getPerformanceMeasure(.Object, MP)
           tuneError <- abs((TuningPars@tuningTarget - tuneValue) / TuningPars@tuningTarget)
@@ -271,7 +315,7 @@ setMethod("runMse", c("MseFramework"),
         bisectObjFn <- function(tuneLog10, MP)
         {
           tune                         <- 10 ^ tuneLog10
-          .Object@StockSynthesisModels <- lapply(.Object@StockSynthesisModels, FUN=function(om){return(runMse(om, .Object, MP, tune, interval, Report, CppMethod, cluster, EffortCeiling, TACTime, rULim))})
+          .Object@StockSynthesisModels <- runModels(.Object@StockSynthesisModels, MP, tune, interval, Report, CppMethod, EffortCeiling, TACTime, rULim)
 
           tuneValue <- getPerformanceMeasure(.Object, MP)
           tuneError <- abs((TuningPars@tuningTarget - tuneValue) / TuningPars@tuningTarget)
@@ -378,7 +422,7 @@ setMethod("runMse", c("MseFramework"),
     }
 
     # re-run all models with final tuning
-    .Object@StockSynthesisModels <- lapply(.Object@StockSynthesisModels, FUN=function(om) {return(runMse(om, .Object, MPs, .Object@tune, interval, Report, CppMethod, cluster, EffortCeiling, TACTime, rULim))})
+    .Object@StockSynthesisModels <- runModels(.Object@StockSynthesisModels, MPs, .Object@tune, interval, Report, CppMethod, EffortCeiling, TACTime, rULim)
 
     if (UseCluster)
     {

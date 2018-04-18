@@ -206,10 +206,21 @@ setMethod("runProjection", c("ManagementVars", "ReferenceVars", "StockSynthesisM
         sink(file=StdOutFileName, append=FALSE, type=c("output", "message"))
       }
 
-      Proj <- new("Projection", ssModelData, RefVars, MseDef, sim, MP, interval, Report, CppMethod, EffortCeiling, TACTime, rULim, seed[sim], tune)
+      Proj <- NA
+
+      tryCatch(
+      {
+        Proj <- new("Projection", ssModelData, RefVars, MseDef, sim, MP, interval, Report, CppMethod, EffortCeiling, TACTime, rULim, seed[sim], tune)
+      },
+      error=function(e)
+      {
+        print(e)
+        traceback()
+      })
 
       if (UseCluster)
       {
+        print("\n")
         sink()
       }
 
@@ -280,24 +291,27 @@ setMethod("runProjection", c("ManagementVars", "ReferenceVars", "StockSynthesisM
 
     for (res in results)
     {
-      sim <- res@which
-
-      if (sim == 1)
+      if (!is.na(res))
       {
-        .Object@FlastYr <- res@F[ssModelData@nyears]
-      }
+        sim <- res@which
 
-      .Object@F[sim,]             <- res@F[years]
-      .Object@SSB[sim,,]          <- res@SSB[,years]
-      .Object@B[sim,,]            <- res@B[,years]
-      .Object@CM[sim,,]           <- res@CM[,years]
-      .Object@CMbyF[sim,,,]       <- res@CMbyF[,years,]
-      .Object@Rec[sim,]           <- res@Rec[years]
-      .Object@RecYrQtr[sim,]      <- res@RecYrQtr[months]
-      .Object@IobsArchive[sim,]   <- res@IobsArchive[years]
-      .Object@IobsRArchive[sim,,] <- res@IobsRArchive[years,]
-      .Object@TAC[sim,]           <- res@TAC[years]
-      .Object@TAEbyF[sim,,]       <- res@TAEbyF[years,]
+        if (sim == 1)
+        {
+          .Object@FlastYr <- res@F[ssModelData@nyears]
+        }
+
+        .Object@F[sim,]             <- res@F[years]
+        .Object@SSB[sim,,]          <- res@SSB[,years]
+        .Object@B[sim,,]            <- res@B[,years]
+        .Object@CM[sim,,]           <- res@CM[,years]
+        .Object@CMbyF[sim,,,]       <- res@CMbyF[,years,]
+        .Object@Rec[sim,]           <- res@Rec[years]
+        .Object@RecYrQtr[sim,]      <- res@RecYrQtr[months]
+        .Object@IobsArchive[sim,]   <- res@IobsArchive[years]
+        .Object@IobsRArchive[sim,,] <- res@IobsRArchive[years,]
+        .Object@TAC[sim,]           <- res@TAC[years]
+        .Object@TAEbyF[sim,,]       <- res@TAEbyF[years,]
+      }
     }
 
     return (.Object)

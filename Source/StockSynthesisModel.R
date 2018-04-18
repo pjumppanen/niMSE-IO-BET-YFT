@@ -713,11 +713,11 @@ setMethod("initialize", "StockSynthesisModel",
 # -----------------------------------------------------------------------------
 
 setMethod("runMse", c("StockSynthesisModel"),
-  function(.Object, mseFramework, MPs, tune=NA, interval=3, Report=FALSE, CppMethod=NA, cluster=NA, EffortCeiling = as.double(20.0), TACTime = 0.5, rULim = 0.5)
+  function(.Object, MseDef, MPs, tune=NA, interval=3, Report=FALSE, CppMethod=NA, cluster=NA, EffortCeiling = as.double(20.0), TACTime = 0.5, rULim = 0.5)
   {
-    if (class(mseFramework) != "MseFramework")
+    if (class(MseDef) != "MseDefinition")
     {
-      print(paste("ERROR: Could not create StockSynthesisModel.",deparse(substitute(MseFramework)),"not of class MseFramework"))
+      print(paste("ERROR: Could not create StockSynthesisModel.",deparse(substitute(MseDef)),"not of class MseDefinition"))
       stop()
     }
 
@@ -751,7 +751,7 @@ setMethod("runMse", c("StockSynthesisModel"),
 
       if ((MP_class == "IO_MP") || (MP_class == "IO_MP_tune"))
       {
-        ProjectedVars <- runProjection(ProjectedVars, .Object@RefVars, .Object@ModelData, mseFramework@MseDef, MP, tune[idx], interval, Report, CppMethod, cluster, EffortCeiling, TACTime, rULim)
+        ProjectedVars <- runProjection(ProjectedVars, .Object@RefVars, .Object@ModelData, MseDef, MP, tune[idx], interval, Report, CppMethod, cluster, EffortCeiling, TACTime, rULim)
 
       } else
       {
