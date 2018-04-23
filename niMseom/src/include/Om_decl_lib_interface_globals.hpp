@@ -6,8 +6,6 @@ EXPORT SEXP Om_get_cd1_par(SEXP args);
 EXPORT SEXP Om_set_cd1_par(SEXP args);
 EXPORT SEXP Om_get_nt_cd1_par(SEXP args);
 EXPORT SEXP Om_set_nt_cd1_par(SEXP args);
-EXPORT SEXP Om_R_findMSYref(SEXP args);
-EXPORT SEXP Om_R_nt_findMSYref(SEXP args);
 EXPORT SEXP Om_R_findMSYrefs(SEXP args);
 EXPORT SEXP Om_R_nt_findMSYrefs(SEXP args);
 EXPORT SEXP Om_get_last_par(SEXP args);

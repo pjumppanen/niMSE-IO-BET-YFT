@@ -1,0 +1,8 @@
+# ignore work folder
+work
+
+# ignore x64 folder
+x64
+
+# ignore win32 folder
+win32

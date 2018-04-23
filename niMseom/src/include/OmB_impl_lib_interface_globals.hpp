@@ -1008,7 +1008,6 @@ EXPORT SEXP OmB_R_MSYrefs(SEXP args)
   SEXP BMSY;
   SEXP SSBMSY;
   SEXP SSBMSY_B0;
-  SEXP sim_idx;
   
   args = CDR(args); rInstance = CAR(args);
   args = CDR(args); par = CAR(args);
@@ -1037,13 +1036,12 @@ EXPORT SEXP OmB_R_MSYrefs(SEXP args)
   args = CDR(args); BMSY = CAR(args);
   args = CDR(args); SSBMSY = CAR(args);
   args = CDR(args); SSBMSY_B0 = CAR(args);
-  args = CDR(args); sim_idx = CAR(args);
   
   ASSERT_TYPE_TAG(rInstance, D_OperatingModelBase);
   
   D_OperatingModelBase* pContext = (D_OperatingModelBase*)R_ExternalPtrAddr(rInstance);
   
-  SEXP Result = pContext->R_MSYrefs(par, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, sel, mov, h, Recdist, SRrel, N, NBefore, SSN, C, SSBA, ntargets, targpop, run_years, MSY, BMSY, SSBMSY, SSBMSY_B0, sim_idx);
+  SEXP Result = pContext->R_MSYrefs(par, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, sel, mov, h, Recdist, SRrel, N, NBefore, SSN, C, SSBA, ntargets, targpop, run_years, MSY, BMSY, SSBMSY, SSBMSY_B0);
   
   return (Result);
 }
@@ -1077,7 +1075,6 @@ EXPORT SEXP OmB_R_nt_MSYrefs(SEXP args)
   SEXP BMSY;
   SEXP SSBMSY;
   SEXP SSBMSY_B0;
-  SEXP sim_idx;
   
   args = CDR(args); rInstance = CAR(args);
   args = CDR(args); par = CAR(args);
@@ -1106,13 +1103,12 @@ EXPORT SEXP OmB_R_nt_MSYrefs(SEXP args)
   args = CDR(args); BMSY = CAR(args);
   args = CDR(args); SSBMSY = CAR(args);
   args = CDR(args); SSBMSY_B0 = CAR(args);
-  args = CDR(args); sim_idx = CAR(args);
   
   ASSERT_TYPE_TAG(rInstance, D_OperatingModelBase);
   
   D_OperatingModelBase* pContext = (D_OperatingModelBase*)R_ExternalPtrAddr(rInstance);
   
-  SEXP Result = pContext->R_nt_MSYrefs(par, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, sel, mov, h, Recdist, SRrel, N, NBefore, SSN, C, SSBA, ntargets, targpop, run_years, MSY, BMSY, SSBMSY, SSBMSY_B0, sim_idx);
+  SEXP Result = pContext->R_nt_MSYrefs(par, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, sel, mov, h, Recdist, SRrel, N, NBefore, SSN, C, SSBA, ntargets, targpop, run_years, MSY, BMSY, SSBMSY, SSBMSY_B0);
   
   return (Result);
 }
@@ -1143,7 +1139,6 @@ EXPORT SEXP OmB_R_MSYrefs_objective(SEXP args)
   SEXP ntargets;
   SEXP targpop;
   SEXP run_years;
-  SEXP sim_idx;
   
   args = CDR(args); rInstance = CAR(args);
   args = CDR(args); par = CAR(args);
@@ -1169,13 +1164,12 @@ EXPORT SEXP OmB_R_MSYrefs_objective(SEXP args)
   args = CDR(args); ntargets = CAR(args);
   args = CDR(args); targpop = CAR(args);
   args = CDR(args); run_years = CAR(args);
-  args = CDR(args); sim_idx = CAR(args);
   
   ASSERT_TYPE_TAG(rInstance, D_OperatingModelBase);
   
   D_OperatingModelBase* pContext = (D_OperatingModelBase*)R_ExternalPtrAddr(rInstance);
   
-  SEXP Result = pContext->R_MSYrefs_objective(par, nReport, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, sel, mov, h, Recdist, SRrel, N, NBefore, SSN, C, SSBA, ntargets, targpop, run_years, sim_idx);
+  SEXP Result = pContext->R_MSYrefs_objective(par, nReport, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, sel, mov, h, Recdist, SRrel, N, NBefore, SSN, C, SSBA, ntargets, targpop, run_years);
   
   return (Result);
 }
@@ -1206,7 +1200,6 @@ EXPORT SEXP OmB_R_nt_MSYrefs_objective(SEXP args)
   SEXP ntargets;
   SEXP targpop;
   SEXP run_years;
-  SEXP sim_idx;
   
   args = CDR(args); rInstance = CAR(args);
   args = CDR(args); par = CAR(args);
@@ -1232,13 +1225,12 @@ EXPORT SEXP OmB_R_nt_MSYrefs_objective(SEXP args)
   args = CDR(args); ntargets = CAR(args);
   args = CDR(args); targpop = CAR(args);
   args = CDR(args); run_years = CAR(args);
-  args = CDR(args); sim_idx = CAR(args);
   
   ASSERT_TYPE_TAG(rInstance, D_OperatingModelBase);
   
   D_OperatingModelBase* pContext = (D_OperatingModelBase*)R_ExternalPtrAddr(rInstance);
   
-  SEXP Result = pContext->R_nt_MSYrefs_objective(par, nReport, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, sel, mov, h, Recdist, SRrel, N, NBefore, SSN, C, SSBA, ntargets, targpop, run_years, sim_idx);
+  SEXP Result = pContext->R_nt_MSYrefs_objective(par, nReport, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, sel, mov, h, Recdist, SRrel, N, NBefore, SSN, C, SSBA, ntargets, targpop, run_years);
   
   return (Result);
 }
@@ -1273,7 +1265,6 @@ EXPORT SEXP OmB_R_MSYREFS_OBJECTIVE_DPAR(SEXP args)
   SEXP ntargets;
   SEXP targpop;
   SEXP run_years;
-  SEXP sim_idx;
   SEXP MSYrefs_objective;
   
   args = CDR(args); rInstance = CAR(args);
@@ -1304,14 +1295,13 @@ EXPORT SEXP OmB_R_MSYREFS_OBJECTIVE_DPAR(SEXP args)
   args = CDR(args); ntargets = CAR(args);
   args = CDR(args); targpop = CAR(args);
   args = CDR(args); run_years = CAR(args);
-  args = CDR(args); sim_idx = CAR(args);
   args = CDR(args); MSYrefs_objective = CAR(args);
   
   ASSERT_TYPE_TAG(rInstance, D_OperatingModelBase);
   
   D_OperatingModelBase* pContext = (D_OperatingModelBase*)R_ExternalPtrAddr(rInstance);
   
-  SEXP Result = pContext->R_MSYREFS_OBJECTIVE_DPAR(par, pard1_par, nReport, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, sel, mov, h, Recdist, SRrel, N, nd1_par, NBefore, nbefored1_par, SSN, C, cd1_par, SSBA, ntargets, targpop, run_years, sim_idx, MSYrefs_objective);
+  SEXP Result = pContext->R_MSYREFS_OBJECTIVE_DPAR(par, pard1_par, nReport, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, sel, mov, h, Recdist, SRrel, N, nd1_par, NBefore, nbefored1_par, SSN, C, cd1_par, SSBA, ntargets, targpop, run_years, MSYrefs_objective);
   
   return (Result);
 }
@@ -1346,7 +1336,6 @@ EXPORT SEXP OmB_R_nt_MSYREFS_OBJECTIVE_DPAR(SEXP args)
   SEXP ntargets;
   SEXP targpop;
   SEXP run_years;
-  SEXP sim_idx;
   SEXP MSYrefs_objective;
   
   args = CDR(args); rInstance = CAR(args);
@@ -1377,14 +1366,13 @@ EXPORT SEXP OmB_R_nt_MSYREFS_OBJECTIVE_DPAR(SEXP args)
   args = CDR(args); ntargets = CAR(args);
   args = CDR(args); targpop = CAR(args);
   args = CDR(args); run_years = CAR(args);
-  args = CDR(args); sim_idx = CAR(args);
   args = CDR(args); MSYrefs_objective = CAR(args);
   
   ASSERT_TYPE_TAG(rInstance, D_OperatingModelBase);
   
   D_OperatingModelBase* pContext = (D_OperatingModelBase*)R_ExternalPtrAddr(rInstance);
   
-  SEXP Result = pContext->R_nt_MSYREFS_OBJECTIVE_DPAR(par, pard1_par, nReport, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, sel, mov, h, Recdist, SRrel, N, nd1_par, NBefore, nbefored1_par, SSN, C, cd1_par, SSBA, ntargets, targpop, run_years, sim_idx, MSYrefs_objective);
+  SEXP Result = pContext->R_nt_MSYREFS_OBJECTIVE_DPAR(par, pard1_par, nReport, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, sel, mov, h, Recdist, SRrel, N, nd1_par, NBefore, nbefored1_par, SSN, C, cd1_par, SSBA, ntargets, targpop, run_years, MSYrefs_objective);
   
   return (Result);
 }
@@ -1543,35 +1531,6 @@ EXPORT SEXP OmB_set_npop(SEXP args)
 }
 
 
-EXPORT SEXP OmB_get_nsim(SEXP args)
-{
-  SEXP rInstance;
-  args = CDR(args); rInstance = CAR(args);
-  
-  ASSERT_TYPE_TAG(rInstance, D_OperatingModelBase);
-  
-  D_OperatingModelBase* pContext = (D_OperatingModelBase*)R_ExternalPtrAddr(rInstance);
-  
-  return (pContext->_get_nsim());
-}
-
-EXPORT SEXP OmB_set_nsim(SEXP args)
-{
-  SEXP rInstance;
-  SEXP arg_nsim;
-  
-  
-  args = CDR(args); rInstance = CAR(args);
-  args = CDR(args); arg_nsim = CAR(args);
-  
-  ASSERT_TYPE_TAG(rInstance, D_OperatingModelBase);
-  
-  D_OperatingModelBase* pContext = (D_OperatingModelBase*)R_ExternalPtrAddr(rInstance);
-  
-  return (pContext->_set_nsim(arg_nsim));
-}
-
-
 EXPORT SEXP OmB_get_nsubyears(SEXP args)
 {
   SEXP rInstance;
@@ -1632,7 +1591,6 @@ EXPORT SEXP OmB_R_popdyn_projection_objective(SEXP args)
   SEXP SSN;
   SEXP C;
   SEXP SSBA;
-  SEXP sim_idx;
   
   args = CDR(args); rInstance = CAR(args);
   args = CDR(args); par = CAR(args);
@@ -1663,13 +1621,12 @@ EXPORT SEXP OmB_R_popdyn_projection_objective(SEXP args)
   args = CDR(args); SSN = CAR(args);
   args = CDR(args); C = CAR(args);
   args = CDR(args); SSBA = CAR(args);
-  args = CDR(args); sim_idx = CAR(args);
   
   ASSERT_TYPE_TAG(rInstance, D_OperatingModelBase);
   
   D_OperatingModelBase* pContext = (D_OperatingModelBase*)R_ExternalPtrAddr(rInstance);
   
-  SEXP Result = pContext->R_popdyn_projection_objective(par, npar, nfixed, TAC, TAE, FbyPar, FbyFixed, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, Wt_age_mid, sel, mov, h, Recdist, Recdevs, RecSpatialDevs, SRrel, N, NBefore, SSN, C, SSBA, sim_idx);
+  SEXP Result = pContext->R_popdyn_projection_objective(par, npar, nfixed, TAC, TAE, FbyPar, FbyFixed, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, Wt_age_mid, sel, mov, h, Recdist, Recdevs, RecSpatialDevs, SRrel, N, NBefore, SSN, C, SSBA);
   
   return (Result);
 }
@@ -1705,7 +1662,6 @@ EXPORT SEXP OmB_R_nt_popdyn_projection_objective(SEXP args)
   SEXP SSN;
   SEXP C;
   SEXP SSBA;
-  SEXP sim_idx;
   
   args = CDR(args); rInstance = CAR(args);
   args = CDR(args); par = CAR(args);
@@ -1736,13 +1692,12 @@ EXPORT SEXP OmB_R_nt_popdyn_projection_objective(SEXP args)
   args = CDR(args); SSN = CAR(args);
   args = CDR(args); C = CAR(args);
   args = CDR(args); SSBA = CAR(args);
-  args = CDR(args); sim_idx = CAR(args);
   
   ASSERT_TYPE_TAG(rInstance, D_OperatingModelBase);
   
   D_OperatingModelBase* pContext = (D_OperatingModelBase*)R_ExternalPtrAddr(rInstance);
   
-  SEXP Result = pContext->R_nt_popdyn_projection_objective(par, npar, nfixed, TAC, TAE, FbyPar, FbyFixed, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, Wt_age_mid, sel, mov, h, Recdist, Recdevs, RecSpatialDevs, SRrel, N, NBefore, SSN, C, SSBA, sim_idx);
+  SEXP Result = pContext->R_nt_popdyn_projection_objective(par, npar, nfixed, TAC, TAE, FbyPar, FbyFixed, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, Wt_age_mid, sel, mov, h, Recdist, Recdevs, RecSpatialDevs, SRrel, N, NBefore, SSN, C, SSBA);
   
   return (Result);
 }
@@ -1782,7 +1737,6 @@ EXPORT SEXP OmB_R_POPDYN_PROJECTION_OBJECTIVE_BPAR(SEXP args)
   SEXP C;
   SEXP cb2_par;
   SEXP SSBA;
-  SEXP sim_idx;
   SEXP popdyn_projection_objectiveb2_par;
   
   args = CDR(args); rInstance = CAR(args);
@@ -1818,14 +1772,13 @@ EXPORT SEXP OmB_R_POPDYN_PROJECTION_OBJECTIVE_BPAR(SEXP args)
   args = CDR(args); C = CAR(args);
   args = CDR(args); cb2_par = CAR(args);
   args = CDR(args); SSBA = CAR(args);
-  args = CDR(args); sim_idx = CAR(args);
   args = CDR(args); popdyn_projection_objectiveb2_par = CAR(args);
   
   ASSERT_TYPE_TAG(rInstance, D_OperatingModelBase);
   
   D_OperatingModelBase* pContext = (D_OperatingModelBase*)R_ExternalPtrAddr(rInstance);
   
-  SEXP Result = pContext->R_POPDYN_PROJECTION_OBJECTIVE_BPAR(par, parb2_par, npar, nfixed, TAC, TAE, FbyPar, FbyFixed, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, Wt_age_mid, sel, mov, h, Recdist, Recdevs, RecSpatialDevs, SRrel, N, nb2_par, NBefore, nbeforeb2_par, SSN, C, cb2_par, SSBA, sim_idx, popdyn_projection_objectiveb2_par);
+  SEXP Result = pContext->R_POPDYN_PROJECTION_OBJECTIVE_BPAR(par, parb2_par, npar, nfixed, TAC, TAE, FbyPar, FbyFixed, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, Wt_age_mid, sel, mov, h, Recdist, Recdevs, RecSpatialDevs, SRrel, N, nb2_par, NBefore, nbeforeb2_par, SSN, C, cb2_par, SSBA, popdyn_projection_objectiveb2_par);
   
   return (Result);
 }
@@ -1865,7 +1818,6 @@ EXPORT SEXP OmB_R_nt_POPDYN_PROJECTION_OBJECTIVE_BPAR(SEXP args)
   SEXP C;
   SEXP cb2_par;
   SEXP SSBA;
-  SEXP sim_idx;
   SEXP popdyn_projection_objectiveb2_par;
   
   args = CDR(args); rInstance = CAR(args);
@@ -1901,14 +1853,13 @@ EXPORT SEXP OmB_R_nt_POPDYN_PROJECTION_OBJECTIVE_BPAR(SEXP args)
   args = CDR(args); C = CAR(args);
   args = CDR(args); cb2_par = CAR(args);
   args = CDR(args); SSBA = CAR(args);
-  args = CDR(args); sim_idx = CAR(args);
   args = CDR(args); popdyn_projection_objectiveb2_par = CAR(args);
   
   ASSERT_TYPE_TAG(rInstance, D_OperatingModelBase);
   
   D_OperatingModelBase* pContext = (D_OperatingModelBase*)R_ExternalPtrAddr(rInstance);
   
-  SEXP Result = pContext->R_nt_POPDYN_PROJECTION_OBJECTIVE_BPAR(par, parb2_par, npar, nfixed, TAC, TAE, FbyPar, FbyFixed, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, Wt_age_mid, sel, mov, h, Recdist, Recdevs, RecSpatialDevs, SRrel, N, nb2_par, NBefore, nbeforeb2_par, SSN, C, cb2_par, SSBA, sim_idx, popdyn_projection_objectiveb2_par);
+  SEXP Result = pContext->R_nt_POPDYN_PROJECTION_OBJECTIVE_BPAR(par, parb2_par, npar, nfixed, TAC, TAE, FbyPar, FbyFixed, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, Wt_age_mid, sel, mov, h, Recdist, Recdevs, RecSpatialDevs, SRrel, N, nb2_par, NBefore, nbeforeb2_par, SSN, C, cb2_par, SSBA, popdyn_projection_objectiveb2_par);
   
   return (Result);
 }
@@ -2123,7 +2074,6 @@ EXPORT SEXP OmB_R_runProjection(SEXP args)
   SEXP SSN;
   SEXP C;
   SEXP SSBA;
-  SEXP sim_idx;
   
   args = CDR(args); rInstance = CAR(args);
   args = CDR(args); par = CAR(args);
@@ -2153,13 +2103,12 @@ EXPORT SEXP OmB_R_runProjection(SEXP args)
   args = CDR(args); SSN = CAR(args);
   args = CDR(args); C = CAR(args);
   args = CDR(args); SSBA = CAR(args);
-  args = CDR(args); sim_idx = CAR(args);
   
   ASSERT_TYPE_TAG(rInstance, D_OperatingModelBase);
   
   D_OperatingModelBase* pContext = (D_OperatingModelBase*)R_ExternalPtrAddr(rInstance);
   
-  SEXP Result = pContext->R_runProjection(par, npar, nfixed, TAC, TAE, FbyPar, FbyFixed, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, sel, mov, h, Recdist, Recdevs, RecSpatialDevs, SRrel, N, NBefore, SSN, C, SSBA, sim_idx);
+  SEXP Result = pContext->R_runProjection(par, npar, nfixed, TAC, TAE, FbyPar, FbyFixed, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, sel, mov, h, Recdist, Recdevs, RecSpatialDevs, SRrel, N, NBefore, SSN, C, SSBA);
   
   return (Result);
 }
@@ -2194,7 +2143,6 @@ EXPORT SEXP OmB_R_nt_runProjection(SEXP args)
   SEXP SSN;
   SEXP C;
   SEXP SSBA;
-  SEXP sim_idx;
   
   args = CDR(args); rInstance = CAR(args);
   args = CDR(args); par = CAR(args);
@@ -2224,13 +2172,12 @@ EXPORT SEXP OmB_R_nt_runProjection(SEXP args)
   args = CDR(args); SSN = CAR(args);
   args = CDR(args); C = CAR(args);
   args = CDR(args); SSBA = CAR(args);
-  args = CDR(args); sim_idx = CAR(args);
   
   ASSERT_TYPE_TAG(rInstance, D_OperatingModelBase);
   
   D_OperatingModelBase* pContext = (D_OperatingModelBase*)R_ExternalPtrAddr(rInstance);
   
-  SEXP Result = pContext->R_nt_runProjection(par, npar, nfixed, TAC, TAE, FbyPar, FbyFixed, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, sel, mov, h, Recdist, Recdevs, RecSpatialDevs, SRrel, N, NBefore, SSN, C, SSBA, sim_idx);
+  SEXP Result = pContext->R_nt_runProjection(par, npar, nfixed, TAC, TAE, FbyPar, FbyFixed, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, sel, mov, h, Recdist, Recdevs, RecSpatialDevs, SRrel, N, NBefore, SSN, C, SSBA);
   
   return (Result);
 }

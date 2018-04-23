@@ -1,4 +1,3 @@
-arg_nsim, 
 arg_npop, 
 arg_nages, 
 arg_nsubyears, 

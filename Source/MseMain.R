@@ -23,27 +23,38 @@ library(mseviz)
 if (version$os == "mingw32")
 {
   # Running in Windows
-  LibName      <- "Mseom"
+  LibName      <- "niMseom"
   LibExtension <- ".dll"
+
+  if (version$arch == "i386")
+  {
+    LibFolder  <- "win32/"
+
+  } else
+  {
+    LibFolder  <- "x64/"
+  }
 
 } else
 {
   # Running in Linux
-  LibName      <- "libMseom"
+  LibName      <- "libniMseom"
   LibExtension <- ".so"
+  LibFolder    <- "linux/"
 }
+
 
 # Only load library if not already loaded. Loading more than once results in
 # R mis-behaving and crashing
 if (is.na(match(LibName,  attr(getLoadedDLLs(), "names"))))
 {
-  LibPath <- paste("./lib/", LibName, LibExtension, sep="")
-#  dyn.load(LibPath)
+  LibPath <- paste("./lib/", LibFolder, LibName, LibExtension, sep="")
+  dyn.load(LibPath)
 }
 
 
-#source("./lib/OmB_R_interface.r")
-#source("./lib/Om_R_interface.r")
+source("./lib/OmB_R_interface.r")
+source("./lib/Om_R_interface.r")
 
 
 source("Source/seasAsYrToDecYr.f.R")

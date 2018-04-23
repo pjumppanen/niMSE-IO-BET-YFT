@@ -1,1 +1,0 @@
-AdtArrayPlan Plan_17;

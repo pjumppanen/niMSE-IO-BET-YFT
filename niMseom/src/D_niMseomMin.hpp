@@ -15,7 +15,7 @@ class D_OperatingModelMin  : public OperatingModelMin
 public: 
   
   #include "include/Om_decl_lib_interface_methods.hpp"
-  D_OperatingModelMin(int arg_nsim, int arg_npop, int arg_nages, int arg_nsubyears, int arg_nareas, int arg_nfleets, const ARRAY_1I arg_Recsubyr);
+  D_OperatingModelMin(int arg_npop, int arg_nages, int arg_nsubyears, int arg_nareas, int arg_nfleets, const ARRAY_1I arg_Recsubyr);
   D_OperatingModelMin(const D_OperatingModelMin& rCopy);
   virtual ~D_OperatingModelMin();
   

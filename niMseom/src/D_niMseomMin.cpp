@@ -23,8 +23,8 @@
 
 // ----------------------------------------------------------------------------
 
-D_OperatingModelMin::D_OperatingModelMin(int arg_nsim, int arg_npop, int arg_nages, int arg_nsubyears, int arg_nareas, int arg_nfleets, const ARRAY_1I arg_Recsubyr)
- : OperatingModelMin(arg_nsim,arg_npop,arg_nages,arg_nsubyears,arg_nareas,arg_nfleets,arg_Recsubyr)
+D_OperatingModelMin::D_OperatingModelMin(int arg_npop, int arg_nages, int arg_nsubyears, int arg_nareas, int arg_nfleets, const ARRAY_1I arg_Recsubyr)
+ : OperatingModelMin(arg_npop,arg_nages,arg_nsubyears,arg_nareas,arg_nfleets,arg_Recsubyr)
 {
   
 }

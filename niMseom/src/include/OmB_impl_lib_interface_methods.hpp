@@ -253,24 +253,24 @@ SEXP D_OperatingModelBase::_set_nt_fmd1_par(SEXP arg_fmd1_par, SEXP sArgList)
 
 SEXP D_OperatingModelBase::R_internal_initialiseParameters(SEXP M, SEXP R0, SEXP mat, SEXP Idist, SEXP Wt_age, SEXP h, bool bTranslate)
 {
-  ARRAY_3D arg_M;
-  ARRAY_2D arg_R0;
-  ARRAY_3D arg_mat;
-  ARRAY_4D arg_Idist;
-  ARRAY_3D arg_Wt_age;
-  ARRAY_2D arg_h;
+  ARRAY_2D arg_M;
+  ARRAY_1D arg_R0;
+  ARRAY_2D arg_mat;
+  ARRAY_3D arg_Idist;
+  ARRAY_2D arg_Wt_age;
+  ARRAY_1D arg_h;
   
-  R_CheckArgument("M", "REALSXP", REALSXP, M, __FILE__, __LINE__, 3, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("M", "REALSXP", REALSXP, M, __FILE__, __LINE__, 2, 1, nages, 1, npop);
   
-  R_CheckArgument("R0", "REALSXP", REALSXP, R0, __FILE__, __LINE__, 2, 1, npop, 1, nsim);
+  R_CheckArgument("R0", "REALSXP", REALSXP, R0, __FILE__, __LINE__, 1, 1, npop);
   
-  R_CheckArgument("mat", "REALSXP", REALSXP, mat, __FILE__, __LINE__, 3, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("mat", "REALSXP", REALSXP, mat, __FILE__, __LINE__, 2, 1, nages, 1, npop);
   
-  R_CheckArgument("Idist", "REALSXP", REALSXP, Idist, __FILE__, __LINE__, 4, 1, nareas, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("Idist", "REALSXP", REALSXP, Idist, __FILE__, __LINE__, 3, 1, nareas, 1, nages, 1, npop);
   
-  R_CheckArgument("Wt_age", "REALSXP", REALSXP, Wt_age, __FILE__, __LINE__, 3, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("Wt_age", "REALSXP", REALSXP, Wt_age, __FILE__, __LINE__, 2, 1, nages, 1, npop);
   
-  R_CheckArgument("h", "REALSXP", REALSXP, h, __FILE__, __LINE__, 2, 1, npop, 1, nsim);
+  R_CheckArgument("h", "REALSXP", REALSXP, h, __FILE__, __LINE__, 1, 1, npop);
   
   if (bTranslate)
   {
@@ -507,73 +507,72 @@ SEXP D_OperatingModelBase::_set_nt_MSY_RecSpatialDevs(SEXP arg_MSY_RecSpatialDev
   return (Result);
 }
 
-SEXP D_OperatingModelBase::R_internal_MSYrefs(SEXP par, SEXP ECurrent, SEXP qy, SEXP R0, SEXP M, SEXP mat, SEXP Idist, SEXP Len_age, SEXP Wt_age, SEXP sel, SEXP mov, SEXP h, SEXP Recdist, SEXP SRrel, SEXP N, SEXP NBefore, SEXP SSN, SEXP C, SEXP SSBA, SEXP ntargets, SEXP targpop, SEXP run_years, SEXP MSY, SEXP BMSY, SEXP SSBMSY, SEXP SSBMSY_B0, SEXP sim_idx, bool bTranslate)
+SEXP D_OperatingModelBase::R_internal_MSYrefs(SEXP par, SEXP ECurrent, SEXP qy, SEXP R0, SEXP M, SEXP mat, SEXP Idist, SEXP Len_age, SEXP Wt_age, SEXP sel, SEXP mov, SEXP h, SEXP Recdist, SEXP SRrel, SEXP N, SEXP NBefore, SEXP SSN, SEXP C, SEXP SSBA, SEXP ntargets, SEXP targpop, SEXP run_years, SEXP MSY, SEXP BMSY, SEXP SSBMSY, SEXP SSBMSY_B0, bool bTranslate)
 {
   double arg_par;
-  ARRAY_4D arg_ECurrent;
-  ARRAY_2D arg_qy;
-  ARRAY_2D arg_R0;
-  ARRAY_3D arg_M;
-  ARRAY_3D arg_mat;
-  ARRAY_4D arg_Idist;
-  ARRAY_3D arg_Len_age;
-  ARRAY_3D arg_Wt_age;
-  ARRAY_3D arg_sel;
-  ARRAY_6D arg_mov;
-  ARRAY_2D arg_h;
-  ARRAY_3D arg_Recdist;
+  ARRAY_3D arg_ECurrent;
+  ARRAY_1D arg_qy;
+  ARRAY_1D arg_R0;
+  ARRAY_2D arg_M;
+  ARRAY_2D arg_mat;
+  ARRAY_3D arg_Idist;
+  ARRAY_2D arg_Len_age;
+  ARRAY_2D arg_Wt_age;
+  ARRAY_2D arg_sel;
+  ARRAY_5D arg_mov;
+  ARRAY_1D arg_h;
+  ARRAY_2D arg_Recdist;
   ARRAY_1I arg_SRrel;
-  ARRAY_5D arg_N;
-  ARRAY_5D arg_NBefore;
-  ARRAY_5D arg_SSN;
-  ARRAY_6D arg_C;
-  ARRAY_2D arg_SSBA;
+  ARRAY_4D arg_N;
+  ARRAY_4D arg_NBefore;
+  ARRAY_4D arg_SSN;
+  ARRAY_5D arg_C;
+  ARRAY_1D arg_SSBA;
   int arg_ntargets;
   ARRAY_1I arg_targpop;
   int arg_run_years;
-  ARRAY_1D arg_MSY;
-  ARRAY_1D arg_BMSY;
-  ARRAY_1D arg_SSBMSY;
-  ARRAY_1D arg_SSBMSY_B0;
-  int arg_sim_idx;
+  double arg_MSY;
+  double arg_BMSY;
+  double arg_SSBMSY;
+  double arg_SSBMSY_B0;
   
   R_CheckArgument("par", "REALSXP", REALSXP, par, __FILE__, __LINE__);
   
-  R_CheckArgument("ECurrent", "REALSXP", REALSXP, ECurrent, __FILE__, __LINE__, 4, 1, nfleets, 1, nareas, 1, nsubyears, 1, nsim);
+  R_CheckArgument("ECurrent", "REALSXP", REALSXP, ECurrent, __FILE__, __LINE__, 3, 1, nfleets, 1, nareas, 1, nsubyears);
   
-  R_CheckArgument("qy", "REALSXP", REALSXP, qy, __FILE__, __LINE__, 2, 1, nfleets, 1, nsim);
+  R_CheckArgument("qy", "REALSXP", REALSXP, qy, __FILE__, __LINE__, 1, 1, nfleets);
   
-  R_CheckArgument("R0", "REALSXP", REALSXP, R0, __FILE__, __LINE__, 2, 1, npop, 1, nsim);
+  R_CheckArgument("R0", "REALSXP", REALSXP, R0, __FILE__, __LINE__, 1, 1, npop);
   
-  R_CheckArgument("M", "REALSXP", REALSXP, M, __FILE__, __LINE__, 3, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("M", "REALSXP", REALSXP, M, __FILE__, __LINE__, 2, 1, nages, 1, npop);
   
-  R_CheckArgument("mat", "REALSXP", REALSXP, mat, __FILE__, __LINE__, 3, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("mat", "REALSXP", REALSXP, mat, __FILE__, __LINE__, 2, 1, nages, 1, npop);
   
-  R_CheckArgument("Idist", "REALSXP", REALSXP, Idist, __FILE__, __LINE__, 4, 1, nareas, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("Idist", "REALSXP", REALSXP, Idist, __FILE__, __LINE__, 3, 1, nareas, 1, nages, 1, npop);
   
-  R_CheckArgument("Len_age", "REALSXP", REALSXP, Len_age, __FILE__, __LINE__, 3, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("Len_age", "REALSXP", REALSXP, Len_age, __FILE__, __LINE__, 2, 1, nages, 1, npop);
   
-  R_CheckArgument("Wt_age", "REALSXP", REALSXP, Wt_age, __FILE__, __LINE__, 3, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("Wt_age", "REALSXP", REALSXP, Wt_age, __FILE__, __LINE__, 2, 1, nages, 1, npop);
   
-  R_CheckArgument("sel", "REALSXP", REALSXP, sel, __FILE__, __LINE__, 3, 1, nages, 1, nfleets, 1, nsim);
+  R_CheckArgument("sel", "REALSXP", REALSXP, sel, __FILE__, __LINE__, 2, 1, nages, 1, nfleets);
   
-  R_CheckArgument("mov", "REALSXP", REALSXP, mov, __FILE__, __LINE__, 6, 1, nareas, 1, nareas, 1, nsubyears, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("mov", "REALSXP", REALSXP, mov, __FILE__, __LINE__, 5, 1, nareas, 1, nareas, 1, nsubyears, 1, nages, 1, npop);
   
-  R_CheckArgument("h", "REALSXP", REALSXP, h, __FILE__, __LINE__, 2, 1, npop, 1, nsim);
+  R_CheckArgument("h", "REALSXP", REALSXP, h, __FILE__, __LINE__, 1, 1, npop);
   
-  R_CheckArgument("Recdist", "REALSXP", REALSXP, Recdist, __FILE__, __LINE__, 3, 1, nareas, 1, npop, 1, nsim);
+  R_CheckArgument("Recdist", "REALSXP", REALSXP, Recdist, __FILE__, __LINE__, 2, 1, nareas, 1, npop);
   
   R_CheckArgument("SRrel", "INTSXP", INTSXP, SRrel, __FILE__, __LINE__, 1, 1, npop);
   
-  R_CheckArgument("N", "REALSXP", REALSXP, N, __FILE__, __LINE__, 5, 1, nareas, 1, nsubyears + 1, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("N", "REALSXP", REALSXP, N, __FILE__, __LINE__, 4, 1, nareas, 1, nsubyears + 1, 1, nages, 1, npop);
   
-  R_CheckArgument("NBefore", "REALSXP", REALSXP, NBefore, __FILE__, __LINE__, 5, 1, nareas, 1, nsubyears + 1, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("NBefore", "REALSXP", REALSXP, NBefore, __FILE__, __LINE__, 4, 1, nareas, 1, nsubyears + 1, 1, nages, 1, npop);
   
-  R_CheckArgument("SSN", "REALSXP", REALSXP, SSN, __FILE__, __LINE__, 5, 1, nareas, 1, nsubyears, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("SSN", "REALSXP", REALSXP, SSN, __FILE__, __LINE__, 4, 1, nareas, 1, nsubyears, 1, nages, 1, npop);
   
-  R_CheckArgument("C", "REALSXP", REALSXP, C, __FILE__, __LINE__, 6, 1, nfleets, 1, nareas, 1, nsubyears, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("C", "REALSXP", REALSXP, C, __FILE__, __LINE__, 5, 1, nfleets, 1, nareas, 1, nsubyears, 1, nages, 1, npop);
   
-  R_CheckArgument("SSBA", "REALSXP", REALSXP, SSBA, __FILE__, __LINE__, 2, 1, npop, 1, nsim);
+  R_CheckArgument("SSBA", "REALSXP", REALSXP, SSBA, __FILE__, __LINE__, 1, 1, npop);
   
   R_CheckArgument("ntargets", "INTSXP", INTSXP, ntargets, __FILE__, __LINE__);
   
@@ -581,15 +580,13 @@ SEXP D_OperatingModelBase::R_internal_MSYrefs(SEXP par, SEXP ECurrent, SEXP qy, 
   
   R_CheckArgument("run_years", "INTSXP", INTSXP, run_years, __FILE__, __LINE__);
   
-  R_CheckArgument("MSY", "REALSXP", REALSXP, MSY, __FILE__, __LINE__, 1, 1, nsim);
+  R_CheckArgument("MSY", "REALSXP", REALSXP, MSY, __FILE__, __LINE__);
   
-  R_CheckArgument("BMSY", "REALSXP", REALSXP, BMSY, __FILE__, __LINE__, 1, 1, nsim);
+  R_CheckArgument("BMSY", "REALSXP", REALSXP, BMSY, __FILE__, __LINE__);
   
-  R_CheckArgument("SSBMSY", "REALSXP", REALSXP, SSBMSY, __FILE__, __LINE__, 1, 1, nsim);
+  R_CheckArgument("SSBMSY", "REALSXP", REALSXP, SSBMSY, __FILE__, __LINE__);
   
-  R_CheckArgument("SSBMSY_B0", "REALSXP", REALSXP, SSBMSY_B0, __FILE__, __LINE__, 1, 1, nsim);
-  
-  R_CheckArgument("sim_idx", "INTSXP", INTSXP, sim_idx, __FILE__, __LINE__);
+  R_CheckArgument("SSBMSY_B0", "REALSXP", REALSXP, SSBMSY_B0, __FILE__, __LINE__);
   
   if (bTranslate)
   {
@@ -668,31 +665,31 @@ SEXP D_OperatingModelBase::R_internal_MSYrefs(SEXP par, SEXP ECurrent, SEXP qy, 
     
     arg_SRrel = 0;
     
-    Plan_12.create(MemAllocator, arg_SRrel);
+    Plan_3.create(MemAllocator, arg_SRrel);
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)INTEGER(SRrel), (char*)arg_SRrel);
     
     arg_N = 0;
     
-    Plan_13.create(MemAllocator, arg_N);
+    Plan_12.create(MemAllocator, arg_N);
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)REAL(N), (char*)arg_N);
     
     arg_NBefore = 0;
     
-    Plan_13.create(MemAllocator, arg_NBefore);
+    Plan_12.create(MemAllocator, arg_NBefore);
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)REAL(NBefore), (char*)arg_NBefore);
     
     arg_SSN = 0;
     
-    Plan_14.create(MemAllocator, arg_SSN);
+    Plan_13.create(MemAllocator, arg_SSN);
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)REAL(SSN), (char*)arg_SSN);
     
     arg_C = 0;
     
-    Plan_15.create(MemAllocator, arg_C);
+    Plan_14.create(MemAllocator, arg_C);
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)REAL(C), (char*)arg_C);
     
@@ -710,31 +707,10 @@ SEXP D_OperatingModelBase::R_internal_MSYrefs(SEXP par, SEXP ECurrent, SEXP qy, 
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)INTEGER(targpop), (char*)arg_targpop);
     
     arg_run_years = INTEGER(run_years)[0];
-    arg_MSY = 0;
-    
-    Plan_16.create(MemAllocator, arg_MSY);
-    
-    AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)REAL(MSY), (char*)arg_MSY);
-    
-    arg_BMSY = 0;
-    
-    Plan_16.create(MemAllocator, arg_BMSY);
-    
-    AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)REAL(BMSY), (char*)arg_BMSY);
-    
-    arg_SSBMSY = 0;
-    
-    Plan_16.create(MemAllocator, arg_SSBMSY);
-    
-    AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)REAL(SSBMSY), (char*)arg_SSBMSY);
-    
-    arg_SSBMSY_B0 = 0;
-    
-    Plan_16.create(MemAllocator, arg_SSBMSY_B0);
-    
-    AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)REAL(SSBMSY_B0), (char*)arg_SSBMSY_B0);
-    
-    arg_sim_idx = INTEGER(sim_idx)[0];
+    arg_MSY = REAL(MSY)[0];
+    arg_BMSY = REAL(BMSY)[0];
+    arg_SSBMSY = REAL(SSBMSY)[0];
+    arg_SSBMSY_B0 = REAL(SSBMSY_B0)[0];
   }
   else
   {
@@ -789,23 +765,23 @@ SEXP D_OperatingModelBase::R_internal_MSYrefs(SEXP par, SEXP ECurrent, SEXP qy, 
     
     arg_SRrel = 0;
     
-    Plan_12.create(MemAllocator, arg_SRrel, (void*)INTEGER(SRrel));
+    Plan_3.create(MemAllocator, arg_SRrel, (void*)INTEGER(SRrel));
     
     arg_N = 0;
     
-    Plan_13.create(MemAllocator, arg_N, (void*)REAL(N));
+    Plan_12.create(MemAllocator, arg_N, (void*)REAL(N));
     
     arg_NBefore = 0;
     
-    Plan_13.create(MemAllocator, arg_NBefore, (void*)REAL(NBefore));
+    Plan_12.create(MemAllocator, arg_NBefore, (void*)REAL(NBefore));
     
     arg_SSN = 0;
     
-    Plan_14.create(MemAllocator, arg_SSN, (void*)REAL(SSN));
+    Plan_13.create(MemAllocator, arg_SSN, (void*)REAL(SSN));
     
     arg_C = 0;
     
-    Plan_15.create(MemAllocator, arg_C, (void*)REAL(C));
+    Plan_14.create(MemAllocator, arg_C, (void*)REAL(C));
     
     arg_SSBA = 0;
     
@@ -817,30 +793,17 @@ SEXP D_OperatingModelBase::R_internal_MSYrefs(SEXP par, SEXP ECurrent, SEXP qy, 
     AdtArrayPlan::create(MemAllocator, arg_targpop, 1, INTEGER(ntargets)[0], (void*)INTEGER(targpop));
     
     arg_run_years = INTEGER(run_years)[0];
-    arg_MSY = 0;
-    
-    Plan_16.create(MemAllocator, arg_MSY, (void*)REAL(MSY));
-    
-    arg_BMSY = 0;
-    
-    Plan_16.create(MemAllocator, arg_BMSY, (void*)REAL(BMSY));
-    
-    arg_SSBMSY = 0;
-    
-    Plan_16.create(MemAllocator, arg_SSBMSY, (void*)REAL(SSBMSY));
-    
-    arg_SSBMSY_B0 = 0;
-    
-    Plan_16.create(MemAllocator, arg_SSBMSY_B0, (void*)REAL(SSBMSY_B0));
-    
-    arg_sim_idx = INTEGER(sim_idx)[0];
+    arg_MSY = REAL(MSY)[0];
+    arg_BMSY = REAL(BMSY)[0];
+    arg_SSBMSY = REAL(SSBMSY)[0];
+    arg_SSBMSY_B0 = REAL(SSBMSY_B0)[0];
   }
   
   SEXP Result = Rf_allocVector(REALSXP, 1);
   
   PROTECT(Result);
   REAL(Result)[0] = 0.0;
-  MSYrefs(arg_par, arg_ECurrent, arg_qy, arg_R0, arg_M, arg_mat, arg_Idist, arg_Len_age, arg_Wt_age, arg_sel, arg_mov, arg_h, arg_Recdist, arg_SRrel, arg_N, arg_NBefore, arg_SSN, arg_C, arg_SSBA, arg_ntargets, arg_targpop, arg_run_years, arg_MSY, arg_BMSY, arg_SSBMSY, arg_SSBMSY_B0, arg_sim_idx);
+  MSYrefs(arg_par, arg_ECurrent, arg_qy, arg_R0, arg_M, arg_mat, arg_Idist, arg_Len_age, arg_Wt_age, arg_sel, arg_mov, arg_h, arg_Recdist, arg_SRrel, arg_N, arg_NBefore, arg_SSN, arg_C, arg_SSBA, arg_ntargets, arg_targpop, arg_run_years, arg_MSY, arg_BMSY, arg_SSBMSY, arg_SSBMSY_B0);
   
   if (bTranslate)
   {
@@ -849,13 +812,17 @@ SEXP D_OperatingModelBase::R_internal_MSYrefs(SEXP par, SEXP ECurrent, SEXP qy, 
     AdtArrayPlanActor::ADlib_to_R(MemAllocator, (char*)arg_SSN, (char*)REAL(SSN));
     AdtArrayPlanActor::ADlib_to_R(MemAllocator, (char*)arg_C, (char*)REAL(C));
     AdtArrayPlanActor::ADlib_to_R(MemAllocator, (char*)arg_SSBA, (char*)REAL(SSBA));
-    AdtArrayPlanActor::ADlib_to_R(MemAllocator, (char*)arg_MSY, (char*)REAL(MSY));
-    AdtArrayPlanActor::ADlib_to_R(MemAllocator, (char*)arg_BMSY, (char*)REAL(BMSY));
-    AdtArrayPlanActor::ADlib_to_R(MemAllocator, (char*)arg_SSBMSY, (char*)REAL(SSBMSY));
-    AdtArrayPlanActor::ADlib_to_R(MemAllocator, (char*)arg_SSBMSY_B0, (char*)REAL(SSBMSY_B0));
+    REAL(MSY)[0] = arg_MSY;
+    REAL(BMSY)[0] = arg_BMSY;
+    REAL(SSBMSY)[0] = arg_SSBMSY;
+    REAL(SSBMSY_B0)[0] = arg_SSBMSY_B0;
   }
   else
   {
+    REAL(MSY)[0] = arg_MSY;
+    REAL(BMSY)[0] = arg_BMSY;
+    REAL(SSBMSY)[0] = arg_SSBMSY;
+    REAL(SSBMSY_B0)[0] = arg_SSBMSY_B0;
   }
   
   AdtArrayPlan::destroy(MemAllocator, arg_ECurrent);
@@ -877,99 +844,92 @@ SEXP D_OperatingModelBase::R_internal_MSYrefs(SEXP par, SEXP ECurrent, SEXP qy, 
   AdtArrayPlan::destroy(MemAllocator, arg_C);
   AdtArrayPlan::destroy(MemAllocator, arg_SSBA);
   AdtArrayPlan::destroy(MemAllocator, arg_targpop);
-  AdtArrayPlan::destroy(MemAllocator, arg_MSY);
-  AdtArrayPlan::destroy(MemAllocator, arg_BMSY);
-  AdtArrayPlan::destroy(MemAllocator, arg_SSBMSY);
-  AdtArrayPlan::destroy(MemAllocator, arg_SSBMSY_B0);
   UNPROTECT(1);
   
   return (Result);
 }
 
-SEXP D_OperatingModelBase::R_MSYrefs(SEXP par, SEXP ECurrent, SEXP qy, SEXP R0, SEXP M, SEXP mat, SEXP Idist, SEXP Len_age, SEXP Wt_age, SEXP sel, SEXP mov, SEXP h, SEXP Recdist, SEXP SRrel, SEXP N, SEXP NBefore, SEXP SSN, SEXP C, SEXP SSBA, SEXP ntargets, SEXP targpop, SEXP run_years, SEXP MSY, SEXP BMSY, SEXP SSBMSY, SEXP SSBMSY_B0, SEXP sim_idx)
+SEXP D_OperatingModelBase::R_MSYrefs(SEXP par, SEXP ECurrent, SEXP qy, SEXP R0, SEXP M, SEXP mat, SEXP Idist, SEXP Len_age, SEXP Wt_age, SEXP sel, SEXP mov, SEXP h, SEXP Recdist, SEXP SRrel, SEXP N, SEXP NBefore, SEXP SSN, SEXP C, SEXP SSBA, SEXP ntargets, SEXP targpop, SEXP run_years, SEXP MSY, SEXP BMSY, SEXP SSBMSY, SEXP SSBMSY_B0)
 {
-  return (R_internal_MSYrefs(par, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, sel, mov, h, Recdist, SRrel, N, NBefore, SSN, C, SSBA, ntargets, targpop, run_years, MSY, BMSY, SSBMSY, SSBMSY_B0, sim_idx, true));
+  return (R_internal_MSYrefs(par, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, sel, mov, h, Recdist, SRrel, N, NBefore, SSN, C, SSBA, ntargets, targpop, run_years, MSY, BMSY, SSBMSY, SSBMSY_B0, true));
 }
 
-SEXP D_OperatingModelBase::R_nt_MSYrefs(SEXP par, SEXP ECurrent, SEXP qy, SEXP R0, SEXP M, SEXP mat, SEXP Idist, SEXP Len_age, SEXP Wt_age, SEXP sel, SEXP mov, SEXP h, SEXP Recdist, SEXP SRrel, SEXP N, SEXP NBefore, SEXP SSN, SEXP C, SEXP SSBA, SEXP ntargets, SEXP targpop, SEXP run_years, SEXP MSY, SEXP BMSY, SEXP SSBMSY, SEXP SSBMSY_B0, SEXP sim_idx)
+SEXP D_OperatingModelBase::R_nt_MSYrefs(SEXP par, SEXP ECurrent, SEXP qy, SEXP R0, SEXP M, SEXP mat, SEXP Idist, SEXP Len_age, SEXP Wt_age, SEXP sel, SEXP mov, SEXP h, SEXP Recdist, SEXP SRrel, SEXP N, SEXP NBefore, SEXP SSN, SEXP C, SEXP SSBA, SEXP ntargets, SEXP targpop, SEXP run_years, SEXP MSY, SEXP BMSY, SEXP SSBMSY, SEXP SSBMSY_B0)
 {
-  return (R_internal_MSYrefs(par, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, sel, mov, h, Recdist, SRrel, N, NBefore, SSN, C, SSBA, ntargets, targpop, run_years, MSY, BMSY, SSBMSY, SSBMSY_B0, sim_idx, false));
+  return (R_internal_MSYrefs(par, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, sel, mov, h, Recdist, SRrel, N, NBefore, SSN, C, SSBA, ntargets, targpop, run_years, MSY, BMSY, SSBMSY, SSBMSY_B0, false));
 }
 
-SEXP D_OperatingModelBase::R_internal_MSYrefs_objective(SEXP par, SEXP nReport, SEXP ECurrent, SEXP qy, SEXP R0, SEXP M, SEXP mat, SEXP Idist, SEXP Len_age, SEXP Wt_age, SEXP sel, SEXP mov, SEXP h, SEXP Recdist, SEXP SRrel, SEXP N, SEXP NBefore, SEXP SSN, SEXP C, SEXP SSBA, SEXP ntargets, SEXP targpop, SEXP run_years, SEXP sim_idx, bool bTranslate)
+SEXP D_OperatingModelBase::R_internal_MSYrefs_objective(SEXP par, SEXP nReport, SEXP ECurrent, SEXP qy, SEXP R0, SEXP M, SEXP mat, SEXP Idist, SEXP Len_age, SEXP Wt_age, SEXP sel, SEXP mov, SEXP h, SEXP Recdist, SEXP SRrel, SEXP N, SEXP NBefore, SEXP SSN, SEXP C, SEXP SSBA, SEXP ntargets, SEXP targpop, SEXP run_years, bool bTranslate)
 {
   double arg_par;
   int arg_nReport;
-  ARRAY_4D arg_ECurrent;
-  ARRAY_2D arg_qy;
-  ARRAY_2D arg_R0;
-  ARRAY_3D arg_M;
-  ARRAY_3D arg_mat;
-  ARRAY_4D arg_Idist;
-  ARRAY_3D arg_Len_age;
-  ARRAY_3D arg_Wt_age;
-  ARRAY_3D arg_sel;
-  ARRAY_6D arg_mov;
-  ARRAY_2D arg_h;
-  ARRAY_3D arg_Recdist;
+  ARRAY_3D arg_ECurrent;
+  ARRAY_1D arg_qy;
+  ARRAY_1D arg_R0;
+  ARRAY_2D arg_M;
+  ARRAY_2D arg_mat;
+  ARRAY_3D arg_Idist;
+  ARRAY_2D arg_Len_age;
+  ARRAY_2D arg_Wt_age;
+  ARRAY_2D arg_sel;
+  ARRAY_5D arg_mov;
+  ARRAY_1D arg_h;
+  ARRAY_2D arg_Recdist;
   ARRAY_1I arg_SRrel;
-  ARRAY_5D arg_N;
-  ARRAY_5D arg_NBefore;
-  ARRAY_5D arg_SSN;
-  ARRAY_6D arg_C;
-  ARRAY_2D arg_SSBA;
+  ARRAY_4D arg_N;
+  ARRAY_4D arg_NBefore;
+  ARRAY_4D arg_SSN;
+  ARRAY_5D arg_C;
+  ARRAY_1D arg_SSBA;
   int arg_ntargets;
   ARRAY_1I arg_targpop;
   int arg_run_years;
-  int arg_sim_idx;
   
   R_CheckArgument("par", "REALSXP", REALSXP, par, __FILE__, __LINE__);
   
   R_CheckArgument("nReport", "INTSXP", INTSXP, nReport, __FILE__, __LINE__);
   
-  R_CheckArgument("ECurrent", "REALSXP", REALSXP, ECurrent, __FILE__, __LINE__, 4, 1, nfleets, 1, nareas, 1, nsubyears, 1, nsim);
+  R_CheckArgument("ECurrent", "REALSXP", REALSXP, ECurrent, __FILE__, __LINE__, 3, 1, nfleets, 1, nareas, 1, nsubyears);
   
-  R_CheckArgument("qy", "REALSXP", REALSXP, qy, __FILE__, __LINE__, 2, 1, nfleets, 1, nsim);
+  R_CheckArgument("qy", "REALSXP", REALSXP, qy, __FILE__, __LINE__, 1, 1, nfleets);
   
-  R_CheckArgument("R0", "REALSXP", REALSXP, R0, __FILE__, __LINE__, 2, 1, npop, 1, nsim);
+  R_CheckArgument("R0", "REALSXP", REALSXP, R0, __FILE__, __LINE__, 1, 1, npop);
   
-  R_CheckArgument("M", "REALSXP", REALSXP, M, __FILE__, __LINE__, 3, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("M", "REALSXP", REALSXP, M, __FILE__, __LINE__, 2, 1, nages, 1, npop);
   
-  R_CheckArgument("mat", "REALSXP", REALSXP, mat, __FILE__, __LINE__, 3, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("mat", "REALSXP", REALSXP, mat, __FILE__, __LINE__, 2, 1, nages, 1, npop);
   
-  R_CheckArgument("Idist", "REALSXP", REALSXP, Idist, __FILE__, __LINE__, 4, 1, nareas, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("Idist", "REALSXP", REALSXP, Idist, __FILE__, __LINE__, 3, 1, nareas, 1, nages, 1, npop);
   
-  R_CheckArgument("Len_age", "REALSXP", REALSXP, Len_age, __FILE__, __LINE__, 3, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("Len_age", "REALSXP", REALSXP, Len_age, __FILE__, __LINE__, 2, 1, nages, 1, npop);
   
-  R_CheckArgument("Wt_age", "REALSXP", REALSXP, Wt_age, __FILE__, __LINE__, 3, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("Wt_age", "REALSXP", REALSXP, Wt_age, __FILE__, __LINE__, 2, 1, nages, 1, npop);
   
-  R_CheckArgument("sel", "REALSXP", REALSXP, sel, __FILE__, __LINE__, 3, 1, nages, 1, nfleets, 1, nsim);
+  R_CheckArgument("sel", "REALSXP", REALSXP, sel, __FILE__, __LINE__, 2, 1, nages, 1, nfleets);
   
-  R_CheckArgument("mov", "REALSXP", REALSXP, mov, __FILE__, __LINE__, 6, 1, nareas, 1, nareas, 1, nsubyears, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("mov", "REALSXP", REALSXP, mov, __FILE__, __LINE__, 5, 1, nareas, 1, nareas, 1, nsubyears, 1, nages, 1, npop);
   
-  R_CheckArgument("h", "REALSXP", REALSXP, h, __FILE__, __LINE__, 2, 1, npop, 1, nsim);
+  R_CheckArgument("h", "REALSXP", REALSXP, h, __FILE__, __LINE__, 1, 1, npop);
   
-  R_CheckArgument("Recdist", "REALSXP", REALSXP, Recdist, __FILE__, __LINE__, 3, 1, nareas, 1, npop, 1, nsim);
+  R_CheckArgument("Recdist", "REALSXP", REALSXP, Recdist, __FILE__, __LINE__, 2, 1, nareas, 1, npop);
   
   R_CheckArgument("SRrel", "INTSXP", INTSXP, SRrel, __FILE__, __LINE__, 1, 1, npop);
   
-  R_CheckArgument("N", "REALSXP", REALSXP, N, __FILE__, __LINE__, 5, 1, nareas, 1, nsubyears + 1, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("N", "REALSXP", REALSXP, N, __FILE__, __LINE__, 4, 1, nareas, 1, nsubyears + 1, 1, nages, 1, npop);
   
-  R_CheckArgument("NBefore", "REALSXP", REALSXP, NBefore, __FILE__, __LINE__, 5, 1, nareas, 1, nsubyears + 1, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("NBefore", "REALSXP", REALSXP, NBefore, __FILE__, __LINE__, 4, 1, nareas, 1, nsubyears + 1, 1, nages, 1, npop);
   
-  R_CheckArgument("SSN", "REALSXP", REALSXP, SSN, __FILE__, __LINE__, 5, 1, nareas, 1, nsubyears, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("SSN", "REALSXP", REALSXP, SSN, __FILE__, __LINE__, 4, 1, nareas, 1, nsubyears, 1, nages, 1, npop);
   
-  R_CheckArgument("C", "REALSXP", REALSXP, C, __FILE__, __LINE__, 6, 1, nfleets, 1, nareas, 1, nsubyears, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("C", "REALSXP", REALSXP, C, __FILE__, __LINE__, 5, 1, nfleets, 1, nareas, 1, nsubyears, 1, nages, 1, npop);
   
-  R_CheckArgument("SSBA", "REALSXP", REALSXP, SSBA, __FILE__, __LINE__, 2, 1, npop, 1, nsim);
+  R_CheckArgument("SSBA", "REALSXP", REALSXP, SSBA, __FILE__, __LINE__, 1, 1, npop);
   
   R_CheckArgument("ntargets", "INTSXP", INTSXP, ntargets, __FILE__, __LINE__);
   
   R_CheckArgument("targpop", "INTSXP", INTSXP, targpop, __FILE__, __LINE__, 1, 1, INTEGER(ntargets)[0]);
   
   R_CheckArgument("run_years", "INTSXP", INTSXP, run_years, __FILE__, __LINE__);
-  
-  R_CheckArgument("sim_idx", "INTSXP", INTSXP, sim_idx, __FILE__, __LINE__);
   
   if (bTranslate)
   {
@@ -1049,31 +1009,31 @@ SEXP D_OperatingModelBase::R_internal_MSYrefs_objective(SEXP par, SEXP nReport, 
     
     arg_SRrel = 0;
     
-    Plan_12.create(MemAllocator, arg_SRrel);
+    Plan_3.create(MemAllocator, arg_SRrel);
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)INTEGER(SRrel), (char*)arg_SRrel);
     
     arg_N = 0;
     
-    Plan_13.create(MemAllocator, arg_N);
+    Plan_12.create(MemAllocator, arg_N);
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)REAL(N), (char*)arg_N);
     
     arg_NBefore = 0;
     
-    Plan_13.create(MemAllocator, arg_NBefore);
+    Plan_12.create(MemAllocator, arg_NBefore);
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)REAL(NBefore), (char*)arg_NBefore);
     
     arg_SSN = 0;
     
-    Plan_14.create(MemAllocator, arg_SSN);
+    Plan_13.create(MemAllocator, arg_SSN);
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)REAL(SSN), (char*)arg_SSN);
     
     arg_C = 0;
     
-    Plan_15.create(MemAllocator, arg_C);
+    Plan_14.create(MemAllocator, arg_C);
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)REAL(C), (char*)arg_C);
     
@@ -1091,7 +1051,6 @@ SEXP D_OperatingModelBase::R_internal_MSYrefs_objective(SEXP par, SEXP nReport, 
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)INTEGER(targpop), (char*)arg_targpop);
     
     arg_run_years = INTEGER(run_years)[0];
-    arg_sim_idx = INTEGER(sim_idx)[0];
   }
   else
   {
@@ -1147,23 +1106,23 @@ SEXP D_OperatingModelBase::R_internal_MSYrefs_objective(SEXP par, SEXP nReport, 
     
     arg_SRrel = 0;
     
-    Plan_12.create(MemAllocator, arg_SRrel, (void*)INTEGER(SRrel));
+    Plan_3.create(MemAllocator, arg_SRrel, (void*)INTEGER(SRrel));
     
     arg_N = 0;
     
-    Plan_13.create(MemAllocator, arg_N, (void*)REAL(N));
+    Plan_12.create(MemAllocator, arg_N, (void*)REAL(N));
     
     arg_NBefore = 0;
     
-    Plan_13.create(MemAllocator, arg_NBefore, (void*)REAL(NBefore));
+    Plan_12.create(MemAllocator, arg_NBefore, (void*)REAL(NBefore));
     
     arg_SSN = 0;
     
-    Plan_14.create(MemAllocator, arg_SSN, (void*)REAL(SSN));
+    Plan_13.create(MemAllocator, arg_SSN, (void*)REAL(SSN));
     
     arg_C = 0;
     
-    Plan_15.create(MemAllocator, arg_C, (void*)REAL(C));
+    Plan_14.create(MemAllocator, arg_C, (void*)REAL(C));
     
     arg_SSBA = 0;
     
@@ -1175,13 +1134,12 @@ SEXP D_OperatingModelBase::R_internal_MSYrefs_objective(SEXP par, SEXP nReport, 
     AdtArrayPlan::create(MemAllocator, arg_targpop, 1, INTEGER(ntargets)[0], (void*)INTEGER(targpop));
     
     arg_run_years = INTEGER(run_years)[0];
-    arg_sim_idx = INTEGER(sim_idx)[0];
   }
   
   SEXP Result = Rf_allocVector(REALSXP, 1);
   
   PROTECT(Result);
-  REAL(Result)[0] = MSYrefs_objective(arg_par, arg_nReport, arg_ECurrent, arg_qy, arg_R0, arg_M, arg_mat, arg_Idist, arg_Len_age, arg_Wt_age, arg_sel, arg_mov, arg_h, arg_Recdist, arg_SRrel, arg_N, arg_NBefore, arg_SSN, arg_C, arg_SSBA, arg_ntargets, arg_targpop, arg_run_years, arg_sim_idx);
+  REAL(Result)[0] = MSYrefs_objective(arg_par, arg_nReport, arg_ECurrent, arg_qy, arg_R0, arg_M, arg_mat, arg_Idist, arg_Len_age, arg_Wt_age, arg_sel, arg_mov, arg_h, arg_Recdist, arg_SRrel, arg_N, arg_NBefore, arg_SSN, arg_C, arg_SSBA, arg_ntargets, arg_targpop, arg_run_years);
   
   if (bTranslate)
   {
@@ -1219,46 +1177,45 @@ SEXP D_OperatingModelBase::R_internal_MSYrefs_objective(SEXP par, SEXP nReport, 
   return (Result);
 }
 
-SEXP D_OperatingModelBase::R_MSYrefs_objective(SEXP par, SEXP nReport, SEXP ECurrent, SEXP qy, SEXP R0, SEXP M, SEXP mat, SEXP Idist, SEXP Len_age, SEXP Wt_age, SEXP sel, SEXP mov, SEXP h, SEXP Recdist, SEXP SRrel, SEXP N, SEXP NBefore, SEXP SSN, SEXP C, SEXP SSBA, SEXP ntargets, SEXP targpop, SEXP run_years, SEXP sim_idx)
+SEXP D_OperatingModelBase::R_MSYrefs_objective(SEXP par, SEXP nReport, SEXP ECurrent, SEXP qy, SEXP R0, SEXP M, SEXP mat, SEXP Idist, SEXP Len_age, SEXP Wt_age, SEXP sel, SEXP mov, SEXP h, SEXP Recdist, SEXP SRrel, SEXP N, SEXP NBefore, SEXP SSN, SEXP C, SEXP SSBA, SEXP ntargets, SEXP targpop, SEXP run_years)
 {
-  return (R_internal_MSYrefs_objective(par, nReport, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, sel, mov, h, Recdist, SRrel, N, NBefore, SSN, C, SSBA, ntargets, targpop, run_years, sim_idx, true));
+  return (R_internal_MSYrefs_objective(par, nReport, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, sel, mov, h, Recdist, SRrel, N, NBefore, SSN, C, SSBA, ntargets, targpop, run_years, true));
 }
 
-SEXP D_OperatingModelBase::R_nt_MSYrefs_objective(SEXP par, SEXP nReport, SEXP ECurrent, SEXP qy, SEXP R0, SEXP M, SEXP mat, SEXP Idist, SEXP Len_age, SEXP Wt_age, SEXP sel, SEXP mov, SEXP h, SEXP Recdist, SEXP SRrel, SEXP N, SEXP NBefore, SEXP SSN, SEXP C, SEXP SSBA, SEXP ntargets, SEXP targpop, SEXP run_years, SEXP sim_idx)
+SEXP D_OperatingModelBase::R_nt_MSYrefs_objective(SEXP par, SEXP nReport, SEXP ECurrent, SEXP qy, SEXP R0, SEXP M, SEXP mat, SEXP Idist, SEXP Len_age, SEXP Wt_age, SEXP sel, SEXP mov, SEXP h, SEXP Recdist, SEXP SRrel, SEXP N, SEXP NBefore, SEXP SSN, SEXP C, SEXP SSBA, SEXP ntargets, SEXP targpop, SEXP run_years)
 {
-  return (R_internal_MSYrefs_objective(par, nReport, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, sel, mov, h, Recdist, SRrel, N, NBefore, SSN, C, SSBA, ntargets, targpop, run_years, sim_idx, false));
+  return (R_internal_MSYrefs_objective(par, nReport, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, sel, mov, h, Recdist, SRrel, N, NBefore, SSN, C, SSBA, ntargets, targpop, run_years, false));
 }
 
-SEXP D_OperatingModelBase::R_internal_MSYREFS_OBJECTIVE_DPAR(SEXP par, SEXP pard1_par, SEXP nReport, SEXP ECurrent, SEXP qy, SEXP R0, SEXP M, SEXP mat, SEXP Idist, SEXP Len_age, SEXP Wt_age, SEXP sel, SEXP mov, SEXP h, SEXP Recdist, SEXP SRrel, SEXP N, SEXP nd1_par, SEXP NBefore, SEXP nbefored1_par, SEXP SSN, SEXP C, SEXP cd1_par, SEXP SSBA, SEXP ntargets, SEXP targpop, SEXP run_years, SEXP sim_idx, SEXP MSYrefs_objective, bool bTranslate)
+SEXP D_OperatingModelBase::R_internal_MSYREFS_OBJECTIVE_DPAR(SEXP par, SEXP pard1_par, SEXP nReport, SEXP ECurrent, SEXP qy, SEXP R0, SEXP M, SEXP mat, SEXP Idist, SEXP Len_age, SEXP Wt_age, SEXP sel, SEXP mov, SEXP h, SEXP Recdist, SEXP SRrel, SEXP N, SEXP nd1_par, SEXP NBefore, SEXP nbefored1_par, SEXP SSN, SEXP C, SEXP cd1_par, SEXP SSBA, SEXP ntargets, SEXP targpop, SEXP run_years, SEXP MSYrefs_objective, bool bTranslate)
 {
   double arg_par;
   double arg_pard1_par;
   int arg_nReport;
-  ARRAY_4D arg_ECurrent;
-  ARRAY_2D arg_qy;
-  ARRAY_2D arg_R0;
-  ARRAY_3D arg_M;
-  ARRAY_3D arg_mat;
-  ARRAY_4D arg_Idist;
-  ARRAY_3D arg_Len_age;
-  ARRAY_3D arg_Wt_age;
-  ARRAY_3D arg_sel;
-  ARRAY_6D arg_mov;
-  ARRAY_2D arg_h;
-  ARRAY_3D arg_Recdist;
+  ARRAY_3D arg_ECurrent;
+  ARRAY_1D arg_qy;
+  ARRAY_1D arg_R0;
+  ARRAY_2D arg_M;
+  ARRAY_2D arg_mat;
+  ARRAY_3D arg_Idist;
+  ARRAY_2D arg_Len_age;
+  ARRAY_2D arg_Wt_age;
+  ARRAY_2D arg_sel;
+  ARRAY_5D arg_mov;
+  ARRAY_1D arg_h;
+  ARRAY_2D arg_Recdist;
   ARRAY_1I arg_SRrel;
-  ARRAY_5D arg_N;
-  ARRAY_5D arg_nd1_par;
-  ARRAY_5D arg_NBefore;
-  ARRAY_5D arg_nbefored1_par;
-  ARRAY_5D arg_SSN;
-  ARRAY_6D arg_C;
-  ARRAY_6D arg_cd1_par;
-  ARRAY_2D arg_SSBA;
+  ARRAY_4D arg_N;
+  ARRAY_4D arg_nd1_par;
+  ARRAY_4D arg_NBefore;
+  ARRAY_4D arg_nbefored1_par;
+  ARRAY_4D arg_SSN;
+  ARRAY_5D arg_C;
+  ARRAY_5D arg_cd1_par;
+  ARRAY_1D arg_SSBA;
   int arg_ntargets;
   ARRAY_1I arg_targpop;
   int arg_run_years;
-  int arg_sim_idx;
   double arg_MSYrefs_objective;
   
   R_CheckArgument("par", "REALSXP", REALSXP, par, __FILE__, __LINE__);
@@ -1267,55 +1224,53 @@ SEXP D_OperatingModelBase::R_internal_MSYREFS_OBJECTIVE_DPAR(SEXP par, SEXP pard
   
   R_CheckArgument("nReport", "INTSXP", INTSXP, nReport, __FILE__, __LINE__);
   
-  R_CheckArgument("ECurrent", "REALSXP", REALSXP, ECurrent, __FILE__, __LINE__, 4, 1, nfleets, 1, nareas, 1, nsubyears, 1, nsim);
+  R_CheckArgument("ECurrent", "REALSXP", REALSXP, ECurrent, __FILE__, __LINE__, 3, 1, nfleets, 1, nareas, 1, nsubyears);
   
-  R_CheckArgument("qy", "REALSXP", REALSXP, qy, __FILE__, __LINE__, 2, 1, nfleets, 1, nsim);
+  R_CheckArgument("qy", "REALSXP", REALSXP, qy, __FILE__, __LINE__, 1, 1, nfleets);
   
-  R_CheckArgument("R0", "REALSXP", REALSXP, R0, __FILE__, __LINE__, 2, 1, npop, 1, nsim);
+  R_CheckArgument("R0", "REALSXP", REALSXP, R0, __FILE__, __LINE__, 1, 1, npop);
   
-  R_CheckArgument("M", "REALSXP", REALSXP, M, __FILE__, __LINE__, 3, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("M", "REALSXP", REALSXP, M, __FILE__, __LINE__, 2, 1, nages, 1, npop);
   
-  R_CheckArgument("mat", "REALSXP", REALSXP, mat, __FILE__, __LINE__, 3, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("mat", "REALSXP", REALSXP, mat, __FILE__, __LINE__, 2, 1, nages, 1, npop);
   
-  R_CheckArgument("Idist", "REALSXP", REALSXP, Idist, __FILE__, __LINE__, 4, 1, nareas, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("Idist", "REALSXP", REALSXP, Idist, __FILE__, __LINE__, 3, 1, nareas, 1, nages, 1, npop);
   
-  R_CheckArgument("Len_age", "REALSXP", REALSXP, Len_age, __FILE__, __LINE__, 3, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("Len_age", "REALSXP", REALSXP, Len_age, __FILE__, __LINE__, 2, 1, nages, 1, npop);
   
-  R_CheckArgument("Wt_age", "REALSXP", REALSXP, Wt_age, __FILE__, __LINE__, 3, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("Wt_age", "REALSXP", REALSXP, Wt_age, __FILE__, __LINE__, 2, 1, nages, 1, npop);
   
-  R_CheckArgument("sel", "REALSXP", REALSXP, sel, __FILE__, __LINE__, 3, 1, nages, 1, nfleets, 1, nsim);
+  R_CheckArgument("sel", "REALSXP", REALSXP, sel, __FILE__, __LINE__, 2, 1, nages, 1, nfleets);
   
-  R_CheckArgument("mov", "REALSXP", REALSXP, mov, __FILE__, __LINE__, 6, 1, nareas, 1, nareas, 1, nsubyears, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("mov", "REALSXP", REALSXP, mov, __FILE__, __LINE__, 5, 1, nareas, 1, nareas, 1, nsubyears, 1, nages, 1, npop);
   
-  R_CheckArgument("h", "REALSXP", REALSXP, h, __FILE__, __LINE__, 2, 1, npop, 1, nsim);
+  R_CheckArgument("h", "REALSXP", REALSXP, h, __FILE__, __LINE__, 1, 1, npop);
   
-  R_CheckArgument("Recdist", "REALSXP", REALSXP, Recdist, __FILE__, __LINE__, 3, 1, nareas, 1, npop, 1, nsim);
+  R_CheckArgument("Recdist", "REALSXP", REALSXP, Recdist, __FILE__, __LINE__, 2, 1, nareas, 1, npop);
   
   R_CheckArgument("SRrel", "INTSXP", INTSXP, SRrel, __FILE__, __LINE__, 1, 1, npop);
   
-  R_CheckArgument("N", "REALSXP", REALSXP, N, __FILE__, __LINE__, 5, 1, nareas, 1, nsubyears + 1, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("N", "REALSXP", REALSXP, N, __FILE__, __LINE__, 4, 1, nareas, 1, nsubyears + 1, 1, nages, 1, npop);
   
-  R_CheckArgument("nd1_par", "REALSXP", REALSXP, nd1_par, __FILE__, __LINE__, 5, 1, nareas, 1, nsubyears + 1, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("nd1_par", "REALSXP", REALSXP, nd1_par, __FILE__, __LINE__, 4, 1, nareas, 1, nsubyears + 1, 1, nages, 1, npop);
   
-  R_CheckArgument("NBefore", "REALSXP", REALSXP, NBefore, __FILE__, __LINE__, 5, 1, nareas, 1, nsubyears + 1, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("NBefore", "REALSXP", REALSXP, NBefore, __FILE__, __LINE__, 4, 1, nareas, 1, nsubyears + 1, 1, nages, 1, npop);
   
-  R_CheckArgument("nbefored1_par", "REALSXP", REALSXP, nbefored1_par, __FILE__, __LINE__, 5, 1, nareas, 1, nsubyears + 1, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("nbefored1_par", "REALSXP", REALSXP, nbefored1_par, __FILE__, __LINE__, 4, 1, nareas, 1, nsubyears + 1, 1, nages, 1, npop);
   
-  R_CheckArgument("SSN", "REALSXP", REALSXP, SSN, __FILE__, __LINE__, 5, 1, nareas, 1, nsubyears, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("SSN", "REALSXP", REALSXP, SSN, __FILE__, __LINE__, 4, 1, nareas, 1, nsubyears, 1, nages, 1, npop);
   
-  R_CheckArgument("C", "REALSXP", REALSXP, C, __FILE__, __LINE__, 6, 1, nfleets, 1, nareas, 1, nsubyears, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("C", "REALSXP", REALSXP, C, __FILE__, __LINE__, 5, 1, nfleets, 1, nareas, 1, nsubyears, 1, nages, 1, npop);
   
-  R_CheckArgument("cd1_par", "REALSXP", REALSXP, cd1_par, __FILE__, __LINE__, 6, 1, nfleets, 1, nareas, 1, nsubyears, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("cd1_par", "REALSXP", REALSXP, cd1_par, __FILE__, __LINE__, 5, 1, nfleets, 1, nareas, 1, nsubyears, 1, nages, 1, npop);
   
-  R_CheckArgument("SSBA", "REALSXP", REALSXP, SSBA, __FILE__, __LINE__, 2, 1, npop, 1, nsim);
+  R_CheckArgument("SSBA", "REALSXP", REALSXP, SSBA, __FILE__, __LINE__, 1, 1, npop);
   
   R_CheckArgument("ntargets", "INTSXP", INTSXP, ntargets, __FILE__, __LINE__);
   
   R_CheckArgument("targpop", "INTSXP", INTSXP, targpop, __FILE__, __LINE__, 1, 1, INTEGER(ntargets)[0]);
   
   R_CheckArgument("run_years", "INTSXP", INTSXP, run_years, __FILE__, __LINE__);
-  
-  R_CheckArgument("sim_idx", "INTSXP", INTSXP, sim_idx, __FILE__, __LINE__);
   
   R_CheckArgument("MSYrefs_objective", "REALSXP", REALSXP, MSYrefs_objective, __FILE__, __LINE__);
   
@@ -1398,49 +1353,49 @@ SEXP D_OperatingModelBase::R_internal_MSYREFS_OBJECTIVE_DPAR(SEXP par, SEXP pard
     
     arg_SRrel = 0;
     
-    Plan_12.create(MemAllocator, arg_SRrel);
+    Plan_3.create(MemAllocator, arg_SRrel);
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)INTEGER(SRrel), (char*)arg_SRrel);
     
     arg_N = 0;
     
-    Plan_13.create(MemAllocator, arg_N);
+    Plan_12.create(MemAllocator, arg_N);
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)REAL(N), (char*)arg_N);
     
     arg_nd1_par = 0;
     
-    Plan_13.create(MemAllocator, arg_nd1_par);
+    Plan_12.create(MemAllocator, arg_nd1_par);
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)REAL(nd1_par), (char*)arg_nd1_par);
     
     arg_NBefore = 0;
     
-    Plan_13.create(MemAllocator, arg_NBefore);
+    Plan_12.create(MemAllocator, arg_NBefore);
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)REAL(NBefore), (char*)arg_NBefore);
     
     arg_nbefored1_par = 0;
     
-    Plan_13.create(MemAllocator, arg_nbefored1_par);
+    Plan_12.create(MemAllocator, arg_nbefored1_par);
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)REAL(nbefored1_par), (char*)arg_nbefored1_par);
     
     arg_SSN = 0;
     
-    Plan_14.create(MemAllocator, arg_SSN);
+    Plan_13.create(MemAllocator, arg_SSN);
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)REAL(SSN), (char*)arg_SSN);
     
     arg_C = 0;
     
-    Plan_15.create(MemAllocator, arg_C);
+    Plan_14.create(MemAllocator, arg_C);
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)REAL(C), (char*)arg_C);
     
     arg_cd1_par = 0;
     
-    Plan_15.create(MemAllocator, arg_cd1_par);
+    Plan_14.create(MemAllocator, arg_cd1_par);
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)REAL(cd1_par), (char*)arg_cd1_par);
     
@@ -1458,7 +1413,6 @@ SEXP D_OperatingModelBase::R_internal_MSYREFS_OBJECTIVE_DPAR(SEXP par, SEXP pard
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)INTEGER(targpop), (char*)arg_targpop);
     
     arg_run_years = INTEGER(run_years)[0];
-    arg_sim_idx = INTEGER(sim_idx)[0];
     arg_MSYrefs_objective = REAL(MSYrefs_objective)[0];
   }
   else
@@ -1516,35 +1470,35 @@ SEXP D_OperatingModelBase::R_internal_MSYREFS_OBJECTIVE_DPAR(SEXP par, SEXP pard
     
     arg_SRrel = 0;
     
-    Plan_12.create(MemAllocator, arg_SRrel, (void*)INTEGER(SRrel));
+    Plan_3.create(MemAllocator, arg_SRrel, (void*)INTEGER(SRrel));
     
     arg_N = 0;
     
-    Plan_13.create(MemAllocator, arg_N, (void*)REAL(N));
+    Plan_12.create(MemAllocator, arg_N, (void*)REAL(N));
     
     arg_nd1_par = 0;
     
-    Plan_13.create(MemAllocator, arg_nd1_par, (void*)REAL(nd1_par));
+    Plan_12.create(MemAllocator, arg_nd1_par, (void*)REAL(nd1_par));
     
     arg_NBefore = 0;
     
-    Plan_13.create(MemAllocator, arg_NBefore, (void*)REAL(NBefore));
+    Plan_12.create(MemAllocator, arg_NBefore, (void*)REAL(NBefore));
     
     arg_nbefored1_par = 0;
     
-    Plan_13.create(MemAllocator, arg_nbefored1_par, (void*)REAL(nbefored1_par));
+    Plan_12.create(MemAllocator, arg_nbefored1_par, (void*)REAL(nbefored1_par));
     
     arg_SSN = 0;
     
-    Plan_14.create(MemAllocator, arg_SSN, (void*)REAL(SSN));
+    Plan_13.create(MemAllocator, arg_SSN, (void*)REAL(SSN));
     
     arg_C = 0;
     
-    Plan_15.create(MemAllocator, arg_C, (void*)REAL(C));
+    Plan_14.create(MemAllocator, arg_C, (void*)REAL(C));
     
     arg_cd1_par = 0;
     
-    Plan_15.create(MemAllocator, arg_cd1_par, (void*)REAL(cd1_par));
+    Plan_14.create(MemAllocator, arg_cd1_par, (void*)REAL(cd1_par));
     
     arg_SSBA = 0;
     
@@ -1556,14 +1510,13 @@ SEXP D_OperatingModelBase::R_internal_MSYREFS_OBJECTIVE_DPAR(SEXP par, SEXP pard
     AdtArrayPlan::create(MemAllocator, arg_targpop, 1, INTEGER(ntargets)[0], (void*)INTEGER(targpop));
     
     arg_run_years = INTEGER(run_years)[0];
-    arg_sim_idx = INTEGER(sim_idx)[0];
     arg_MSYrefs_objective = REAL(MSYrefs_objective)[0];
   }
   
   SEXP Result = Rf_allocVector(REALSXP, 1);
   
   PROTECT(Result);
-  REAL(Result)[0] = MSYREFS_OBJECTIVE_DPAR(arg_par, arg_pard1_par, arg_nReport, arg_ECurrent, arg_qy, arg_R0, arg_M, arg_mat, arg_Idist, arg_Len_age, arg_Wt_age, arg_sel, arg_mov, arg_h, arg_Recdist, arg_SRrel, arg_N, arg_nd1_par, arg_NBefore, arg_nbefored1_par, arg_SSN, arg_C, arg_cd1_par, arg_SSBA, arg_ntargets, arg_targpop, arg_run_years, arg_sim_idx, arg_MSYrefs_objective);
+  REAL(Result)[0] = MSYREFS_OBJECTIVE_DPAR(arg_par, arg_pard1_par, arg_nReport, arg_ECurrent, arg_qy, arg_R0, arg_M, arg_mat, arg_Idist, arg_Len_age, arg_Wt_age, arg_sel, arg_mov, arg_h, arg_Recdist, arg_SRrel, arg_N, arg_nd1_par, arg_NBefore, arg_nbefored1_par, arg_SSN, arg_C, arg_cd1_par, arg_SSBA, arg_ntargets, arg_targpop, arg_run_years, arg_MSYrefs_objective);
   
   if (bTranslate)
   {
@@ -1609,14 +1562,14 @@ SEXP D_OperatingModelBase::R_internal_MSYREFS_OBJECTIVE_DPAR(SEXP par, SEXP pard
   return (Result);
 }
 
-SEXP D_OperatingModelBase::R_MSYREFS_OBJECTIVE_DPAR(SEXP par, SEXP pard1_par, SEXP nReport, SEXP ECurrent, SEXP qy, SEXP R0, SEXP M, SEXP mat, SEXP Idist, SEXP Len_age, SEXP Wt_age, SEXP sel, SEXP mov, SEXP h, SEXP Recdist, SEXP SRrel, SEXP N, SEXP nd1_par, SEXP NBefore, SEXP nbefored1_par, SEXP SSN, SEXP C, SEXP cd1_par, SEXP SSBA, SEXP ntargets, SEXP targpop, SEXP run_years, SEXP sim_idx, SEXP MSYrefs_objective)
+SEXP D_OperatingModelBase::R_MSYREFS_OBJECTIVE_DPAR(SEXP par, SEXP pard1_par, SEXP nReport, SEXP ECurrent, SEXP qy, SEXP R0, SEXP M, SEXP mat, SEXP Idist, SEXP Len_age, SEXP Wt_age, SEXP sel, SEXP mov, SEXP h, SEXP Recdist, SEXP SRrel, SEXP N, SEXP nd1_par, SEXP NBefore, SEXP nbefored1_par, SEXP SSN, SEXP C, SEXP cd1_par, SEXP SSBA, SEXP ntargets, SEXP targpop, SEXP run_years, SEXP MSYrefs_objective)
 {
-  return (R_internal_MSYREFS_OBJECTIVE_DPAR(par, pard1_par, nReport, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, sel, mov, h, Recdist, SRrel, N, nd1_par, NBefore, nbefored1_par, SSN, C, cd1_par, SSBA, ntargets, targpop, run_years, sim_idx, MSYrefs_objective, true));
+  return (R_internal_MSYREFS_OBJECTIVE_DPAR(par, pard1_par, nReport, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, sel, mov, h, Recdist, SRrel, N, nd1_par, NBefore, nbefored1_par, SSN, C, cd1_par, SSBA, ntargets, targpop, run_years, MSYrefs_objective, true));
 }
 
-SEXP D_OperatingModelBase::R_nt_MSYREFS_OBJECTIVE_DPAR(SEXP par, SEXP pard1_par, SEXP nReport, SEXP ECurrent, SEXP qy, SEXP R0, SEXP M, SEXP mat, SEXP Idist, SEXP Len_age, SEXP Wt_age, SEXP sel, SEXP mov, SEXP h, SEXP Recdist, SEXP SRrel, SEXP N, SEXP nd1_par, SEXP NBefore, SEXP nbefored1_par, SEXP SSN, SEXP C, SEXP cd1_par, SEXP SSBA, SEXP ntargets, SEXP targpop, SEXP run_years, SEXP sim_idx, SEXP MSYrefs_objective)
+SEXP D_OperatingModelBase::R_nt_MSYREFS_OBJECTIVE_DPAR(SEXP par, SEXP pard1_par, SEXP nReport, SEXP ECurrent, SEXP qy, SEXP R0, SEXP M, SEXP mat, SEXP Idist, SEXP Len_age, SEXP Wt_age, SEXP sel, SEXP mov, SEXP h, SEXP Recdist, SEXP SRrel, SEXP N, SEXP nd1_par, SEXP NBefore, SEXP nbefored1_par, SEXP SSN, SEXP C, SEXP cd1_par, SEXP SSBA, SEXP ntargets, SEXP targpop, SEXP run_years, SEXP MSYrefs_objective)
 {
-  return (R_internal_MSYREFS_OBJECTIVE_DPAR(par, pard1_par, nReport, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, sel, mov, h, Recdist, SRrel, N, nd1_par, NBefore, nbefored1_par, SSN, C, cd1_par, SSBA, ntargets, targpop, run_years, sim_idx, MSYrefs_objective, false));
+  return (R_internal_MSYREFS_OBJECTIVE_DPAR(par, pard1_par, nReport, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, sel, mov, h, Recdist, SRrel, N, nd1_par, NBefore, nbefored1_par, SSN, C, cd1_par, SSBA, ntargets, targpop, run_years, MSYrefs_objective, false));
 }
 
 SEXP D_OperatingModelBase::_get_nages() const
@@ -1649,24 +1602,24 @@ SEXP D_OperatingModelBase::_set_nareas(SEXP arg_nareas)
 
 SEXP D_OperatingModelBase::R_internal_nextYear(SEXP N, SEXP NBefore, bool bTranslate)
 {
-  ARRAY_5D arg_N;
-  ARRAY_5D arg_NBefore;
+  ARRAY_4D arg_N;
+  ARRAY_4D arg_NBefore;
   
-  R_CheckArgument("N", "REALSXP", REALSXP, N, __FILE__, __LINE__, 5, 1, nareas, 1, nsubyears + 1, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("N", "REALSXP", REALSXP, N, __FILE__, __LINE__, 4, 1, nareas, 1, nsubyears + 1, 1, nages, 1, npop);
   
-  R_CheckArgument("NBefore", "REALSXP", REALSXP, NBefore, __FILE__, __LINE__, 5, 1, nareas, 1, nsubyears + 1, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("NBefore", "REALSXP", REALSXP, NBefore, __FILE__, __LINE__, 4, 1, nareas, 1, nsubyears + 1, 1, nages, 1, npop);
   
   if (bTranslate)
   {
     arg_N = 0;
     
-    Plan_13.create(MemAllocator, arg_N);
+    Plan_12.create(MemAllocator, arg_N);
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)REAL(N), (char*)arg_N);
     
     arg_NBefore = 0;
     
-    Plan_13.create(MemAllocator, arg_NBefore);
+    Plan_12.create(MemAllocator, arg_NBefore);
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)REAL(NBefore), (char*)arg_NBefore);
     
@@ -1675,11 +1628,11 @@ SEXP D_OperatingModelBase::R_internal_nextYear(SEXP N, SEXP NBefore, bool bTrans
   {
     arg_N = 0;
     
-    Plan_13.create(MemAllocator, arg_N, (void*)REAL(N));
+    Plan_12.create(MemAllocator, arg_N, (void*)REAL(N));
     
     arg_NBefore = 0;
     
-    Plan_13.create(MemAllocator, arg_NBefore, (void*)REAL(NBefore));
+    Plan_12.create(MemAllocator, arg_NBefore, (void*)REAL(NBefore));
     
   }
   
@@ -1743,20 +1696,6 @@ SEXP D_OperatingModelBase::_set_npop(SEXP arg_npop)
   return (R_Empty());
 }
 
-SEXP D_OperatingModelBase::_get_nsim() const
-{
-  return (R_Scalar(nsim));
-}
-
-SEXP D_OperatingModelBase::_set_nsim(SEXP arg_nsim)
-{
-  R_CheckArgument("arg_nsim", "INTSXP", INTSXP, arg_nsim, __FILE__, __LINE__);
-  
-  nsim = INTEGER(arg_nsim)[0];
-  
-  return (R_Empty());
-}
-
 SEXP D_OperatingModelBase::_get_nsubyears() const
 {
   return (R_Scalar(nsubyears));
@@ -1771,7 +1710,7 @@ SEXP D_OperatingModelBase::_set_nsubyears(SEXP arg_nsubyears)
   return (R_Empty());
 }
 
-SEXP D_OperatingModelBase::R_internal_popdyn_projection_objective(SEXP par, SEXP npar, SEXP nfixed, SEXP TAC, SEXP TAE, SEXP FbyPar, SEXP FbyFixed, SEXP ECurrent, SEXP qy, SEXP R0, SEXP M, SEXP mat, SEXP Idist, SEXP Len_age, SEXP Wt_age, SEXP Wt_age_mid, SEXP sel, SEXP mov, SEXP h, SEXP Recdist, SEXP Recdevs, SEXP RecSpatialDevs, SEXP SRrel, SEXP N, SEXP NBefore, SEXP SSN, SEXP C, SEXP SSBA, SEXP sim_idx, bool bTranslate)
+SEXP D_OperatingModelBase::R_internal_popdyn_projection_objective(SEXP par, SEXP npar, SEXP nfixed, SEXP TAC, SEXP TAE, SEXP FbyPar, SEXP FbyFixed, SEXP ECurrent, SEXP qy, SEXP R0, SEXP M, SEXP mat, SEXP Idist, SEXP Len_age, SEXP Wt_age, SEXP Wt_age_mid, SEXP sel, SEXP mov, SEXP h, SEXP Recdist, SEXP Recdevs, SEXP RecSpatialDevs, SEXP SRrel, SEXP N, SEXP NBefore, SEXP SSN, SEXP C, SEXP SSBA, bool bTranslate)
 {
   ARRAY_1D arg_par;
   int arg_npar;
@@ -1780,28 +1719,27 @@ SEXP D_OperatingModelBase::R_internal_popdyn_projection_objective(SEXP par, SEXP
   ARRAY_1D arg_TAE;
   ARRAY_1I arg_FbyPar;
   ARRAY_1I arg_FbyFixed;
-  ARRAY_4D arg_ECurrent;
-  ARRAY_2D arg_qy;
-  ARRAY_2D arg_R0;
-  ARRAY_3D arg_M;
-  ARRAY_3D arg_mat;
-  ARRAY_4D arg_Idist;
-  ARRAY_3D arg_Len_age;
-  ARRAY_3D arg_Wt_age;
-  ARRAY_3D arg_Wt_age_mid;
-  ARRAY_3D arg_sel;
-  ARRAY_6D arg_mov;
-  ARRAY_2D arg_h;
-  ARRAY_3D arg_Recdist;
-  ARRAY_3D arg_Recdevs;
-  ARRAY_3D arg_RecSpatialDevs;
+  ARRAY_3D arg_ECurrent;
+  ARRAY_1D arg_qy;
+  ARRAY_1D arg_R0;
+  ARRAY_2D arg_M;
+  ARRAY_2D arg_mat;
+  ARRAY_3D arg_Idist;
+  ARRAY_2D arg_Len_age;
+  ARRAY_2D arg_Wt_age;
+  ARRAY_2D arg_Wt_age_mid;
+  ARRAY_2D arg_sel;
+  ARRAY_5D arg_mov;
+  ARRAY_1D arg_h;
+  ARRAY_2D arg_Recdist;
+  ARRAY_2D arg_Recdevs;
+  ARRAY_2D arg_RecSpatialDevs;
   ARRAY_1I arg_SRrel;
-  ARRAY_5D arg_N;
-  ARRAY_5D arg_NBefore;
-  ARRAY_5D arg_SSN;
-  ARRAY_6D arg_C;
-  ARRAY_2D arg_SSBA;
-  int arg_sim_idx;
+  ARRAY_4D arg_N;
+  ARRAY_4D arg_NBefore;
+  ARRAY_4D arg_SSN;
+  ARRAY_5D arg_C;
+  ARRAY_1D arg_SSBA;
   
   R_CheckArgument("par", "REALSXP", REALSXP, par, __FILE__, __LINE__, 1, 0, INTEGER(npar)[0] - 1);
   
@@ -1817,49 +1755,47 @@ SEXP D_OperatingModelBase::R_internal_popdyn_projection_objective(SEXP par, SEXP
   
   R_CheckArgument("FbyFixed", "INTSXP", INTSXP, FbyFixed, __FILE__, __LINE__, 1, 0, INTEGER(nfixed)[0] - 1);
   
-  R_CheckArgument("ECurrent", "REALSXP", REALSXP, ECurrent, __FILE__, __LINE__, 4, 1, nfleets, 1, nareas, 1, nsubyears, 1, nsim);
+  R_CheckArgument("ECurrent", "REALSXP", REALSXP, ECurrent, __FILE__, __LINE__, 3, 1, nfleets, 1, nareas, 1, nsubyears);
   
-  R_CheckArgument("qy", "REALSXP", REALSXP, qy, __FILE__, __LINE__, 2, 1, nfleets, 1, nsim);
+  R_CheckArgument("qy", "REALSXP", REALSXP, qy, __FILE__, __LINE__, 1, 1, nfleets);
   
-  R_CheckArgument("R0", "REALSXP", REALSXP, R0, __FILE__, __LINE__, 2, 1, npop, 1, nsim);
+  R_CheckArgument("R0", "REALSXP", REALSXP, R0, __FILE__, __LINE__, 1, 1, npop);
   
-  R_CheckArgument("M", "REALSXP", REALSXP, M, __FILE__, __LINE__, 3, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("M", "REALSXP", REALSXP, M, __FILE__, __LINE__, 2, 1, nages, 1, npop);
   
-  R_CheckArgument("mat", "REALSXP", REALSXP, mat, __FILE__, __LINE__, 3, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("mat", "REALSXP", REALSXP, mat, __FILE__, __LINE__, 2, 1, nages, 1, npop);
   
-  R_CheckArgument("Idist", "REALSXP", REALSXP, Idist, __FILE__, __LINE__, 4, 1, nareas, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("Idist", "REALSXP", REALSXP, Idist, __FILE__, __LINE__, 3, 1, nareas, 1, nages, 1, npop);
   
-  R_CheckArgument("Len_age", "REALSXP", REALSXP, Len_age, __FILE__, __LINE__, 3, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("Len_age", "REALSXP", REALSXP, Len_age, __FILE__, __LINE__, 2, 1, nages, 1, npop);
   
-  R_CheckArgument("Wt_age", "REALSXP", REALSXP, Wt_age, __FILE__, __LINE__, 3, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("Wt_age", "REALSXP", REALSXP, Wt_age, __FILE__, __LINE__, 2, 1, nages, 1, npop);
   
-  R_CheckArgument("Wt_age_mid", "REALSXP", REALSXP, Wt_age_mid, __FILE__, __LINE__, 3, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("Wt_age_mid", "REALSXP", REALSXP, Wt_age_mid, __FILE__, __LINE__, 2, 1, nages, 1, npop);
   
-  R_CheckArgument("sel", "REALSXP", REALSXP, sel, __FILE__, __LINE__, 3, 1, nages, 1, nfleets, 1, nsim);
+  R_CheckArgument("sel", "REALSXP", REALSXP, sel, __FILE__, __LINE__, 2, 1, nages, 1, nfleets);
   
-  R_CheckArgument("mov", "REALSXP", REALSXP, mov, __FILE__, __LINE__, 6, 1, nareas, 1, nareas, 1, nsubyears, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("mov", "REALSXP", REALSXP, mov, __FILE__, __LINE__, 5, 1, nareas, 1, nareas, 1, nsubyears, 1, nages, 1, npop);
   
-  R_CheckArgument("h", "REALSXP", REALSXP, h, __FILE__, __LINE__, 2, 1, npop, 1, nsim);
+  R_CheckArgument("h", "REALSXP", REALSXP, h, __FILE__, __LINE__, 1, 1, npop);
   
-  R_CheckArgument("Recdist", "REALSXP", REALSXP, Recdist, __FILE__, __LINE__, 3, 1, nareas, 1, npop, 1, nsim);
+  R_CheckArgument("Recdist", "REALSXP", REALSXP, Recdist, __FILE__, __LINE__, 2, 1, nareas, 1, npop);
   
-  R_CheckArgument("Recdevs", "REALSXP", REALSXP, Recdevs, __FILE__, __LINE__, 3, 1, SpawnPerYr, 1, npop, 1, nsim);
+  R_CheckArgument("Recdevs", "REALSXP", REALSXP, Recdevs, __FILE__, __LINE__, 2, 1, SpawnPerYr, 1, npop);
   
-  R_CheckArgument("RecSpatialDevs", "REALSXP", REALSXP, RecSpatialDevs, __FILE__, __LINE__, 3, 1, nareas, 1, npop, 1, nsim);
+  R_CheckArgument("RecSpatialDevs", "REALSXP", REALSXP, RecSpatialDevs, __FILE__, __LINE__, 2, 1, nareas, 1, npop);
   
   R_CheckArgument("SRrel", "INTSXP", INTSXP, SRrel, __FILE__, __LINE__, 1, 1, npop);
   
-  R_CheckArgument("N", "REALSXP", REALSXP, N, __FILE__, __LINE__, 5, 1, nareas, 1, nsubyears + 1, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("N", "REALSXP", REALSXP, N, __FILE__, __LINE__, 4, 1, nareas, 1, nsubyears + 1, 1, nages, 1, npop);
   
-  R_CheckArgument("NBefore", "REALSXP", REALSXP, NBefore, __FILE__, __LINE__, 5, 1, nareas, 1, nsubyears + 1, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("NBefore", "REALSXP", REALSXP, NBefore, __FILE__, __LINE__, 4, 1, nareas, 1, nsubyears + 1, 1, nages, 1, npop);
   
-  R_CheckArgument("SSN", "REALSXP", REALSXP, SSN, __FILE__, __LINE__, 5, 1, nareas, 1, nsubyears, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("SSN", "REALSXP", REALSXP, SSN, __FILE__, __LINE__, 4, 1, nareas, 1, nsubyears, 1, nages, 1, npop);
   
-  R_CheckArgument("C", "REALSXP", REALSXP, C, __FILE__, __LINE__, 6, 1, nfleets, 1, nareas, 1, nsubyears, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("C", "REALSXP", REALSXP, C, __FILE__, __LINE__, 5, 1, nfleets, 1, nareas, 1, nsubyears, 1, nages, 1, npop);
   
-  R_CheckArgument("SSBA", "REALSXP", REALSXP, SSBA, __FILE__, __LINE__, 2, 1, npop, 1, nsim);
-  
-  R_CheckArgument("sim_idx", "INTSXP", INTSXP, sim_idx, __FILE__, __LINE__);
+  R_CheckArgument("SSBA", "REALSXP", REALSXP, SSBA, __FILE__, __LINE__, 1, 1, npop);
   
   if (bTranslate)
   {
@@ -1987,31 +1923,31 @@ SEXP D_OperatingModelBase::R_internal_popdyn_projection_objective(SEXP par, SEXP
     
     arg_SRrel = 0;
     
-    Plan_12.create(MemAllocator, arg_SRrel);
+    Plan_3.create(MemAllocator, arg_SRrel);
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)INTEGER(SRrel), (char*)arg_SRrel);
     
     arg_N = 0;
     
-    Plan_13.create(MemAllocator, arg_N);
+    Plan_12.create(MemAllocator, arg_N);
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)REAL(N), (char*)arg_N);
     
     arg_NBefore = 0;
     
-    Plan_13.create(MemAllocator, arg_NBefore);
+    Plan_12.create(MemAllocator, arg_NBefore);
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)REAL(NBefore), (char*)arg_NBefore);
     
     arg_SSN = 0;
     
-    Plan_14.create(MemAllocator, arg_SSN);
+    Plan_13.create(MemAllocator, arg_SSN);
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)REAL(SSN), (char*)arg_SSN);
     
     arg_C = 0;
     
-    Plan_15.create(MemAllocator, arg_C);
+    Plan_14.create(MemAllocator, arg_C);
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)REAL(C), (char*)arg_C);
     
@@ -2021,7 +1957,6 @@ SEXP D_OperatingModelBase::R_internal_popdyn_projection_objective(SEXP par, SEXP
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)REAL(SSBA), (char*)arg_SSBA);
     
-    arg_sim_idx = INTEGER(sim_idx)[0];
   }
   else
   {
@@ -2109,35 +2044,34 @@ SEXP D_OperatingModelBase::R_internal_popdyn_projection_objective(SEXP par, SEXP
     
     arg_SRrel = 0;
     
-    Plan_12.create(MemAllocator, arg_SRrel, (void*)INTEGER(SRrel));
+    Plan_3.create(MemAllocator, arg_SRrel, (void*)INTEGER(SRrel));
     
     arg_N = 0;
     
-    Plan_13.create(MemAllocator, arg_N, (void*)REAL(N));
+    Plan_12.create(MemAllocator, arg_N, (void*)REAL(N));
     
     arg_NBefore = 0;
     
-    Plan_13.create(MemAllocator, arg_NBefore, (void*)REAL(NBefore));
+    Plan_12.create(MemAllocator, arg_NBefore, (void*)REAL(NBefore));
     
     arg_SSN = 0;
     
-    Plan_14.create(MemAllocator, arg_SSN, (void*)REAL(SSN));
+    Plan_13.create(MemAllocator, arg_SSN, (void*)REAL(SSN));
     
     arg_C = 0;
     
-    Plan_15.create(MemAllocator, arg_C, (void*)REAL(C));
+    Plan_14.create(MemAllocator, arg_C, (void*)REAL(C));
     
     arg_SSBA = 0;
     
     Plan_3.create(MemAllocator, arg_SSBA, (void*)REAL(SSBA));
     
-    arg_sim_idx = INTEGER(sim_idx)[0];
   }
   
   SEXP Result = Rf_allocVector(REALSXP, 1);
   
   PROTECT(Result);
-  REAL(Result)[0] = popdyn_projection_objective(arg_par, arg_npar, arg_nfixed, arg_TAC, arg_TAE, arg_FbyPar, arg_FbyFixed, arg_ECurrent, arg_qy, arg_R0, arg_M, arg_mat, arg_Idist, arg_Len_age, arg_Wt_age, arg_Wt_age_mid, arg_sel, arg_mov, arg_h, arg_Recdist, arg_Recdevs, arg_RecSpatialDevs, arg_SRrel, arg_N, arg_NBefore, arg_SSN, arg_C, arg_SSBA, arg_sim_idx);
+  REAL(Result)[0] = popdyn_projection_objective(arg_par, arg_npar, arg_nfixed, arg_TAC, arg_TAE, arg_FbyPar, arg_FbyFixed, arg_ECurrent, arg_qy, arg_R0, arg_M, arg_mat, arg_Idist, arg_Len_age, arg_Wt_age, arg_Wt_age_mid, arg_sel, arg_mov, arg_h, arg_Recdist, arg_Recdevs, arg_RecSpatialDevs, arg_SRrel, arg_N, arg_NBefore, arg_SSN, arg_C, arg_SSBA);
   
   if (bTranslate)
   {
@@ -2182,17 +2116,17 @@ SEXP D_OperatingModelBase::R_internal_popdyn_projection_objective(SEXP par, SEXP
   return (Result);
 }
 
-SEXP D_OperatingModelBase::R_popdyn_projection_objective(SEXP par, SEXP npar, SEXP nfixed, SEXP TAC, SEXP TAE, SEXP FbyPar, SEXP FbyFixed, SEXP ECurrent, SEXP qy, SEXP R0, SEXP M, SEXP mat, SEXP Idist, SEXP Len_age, SEXP Wt_age, SEXP Wt_age_mid, SEXP sel, SEXP mov, SEXP h, SEXP Recdist, SEXP Recdevs, SEXP RecSpatialDevs, SEXP SRrel, SEXP N, SEXP NBefore, SEXP SSN, SEXP C, SEXP SSBA, SEXP sim_idx)
+SEXP D_OperatingModelBase::R_popdyn_projection_objective(SEXP par, SEXP npar, SEXP nfixed, SEXP TAC, SEXP TAE, SEXP FbyPar, SEXP FbyFixed, SEXP ECurrent, SEXP qy, SEXP R0, SEXP M, SEXP mat, SEXP Idist, SEXP Len_age, SEXP Wt_age, SEXP Wt_age_mid, SEXP sel, SEXP mov, SEXP h, SEXP Recdist, SEXP Recdevs, SEXP RecSpatialDevs, SEXP SRrel, SEXP N, SEXP NBefore, SEXP SSN, SEXP C, SEXP SSBA)
 {
-  return (R_internal_popdyn_projection_objective(par, npar, nfixed, TAC, TAE, FbyPar, FbyFixed, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, Wt_age_mid, sel, mov, h, Recdist, Recdevs, RecSpatialDevs, SRrel, N, NBefore, SSN, C, SSBA, sim_idx, true));
+  return (R_internal_popdyn_projection_objective(par, npar, nfixed, TAC, TAE, FbyPar, FbyFixed, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, Wt_age_mid, sel, mov, h, Recdist, Recdevs, RecSpatialDevs, SRrel, N, NBefore, SSN, C, SSBA, true));
 }
 
-SEXP D_OperatingModelBase::R_nt_popdyn_projection_objective(SEXP par, SEXP npar, SEXP nfixed, SEXP TAC, SEXP TAE, SEXP FbyPar, SEXP FbyFixed, SEXP ECurrent, SEXP qy, SEXP R0, SEXP M, SEXP mat, SEXP Idist, SEXP Len_age, SEXP Wt_age, SEXP Wt_age_mid, SEXP sel, SEXP mov, SEXP h, SEXP Recdist, SEXP Recdevs, SEXP RecSpatialDevs, SEXP SRrel, SEXP N, SEXP NBefore, SEXP SSN, SEXP C, SEXP SSBA, SEXP sim_idx)
+SEXP D_OperatingModelBase::R_nt_popdyn_projection_objective(SEXP par, SEXP npar, SEXP nfixed, SEXP TAC, SEXP TAE, SEXP FbyPar, SEXP FbyFixed, SEXP ECurrent, SEXP qy, SEXP R0, SEXP M, SEXP mat, SEXP Idist, SEXP Len_age, SEXP Wt_age, SEXP Wt_age_mid, SEXP sel, SEXP mov, SEXP h, SEXP Recdist, SEXP Recdevs, SEXP RecSpatialDevs, SEXP SRrel, SEXP N, SEXP NBefore, SEXP SSN, SEXP C, SEXP SSBA)
 {
-  return (R_internal_popdyn_projection_objective(par, npar, nfixed, TAC, TAE, FbyPar, FbyFixed, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, Wt_age_mid, sel, mov, h, Recdist, Recdevs, RecSpatialDevs, SRrel, N, NBefore, SSN, C, SSBA, sim_idx, false));
+  return (R_internal_popdyn_projection_objective(par, npar, nfixed, TAC, TAE, FbyPar, FbyFixed, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, Wt_age_mid, sel, mov, h, Recdist, Recdevs, RecSpatialDevs, SRrel, N, NBefore, SSN, C, SSBA, false));
 }
 
-SEXP D_OperatingModelBase::R_internal_POPDYN_PROJECTION_OBJECTIVE_BPAR(SEXP par, SEXP parb2_par, SEXP npar, SEXP nfixed, SEXP TAC, SEXP TAE, SEXP FbyPar, SEXP FbyFixed, SEXP ECurrent, SEXP qy, SEXP R0, SEXP M, SEXP mat, SEXP Idist, SEXP Len_age, SEXP Wt_age, SEXP Wt_age_mid, SEXP sel, SEXP mov, SEXP h, SEXP Recdist, SEXP Recdevs, SEXP RecSpatialDevs, SEXP SRrel, SEXP N, SEXP nb2_par, SEXP NBefore, SEXP nbeforeb2_par, SEXP SSN, SEXP C, SEXP cb2_par, SEXP SSBA, SEXP sim_idx, SEXP popdyn_projection_objectiveb2_par, bool bTranslate)
+SEXP D_OperatingModelBase::R_internal_POPDYN_PROJECTION_OBJECTIVE_BPAR(SEXP par, SEXP parb2_par, SEXP npar, SEXP nfixed, SEXP TAC, SEXP TAE, SEXP FbyPar, SEXP FbyFixed, SEXP ECurrent, SEXP qy, SEXP R0, SEXP M, SEXP mat, SEXP Idist, SEXP Len_age, SEXP Wt_age, SEXP Wt_age_mid, SEXP sel, SEXP mov, SEXP h, SEXP Recdist, SEXP Recdevs, SEXP RecSpatialDevs, SEXP SRrel, SEXP N, SEXP nb2_par, SEXP NBefore, SEXP nbeforeb2_par, SEXP SSN, SEXP C, SEXP cb2_par, SEXP SSBA, SEXP popdyn_projection_objectiveb2_par, bool bTranslate)
 {
   ARRAY_1D arg_par;
   ARRAY_1D arg_parb2_par;
@@ -2202,31 +2136,30 @@ SEXP D_OperatingModelBase::R_internal_POPDYN_PROJECTION_OBJECTIVE_BPAR(SEXP par,
   ARRAY_1D arg_TAE;
   ARRAY_1I arg_FbyPar;
   ARRAY_1I arg_FbyFixed;
-  ARRAY_4D arg_ECurrent;
-  ARRAY_2D arg_qy;
-  ARRAY_2D arg_R0;
-  ARRAY_3D arg_M;
-  ARRAY_3D arg_mat;
-  ARRAY_4D arg_Idist;
-  ARRAY_3D arg_Len_age;
-  ARRAY_3D arg_Wt_age;
-  ARRAY_3D arg_Wt_age_mid;
-  ARRAY_3D arg_sel;
-  ARRAY_6D arg_mov;
-  ARRAY_2D arg_h;
-  ARRAY_3D arg_Recdist;
-  ARRAY_3D arg_Recdevs;
-  ARRAY_3D arg_RecSpatialDevs;
+  ARRAY_3D arg_ECurrent;
+  ARRAY_1D arg_qy;
+  ARRAY_1D arg_R0;
+  ARRAY_2D arg_M;
+  ARRAY_2D arg_mat;
+  ARRAY_3D arg_Idist;
+  ARRAY_2D arg_Len_age;
+  ARRAY_2D arg_Wt_age;
+  ARRAY_2D arg_Wt_age_mid;
+  ARRAY_2D arg_sel;
+  ARRAY_5D arg_mov;
+  ARRAY_1D arg_h;
+  ARRAY_2D arg_Recdist;
+  ARRAY_2D arg_Recdevs;
+  ARRAY_2D arg_RecSpatialDevs;
   ARRAY_1I arg_SRrel;
-  ARRAY_5D arg_N;
-  ARRAY_5D arg_nb2_par;
-  ARRAY_5D arg_NBefore;
-  ARRAY_5D arg_nbeforeb2_par;
-  ARRAY_5D arg_SSN;
-  ARRAY_6D arg_C;
-  ARRAY_6D arg_cb2_par;
-  ARRAY_2D arg_SSBA;
-  int arg_sim_idx;
+  ARRAY_4D arg_N;
+  ARRAY_4D arg_nb2_par;
+  ARRAY_4D arg_NBefore;
+  ARRAY_4D arg_nbeforeb2_par;
+  ARRAY_4D arg_SSN;
+  ARRAY_5D arg_C;
+  ARRAY_5D arg_cb2_par;
+  ARRAY_1D arg_SSBA;
   double arg_popdyn_projection_objectiveb2_par;
   
   R_CheckArgument("par", "REALSXP", REALSXP, par, __FILE__, __LINE__, 1, 0, INTEGER(npar)[0] - 1);
@@ -2245,55 +2178,53 @@ SEXP D_OperatingModelBase::R_internal_POPDYN_PROJECTION_OBJECTIVE_BPAR(SEXP par,
   
   R_CheckArgument("FbyFixed", "INTSXP", INTSXP, FbyFixed, __FILE__, __LINE__, 1, 0, INTEGER(nfixed)[0] - 1);
   
-  R_CheckArgument("ECurrent", "REALSXP", REALSXP, ECurrent, __FILE__, __LINE__, 4, 1, nfleets, 1, nareas, 1, nsubyears, 1, nsim);
+  R_CheckArgument("ECurrent", "REALSXP", REALSXP, ECurrent, __FILE__, __LINE__, 3, 1, nfleets, 1, nareas, 1, nsubyears);
   
-  R_CheckArgument("qy", "REALSXP", REALSXP, qy, __FILE__, __LINE__, 2, 1, nfleets, 1, nsim);
+  R_CheckArgument("qy", "REALSXP", REALSXP, qy, __FILE__, __LINE__, 1, 1, nfleets);
   
-  R_CheckArgument("R0", "REALSXP", REALSXP, R0, __FILE__, __LINE__, 2, 1, npop, 1, nsim);
+  R_CheckArgument("R0", "REALSXP", REALSXP, R0, __FILE__, __LINE__, 1, 1, npop);
   
-  R_CheckArgument("M", "REALSXP", REALSXP, M, __FILE__, __LINE__, 3, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("M", "REALSXP", REALSXP, M, __FILE__, __LINE__, 2, 1, nages, 1, npop);
   
-  R_CheckArgument("mat", "REALSXP", REALSXP, mat, __FILE__, __LINE__, 3, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("mat", "REALSXP", REALSXP, mat, __FILE__, __LINE__, 2, 1, nages, 1, npop);
   
-  R_CheckArgument("Idist", "REALSXP", REALSXP, Idist, __FILE__, __LINE__, 4, 1, nareas, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("Idist", "REALSXP", REALSXP, Idist, __FILE__, __LINE__, 3, 1, nareas, 1, nages, 1, npop);
   
-  R_CheckArgument("Len_age", "REALSXP", REALSXP, Len_age, __FILE__, __LINE__, 3, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("Len_age", "REALSXP", REALSXP, Len_age, __FILE__, __LINE__, 2, 1, nages, 1, npop);
   
-  R_CheckArgument("Wt_age", "REALSXP", REALSXP, Wt_age, __FILE__, __LINE__, 3, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("Wt_age", "REALSXP", REALSXP, Wt_age, __FILE__, __LINE__, 2, 1, nages, 1, npop);
   
-  R_CheckArgument("Wt_age_mid", "REALSXP", REALSXP, Wt_age_mid, __FILE__, __LINE__, 3, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("Wt_age_mid", "REALSXP", REALSXP, Wt_age_mid, __FILE__, __LINE__, 2, 1, nages, 1, npop);
   
-  R_CheckArgument("sel", "REALSXP", REALSXP, sel, __FILE__, __LINE__, 3, 1, nages, 1, nfleets, 1, nsim);
+  R_CheckArgument("sel", "REALSXP", REALSXP, sel, __FILE__, __LINE__, 2, 1, nages, 1, nfleets);
   
-  R_CheckArgument("mov", "REALSXP", REALSXP, mov, __FILE__, __LINE__, 6, 1, nareas, 1, nareas, 1, nsubyears, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("mov", "REALSXP", REALSXP, mov, __FILE__, __LINE__, 5, 1, nareas, 1, nareas, 1, nsubyears, 1, nages, 1, npop);
   
-  R_CheckArgument("h", "REALSXP", REALSXP, h, __FILE__, __LINE__, 2, 1, npop, 1, nsim);
+  R_CheckArgument("h", "REALSXP", REALSXP, h, __FILE__, __LINE__, 1, 1, npop);
   
-  R_CheckArgument("Recdist", "REALSXP", REALSXP, Recdist, __FILE__, __LINE__, 3, 1, nareas, 1, npop, 1, nsim);
+  R_CheckArgument("Recdist", "REALSXP", REALSXP, Recdist, __FILE__, __LINE__, 2, 1, nareas, 1, npop);
   
-  R_CheckArgument("Recdevs", "REALSXP", REALSXP, Recdevs, __FILE__, __LINE__, 3, 1, SpawnPerYr, 1, npop, 1, nsim);
+  R_CheckArgument("Recdevs", "REALSXP", REALSXP, Recdevs, __FILE__, __LINE__, 2, 1, SpawnPerYr, 1, npop);
   
-  R_CheckArgument("RecSpatialDevs", "REALSXP", REALSXP, RecSpatialDevs, __FILE__, __LINE__, 3, 1, nareas, 1, npop, 1, nsim);
+  R_CheckArgument("RecSpatialDevs", "REALSXP", REALSXP, RecSpatialDevs, __FILE__, __LINE__, 2, 1, nareas, 1, npop);
   
   R_CheckArgument("SRrel", "INTSXP", INTSXP, SRrel, __FILE__, __LINE__, 1, 1, npop);
   
-  R_CheckArgument("N", "REALSXP", REALSXP, N, __FILE__, __LINE__, 5, 1, nareas, 1, nsubyears + 1, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("N", "REALSXP", REALSXP, N, __FILE__, __LINE__, 4, 1, nareas, 1, nsubyears + 1, 1, nages, 1, npop);
   
-  R_CheckArgument("nb2_par", "REALSXP", REALSXP, nb2_par, __FILE__, __LINE__, 5, 1, nareas, 1, nsubyears + 1, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("nb2_par", "REALSXP", REALSXP, nb2_par, __FILE__, __LINE__, 4, 1, nareas, 1, nsubyears + 1, 1, nages, 1, npop);
   
-  R_CheckArgument("NBefore", "REALSXP", REALSXP, NBefore, __FILE__, __LINE__, 5, 1, nareas, 1, nsubyears + 1, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("NBefore", "REALSXP", REALSXP, NBefore, __FILE__, __LINE__, 4, 1, nareas, 1, nsubyears + 1, 1, nages, 1, npop);
   
-  R_CheckArgument("nbeforeb2_par", "REALSXP", REALSXP, nbeforeb2_par, __FILE__, __LINE__, 5, 1, nareas, 1, nsubyears + 1, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("nbeforeb2_par", "REALSXP", REALSXP, nbeforeb2_par, __FILE__, __LINE__, 4, 1, nareas, 1, nsubyears + 1, 1, nages, 1, npop);
   
-  R_CheckArgument("SSN", "REALSXP", REALSXP, SSN, __FILE__, __LINE__, 5, 1, nareas, 1, nsubyears, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("SSN", "REALSXP", REALSXP, SSN, __FILE__, __LINE__, 4, 1, nareas, 1, nsubyears, 1, nages, 1, npop);
   
-  R_CheckArgument("C", "REALSXP", REALSXP, C, __FILE__, __LINE__, 6, 1, nfleets, 1, nareas, 1, nsubyears, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("C", "REALSXP", REALSXP, C, __FILE__, __LINE__, 5, 1, nfleets, 1, nareas, 1, nsubyears, 1, nages, 1, npop);
   
-  R_CheckArgument("cb2_par", "REALSXP", REALSXP, cb2_par, __FILE__, __LINE__, 6, 1, nfleets, 1, nareas, 1, nsubyears, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("cb2_par", "REALSXP", REALSXP, cb2_par, __FILE__, __LINE__, 5, 1, nfleets, 1, nareas, 1, nsubyears, 1, nages, 1, npop);
   
-  R_CheckArgument("SSBA", "REALSXP", REALSXP, SSBA, __FILE__, __LINE__, 2, 1, npop, 1, nsim);
-  
-  R_CheckArgument("sim_idx", "INTSXP", INTSXP, sim_idx, __FILE__, __LINE__);
+  R_CheckArgument("SSBA", "REALSXP", REALSXP, SSBA, __FILE__, __LINE__, 1, 1, npop);
   
   R_CheckArgument("popdyn_projection_objectiveb2_par", "REALSXP", REALSXP, popdyn_projection_objectiveb2_par, __FILE__, __LINE__);
   
@@ -2429,49 +2360,49 @@ SEXP D_OperatingModelBase::R_internal_POPDYN_PROJECTION_OBJECTIVE_BPAR(SEXP par,
     
     arg_SRrel = 0;
     
-    Plan_12.create(MemAllocator, arg_SRrel);
+    Plan_3.create(MemAllocator, arg_SRrel);
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)INTEGER(SRrel), (char*)arg_SRrel);
     
     arg_N = 0;
     
-    Plan_13.create(MemAllocator, arg_N);
+    Plan_12.create(MemAllocator, arg_N);
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)REAL(N), (char*)arg_N);
     
     arg_nb2_par = 0;
     
-    Plan_13.create(MemAllocator, arg_nb2_par);
+    Plan_12.create(MemAllocator, arg_nb2_par);
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)REAL(nb2_par), (char*)arg_nb2_par);
     
     arg_NBefore = 0;
     
-    Plan_13.create(MemAllocator, arg_NBefore);
+    Plan_12.create(MemAllocator, arg_NBefore);
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)REAL(NBefore), (char*)arg_NBefore);
     
     arg_nbeforeb2_par = 0;
     
-    Plan_13.create(MemAllocator, arg_nbeforeb2_par);
+    Plan_12.create(MemAllocator, arg_nbeforeb2_par);
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)REAL(nbeforeb2_par), (char*)arg_nbeforeb2_par);
     
     arg_SSN = 0;
     
-    Plan_14.create(MemAllocator, arg_SSN);
+    Plan_13.create(MemAllocator, arg_SSN);
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)REAL(SSN), (char*)arg_SSN);
     
     arg_C = 0;
     
-    Plan_15.create(MemAllocator, arg_C);
+    Plan_14.create(MemAllocator, arg_C);
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)REAL(C), (char*)arg_C);
     
     arg_cb2_par = 0;
     
-    Plan_15.create(MemAllocator, arg_cb2_par);
+    Plan_14.create(MemAllocator, arg_cb2_par);
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)REAL(cb2_par), (char*)arg_cb2_par);
     
@@ -2481,7 +2412,6 @@ SEXP D_OperatingModelBase::R_internal_POPDYN_PROJECTION_OBJECTIVE_BPAR(SEXP par,
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)REAL(SSBA), (char*)arg_SSBA);
     
-    arg_sim_idx = INTEGER(sim_idx)[0];
     arg_popdyn_projection_objectiveb2_par = REAL(popdyn_projection_objectiveb2_par)[0];
   }
   else
@@ -2574,41 +2504,40 @@ SEXP D_OperatingModelBase::R_internal_POPDYN_PROJECTION_OBJECTIVE_BPAR(SEXP par,
     
     arg_SRrel = 0;
     
-    Plan_12.create(MemAllocator, arg_SRrel, (void*)INTEGER(SRrel));
+    Plan_3.create(MemAllocator, arg_SRrel, (void*)INTEGER(SRrel));
     
     arg_N = 0;
     
-    Plan_13.create(MemAllocator, arg_N, (void*)REAL(N));
+    Plan_12.create(MemAllocator, arg_N, (void*)REAL(N));
     
     arg_nb2_par = 0;
     
-    Plan_13.create(MemAllocator, arg_nb2_par, (void*)REAL(nb2_par));
+    Plan_12.create(MemAllocator, arg_nb2_par, (void*)REAL(nb2_par));
     
     arg_NBefore = 0;
     
-    Plan_13.create(MemAllocator, arg_NBefore, (void*)REAL(NBefore));
+    Plan_12.create(MemAllocator, arg_NBefore, (void*)REAL(NBefore));
     
     arg_nbeforeb2_par = 0;
     
-    Plan_13.create(MemAllocator, arg_nbeforeb2_par, (void*)REAL(nbeforeb2_par));
+    Plan_12.create(MemAllocator, arg_nbeforeb2_par, (void*)REAL(nbeforeb2_par));
     
     arg_SSN = 0;
     
-    Plan_14.create(MemAllocator, arg_SSN, (void*)REAL(SSN));
+    Plan_13.create(MemAllocator, arg_SSN, (void*)REAL(SSN));
     
     arg_C = 0;
     
-    Plan_15.create(MemAllocator, arg_C, (void*)REAL(C));
+    Plan_14.create(MemAllocator, arg_C, (void*)REAL(C));
     
     arg_cb2_par = 0;
     
-    Plan_15.create(MemAllocator, arg_cb2_par, (void*)REAL(cb2_par));
+    Plan_14.create(MemAllocator, arg_cb2_par, (void*)REAL(cb2_par));
     
     arg_SSBA = 0;
     
     Plan_3.create(MemAllocator, arg_SSBA, (void*)REAL(SSBA));
     
-    arg_sim_idx = INTEGER(sim_idx)[0];
     arg_popdyn_projection_objectiveb2_par = REAL(popdyn_projection_objectiveb2_par)[0];
   }
   
@@ -2616,7 +2545,7 @@ SEXP D_OperatingModelBase::R_internal_POPDYN_PROJECTION_OBJECTIVE_BPAR(SEXP par,
   
   PROTECT(Result);
   REAL(Result)[0] = 0.0;
-  POPDYN_PROJECTION_OBJECTIVE_BPAR(arg_par, arg_parb2_par, arg_npar, arg_nfixed, arg_TAC, arg_TAE, arg_FbyPar, arg_FbyFixed, arg_ECurrent, arg_qy, arg_R0, arg_M, arg_mat, arg_Idist, arg_Len_age, arg_Wt_age, arg_Wt_age_mid, arg_sel, arg_mov, arg_h, arg_Recdist, arg_Recdevs, arg_RecSpatialDevs, arg_SRrel, arg_N, arg_nb2_par, arg_NBefore, arg_nbeforeb2_par, arg_SSN, arg_C, arg_cb2_par, arg_SSBA, arg_sim_idx, arg_popdyn_projection_objectiveb2_par);
+  POPDYN_PROJECTION_OBJECTIVE_BPAR(arg_par, arg_parb2_par, arg_npar, arg_nfixed, arg_TAC, arg_TAE, arg_FbyPar, arg_FbyFixed, arg_ECurrent, arg_qy, arg_R0, arg_M, arg_mat, arg_Idist, arg_Len_age, arg_Wt_age, arg_Wt_age_mid, arg_sel, arg_mov, arg_h, arg_Recdist, arg_Recdevs, arg_RecSpatialDevs, arg_SRrel, arg_N, arg_nb2_par, arg_NBefore, arg_nbeforeb2_par, arg_SSN, arg_C, arg_cb2_par, arg_SSBA, arg_popdyn_projection_objectiveb2_par);
   
   if (bTranslate)
   {
@@ -2671,14 +2600,14 @@ SEXP D_OperatingModelBase::R_internal_POPDYN_PROJECTION_OBJECTIVE_BPAR(SEXP par,
   return (Result);
 }
 
-SEXP D_OperatingModelBase::R_POPDYN_PROJECTION_OBJECTIVE_BPAR(SEXP par, SEXP parb2_par, SEXP npar, SEXP nfixed, SEXP TAC, SEXP TAE, SEXP FbyPar, SEXP FbyFixed, SEXP ECurrent, SEXP qy, SEXP R0, SEXP M, SEXP mat, SEXP Idist, SEXP Len_age, SEXP Wt_age, SEXP Wt_age_mid, SEXP sel, SEXP mov, SEXP h, SEXP Recdist, SEXP Recdevs, SEXP RecSpatialDevs, SEXP SRrel, SEXP N, SEXP nb2_par, SEXP NBefore, SEXP nbeforeb2_par, SEXP SSN, SEXP C, SEXP cb2_par, SEXP SSBA, SEXP sim_idx, SEXP popdyn_projection_objectiveb2_par)
+SEXP D_OperatingModelBase::R_POPDYN_PROJECTION_OBJECTIVE_BPAR(SEXP par, SEXP parb2_par, SEXP npar, SEXP nfixed, SEXP TAC, SEXP TAE, SEXP FbyPar, SEXP FbyFixed, SEXP ECurrent, SEXP qy, SEXP R0, SEXP M, SEXP mat, SEXP Idist, SEXP Len_age, SEXP Wt_age, SEXP Wt_age_mid, SEXP sel, SEXP mov, SEXP h, SEXP Recdist, SEXP Recdevs, SEXP RecSpatialDevs, SEXP SRrel, SEXP N, SEXP nb2_par, SEXP NBefore, SEXP nbeforeb2_par, SEXP SSN, SEXP C, SEXP cb2_par, SEXP SSBA, SEXP popdyn_projection_objectiveb2_par)
 {
-  return (R_internal_POPDYN_PROJECTION_OBJECTIVE_BPAR(par, parb2_par, npar, nfixed, TAC, TAE, FbyPar, FbyFixed, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, Wt_age_mid, sel, mov, h, Recdist, Recdevs, RecSpatialDevs, SRrel, N, nb2_par, NBefore, nbeforeb2_par, SSN, C, cb2_par, SSBA, sim_idx, popdyn_projection_objectiveb2_par, true));
+  return (R_internal_POPDYN_PROJECTION_OBJECTIVE_BPAR(par, parb2_par, npar, nfixed, TAC, TAE, FbyPar, FbyFixed, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, Wt_age_mid, sel, mov, h, Recdist, Recdevs, RecSpatialDevs, SRrel, N, nb2_par, NBefore, nbeforeb2_par, SSN, C, cb2_par, SSBA, popdyn_projection_objectiveb2_par, true));
 }
 
-SEXP D_OperatingModelBase::R_nt_POPDYN_PROJECTION_OBJECTIVE_BPAR(SEXP par, SEXP parb2_par, SEXP npar, SEXP nfixed, SEXP TAC, SEXP TAE, SEXP FbyPar, SEXP FbyFixed, SEXP ECurrent, SEXP qy, SEXP R0, SEXP M, SEXP mat, SEXP Idist, SEXP Len_age, SEXP Wt_age, SEXP Wt_age_mid, SEXP sel, SEXP mov, SEXP h, SEXP Recdist, SEXP Recdevs, SEXP RecSpatialDevs, SEXP SRrel, SEXP N, SEXP nb2_par, SEXP NBefore, SEXP nbeforeb2_par, SEXP SSN, SEXP C, SEXP cb2_par, SEXP SSBA, SEXP sim_idx, SEXP popdyn_projection_objectiveb2_par)
+SEXP D_OperatingModelBase::R_nt_POPDYN_PROJECTION_OBJECTIVE_BPAR(SEXP par, SEXP parb2_par, SEXP npar, SEXP nfixed, SEXP TAC, SEXP TAE, SEXP FbyPar, SEXP FbyFixed, SEXP ECurrent, SEXP qy, SEXP R0, SEXP M, SEXP mat, SEXP Idist, SEXP Len_age, SEXP Wt_age, SEXP Wt_age_mid, SEXP sel, SEXP mov, SEXP h, SEXP Recdist, SEXP Recdevs, SEXP RecSpatialDevs, SEXP SRrel, SEXP N, SEXP nb2_par, SEXP NBefore, SEXP nbeforeb2_par, SEXP SSN, SEXP C, SEXP cb2_par, SEXP SSBA, SEXP popdyn_projection_objectiveb2_par)
 {
-  return (R_internal_POPDYN_PROJECTION_OBJECTIVE_BPAR(par, parb2_par, npar, nfixed, TAC, TAE, FbyPar, FbyFixed, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, Wt_age_mid, sel, mov, h, Recdist, Recdevs, RecSpatialDevs, SRrel, N, nb2_par, NBefore, nbeforeb2_par, SSN, C, cb2_par, SSBA, sim_idx, popdyn_projection_objectiveb2_par, false));
+  return (R_internal_POPDYN_PROJECTION_OBJECTIVE_BPAR(par, parb2_par, npar, nfixed, TAC, TAE, FbyPar, FbyFixed, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, Wt_age_mid, sel, mov, h, Recdist, Recdevs, RecSpatialDevs, SRrel, N, nb2_par, NBefore, nbeforeb2_par, SSN, C, cb2_par, SSBA, popdyn_projection_objectiveb2_par, false));
 }
 
 SEXP D_OperatingModelBase::_get_Recsubyr(SEXP sArgList) const
@@ -2712,68 +2641,68 @@ SEXP D_OperatingModelBase::_set_nt_Recsubyr(SEXP arg_Recsubyr, SEXP sArgList)
 SEXP D_OperatingModelBase::R_internal_runHistoric(SEXP totF, SEXP qy, SEXP ECurrent, SEXP R0, SEXP M, SEXP mat, SEXP Idist, SEXP Len_age, SEXP Wt_age, SEXP sel, SEXP mov, SEXP h, SEXP Recdist, SEXP Recdevs, SEXP RecSpatialDevs, SEXP SRrel, SEXP N, SEXP NBefore, SEXP SSN, SEXP C, SEXP SSBA, bool bTranslate)
 {
   double arg_totF;
-  ARRAY_2D arg_qy;
-  ARRAY_4D arg_ECurrent;
-  ARRAY_2D arg_R0;
-  ARRAY_3D arg_M;
-  ARRAY_3D arg_mat;
-  ARRAY_4D arg_Idist;
-  ARRAY_3D arg_Len_age;
-  ARRAY_3D arg_Wt_age;
-  ARRAY_3D arg_sel;
-  ARRAY_6D arg_mov;
-  ARRAY_2D arg_h;
-  ARRAY_3D arg_Recdist;
-  ARRAY_3D arg_Recdevs;
-  ARRAY_3D arg_RecSpatialDevs;
+  ARRAY_1D arg_qy;
+  ARRAY_3D arg_ECurrent;
+  ARRAY_1D arg_R0;
+  ARRAY_2D arg_M;
+  ARRAY_2D arg_mat;
+  ARRAY_3D arg_Idist;
+  ARRAY_2D arg_Len_age;
+  ARRAY_2D arg_Wt_age;
+  ARRAY_2D arg_sel;
+  ARRAY_5D arg_mov;
+  ARRAY_1D arg_h;
+  ARRAY_2D arg_Recdist;
+  ARRAY_2D arg_Recdevs;
+  ARRAY_2D arg_RecSpatialDevs;
   ARRAY_1I arg_SRrel;
-  ARRAY_5D arg_N;
-  ARRAY_5D arg_NBefore;
-  ARRAY_5D arg_SSN;
-  ARRAY_6D arg_C;
-  ARRAY_2D arg_SSBA;
+  ARRAY_4D arg_N;
+  ARRAY_4D arg_NBefore;
+  ARRAY_4D arg_SSN;
+  ARRAY_5D arg_C;
+  ARRAY_1D arg_SSBA;
   
   R_CheckArgument("totF", "REALSXP", REALSXP, totF, __FILE__, __LINE__);
   
-  R_CheckArgument("qy", "REALSXP", REALSXP, qy, __FILE__, __LINE__, 2, 1, nfleets, 1, nsim);
+  R_CheckArgument("qy", "REALSXP", REALSXP, qy, __FILE__, __LINE__, 1, 1, nfleets);
   
-  R_CheckArgument("ECurrent", "REALSXP", REALSXP, ECurrent, __FILE__, __LINE__, 4, 1, nfleets, 1, nareas, 1, nsubyears, 1, nsim);
+  R_CheckArgument("ECurrent", "REALSXP", REALSXP, ECurrent, __FILE__, __LINE__, 3, 1, nfleets, 1, nareas, 1, nsubyears);
   
-  R_CheckArgument("R0", "REALSXP", REALSXP, R0, __FILE__, __LINE__, 2, 1, npop, 1, nsim);
+  R_CheckArgument("R0", "REALSXP", REALSXP, R0, __FILE__, __LINE__, 1, 1, npop);
   
-  R_CheckArgument("M", "REALSXP", REALSXP, M, __FILE__, __LINE__, 3, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("M", "REALSXP", REALSXP, M, __FILE__, __LINE__, 2, 1, nages, 1, npop);
   
-  R_CheckArgument("mat", "REALSXP", REALSXP, mat, __FILE__, __LINE__, 3, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("mat", "REALSXP", REALSXP, mat, __FILE__, __LINE__, 2, 1, nages, 1, npop);
   
-  R_CheckArgument("Idist", "REALSXP", REALSXP, Idist, __FILE__, __LINE__, 4, 1, nareas, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("Idist", "REALSXP", REALSXP, Idist, __FILE__, __LINE__, 3, 1, nareas, 1, nages, 1, npop);
   
-  R_CheckArgument("Len_age", "REALSXP", REALSXP, Len_age, __FILE__, __LINE__, 3, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("Len_age", "REALSXP", REALSXP, Len_age, __FILE__, __LINE__, 2, 1, nages, 1, npop);
   
-  R_CheckArgument("Wt_age", "REALSXP", REALSXP, Wt_age, __FILE__, __LINE__, 3, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("Wt_age", "REALSXP", REALSXP, Wt_age, __FILE__, __LINE__, 2, 1, nages, 1, npop);
   
-  R_CheckArgument("sel", "REALSXP", REALSXP, sel, __FILE__, __LINE__, 3, 1, nages, 1, nfleets, 1, nsim);
+  R_CheckArgument("sel", "REALSXP", REALSXP, sel, __FILE__, __LINE__, 2, 1, nages, 1, nfleets);
   
-  R_CheckArgument("mov", "REALSXP", REALSXP, mov, __FILE__, __LINE__, 6, 1, nareas, 1, nareas, 1, nsubyears, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("mov", "REALSXP", REALSXP, mov, __FILE__, __LINE__, 5, 1, nareas, 1, nareas, 1, nsubyears, 1, nages, 1, npop);
   
-  R_CheckArgument("h", "REALSXP", REALSXP, h, __FILE__, __LINE__, 2, 1, npop, 1, nsim);
+  R_CheckArgument("h", "REALSXP", REALSXP, h, __FILE__, __LINE__, 1, 1, npop);
   
-  R_CheckArgument("Recdist", "REALSXP", REALSXP, Recdist, __FILE__, __LINE__, 3, 1, nareas, 1, npop, 1, nsim);
+  R_CheckArgument("Recdist", "REALSXP", REALSXP, Recdist, __FILE__, __LINE__, 2, 1, nareas, 1, npop);
   
-  R_CheckArgument("Recdevs", "REALSXP", REALSXP, Recdevs, __FILE__, __LINE__, 3, 1, SpawnPerYr, 1, npop, 1, nsim);
+  R_CheckArgument("Recdevs", "REALSXP", REALSXP, Recdevs, __FILE__, __LINE__, 2, 1, SpawnPerYr, 1, npop);
   
-  R_CheckArgument("RecSpatialDevs", "REALSXP", REALSXP, RecSpatialDevs, __FILE__, __LINE__, 3, 1, nareas, 1, npop, 1, nsim);
+  R_CheckArgument("RecSpatialDevs", "REALSXP", REALSXP, RecSpatialDevs, __FILE__, __LINE__, 2, 1, nareas, 1, npop);
   
   R_CheckArgument("SRrel", "INTSXP", INTSXP, SRrel, __FILE__, __LINE__, 1, 1, npop);
   
-  R_CheckArgument("N", "REALSXP", REALSXP, N, __FILE__, __LINE__, 5, 1, nareas, 1, nsubyears + 1, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("N", "REALSXP", REALSXP, N, __FILE__, __LINE__, 4, 1, nareas, 1, nsubyears + 1, 1, nages, 1, npop);
   
-  R_CheckArgument("NBefore", "REALSXP", REALSXP, NBefore, __FILE__, __LINE__, 5, 1, nareas, 1, nsubyears + 1, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("NBefore", "REALSXP", REALSXP, NBefore, __FILE__, __LINE__, 4, 1, nareas, 1, nsubyears + 1, 1, nages, 1, npop);
   
-  R_CheckArgument("SSN", "REALSXP", REALSXP, SSN, __FILE__, __LINE__, 5, 1, nareas, 1, nsubyears, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("SSN", "REALSXP", REALSXP, SSN, __FILE__, __LINE__, 4, 1, nareas, 1, nsubyears, 1, nages, 1, npop);
   
-  R_CheckArgument("C", "REALSXP", REALSXP, C, __FILE__, __LINE__, 6, 1, nfleets, 1, nareas, 1, nsubyears, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("C", "REALSXP", REALSXP, C, __FILE__, __LINE__, 5, 1, nfleets, 1, nareas, 1, nsubyears, 1, nages, 1, npop);
   
-  R_CheckArgument("SSBA", "REALSXP", REALSXP, SSBA, __FILE__, __LINE__, 2, 1, npop, 1, nsim);
+  R_CheckArgument("SSBA", "REALSXP", REALSXP, SSBA, __FILE__, __LINE__, 1, 1, npop);
   
   if (bTranslate)
   {
@@ -2864,31 +2793,31 @@ SEXP D_OperatingModelBase::R_internal_runHistoric(SEXP totF, SEXP qy, SEXP ECurr
     
     arg_SRrel = 0;
     
-    Plan_12.create(MemAllocator, arg_SRrel);
+    Plan_3.create(MemAllocator, arg_SRrel);
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)INTEGER(SRrel), (char*)arg_SRrel);
     
     arg_N = 0;
     
-    Plan_13.create(MemAllocator, arg_N);
+    Plan_12.create(MemAllocator, arg_N);
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)REAL(N), (char*)arg_N);
     
     arg_NBefore = 0;
     
-    Plan_13.create(MemAllocator, arg_NBefore);
+    Plan_12.create(MemAllocator, arg_NBefore);
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)REAL(NBefore), (char*)arg_NBefore);
     
     arg_SSN = 0;
     
-    Plan_14.create(MemAllocator, arg_SSN);
+    Plan_13.create(MemAllocator, arg_SSN);
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)REAL(SSN), (char*)arg_SSN);
     
     arg_C = 0;
     
-    Plan_15.create(MemAllocator, arg_C);
+    Plan_14.create(MemAllocator, arg_C);
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)REAL(C), (char*)arg_C);
     
@@ -2960,23 +2889,23 @@ SEXP D_OperatingModelBase::R_internal_runHistoric(SEXP totF, SEXP qy, SEXP ECurr
     
     arg_SRrel = 0;
     
-    Plan_12.create(MemAllocator, arg_SRrel, (void*)INTEGER(SRrel));
+    Plan_3.create(MemAllocator, arg_SRrel, (void*)INTEGER(SRrel));
     
     arg_N = 0;
     
-    Plan_13.create(MemAllocator, arg_N, (void*)REAL(N));
+    Plan_12.create(MemAllocator, arg_N, (void*)REAL(N));
     
     arg_NBefore = 0;
     
-    Plan_13.create(MemAllocator, arg_NBefore, (void*)REAL(NBefore));
+    Plan_12.create(MemAllocator, arg_NBefore, (void*)REAL(NBefore));
     
     arg_SSN = 0;
     
-    Plan_14.create(MemAllocator, arg_SSN, (void*)REAL(SSN));
+    Plan_13.create(MemAllocator, arg_SSN, (void*)REAL(SSN));
     
     arg_C = 0;
     
-    Plan_15.create(MemAllocator, arg_C, (void*)REAL(C));
+    Plan_14.create(MemAllocator, arg_C, (void*)REAL(C));
     
     arg_SSBA = 0;
     
@@ -3037,7 +2966,7 @@ SEXP D_OperatingModelBase::R_nt_runHistoric(SEXP totF, SEXP qy, SEXP ECurrent, S
   return (R_internal_runHistoric(totF, qy, ECurrent, R0, M, mat, Idist, Len_age, Wt_age, sel, mov, h, Recdist, Recdevs, RecSpatialDevs, SRrel, N, NBefore, SSN, C, SSBA, false));
 }
 
-SEXP D_OperatingModelBase::R_internal_runProjection(SEXP par, SEXP npar, SEXP nfixed, SEXP TAC, SEXP TAE, SEXP FbyPar, SEXP FbyFixed, SEXP ECurrent, SEXP qy, SEXP R0, SEXP M, SEXP mat, SEXP Idist, SEXP Len_age, SEXP Wt_age, SEXP sel, SEXP mov, SEXP h, SEXP Recdist, SEXP Recdevs, SEXP RecSpatialDevs, SEXP SRrel, SEXP N, SEXP NBefore, SEXP SSN, SEXP C, SEXP SSBA, SEXP sim_idx, bool bTranslate)
+SEXP D_OperatingModelBase::R_internal_runProjection(SEXP par, SEXP npar, SEXP nfixed, SEXP TAC, SEXP TAE, SEXP FbyPar, SEXP FbyFixed, SEXP ECurrent, SEXP qy, SEXP R0, SEXP M, SEXP mat, SEXP Idist, SEXP Len_age, SEXP Wt_age, SEXP sel, SEXP mov, SEXP h, SEXP Recdist, SEXP Recdevs, SEXP RecSpatialDevs, SEXP SRrel, SEXP N, SEXP NBefore, SEXP SSN, SEXP C, SEXP SSBA, bool bTranslate)
 {
   ARRAY_1D arg_par;
   int arg_npar;
@@ -3046,27 +2975,26 @@ SEXP D_OperatingModelBase::R_internal_runProjection(SEXP par, SEXP npar, SEXP nf
   ARRAY_1D arg_TAE;
   ARRAY_1I arg_FbyPar;
   ARRAY_1I arg_FbyFixed;
-  ARRAY_4D arg_ECurrent;
-  ARRAY_2D arg_qy;
-  ARRAY_2D arg_R0;
-  ARRAY_3D arg_M;
-  ARRAY_3D arg_mat;
-  ARRAY_4D arg_Idist;
-  ARRAY_3D arg_Len_age;
-  ARRAY_3D arg_Wt_age;
-  ARRAY_3D arg_sel;
-  ARRAY_6D arg_mov;
-  ARRAY_2D arg_h;
-  ARRAY_3D arg_Recdist;
-  ARRAY_3D arg_Recdevs;
-  ARRAY_3D arg_RecSpatialDevs;
+  ARRAY_3D arg_ECurrent;
+  ARRAY_1D arg_qy;
+  ARRAY_1D arg_R0;
+  ARRAY_2D arg_M;
+  ARRAY_2D arg_mat;
+  ARRAY_3D arg_Idist;
+  ARRAY_2D arg_Len_age;
+  ARRAY_2D arg_Wt_age;
+  ARRAY_2D arg_sel;
+  ARRAY_5D arg_mov;
+  ARRAY_1D arg_h;
+  ARRAY_2D arg_Recdist;
+  ARRAY_2D arg_Recdevs;
+  ARRAY_2D arg_RecSpatialDevs;
   ARRAY_1I arg_SRrel;
-  ARRAY_5D arg_N;
-  ARRAY_5D arg_NBefore;
-  ARRAY_5D arg_SSN;
-  ARRAY_6D arg_C;
-  ARRAY_2D arg_SSBA;
-  int arg_sim_idx;
+  ARRAY_4D arg_N;
+  ARRAY_4D arg_NBefore;
+  ARRAY_4D arg_SSN;
+  ARRAY_5D arg_C;
+  ARRAY_1D arg_SSBA;
   
   R_CheckArgument("par", "REALSXP", REALSXP, par, __FILE__, __LINE__, 1, 0, INTEGER(npar)[0] - 1);
   
@@ -3082,47 +3010,45 @@ SEXP D_OperatingModelBase::R_internal_runProjection(SEXP par, SEXP npar, SEXP nf
   
   R_CheckArgument("FbyFixed", "INTSXP", INTSXP, FbyFixed, __FILE__, __LINE__, 1, 0, INTEGER(nfixed)[0] - 1);
   
-  R_CheckArgument("ECurrent", "REALSXP", REALSXP, ECurrent, __FILE__, __LINE__, 4, 1, nfleets, 1, nareas, 1, nsubyears, 1, nsim);
+  R_CheckArgument("ECurrent", "REALSXP", REALSXP, ECurrent, __FILE__, __LINE__, 3, 1, nfleets, 1, nareas, 1, nsubyears);
   
-  R_CheckArgument("qy", "REALSXP", REALSXP, qy, __FILE__, __LINE__, 2, 1, nfleets, 1, nsim);
+  R_CheckArgument("qy", "REALSXP", REALSXP, qy, __FILE__, __LINE__, 1, 1, nfleets);
   
-  R_CheckArgument("R0", "REALSXP", REALSXP, R0, __FILE__, __LINE__, 2, 1, npop, 1, nsim);
+  R_CheckArgument("R0", "REALSXP", REALSXP, R0, __FILE__, __LINE__, 1, 1, npop);
   
-  R_CheckArgument("M", "REALSXP", REALSXP, M, __FILE__, __LINE__, 3, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("M", "REALSXP", REALSXP, M, __FILE__, __LINE__, 2, 1, nages, 1, npop);
   
-  R_CheckArgument("mat", "REALSXP", REALSXP, mat, __FILE__, __LINE__, 3, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("mat", "REALSXP", REALSXP, mat, __FILE__, __LINE__, 2, 1, nages, 1, npop);
   
-  R_CheckArgument("Idist", "REALSXP", REALSXP, Idist, __FILE__, __LINE__, 4, 1, nareas, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("Idist", "REALSXP", REALSXP, Idist, __FILE__, __LINE__, 3, 1, nareas, 1, nages, 1, npop);
   
-  R_CheckArgument("Len_age", "REALSXP", REALSXP, Len_age, __FILE__, __LINE__, 3, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("Len_age", "REALSXP", REALSXP, Len_age, __FILE__, __LINE__, 2, 1, nages, 1, npop);
   
-  R_CheckArgument("Wt_age", "REALSXP", REALSXP, Wt_age, __FILE__, __LINE__, 3, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("Wt_age", "REALSXP", REALSXP, Wt_age, __FILE__, __LINE__, 2, 1, nages, 1, npop);
   
-  R_CheckArgument("sel", "REALSXP", REALSXP, sel, __FILE__, __LINE__, 3, 1, nages, 1, nfleets, 1, nsim);
+  R_CheckArgument("sel", "REALSXP", REALSXP, sel, __FILE__, __LINE__, 2, 1, nages, 1, nfleets);
   
-  R_CheckArgument("mov", "REALSXP", REALSXP, mov, __FILE__, __LINE__, 6, 1, nareas, 1, nareas, 1, nsubyears, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("mov", "REALSXP", REALSXP, mov, __FILE__, __LINE__, 5, 1, nareas, 1, nareas, 1, nsubyears, 1, nages, 1, npop);
   
-  R_CheckArgument("h", "REALSXP", REALSXP, h, __FILE__, __LINE__, 2, 1, npop, 1, nsim);
+  R_CheckArgument("h", "REALSXP", REALSXP, h, __FILE__, __LINE__, 1, 1, npop);
   
-  R_CheckArgument("Recdist", "REALSXP", REALSXP, Recdist, __FILE__, __LINE__, 3, 1, nareas, 1, npop, 1, nsim);
+  R_CheckArgument("Recdist", "REALSXP", REALSXP, Recdist, __FILE__, __LINE__, 2, 1, nareas, 1, npop);
   
-  R_CheckArgument("Recdevs", "REALSXP", REALSXP, Recdevs, __FILE__, __LINE__, 3, 1, SpawnPerYr, 1, npop, 1, nsim);
+  R_CheckArgument("Recdevs", "REALSXP", REALSXP, Recdevs, __FILE__, __LINE__, 2, 1, SpawnPerYr, 1, npop);
   
-  R_CheckArgument("RecSpatialDevs", "REALSXP", REALSXP, RecSpatialDevs, __FILE__, __LINE__, 3, 1, nareas, 1, npop, 1, nsim);
+  R_CheckArgument("RecSpatialDevs", "REALSXP", REALSXP, RecSpatialDevs, __FILE__, __LINE__, 2, 1, nareas, 1, npop);
   
   R_CheckArgument("SRrel", "INTSXP", INTSXP, SRrel, __FILE__, __LINE__, 1, 1, npop);
   
-  R_CheckArgument("N", "REALSXP", REALSXP, N, __FILE__, __LINE__, 5, 1, nareas, 1, nsubyears + 1, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("N", "REALSXP", REALSXP, N, __FILE__, __LINE__, 4, 1, nareas, 1, nsubyears + 1, 1, nages, 1, npop);
   
-  R_CheckArgument("NBefore", "REALSXP", REALSXP, NBefore, __FILE__, __LINE__, 5, 1, nareas, 1, nsubyears + 1, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("NBefore", "REALSXP", REALSXP, NBefore, __FILE__, __LINE__, 4, 1, nareas, 1, nsubyears + 1, 1, nages, 1, npop);
   
-  R_CheckArgument("SSN", "REALSXP", REALSXP, SSN, __FILE__, __LINE__, 5, 1, nareas, 1, nsubyears, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("SSN", "REALSXP", REALSXP, SSN, __FILE__, __LINE__, 4, 1, nareas, 1, nsubyears, 1, nages, 1, npop);
   
-  R_CheckArgument("C", "REALSXP", REALSXP, C, __FILE__, __LINE__, 6, 1, nfleets, 1, nareas, 1, nsubyears, 1, nages, 1, npop, 1, nsim);
+  R_CheckArgument("C", "REALSXP", REALSXP, C, __FILE__, __LINE__, 5, 1, nfleets, 1, nareas, 1, nsubyears, 1, nages, 1, npop);
   
-  R_CheckArgument("SSBA", "REALSXP", REALSXP, SSBA, __FILE__, __LINE__, 2, 1, npop, 1, nsim);
-  
-  R_CheckArgument("sim_idx", "INTSXP", INTSXP, sim_idx, __FILE__, __LINE__);
+  R_CheckArgument("SSBA", "REALSXP", REALSXP, SSBA, __FILE__, __LINE__, 1, 1, npop);
   
   if (bTranslate)
   {
@@ -3244,31 +3170,31 @@ SEXP D_OperatingModelBase::R_internal_runProjection(SEXP par, SEXP npar, SEXP nf
     
     arg_SRrel = 0;
     
-    Plan_12.create(MemAllocator, arg_SRrel);
+    Plan_3.create(MemAllocator, arg_SRrel);
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)INTEGER(SRrel), (char*)arg_SRrel);
     
     arg_N = 0;
     
-    Plan_13.create(MemAllocator, arg_N);
+    Plan_12.create(MemAllocator, arg_N);
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)REAL(N), (char*)arg_N);
     
     arg_NBefore = 0;
     
-    Plan_13.create(MemAllocator, arg_NBefore);
+    Plan_12.create(MemAllocator, arg_NBefore);
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)REAL(NBefore), (char*)arg_NBefore);
     
     arg_SSN = 0;
     
-    Plan_14.create(MemAllocator, arg_SSN);
+    Plan_13.create(MemAllocator, arg_SSN);
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)REAL(SSN), (char*)arg_SSN);
     
     arg_C = 0;
     
-    Plan_15.create(MemAllocator, arg_C);
+    Plan_14.create(MemAllocator, arg_C);
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)REAL(C), (char*)arg_C);
     
@@ -3278,7 +3204,6 @@ SEXP D_OperatingModelBase::R_internal_runProjection(SEXP par, SEXP npar, SEXP nf
     
     AdtArrayPlanActor::R_to_ADlib(MemAllocator, (char*)REAL(SSBA), (char*)arg_SSBA);
     
-    arg_sim_idx = INTEGER(sim_idx)[0];
   }
   else
   {
@@ -3362,36 +3287,35 @@ SEXP D_OperatingModelBase::R_internal_runProjection(SEXP par, SEXP npar, SEXP nf
     
     arg_SRrel = 0;
     
-    Plan_12.create(MemAllocator, arg_SRrel, (void*)INTEGER(SRrel));
+    Plan_3.create(MemAllocator, arg_SRrel, (void*)INTEGER(SRrel));
     
     arg_N = 0;
     
-    Plan_13.create(MemAllocator, arg_N, (void*)REAL(N));
+    Plan_12.create(MemAllocator, arg_N, (void*)REAL(N));
     
     arg_NBefore = 0;
     
-    Plan_13.create(MemAllocator, arg_NBefore, (void*)REAL(NBefore));
+    Plan_12.create(MemAllocator, arg_NBefore, (void*)REAL(NBefore));
     
     arg_SSN = 0;
     
-    Plan_14.create(MemAllocator, arg_SSN, (void*)REAL(SSN));
+    Plan_13.create(MemAllocator, arg_SSN, (void*)REAL(SSN));
     
     arg_C = 0;
     
-    Plan_15.create(MemAllocator, arg_C, (void*)REAL(C));
+    Plan_14.create(MemAllocator, arg_C, (void*)REAL(C));
     
     arg_SSBA = 0;
     
     Plan_3.create(MemAllocator, arg_SSBA, (void*)REAL(SSBA));
     
-    arg_sim_idx = INTEGER(sim_idx)[0];
   }
   
   SEXP Result = Rf_allocVector(REALSXP, 1);
   
   PROTECT(Result);
   REAL(Result)[0] = 0.0;
-  runProjection(arg_par, arg_npar, arg_nfixed, arg_TAC, arg_TAE, arg_FbyPar, arg_FbyFixed, arg_ECurrent, arg_qy, arg_R0, arg_M, arg_mat, arg_Idist, arg_Len_age, arg_Wt_age, arg_sel, arg_mov, arg_h, arg_Recdist, arg_Recdevs, arg_RecSpatialDevs, arg_SRrel, arg_N, arg_NBefore, arg_SSN, arg_C, arg_SSBA, arg_sim_idx);
+  runProjection(arg_par, arg_npar, arg_nfixed, arg_TAC, arg_TAE, arg_FbyPar, arg_FbyFixed, arg_ECurrent, arg_qy, arg_R0, arg_M, arg_mat, arg_Idist, arg_Len_age, arg_Wt_age, arg_sel, arg_mov, arg_h, arg_Recdist, arg_Recdevs, arg_RecSpatialDevs, arg_SRrel, arg_N, arg_NBefore, arg_SSN, arg_C, arg_SSBA);
   
   if (bTranslate)
   {
@@ -3435,14 +3359,14 @@ SEXP D_OperatingModelBase::R_internal_runProjection(SEXP par, SEXP npar, SEXP nf
   return (Result);
 }
 
-SEXP D_OperatingModelBase::R_runProjection(SEXP par, SEXP npar, SEXP nfixed, SEXP TAC, SEXP TAE, SEXP FbyPar, SEXP FbyFixed, SEXP ECurrent, SEXP qy, SEXP R0, SEXP M, SEXP mat, SEXP Idist, SEXP Len_age, SEXP Wt_age, SEXP sel, SEXP mov, SEXP h, SEXP Recdist, SEXP Recdevs, SEXP RecSpatialDevs, SEXP SRrel, SEXP N, SEXP NBefore, SEXP SSN, SEXP C, SEXP SSBA, SEXP sim_idx)
+SEXP D_OperatingModelBase::R_runProjection(SEXP par, SEXP npar, SEXP nfixed, SEXP TAC, SEXP TAE, SEXP FbyPar, SEXP FbyFixed, SEXP ECurrent, SEXP qy, SEXP R0, SEXP M, SEXP mat, SEXP Idist, SEXP Len_age, SEXP Wt_age, SEXP sel, SEXP mov, SEXP h, SEXP Recdist, SEXP Recdevs, SEXP RecSpatialDevs, SEXP SRrel, SEXP N, SEXP NBefore, SEXP SSN, SEXP C, SEXP SSBA)
 {
-  return (R_internal_runProjection(par, npar, nfixed, TAC, TAE, FbyPar, FbyFixed, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, sel, mov, h, Recdist, Recdevs, RecSpatialDevs, SRrel, N, NBefore, SSN, C, SSBA, sim_idx, true));
+  return (R_internal_runProjection(par, npar, nfixed, TAC, TAE, FbyPar, FbyFixed, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, sel, mov, h, Recdist, Recdevs, RecSpatialDevs, SRrel, N, NBefore, SSN, C, SSBA, true));
 }
 
-SEXP D_OperatingModelBase::R_nt_runProjection(SEXP par, SEXP npar, SEXP nfixed, SEXP TAC, SEXP TAE, SEXP FbyPar, SEXP FbyFixed, SEXP ECurrent, SEXP qy, SEXP R0, SEXP M, SEXP mat, SEXP Idist, SEXP Len_age, SEXP Wt_age, SEXP sel, SEXP mov, SEXP h, SEXP Recdist, SEXP Recdevs, SEXP RecSpatialDevs, SEXP SRrel, SEXP N, SEXP NBefore, SEXP SSN, SEXP C, SEXP SSBA, SEXP sim_idx)
+SEXP D_OperatingModelBase::R_nt_runProjection(SEXP par, SEXP npar, SEXP nfixed, SEXP TAC, SEXP TAE, SEXP FbyPar, SEXP FbyFixed, SEXP ECurrent, SEXP qy, SEXP R0, SEXP M, SEXP mat, SEXP Idist, SEXP Len_age, SEXP Wt_age, SEXP sel, SEXP mov, SEXP h, SEXP Recdist, SEXP Recdevs, SEXP RecSpatialDevs, SEXP SRrel, SEXP N, SEXP NBefore, SEXP SSN, SEXP C, SEXP SSBA)
 {
-  return (R_internal_runProjection(par, npar, nfixed, TAC, TAE, FbyPar, FbyFixed, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, sel, mov, h, Recdist, Recdevs, RecSpatialDevs, SRrel, N, NBefore, SSN, C, SSBA, sim_idx, false));
+  return (R_internal_runProjection(par, npar, nfixed, TAC, TAE, FbyPar, FbyFixed, ECurrent, qy, R0, M, mat, Idist, Len_age, Wt_age, sel, mov, h, Recdist, Recdevs, RecSpatialDevs, SRrel, N, NBefore, SSN, C, SSBA, false));
 }
 
 SEXP D_OperatingModelBase::_get_SpawnPerYr() const

@@ -13,11 +13,19 @@ EXPORT void OmB_destroy_handler(SEXP rInstance)
   R_ClearExternalPtr(rInstance);
 }
 
-EXPORT SEXP OmB_destroy(SEXP rInstance)
+EXPORT SEXP OmB_destroy(SEXP args)
 {
+  SEXP rInstance;
+  args = CDR(args); rInstance = CAR(args);
   OmB_destroy_handler(rInstance);
   
-  return (rInstance);
+  SEXP Result = allocVector(INTSXP, 1);
+  
+  PROTECT(Result);
+  INTEGER(Result)[0] = 0;
+  UNPROTECT(1);
+  
+  return(Result);
 }
 
 EXPORT SEXP OmB_create(SEXP args)
@@ -25,7 +33,6 @@ EXPORT SEXP OmB_create(SEXP args)
   SEXP Result = {0};
   D_OperatingModelBase* pContext = 0;
   
-  SEXP arg_nsim;
   SEXP arg_npop;
   SEXP arg_nages;
   SEXP arg_nsubyears;
@@ -33,15 +40,12 @@ EXPORT SEXP OmB_create(SEXP args)
   SEXP arg_nfleets;
   SEXP arg_Recsubyr;
   
-  args = CDR(args); arg_nsim = CAR(args);
   args = CDR(args); arg_npop = CAR(args);
   args = CDR(args); arg_nages = CAR(args);
   args = CDR(args); arg_nsubyears = CAR(args);
   args = CDR(args); arg_nareas = CAR(args);
   args = CDR(args); arg_nfleets = CAR(args);
   args = CDR(args); arg_Recsubyr = CAR(args);
-  
-  R_CheckArgument("arg_nsim", "INTSXP", INTSXP, arg_nsim, __FILE__, __LINE__);
   
   R_CheckArgument("arg_npop", "INTSXP", INTSXP, arg_npop, __FILE__, __LINE__);
   
@@ -56,7 +60,6 @@ EXPORT SEXP OmB_create(SEXP args)
   R_CheckArgument("arg_Recsubyr", "INTSXP", INTSXP, arg_Recsubyr, __FILE__, __LINE__, 1, 1, INTEGER(arg_nsubyears)[0]);
   
   pContext = new D_OperatingModelBase(
-      INTEGER(arg_nsim)[0], 
       INTEGER(arg_npop)[0], 
       INTEGER(arg_nages)[0], 
       INTEGER(arg_nsubyears)[0], 

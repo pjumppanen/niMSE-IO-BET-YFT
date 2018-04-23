@@ -1,8 +1,11 @@
 # ignore binary files
 *.dch
 *.sdf
+*.user
+*.opendb
 .vs
 x64
 Win32
 work
+Debug
 

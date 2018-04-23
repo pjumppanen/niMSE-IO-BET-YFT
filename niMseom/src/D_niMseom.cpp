@@ -13,8 +13,8 @@
 
 // ----------------------------------------------------------------------------
 
-D_OperatingModelBase::D_OperatingModelBase(int arg_nsim, int arg_npop, int arg_nages, int arg_nsubyears, int arg_nareas, int arg_nfleets, const ARRAY_1I arg_Recsubyr)
- : OperatingModelBase(arg_nsim,arg_npop,arg_nages,arg_nsubyears,arg_nareas,arg_nfleets,arg_Recsubyr)
+D_OperatingModelBase::D_OperatingModelBase(int arg_npop, int arg_nages, int arg_nsubyears, int arg_nareas, int arg_nfleets, const ARRAY_1I arg_Recsubyr)
+ : OperatingModelBase(arg_npop,arg_nages,arg_nsubyears,arg_nareas,arg_nfleets,arg_Recsubyr)
 {
   create(eforyeard1_par,EforYear);
   create(fmd1_par,FM);
@@ -89,7 +89,7 @@ D_OperatingModelBase::~D_OperatingModelBase()
 //    RW status of diff variables: movn:(loc) fm:(loc) eforyear:(loc)
 //                 nbefore:(loc) n:(loc) operatingmodelbase__msyrefs_objective:out
 //                 par:in c:(loc)
-double D_OperatingModelBase::MSYREFS_OBJECTIVE_DPAR(double par, double pard1_par, int nReport, const ARRAY_4D ECurrent/* nfleets,nareas,nsubyears,nsim */, const ARRAY_2D qy/* nfleets,nsim */, const ARRAY_2D R0/* npop,nsim */, const ARRAY_3D M/* nages,npop,nsim */, const ARRAY_3D mat/* nages,npop,nsim */, const ARRAY_4D Idist/* nareas,nages,npop,nsim */, const ARRAY_3D Len_age/* nages,npop,nsim */, const ARRAY_3D Wt_age/* nages,npop,nsim */, const ARRAY_3D sel/* nages,nfleets,nsim */, const ARRAY_6D mov/* nareas,nareas,nsubyears,nages,npop,nsim */, const ARRAY_2D h/* npop,nsim */, const ARRAY_3D Recdist/* nareas,npop,nsim */, const ARRAY_1I SRrel/* npop */, ARRAY_5D N/* nareas,nsubyears + 1,nages,npop,nsim */, ARRAY_5D nd1_par/* nareas,nsubyears + 1,nages,npop,nsim */, ARRAY_5D NBefore/* nareas,nsubyears + 1,nages,npop,nsim */, ARRAY_5D nbefored1_par/* nareas,nsubyears + 1,nages,npop,nsim */, ARRAY_5D SSN/* nareas,nsubyears,nages,npop,nsim */, ARRAY_6D C/* nfleets,nareas,nsubyears,nages,npop,nsim */, ARRAY_6D cd1_par/* nfleets,nareas,nsubyears,nages,npop,nsim */, ARRAY_2D SSBA/* npop,nsim */, int ntargets, const ARRAY_1I targpop/* ntargets */, int run_years, int sim_idx, double& MSYrefs_objective)
+double D_OperatingModelBase::MSYREFS_OBJECTIVE_DPAR(double par, double pard1_par, int nReport, const ARRAY_3D ECurrent/* nfleets,nareas,nsubyears */, const ARRAY_1D qy/* nfleets */, const ARRAY_1D R0/* npop */, const ARRAY_2D M/* nages,npop */, const ARRAY_2D mat/* nages,npop */, const ARRAY_3D Idist/* nareas,nages,npop */, const ARRAY_2D Len_age/* nages,npop */, const ARRAY_2D Wt_age/* nages,npop */, const ARRAY_2D sel/* nages,nfleets */, const ARRAY_5D mov/* nareas,nareas,nsubyears,nages,npop */, const ARRAY_1D h/* npop */, const ARRAY_2D Recdist/* nareas,npop */, const ARRAY_1I SRrel/* npop */, ARRAY_4D N/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D nd1_par/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D NBefore/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D nbefored1_par/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D SSN/* nareas,nsubyears,nages,npop */, ARRAY_5D C/* nfleets,nareas,nsubyears,nages,npop */, ARRAY_5D cd1_par/* nfleets,nareas,nsubyears,nages,npop */, ARRAY_1D SSBA/* npop */, int ntargets, const ARRAY_1I targpop/* ntargets */, int run_years, double& MSYrefs_objective)
 {
   int ca;
   int cf;
@@ -102,7 +102,7 @@ double D_OperatingModelBase::MSYREFS_OBJECTIVE_DPAR(double par, double pard1_par
   double dobjectived1_par;
   int p;
   double ret_MSYREFS_OBJECTIVE_DPAR;
-  POPDYN_MSY_PAR_DPAR(par,pard1_par,ECurrent,qy,R0,M,mat,Idist,Len_age,Wt_age,sel,mov,h,Recdist,SRrel,N,nd1_par,NBefore,nbefored1_par,SSN,C,cd1_par,SSBA,run_years,sim_idx);
+  POPDYN_MSY_PAR_DPAR(par,pard1_par,ECurrent,qy,R0,M,mat,Idist,Len_age,Wt_age,sel,mov,h,Recdist,SRrel,N,nd1_par,NBefore,nbefored1_par,SSN,C,cd1_par,SSBA,run_years);
   dCatch = 1.0e-6;
   cp = 1;
   dcatchd1_par = 0.0;
@@ -126,8 +126,8 @@ double D_OperatingModelBase::MSYREFS_OBJECTIVE_DPAR(double par, double pard1_par
           
           while ((cm <= nsubyears))
           {
-            dcatchd1_par = dcatchd1_par + Wt_age[ca][p][sim_idx] * cd1_par[cf][cr][cm][ca][p][sim_idx];
-            dCatch = dCatch + C[cf][cr][cm][ca][p][sim_idx] * Wt_age[ca][p][sim_idx];
+            dcatchd1_par = dcatchd1_par + Wt_age[ca][p] * cd1_par[cf][cr][cm][ca][p];
+            dCatch = dCatch + C[cf][cr][cm][ca][p] * Wt_age[ca][p];
             cm = cm + 1;
           }
           
@@ -155,7 +155,7 @@ double D_OperatingModelBase::MSYREFS_OBJECTIVE_DPAR(double par, double pard1_par
 //   Differentiation of operatingmodelbase__popdyn_msy_par in forward (tangent) mode:
 //    variations   of useful results: c
 //    with respect to varying inputs: par
-void D_OperatingModelBase::POPDYN_MSY_PAR_DPAR(double par, double pard1_par, const ARRAY_4D ECurrent/* nfleets,nareas,nsubyears,nsim */, const ARRAY_2D qy/* nfleets,nsim */, const ARRAY_2D R0/* npop,nsim */, const ARRAY_3D M/* nages,npop,nsim */, const ARRAY_3D mat/* nages,npop,nsim */, const ARRAY_4D Idist/* nareas,nages,npop,nsim */, const ARRAY_3D Len_age/* nages,npop,nsim */, const ARRAY_3D Wt_age/* nages,npop,nsim */, const ARRAY_3D sel/* nages,nfleets,nsim */, const ARRAY_6D mov/* nareas,nareas,nsubyears,nages,npop,nsim */, const ARRAY_2D h/* npop,nsim */, const ARRAY_3D Recdist/* nareas,npop,nsim */, const ARRAY_1I SRrel/* npop */, ARRAY_5D N/* nareas,nsubyears + 1,nages,npop,nsim */, ARRAY_5D nd1_par/* nareas,nsubyears + 1,nages,npop,nsim */, ARRAY_5D NBefore/* nareas,nsubyears + 1,nages,npop,nsim */, ARRAY_5D nbefored1_par/* nareas,nsubyears + 1,nages,npop,nsim */, ARRAY_5D SSN/* nareas,nsubyears,nages,npop,nsim */, ARRAY_6D C/* nfleets,nareas,nsubyears,nages,npop,nsim */, ARRAY_6D cd1_par/* nfleets,nareas,nsubyears,nages,npop,nsim */, ARRAY_2D SSBA/* npop,nsim */, int run_years, int sim_idx)
+void D_OperatingModelBase::POPDYN_MSY_PAR_DPAR(double par, double pard1_par, const ARRAY_3D ECurrent/* nfleets,nareas,nsubyears */, const ARRAY_1D qy/* nfleets */, const ARRAY_1D R0/* npop */, const ARRAY_2D M/* nages,npop */, const ARRAY_2D mat/* nages,npop */, const ARRAY_3D Idist/* nareas,nages,npop */, const ARRAY_2D Len_age/* nages,npop */, const ARRAY_2D Wt_age/* nages,npop */, const ARRAY_2D sel/* nages,nfleets */, const ARRAY_5D mov/* nareas,nareas,nsubyears,nages,npop */, const ARRAY_1D h/* npop */, const ARRAY_2D Recdist/* nareas,npop */, const ARRAY_1I SRrel/* npop */, ARRAY_4D N/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D nd1_par/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D NBefore/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D nbefored1_par/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D SSN/* nareas,nsubyears,nages,npop */, ARRAY_5D C/* nfleets,nareas,nsubyears,nages,npop */, ARRAY_5D cd1_par/* nfleets,nareas,nsubyears,nages,npop */, ARRAY_1D SSBA/* npop */, int run_years)
 {
   int cf;
   int cr;
@@ -166,24 +166,20 @@ void D_OperatingModelBase::POPDYN_MSY_PAR_DPAR(double par, double pard1_par, con
   int ix_2___;
   int ix_3___;
   int ix_4___;
-  int ix_5___;
   double totF;
   double totfd1_par;
   totfd1_par = pard1_par * exp(par);
   totF = exp(par);
-  popdyn_init(R0,mat,Idist,N,NBefore,SSN,sim_idx);
+  popdyn_init(R0,mat,Idist,N,NBefore,SSN);
   cf = 1;
   
-  for (ix_3___ = 1;ix_3___ <= nsim; ++ix_3___)
+  for (ix_2___ = 1;ix_2___ <= nsubyears; ++ix_2___)
   {
-    for (ix_2___ = 1;ix_2___ <= nsubyears; ++ix_2___)
+    for (ix_1___ = 1;ix_1___ <= nareas; ++ix_1___)
     {
-      for (ix_1___ = 1;ix_1___ <= nareas; ++ix_1___)
+      for (ix_0___ = 1;ix_0___ <= nfleets; ++ix_0___)
       {
-        for (ix_0___ = 1;ix_0___ <= nfleets; ++ix_0___)
-        {
-          eforyeard1_par[ix_0___][ix_1___][ix_2___][ix_3___] = 0.0;
-        }
+        eforyeard1_par[ix_0___][ix_1___][ix_2___] = 0.0;
       }
     }
   }
@@ -198,8 +194,8 @@ void D_OperatingModelBase::POPDYN_MSY_PAR_DPAR(double par, double pard1_par, con
       
       while ((cs <= nsubyears))
       {
-        eforyeard1_par[cf][cr][cs][sim_idx] = ECurrent[cf][cr][cs][sim_idx] * totfd1_par;
-        EforYear[cf][cr][cs][sim_idx] = totF * ECurrent[cf][cr][cs][sim_idx];
+        eforyeard1_par[cf][cr][cs] = ECurrent[cf][cr][cs] * totfd1_par;
+        EforYear[cf][cr][cs] = totF * ECurrent[cf][cr][cs];
         cs = cs + 1;
       }
       
@@ -211,70 +207,55 @@ void D_OperatingModelBase::POPDYN_MSY_PAR_DPAR(double par, double pard1_par, con
   
   cy = 1;
   
-  for (ix_1___ = 1;ix_1___ <= nsim; ++ix_1___)
+  for (ix_0___ = 1;ix_0___ <= nareas; ++ix_0___)
   {
-    for (ix_0___ = 1;ix_0___ <= nareas; ++ix_0___)
-    {
-      movnd1_par[ix_0___][ix_1___] = 0.0;
-    }
+    movnd1_par[ix_0___] = 0.0;
   }
   
-  for (ix_1___ = 1;ix_1___ <= nsim; ++ix_1___)
+  for (ix_0___ = 1;ix_0___ <= nfleets; ++ix_0___)
   {
-    for (ix_0___ = 1;ix_0___ <= nfleets; ++ix_0___)
-    {
-      fmd1_par[ix_0___][ix_1___] = 0.0;
-    }
+    fmd1_par[ix_0___] = 0.0;
   }
   
-  for (ix_4___ = 1;ix_4___ <= nsim; ++ix_4___)
+  for (ix_3___ = 1;ix_3___ <= npop; ++ix_3___)
   {
-    for (ix_3___ = 1;ix_3___ <= npop; ++ix_3___)
+    for (ix_2___ = 1;ix_2___ <= nages; ++ix_2___)
     {
-      for (ix_2___ = 1;ix_2___ <= nages; ++ix_2___)
+      for (ix_1___ = 1;ix_1___ <= nsubyears + 1; ++ix_1___)
       {
-        for (ix_1___ = 1;ix_1___ <= nsubyears + 1; ++ix_1___)
+        for (ix_0___ = 1;ix_0___ <= nareas; ++ix_0___)
         {
-          for (ix_0___ = 1;ix_0___ <= nareas; ++ix_0___)
-          {
-            nbefored1_par[ix_0___][ix_1___][ix_2___][ix_3___][ix_4___] = 0.0;
-          }
+          nbefored1_par[ix_0___][ix_1___][ix_2___][ix_3___] = 0.0;
         }
       }
     }
   }
   
-  for (ix_4___ = 1;ix_4___ <= nsim; ++ix_4___)
+  for (ix_3___ = 1;ix_3___ <= npop; ++ix_3___)
   {
-    for (ix_3___ = 1;ix_3___ <= npop; ++ix_3___)
+    for (ix_2___ = 1;ix_2___ <= nages; ++ix_2___)
     {
-      for (ix_2___ = 1;ix_2___ <= nages; ++ix_2___)
+      for (ix_1___ = 1;ix_1___ <= nsubyears + 1; ++ix_1___)
       {
-        for (ix_1___ = 1;ix_1___ <= nsubyears + 1; ++ix_1___)
+        for (ix_0___ = 1;ix_0___ <= nareas; ++ix_0___)
         {
-          for (ix_0___ = 1;ix_0___ <= nareas; ++ix_0___)
-          {
-            nd1_par[ix_0___][ix_1___][ix_2___][ix_3___][ix_4___] = 0.0;
-          }
+          nd1_par[ix_0___][ix_1___][ix_2___][ix_3___] = 0.0;
         }
       }
     }
   }
   
-  for (ix_5___ = 1;ix_5___ <= nsim; ++ix_5___)
+  for (ix_4___ = 1;ix_4___ <= npop; ++ix_4___)
   {
-    for (ix_4___ = 1;ix_4___ <= npop; ++ix_4___)
+    for (ix_3___ = 1;ix_3___ <= nages; ++ix_3___)
     {
-      for (ix_3___ = 1;ix_3___ <= nages; ++ix_3___)
+      for (ix_2___ = 1;ix_2___ <= nsubyears; ++ix_2___)
       {
-        for (ix_2___ = 1;ix_2___ <= nsubyears; ++ix_2___)
+        for (ix_1___ = 1;ix_1___ <= nareas; ++ix_1___)
         {
-          for (ix_1___ = 1;ix_1___ <= nareas; ++ix_1___)
+          for (ix_0___ = 1;ix_0___ <= nfleets; ++ix_0___)
           {
-            for (ix_0___ = 1;ix_0___ <= nfleets; ++ix_0___)
-            {
-              cd1_par[ix_0___][ix_1___][ix_2___][ix_3___][ix_4___][ix_5___] = 0.0;
-            }
+            cd1_par[ix_0___][ix_1___][ix_2___][ix_3___][ix_4___] = 0.0;
           }
         }
       }
@@ -283,20 +264,20 @@ void D_OperatingModelBase::POPDYN_MSY_PAR_DPAR(double par, double pard1_par, con
   
   while ((cy < run_years))
   {
-    POPDYN_YEAR_DPAR(qy,R0,M,mat,Len_age,Wt_age,sel,EforYear,eforyeard1_par,mov,h,Recdist,MSY_Recdevs,MSY_RecSpatialDevs,SRrel,N,nd1_par,NBefore,nbefored1_par,SSN,C,cd1_par,SSBA,0,sim_idx);
-    POPDYN_NEXT_YEAR_DPAR(N,nd1_par,NBefore,nbefored1_par,sim_idx);
+    POPDYN_YEAR_DPAR(qy,R0,M,mat,Len_age,Wt_age,sel,EforYear,eforyeard1_par,mov,h,Recdist,MSY_Recdevs,MSY_RecSpatialDevs,SRrel,N,nd1_par,NBefore,nbefored1_par,SSN,C,cd1_par,SSBA,0);
+    NEXTYEAR_DPAR(N,nd1_par,NBefore,nbefored1_par);
     cy = cy + 1;
   }
   
-  POPDYN_YEAR_DPAR(qy,R0,M,mat,Len_age,Wt_age,sel,EforYear,eforyeard1_par,mov,h,Recdist,MSY_Recdevs,MSY_RecSpatialDevs,SRrel,N,nd1_par,NBefore,nbefored1_par,SSN,C,cd1_par,SSBA,0,sim_idx);
+  POPDYN_YEAR_DPAR(qy,R0,M,mat,Len_age,Wt_age,sel,EforYear,eforyeard1_par,mov,h,Recdist,MSY_Recdevs,MSY_RecSpatialDevs,SRrel,N,nd1_par,NBefore,nbefored1_par,SSN,C,cd1_par,SSBA,0);
 }
 
 // ----------------------------------------------------------------------------
 
-//   Differentiation of operatingmodelbase__popdyn_next_year in forward (tangent) mode:
+//   Differentiation of operatingmodelbase__nextyear in forward (tangent) mode:
 //    variations   of useful results: nbefore n
 //    with respect to varying inputs: nbefore n
-void D_OperatingModelBase::POPDYN_NEXT_YEAR_DPAR(ARRAY_5D N/* nareas,nsubyears + 1,nages,npop,nsim */, ARRAY_5D nd1_par/* nareas,nsubyears + 1,nages,npop,nsim */, ARRAY_5D NBefore/* nareas,nsubyears + 1,nages,npop,nsim */, ARRAY_5D nbefored1_par/* nareas,nsubyears + 1,nages,npop,nsim */, int sim_idx)
+void D_OperatingModelBase::NEXTYEAR_DPAR(ARRAY_4D N/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D nd1_par/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D NBefore/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D nbefored1_par/* nareas,nsubyears + 1,nages,npop */)
 {
   int ca;
   int cp;
@@ -313,10 +294,10 @@ void D_OperatingModelBase::POPDYN_NEXT_YEAR_DPAR(ARRAY_5D N/* nareas,nsubyears +
       
       while ((cp <= npop))
       {
-        nd1_par[cr][1][ca][cp][sim_idx] = nd1_par[cr][nsubyears + 1][ca][cp][sim_idx];
-        N[cr][1][ca][cp][sim_idx] = N[cr][nsubyears + 1][ca][cp][sim_idx];
-        nbefored1_par[cr][1][ca][cp][sim_idx] = nbefored1_par[cr][nsubyears + 1][ca][cp][sim_idx];
-        NBefore[cr][1][ca][cp][sim_idx] = NBefore[cr][nsubyears + 1][ca][cp][sim_idx];
+        nd1_par[cr][1][ca][cp] = nd1_par[cr][nsubyears + 1][ca][cp];
+        N[cr][1][ca][cp] = N[cr][nsubyears + 1][ca][cp];
+        nbefored1_par[cr][1][ca][cp] = nbefored1_par[cr][nsubyears + 1][ca][cp];
+        NBefore[cr][1][ca][cp] = NBefore[cr][nsubyears + 1][ca][cp];
         cp = cp + 1;
       }
       
@@ -332,7 +313,7 @@ void D_OperatingModelBase::POPDYN_NEXT_YEAR_DPAR(ARRAY_5D N/* nareas,nsubyears +
 //   Differentiation of operatingmodelbase__popdyn_year in forward (tangent) mode:
 //    variations   of useful results: movn fm nbefore n c
 //    with respect to varying inputs: movn fm nbefore n eannual c
-void D_OperatingModelBase::POPDYN_YEAR_DPAR(const ARRAY_2D qy/* nfleets,nsim */, const ARRAY_2D R0/* npop,nsim */, const ARRAY_3D M/* nages,npop,nsim */, const ARRAY_3D mat/* nages,npop,nsim */, const ARRAY_3D Len_age/* nages,npop,nsim */, const ARRAY_3D Wt_age/* nages,npop,nsim */, const ARRAY_3D sel/* nages,nfleets,nsim */, const ARRAY_4D Eannual/* nfleets,nareas,nsubyears,nsim */, const ARRAY_4D eannuald1_par/* nfleets,nareas,nsubyears,nsim */, const ARRAY_6D mov/* nareas,nareas,nsubyears,nages,npop,nsim */, const ARRAY_2D h/* npop,nsim */, const ARRAY_3D Recdist/* nareas,npop,nsim */, const ARRAY_3D Recdevs/* SpawnPerYr,npop,nsim */, const ARRAY_3D RecSpatialDevs/* nareas,npop,nsim */, const ARRAY_1I SRrel/* npop */, ARRAY_5D N/* nareas,nsubyears + 1,nages,npop,nsim */, ARRAY_5D nd1_par/* nareas,nsubyears + 1,nages,npop,nsim */, ARRAY_5D NBefore/* nareas,nsubyears + 1,nages,npop,nsim */, ARRAY_5D nbefored1_par/* nareas,nsubyears + 1,nages,npop,nsim */, ARRAY_5D SSN/* nareas,nsubyears,nages,npop,nsim */, ARRAY_6D C/* nfleets,nareas,nsubyears,nages,npop,nsim */, ARRAY_6D cd1_par/* nfleets,nareas,nsubyears,nages,npop,nsim */, ARRAY_2D SSBA/* npop,nsim */, int bIgnoreLast, int sim_idx)
+void D_OperatingModelBase::POPDYN_YEAR_DPAR(const ARRAY_1D qy/* nfleets */, const ARRAY_1D R0/* npop */, const ARRAY_2D M/* nages,npop */, const ARRAY_2D mat/* nages,npop */, const ARRAY_2D Len_age/* nages,npop */, const ARRAY_2D Wt_age/* nages,npop */, const ARRAY_2D sel/* nages,nfleets */, const ARRAY_3D Eannual/* nfleets,nareas,nsubyears */, const ARRAY_3D eannuald1_par/* nfleets,nareas,nsubyears */, const ARRAY_5D mov/* nareas,nareas,nsubyears,nages,npop */, const ARRAY_1D h/* npop */, const ARRAY_2D Recdist/* nareas,npop */, const ARRAY_2D Recdevs/* SpawnPerYr,npop */, const ARRAY_2D RecSpatialDevs/* nareas,npop */, const ARRAY_1I SRrel/* npop */, ARRAY_4D N/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D nd1_par/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D NBefore/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D nbefored1_par/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D SSN/* nareas,nsubyears,nages,npop */, ARRAY_5D C/* nfleets,nareas,nsubyears,nages,npop */, ARRAY_5D cd1_par/* nfleets,nareas,nsubyears,nages,npop */, ARRAY_1D SSBA/* npop */, int bIgnoreLast)
 {
   int ca;
   int cf;
@@ -380,11 +361,11 @@ void D_OperatingModelBase::POPDYN_YEAR_DPAR(const ARRAY_2D qy/* nfleets,nsim */,
         
         while ((ca <= nages))
         {
-          dssnd1_par = mat[ca][cp][sim_idx] * nbefored1_par[cr][cs][ca][cp][sim_idx];
-          dSSN = NBefore[cr][cs][ca][cp][sim_idx] * mat[ca][cp][sim_idx];
-          SSN[cr][cs][ca][cp][sim_idx] = dSSN;
-          dssb_aread1_par = dssb_aread1_par + Wt_age[ca][cp][sim_idx] * dssnd1_par;
-          dSSB_area = dSSB_area + dSSN * Wt_age[ca][cp][sim_idx];
+          dssnd1_par = mat[ca][cp] * nbefored1_par[cr][cs][ca][cp];
+          dSSN = NBefore[cr][cs][ca][cp] * mat[ca][cp];
+          SSN[cr][cs][ca][cp] = dSSN;
+          dssb_aread1_par = dssb_aread1_par + Wt_age[ca][cp] * dssnd1_par;
+          dSSB_area = dSSB_area + dSSN * Wt_age[ca][cp];
           ca = ca + 1;
         }
         
@@ -393,29 +374,29 @@ void D_OperatingModelBase::POPDYN_YEAR_DPAR(const ARRAY_2D qy/* nfleets,nsim */,
         cr = cr + 1;
       }
       
-      SSBA[cp][sim_idx] = dSSB;
+      SSBA[cp] = dSSB;
       
       if ((Recsubyr[cs] != 0))
       {
         if ((SRrel[cp] == 1))
         {
-          drecruitmentd1_par = Recdevs[nRecdevIdx][cp][sim_idx] * (0.8 * R0[cp][sim_idx] * h[cp][sim_idx] * dssbd1_par * (0.2 * SSBpR[cp][sim_idx] * R0[cp][sim_idx] * (1.0 - h[cp][sim_idx]) + (h[cp][sim_idx] - 0.2) * dSSB) - 0.8 * R0[cp][sim_idx] * h[cp][sim_idx] * dSSB * (h[cp][sim_idx] - 0.2) * dssbd1_par) / pow((0.2 * SSBpR[cp][sim_idx] * R0[cp][sim_idx] * (1.0 - h[cp][sim_idx]) + (h[cp][sim_idx] - 0.2) * dSSB),2);
-          dRecruitment = Recdevs[nRecdevIdx][cp][sim_idx] * (0.8 * R0[cp][sim_idx] * h[cp][sim_idx] * dSSB / (0.2 * SSBpR[cp][sim_idx] * R0[cp][sim_idx] * (1.0 - h[cp][sim_idx]) + (h[cp][sim_idx] - 0.2) * dSSB));
+          drecruitmentd1_par = Recdevs[nRecdevIdx][cp] * (0.8 * R0[cp] * h[cp] * dssbd1_par * (0.2 * SSBpR[cp] * R0[cp] * (1.0 - h[cp]) + (h[cp] - 0.2) * dSSB) - 0.8 * R0[cp] * h[cp] * dSSB * (h[cp] - 0.2) * dssbd1_par) / pow((0.2 * SSBpR[cp] * R0[cp] * (1.0 - h[cp]) + (h[cp] - 0.2) * dSSB),2);
+          dRecruitment = Recdevs[nRecdevIdx][cp] * (0.8 * R0[cp] * h[cp] * dSSB / (0.2 * SSBpR[cp] * R0[cp] * (1.0 - h[cp]) + (h[cp] - 0.2) * dSSB));
         }
         else
         {
-          drecruitmentd1_par = Recdevs[nRecdevIdx][cp][sim_idx] * aR[cp][sim_idx] * (dssbd1_par * exp(-(bR[cp][sim_idx] * dSSB)) - dSSB * bR[cp][sim_idx] * dssbd1_par * exp(-(bR[cp][sim_idx] * dSSB)));
-          dRecruitment = Recdevs[nRecdevIdx][cp][sim_idx] * aR[cp][sim_idx] * dSSB * exp(-(bR[cp][sim_idx] * dSSB));
+          drecruitmentd1_par = Recdevs[nRecdevIdx][cp] * aR[cp] * (dssbd1_par * exp(-(bR[cp] * dSSB)) - dSSB * bR[cp] * dssbd1_par * exp(-(bR[cp] * dSSB)));
+          dRecruitment = Recdevs[nRecdevIdx][cp] * aR[cp] * dSSB * exp(-(bR[cp] * dSSB));
         }
         
         cr = 1;
         
         while ((cr <= nareas))
         {
-          nbefored1_par[cr][cs][1][cp][sim_idx] = RecSpatialDevs[cr][cp][sim_idx] * Recdist[cr][cp][sim_idx] * drecruitmentd1_par;
-          NBefore[cr][cs][1][cp][sim_idx] = dRecruitment * RecSpatialDevs[cr][cp][sim_idx] * Recdist[cr][cp][sim_idx];
-          nd1_par[cr][cs][1][cp][sim_idx] = nbefored1_par[cr][cs][1][cp][sim_idx];
-          N[cr][cs][1][cp][sim_idx] = NBefore[cr][cs][1][cp][sim_idx];
+          nbefored1_par[cr][cs][1][cp] = RecSpatialDevs[cr][cp] * Recdist[cr][cp] * drecruitmentd1_par;
+          NBefore[cr][cs][1][cp] = dRecruitment * RecSpatialDevs[cr][cp] * Recdist[cr][cp];
+          nd1_par[cr][cs][1][cp] = nbefored1_par[cr][cs][1][cp];
+          N[cr][cs][1][cp] = NBefore[cr][cs][1][cp];
           cr = cr + 1;
         }
       }
@@ -434,13 +415,13 @@ void D_OperatingModelBase::POPDYN_YEAR_DPAR(const ARRAY_2D qy/* nfleets,nsim */,
           
           while ((cr2 <= nareas))
           {
-            dnd1_par = dnd1_par + mov[cr][cr2][cs][ca][cp][sim_idx] * nd1_par[cr2][cs][ca][cp][sim_idx];
-            dN = dN + N[cr2][cs][ca][cp][sim_idx] * mov[cr][cr2][cs][ca][cp][sim_idx];
+            dnd1_par = dnd1_par + mov[cr][cr2][cs][ca][cp] * nd1_par[cr2][cs][ca][cp];
+            dN = dN + N[cr2][cs][ca][cp] * mov[cr][cr2][cs][ca][cp];
             cr2 = cr2 + 1;
           }
           
-          movnd1_par[cr][sim_idx] = dnd1_par;
-          MovN[cr][sim_idx] = dN;
+          movnd1_par[cr] = dnd1_par;
+          MovN[cr] = dN;
           cr = cr + 1;
         }
         
@@ -448,8 +429,8 @@ void D_OperatingModelBase::POPDYN_YEAR_DPAR(const ARRAY_2D qy/* nfleets,nsim */,
         
         while ((cr <= nareas))
         {
-          nd1_par[cr][cs][ca][cp][sim_idx] = movnd1_par[cr][sim_idx];
-          N[cr][cs][ca][cp][sim_idx] = MovN[cr][sim_idx];
+          nd1_par[cr][cs][ca][cp] = movnd1_par[cr];
+          N[cr][cs][ca][cp] = MovN[cr];
           cr = cr + 1;
         }
         
@@ -470,28 +451,28 @@ void D_OperatingModelBase::POPDYN_YEAR_DPAR(const ARRAY_2D qy/* nfleets,nsim */,
           
           while ((cf <= nfleets))
           {
-            dfmd1_par = sel[ca][cf][sim_idx] * qy[cf][sim_idx] * eannuald1_par[cf][cr][cs][sim_idx];
-            dFM = Eannual[cf][cr][cs][sim_idx] * sel[ca][cf][sim_idx] * qy[cf][sim_idx];
-            fmd1_par[cf][sim_idx] = dfmd1_par;
-            FM[cf][sim_idx] = dFM;
+            dfmd1_par = sel[ca][cf] * qy[cf] * eannuald1_par[cf][cr][cs];
+            dFM = Eannual[cf][cr][cs] * sel[ca][cf] * qy[cf];
+            fmd1_par[cf] = dfmd1_par;
+            FM[cf] = dFM;
             dftotd1_par = dftotd1_par + dfmd1_par;
             dFtot = dFtot + dFM;
             cf = cf + 1;
           }
           
           dzd1_par = dftotd1_par;
-          dZ = dFtot + M[ca][cp][sim_idx] / nsubyears;
+          dZ = dFtot + M[ca][cp] / nsubyears;
           cf = 1;
           
           while ((cf <= nfleets))
           {
-            cd1_par[cf][cr][cs][ca][cp][sim_idx] = (nd1_par[cr][cs][ca][cp][sim_idx] * FM[cf][sim_idx] / dZ + N[cr][cs][ca][cp][sim_idx] * (fmd1_par[cf][sim_idx] * dZ - FM[cf][sim_idx] * dzd1_par) / pow(dZ,2)) * (1 - exp(-dZ)) + N[cr][cs][ca][cp][sim_idx] * FM[cf][sim_idx] * dzd1_par * exp(-dZ) / dZ;
-            C[cf][cr][cs][ca][cp][sim_idx] = N[cr][cs][ca][cp][sim_idx] * (1 - exp(-dZ)) * (FM[cf][sim_idx] / dZ);
+            cd1_par[cf][cr][cs][ca][cp] = (nd1_par[cr][cs][ca][cp] * FM[cf] / dZ + N[cr][cs][ca][cp] * (fmd1_par[cf] * dZ - FM[cf] * dzd1_par) / pow(dZ,2)) * (1 - exp(-dZ)) + N[cr][cs][ca][cp] * FM[cf] * dzd1_par * exp(-dZ) / dZ;
+            C[cf][cr][cs][ca][cp] = N[cr][cs][ca][cp] * (1 - exp(-dZ)) * (FM[cf] / dZ);
             cf = cf + 1;
           }
           
-          nd1_par[cr][cs][ca][cp][sim_idx] = nd1_par[cr][cs][ca][cp][sim_idx] * exp(-dZ) - N[cr][cs][ca][cp][sim_idx] * dzd1_par * exp(-dZ);
-          N[cr][cs][ca][cp][sim_idx] = N[cr][cs][ca][cp][sim_idx] * exp(-dZ);
+          nd1_par[cr][cs][ca][cp] = nd1_par[cr][cs][ca][cp] * exp(-dZ) - N[cr][cs][ca][cp] * dzd1_par * exp(-dZ);
+          N[cr][cs][ca][cp] = N[cr][cs][ca][cp] * exp(-dZ);
           cr = cr + 1;
         }
         
@@ -504,27 +485,27 @@ void D_OperatingModelBase::POPDYN_YEAR_DPAR(const ARRAY_2D qy/* nfleets,nsim */,
         
         while ((cr <= nareas))
         {
-          dplusgroupd1_par = nd1_par[cr][cs][nages][cp][sim_idx];
-          dPlusGroup = N[cr][cs][nages][cp][sim_idx];
-          nbefored1_par[cr][cs + 1][1][cp][sim_idx] = 0.0;
-          NBefore[cr][cs + 1][1][cp][sim_idx] = 0.0;
-          nd1_par[cr][cs + 1][1][cp][sim_idx] = 0.0;
-          N[cr][cs + 1][1][cp][sim_idx] = 0.0;
+          dplusgroupd1_par = nd1_par[cr][cs][nages][cp];
+          dPlusGroup = N[cr][cs][nages][cp];
+          nbefored1_par[cr][cs + 1][1][cp] = 0.0;
+          NBefore[cr][cs + 1][1][cp] = 0.0;
+          nd1_par[cr][cs + 1][1][cp] = 0.0;
+          N[cr][cs + 1][1][cp] = 0.0;
           ca = nages - 1;
           
           while ((ca >= 1))
           {
-            nbefored1_par[cr][cs + 1][ca + 1][cp][sim_idx] = nd1_par[cr][cs][ca][cp][sim_idx];
-            NBefore[cr][cs + 1][ca + 1][cp][sim_idx] = N[cr][cs][ca][cp][sim_idx];
-            nd1_par[cr][cs + 1][ca + 1][cp][sim_idx] = nbefored1_par[cr][cs + 1][ca + 1][cp][sim_idx];
-            N[cr][cs + 1][ca + 1][cp][sim_idx] = NBefore[cr][cs + 1][ca + 1][cp][sim_idx];
+            nbefored1_par[cr][cs + 1][ca + 1][cp] = nd1_par[cr][cs][ca][cp];
+            NBefore[cr][cs + 1][ca + 1][cp] = N[cr][cs][ca][cp];
+            nd1_par[cr][cs + 1][ca + 1][cp] = nbefored1_par[cr][cs + 1][ca + 1][cp];
+            N[cr][cs + 1][ca + 1][cp] = NBefore[cr][cs + 1][ca + 1][cp];
             ca = ca - 1;
           }
           
-          nbefored1_par[cr][cs + 1][nages][cp][sim_idx] = nbefored1_par[cr][cs + 1][nages][cp][sim_idx] + dplusgroupd1_par;
-          NBefore[cr][cs + 1][nages][cp][sim_idx] = NBefore[cr][cs + 1][nages][cp][sim_idx] + dPlusGroup;
-          nd1_par[cr][cs + 1][nages][cp][sim_idx] = nd1_par[cr][cs + 1][nages][cp][sim_idx] + dplusgroupd1_par;
-          N[cr][cs + 1][nages][cp][sim_idx] = N[cr][cs + 1][nages][cp][sim_idx] + dPlusGroup;
+          nbefored1_par[cr][cs + 1][nages][cp] = nbefored1_par[cr][cs + 1][nages][cp] + dplusgroupd1_par;
+          NBefore[cr][cs + 1][nages][cp] = NBefore[cr][cs + 1][nages][cp] + dPlusGroup;
+          nd1_par[cr][cs + 1][nages][cp] = nd1_par[cr][cs + 1][nages][cp] + dplusgroupd1_par;
+          N[cr][cs + 1][nages][cp] = N[cr][cs + 1][nages][cp] + dPlusGroup;
           cr = cr + 1;
         }
       }
@@ -549,7 +530,7 @@ void D_OperatingModelBase::POPDYN_YEAR_DPAR(const ARRAY_2D qy/* nfleets,nsim */,
 //    RW status of diff variables: movn:(loc) fm:(loc) eforyear:(loc)
 //                 nbefore:(loc) n:(loc) operatingmodelbase__popdyn_projection_objective:in-killed
 //                 par:out c:(loc)
-void D_OperatingModelBase::POPDYN_PROJECTION_OBJECTIVE_BPAR(const ARRAY_1D par/* 0:npar - 1 */, ARRAY_1D parb2_par/* 0:npar - 1 */, int npar, int nfixed, const ARRAY_1D TAC/* 0:npar - 1 */, const ARRAY_1D TAE/* 0:nfixed - 1 */, const ARRAY_1I FbyPar/* 0:npar - 1 */, const ARRAY_1I FbyFixed/* 0:nfixed - 1 */, const ARRAY_4D ECurrent/* nfleets,nareas,nsubyears,nsim */, const ARRAY_2D qy/* nfleets,nsim */, const ARRAY_2D R0/* npop,nsim */, const ARRAY_3D M/* nages,npop,nsim */, const ARRAY_3D mat/* nages,npop,nsim */, const ARRAY_4D Idist/* nareas,nages,npop,nsim */, const ARRAY_3D Len_age/* nages,npop,nsim */, const ARRAY_3D Wt_age/* nages,npop,nsim */, const ARRAY_3D Wt_age_mid/* nages,npop,nsim */, const ARRAY_3D sel/* nages,nfleets,nsim */, const ARRAY_6D mov/* nareas,nareas,nsubyears,nages,npop,nsim */, const ARRAY_2D h/* npop,nsim */, const ARRAY_3D Recdist/* nareas,npop,nsim */, const ARRAY_3D Recdevs/* SpawnPerYr,npop,nsim */, const ARRAY_3D RecSpatialDevs/* nareas,npop,nsim */, const ARRAY_1I SRrel/* npop */, ARRAY_5D N/* nareas,nsubyears + 1,nages,npop,nsim */, ARRAY_5D nb2_par/* nareas,nsubyears + 1,nages,npop,nsim */, ARRAY_5D NBefore/* nareas,nsubyears + 1,nages,npop,nsim */, ARRAY_5D nbeforeb2_par/* nareas,nsubyears + 1,nages,npop,nsim */, ARRAY_5D SSN/* nareas,nsubyears,nages,npop,nsim */, ARRAY_6D C/* nfleets,nareas,nsubyears,nages,npop,nsim */, ARRAY_6D cb2_par/* nfleets,nareas,nsubyears,nages,npop,nsim */, ARRAY_2D SSBA/* npop,nsim */, int sim_idx, double& popdyn_projection_objectiveb2_par)
+void D_OperatingModelBase::POPDYN_PROJECTION_OBJECTIVE_BPAR(const ARRAY_1D par/* 0:npar - 1 */, ARRAY_1D parb2_par/* 0:npar - 1 */, int npar, int nfixed, const ARRAY_1D TAC/* 0:npar - 1 */, const ARRAY_1D TAE/* 0:nfixed - 1 */, const ARRAY_1I FbyPar/* 0:npar - 1 */, const ARRAY_1I FbyFixed/* 0:nfixed - 1 */, const ARRAY_3D ECurrent/* nfleets,nareas,nsubyears */, const ARRAY_1D qy/* nfleets */, const ARRAY_1D R0/* npop */, const ARRAY_2D M/* nages,npop */, const ARRAY_2D mat/* nages,npop */, const ARRAY_3D Idist/* nareas,nages,npop */, const ARRAY_2D Len_age/* nages,npop */, const ARRAY_2D Wt_age/* nages,npop */, const ARRAY_2D Wt_age_mid/* nages,npop */, const ARRAY_2D sel/* nages,nfleets */, const ARRAY_5D mov/* nareas,nareas,nsubyears,nages,npop */, const ARRAY_1D h/* npop */, const ARRAY_2D Recdist/* nareas,npop */, const ARRAY_2D Recdevs/* SpawnPerYr,npop */, const ARRAY_2D RecSpatialDevs/* nareas,npop */, const ARRAY_1I SRrel/* npop */, ARRAY_4D N/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D nb2_par/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D NBefore/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D nbeforeb2_par/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D SSN/* nareas,nsubyears,nages,npop */, ARRAY_5D C/* nfleets,nareas,nsubyears,nages,npop */, ARRAY_5D cb2_par/* nfleets,nareas,nsubyears,nages,npop */, ARRAY_1D SSBA/* npop */, double& popdyn_projection_objectiveb2_par)
 {
   int ad_count;
   int ad_count0;
@@ -577,12 +558,11 @@ void D_OperatingModelBase::POPDYN_PROJECTION_OBJECTIVE_BPAR(const ARRAY_1D par/*
   int ix_2___;
   int ix_3___;
   int ix_4___;
-  int ix_5___;
   double temp;
   cf = 0;
   dTACError = 0;
   dCatchBiomass = 0;
-  popdyn_projection_par(par,npar,nfixed,TAE,FbyPar,FbyFixed,ECurrent,qy,R0,M,mat,Idist,Len_age,Wt_age,sel,mov,h,Recdist,Recdevs,RecSpatialDevs,SRrel,N,NBefore,SSN,C,SSBA,1,sim_idx);
+  popdyn_projection_par(par,npar,nfixed,TAE,FbyPar,FbyFixed,ECurrent,qy,R0,M,mat,Idist,Len_age,Wt_age,sel,mov,h,Recdist,Recdevs,RecSpatialDevs,SRrel,N,NBefore,SSN,C,SSBA,1);
   cx = 0;
   ad_count3 = 0;
   
@@ -626,7 +606,7 @@ void D_OperatingModelBase::POPDYN_PROJECTION_OBJECTIVE_BPAR(const ARRAY_1D par/*
           
           while ((cs <= nsubyears))
           {
-            dCatchBiomass = dCatchBiomass + C[cf][cr][cs][ca][cp][sim_idx] * Wt_age_mid[ca][cp][sim_idx];
+            dCatchBiomass = dCatchBiomass + C[cf][cr][cs][ca][cp] * Wt_age_mid[ca][cp];
             i4stack_1_2i = i4stack_1_2i + 1;
             
             if (i4stack_1_2i > stackSizeInt(i4stack_1_2))
@@ -738,20 +718,17 @@ void D_OperatingModelBase::POPDYN_PROJECTION_OBJECTIVE_BPAR(const ARRAY_1D par/*
   i4stack_1_2[i4stack_1_2i] = ad_count3;
   dobjectiveb2_par = popdyn_projection_objectiveb2_par;
   
-  for (ix_5___ = 1;ix_5___ <= nsim; ++ix_5___)
+  for (ix_4___ = 1;ix_4___ <= npop; ++ix_4___)
   {
-    for (ix_4___ = 1;ix_4___ <= npop; ++ix_4___)
+    for (ix_3___ = 1;ix_3___ <= nages; ++ix_3___)
     {
-      for (ix_3___ = 1;ix_3___ <= nages; ++ix_3___)
+      for (ix_2___ = 1;ix_2___ <= nsubyears; ++ix_2___)
       {
-        for (ix_2___ = 1;ix_2___ <= nsubyears; ++ix_2___)
+        for (ix_1___ = 1;ix_1___ <= nareas; ++ix_1___)
         {
-          for (ix_1___ = 1;ix_1___ <= nareas; ++ix_1___)
+          for (ix_0___ = 1;ix_0___ <= nfleets; ++ix_0___)
           {
-            for (ix_0___ = 1;ix_0___ <= nfleets; ++ix_0___)
-            {
-              cb2_par[ix_0___][ix_1___][ix_2___][ix_3___][ix_4___][ix_5___] = 0.0;
-            }
+            cb2_par[ix_0___][ix_1___][ix_2___][ix_3___][ix_4___] = 0.0;
           }
         }
       }
@@ -798,7 +775,7 @@ void D_OperatingModelBase::POPDYN_PROJECTION_OBJECTIVE_BPAR(const ARRAY_1D par/*
           {
             cs = i4stack_1_2[i4stack_1_2i];
             i4stack_1_2i = i4stack_1_2i - 1;
-            cb2_par[cf][cr][cs][ca][cp][sim_idx] = cb2_par[cf][cr][cs][ca][cp][sim_idx] + Wt_age_mid[ca][cp][sim_idx] * dcatchbiomassb2_par;
+            cb2_par[cf][cr][cs][ca][cp] = cb2_par[cf][cr][cs][ca][cp] + Wt_age_mid[ca][cp] * dcatchbiomassb2_par;
           }
         }
       }
@@ -810,7 +787,7 @@ void D_OperatingModelBase::POPDYN_PROJECTION_OBJECTIVE_BPAR(const ARRAY_1D par/*
     r4stack_1_2i = r4stack_1_2i - 1;
   }
   
-  POPDYN_PROJECTION_PAR_BPAR(par,parb2_par,npar,nfixed,TAE,FbyPar,FbyFixed,ECurrent,qy,R0,M,mat,Idist,Len_age,Wt_age,sel,mov,h,Recdist,Recdevs,RecSpatialDevs,SRrel,N,nb2_par,NBefore,nbeforeb2_par,SSN,C,cb2_par,SSBA,1,sim_idx);
+  POPDYN_PROJECTION_PAR_BPAR(par,parb2_par,npar,nfixed,TAE,FbyPar,FbyFixed,ECurrent,qy,R0,M,mat,Idist,Len_age,Wt_age,sel,mov,h,Recdist,Recdevs,RecSpatialDevs,SRrel,N,nb2_par,NBefore,nbeforeb2_par,SSN,C,cb2_par,SSBA,1);
 }
 
 // ----------------------------------------------------------------------------
@@ -818,7 +795,7 @@ void D_OperatingModelBase::POPDYN_PROJECTION_OBJECTIVE_BPAR(const ARRAY_1D par/*
 //   Differentiation of operatingmodelbase__popdyn_projection_par in reverse (adjoint) mode:
 //    gradient     of useful results: c
 //    with respect to varying inputs: par
-void D_OperatingModelBase::POPDYN_PROJECTION_PAR_BPAR(const ARRAY_1D par/* 0:npar - 1 */, ARRAY_1D parb2_par/* 0:npar - 1 */, int npar, int nfixed, const ARRAY_1D TAE/* 0:nfixed - 1 */, const ARRAY_1I FbyPar/* 0:npar - 1 */, const ARRAY_1I FbyFixed/* 0:nfixed - 1 */, const ARRAY_4D ECurrent/* nfleets,nareas,nsubyears,nsim */, const ARRAY_2D qy/* nfleets,nsim */, const ARRAY_2D R0/* npop,nsim */, const ARRAY_3D M/* nages,npop,nsim */, const ARRAY_3D mat/* nages,npop,nsim */, const ARRAY_4D Idist/* nareas,nages,npop,nsim */, const ARRAY_3D Len_age/* nages,npop,nsim */, const ARRAY_3D Wt_age/* nages,npop,nsim */, const ARRAY_3D sel/* nages,nfleets,nsim */, const ARRAY_6D mov/* nareas,nareas,nsubyears,nages,npop,nsim */, const ARRAY_2D h/* npop,nsim */, const ARRAY_3D Recdist/* nareas,npop,nsim */, const ARRAY_3D Recdevs/* SpawnPerYr,npop,nsim */, const ARRAY_3D RecSpatialDevs/* nareas,npop,nsim */, const ARRAY_1I SRrel/* npop */, ARRAY_5D N/* nareas,nsubyears + 1,nages,npop,nsim */, ARRAY_5D nb2_par/* nareas,nsubyears + 1,nages,npop,nsim */, ARRAY_5D NBefore/* nareas,nsubyears + 1,nages,npop,nsim */, ARRAY_5D nbeforeb2_par/* nareas,nsubyears + 1,nages,npop,nsim */, ARRAY_5D SSN/* nareas,nsubyears,nages,npop,nsim */, ARRAY_6D C/* nfleets,nareas,nsubyears,nages,npop,nsim */, ARRAY_6D cb2_par/* nfleets,nareas,nsubyears,nages,npop,nsim */, ARRAY_2D SSBA/* npop,nsim */, int bIgnoreLast, int sim_idx)
+void D_OperatingModelBase::POPDYN_PROJECTION_PAR_BPAR(const ARRAY_1D par/* 0:npar - 1 */, ARRAY_1D parb2_par/* 0:npar - 1 */, int npar, int nfixed, const ARRAY_1D TAE/* 0:nfixed - 1 */, const ARRAY_1I FbyPar/* 0:npar - 1 */, const ARRAY_1I FbyFixed/* 0:nfixed - 1 */, const ARRAY_3D ECurrent/* nfleets,nareas,nsubyears */, const ARRAY_1D qy/* nfleets */, const ARRAY_1D R0/* npop */, const ARRAY_2D M/* nages,npop */, const ARRAY_2D mat/* nages,npop */, const ARRAY_3D Idist/* nareas,nages,npop */, const ARRAY_2D Len_age/* nages,npop */, const ARRAY_2D Wt_age/* nages,npop */, const ARRAY_2D sel/* nages,nfleets */, const ARRAY_5D mov/* nareas,nareas,nsubyears,nages,npop */, const ARRAY_1D h/* npop */, const ARRAY_2D Recdist/* nareas,npop */, const ARRAY_2D Recdevs/* SpawnPerYr,npop */, const ARRAY_2D RecSpatialDevs/* nareas,npop */, const ARRAY_1I SRrel/* npop */, ARRAY_4D N/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D nb2_par/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D NBefore/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D nbeforeb2_par/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D SSN/* nareas,nsubyears,nages,npop */, ARRAY_5D C/* nfleets,nareas,nsubyears,nages,npop */, ARRAY_5D cb2_par/* nfleets,nareas,nsubyears,nages,npop */, ARRAY_1D SSBA/* npop */, int bIgnoreLast)
 {
   int ad_count;
   int ad_count0;
@@ -860,7 +837,7 @@ void D_OperatingModelBase::POPDYN_PROJECTION_PAR_BPAR(const ARRAY_1D par/* 0:npa
       
       while ((cs <= nsubyears))
       {
-        EforYear[cf][cr][cs][sim_idx] = exp(par[cx]) * ECurrent[cf][cr][cs][sim_idx];
+        EforYear[cf][cr][cs] = exp(par[cx]) * ECurrent[cf][cr][cs];
         i4stack_2_2i = i4stack_2_2i + 1;
         
         if (i4stack_2_2i > stackSizeInt(i4stack_2_2))
@@ -920,7 +897,7 @@ void D_OperatingModelBase::POPDYN_PROJECTION_PAR_BPAR(const ARRAY_1D par/* 0:npa
       
       while ((cs <= nsubyears))
       {
-        EforYear[cf][cr][cs][sim_idx] = TAE[cx] * ECurrent[cf][cr][cs][sim_idx];
+        EforYear[cf][cr][cs] = TAE[cx] * ECurrent[cf][cr][cs];
         i4stack_2_2i = i4stack_2_2i + 1;
         
         if (i4stack_2_2i > stackSizeInt(i4stack_2_2))
@@ -973,8 +950,8 @@ void D_OperatingModelBase::POPDYN_PROJECTION_PAR_BPAR(const ARRAY_1D par/* 0:npa
   }
   
   i4stack_2_2[i4stack_2_2i] = ad_count3;
-  popdyn_next_year(N,NBefore,sim_idx);
-  POPDYN_YEAR_BPAR(qy,R0,M,mat,Len_age,Wt_age,sel,EforYear,eforyearb2_par,mov,h,Recdist,Recdevs,RecSpatialDevs,SRrel,N,nb2_par,NBefore,nbeforeb2_par,SSN,C,cb2_par,SSBA,bIgnoreLast,sim_idx);
+  nextYear(N,NBefore);
+  POPDYN_YEAR_BPAR(qy,R0,M,mat,Len_age,Wt_age,sel,EforYear,eforyearb2_par,mov,h,Recdist,Recdevs,RecSpatialDevs,SRrel,N,nb2_par,NBefore,nbeforeb2_par,SSN,C,cb2_par,SSBA,bIgnoreLast);
   
   for (ix_0___ = 0;ix_0___ <= npar - 1; ++ix_0___)
   {
@@ -1000,7 +977,7 @@ void D_OperatingModelBase::POPDYN_PROJECTION_PAR_BPAR(const ARRAY_1D par/* 0:npa
       {
         cs = i4stack_2_2[i4stack_2_2i];
         i4stack_2_2i = i4stack_2_2i - 1;
-        eforyearb2_par[cf][cr][cs][sim_idx] = 0.0;
+        eforyearb2_par[cf][cr][cs] = 0.0;
       }
       
       cf = i4stack_2_2[i4stack_2_2i];
@@ -1021,8 +998,8 @@ void D_OperatingModelBase::POPDYN_PROJECTION_PAR_BPAR(const ARRAY_1D par/* 0:npa
       {
         cs = i4stack_2_2[i4stack_2_2i];
         i4stack_2_2i = i4stack_2_2i - 1;
-        parb2_par[cx] = parb2_par[cx] + ECurrent[cf][cr][cs][sim_idx] * exp(par[cx]) * eforyearb2_par[cf][cr][cs][sim_idx];
-        eforyearb2_par[cf][cr][cs][sim_idx] = 0.0;
+        parb2_par[cx] = parb2_par[cx] + ECurrent[cf][cr][cs] * exp(par[cx]) * eforyearb2_par[cf][cr][cs];
+        eforyearb2_par[cf][cr][cs] = 0.0;
       }
       
       cf = i4stack_2_2[i4stack_2_2i];
@@ -1036,7 +1013,7 @@ void D_OperatingModelBase::POPDYN_PROJECTION_PAR_BPAR(const ARRAY_1D par/* 0:npa
 //   Differentiation of operatingmodelbase__popdyn_year in reverse (adjoint) mode:
 //    gradient     of useful results: c
 //    with respect to varying inputs: eannual
-void D_OperatingModelBase::POPDYN_YEAR_BPAR(const ARRAY_2D qy/* nfleets,nsim */, const ARRAY_2D R0/* npop,nsim */, const ARRAY_3D M/* nages,npop,nsim */, const ARRAY_3D mat/* nages,npop,nsim */, const ARRAY_3D Len_age/* nages,npop,nsim */, const ARRAY_3D Wt_age/* nages,npop,nsim */, const ARRAY_3D sel/* nages,nfleets,nsim */, const ARRAY_4D Eannual/* nfleets,nareas,nsubyears,nsim */, ARRAY_4D eannualb2_par/* nfleets,nareas,nsubyears,nsim */, const ARRAY_6D mov/* nareas,nareas,nsubyears,nages,npop,nsim */, const ARRAY_2D h/* npop,nsim */, const ARRAY_3D Recdist/* nareas,npop,nsim */, const ARRAY_3D Recdevs/* SpawnPerYr,npop,nsim */, const ARRAY_3D RecSpatialDevs/* nareas,npop,nsim */, const ARRAY_1I SRrel/* npop */, ARRAY_5D N/* nareas,nsubyears + 1,nages,npop,nsim */, ARRAY_5D nb2_par/* nareas,nsubyears + 1,nages,npop,nsim */, ARRAY_5D NBefore/* nareas,nsubyears + 1,nages,npop,nsim */, ARRAY_5D nbeforeb2_par/* nareas,nsubyears + 1,nages,npop,nsim */, ARRAY_5D SSN/* nareas,nsubyears,nages,npop,nsim */, ARRAY_6D C/* nfleets,nareas,nsubyears,nages,npop,nsim */, ARRAY_6D cb2_par/* nfleets,nareas,nsubyears,nages,npop,nsim */, ARRAY_2D SSBA/* npop,nsim */, int bIgnoreLast, int sim_idx)
+void D_OperatingModelBase::POPDYN_YEAR_BPAR(const ARRAY_1D qy/* nfleets */, const ARRAY_1D R0/* npop */, const ARRAY_2D M/* nages,npop */, const ARRAY_2D mat/* nages,npop */, const ARRAY_2D Len_age/* nages,npop */, const ARRAY_2D Wt_age/* nages,npop */, const ARRAY_2D sel/* nages,nfleets */, const ARRAY_3D Eannual/* nfleets,nareas,nsubyears */, ARRAY_3D eannualb2_par/* nfleets,nareas,nsubyears */, const ARRAY_5D mov/* nareas,nareas,nsubyears,nages,npop */, const ARRAY_1D h/* npop */, const ARRAY_2D Recdist/* nareas,npop */, const ARRAY_2D Recdevs/* SpawnPerYr,npop */, const ARRAY_2D RecSpatialDevs/* nareas,npop */, const ARRAY_1I SRrel/* npop */, ARRAY_4D N/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D nb2_par/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D NBefore/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D nbeforeb2_par/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D SSN/* nareas,nsubyears,nages,npop */, ARRAY_5D C/* nfleets,nareas,nsubyears,nages,npop */, ARRAY_5D cb2_par/* nfleets,nareas,nsubyears,nages,npop */, ARRAY_1D SSBA/* npop */, int bIgnoreLast)
 {
   int ad_count;
   int ad_count0;
@@ -1097,12 +1074,10 @@ void D_OperatingModelBase::POPDYN_YEAR_BPAR(const ARRAY_2D qy/* nfleets,nsim */,
   int ix_1___;
   int ix_2___;
   int ix_3___;
-  int ix_4___;
   int nRecdevIdx;
   double temp;
   double temp0;
   double temp1;
-  double temp2;
   double tempb2_par;
   double tempb2_par0;
   double tempb2_par1;
@@ -1141,8 +1116,8 @@ void D_OperatingModelBase::POPDYN_YEAR_BPAR(const ARRAY_2D qy/* nfleets,nsim */,
         
         while ((ca <= nages))
         {
-          dSSN = NBefore[cr][cs][ca][cp][sim_idx] * mat[ca][cp][sim_idx];
-          dSSB_area = dSSB_area + dSSN * Wt_age[ca][cp][sim_idx];
+          dSSN = NBefore[cr][cs][ca][cp] * mat[ca][cp];
+          dSSB_area = dSSB_area + dSSN * Wt_age[ca][cp];
           i4stack_3_2i = i4stack_3_2i + 1;
           
           if (i4stack_3_2i > stackSizeInt(i4stack_3_2))
@@ -1189,7 +1164,7 @@ void D_OperatingModelBase::POPDYN_YEAR_BPAR(const ARRAY_2D qy/* nfleets,nsim */,
       {
         if ((SRrel[cp] == 1))
         {
-          dRecruitment = Recdevs[nRecdevIdx][cp][sim_idx] * (0.8 * R0[cp][sim_idx] * h[cp][sim_idx] * dSSB / (0.2 * SSBpR[cp][sim_idx] * R0[cp][sim_idx] * (1.0 - h[cp][sim_idx]) + (h[cp][sim_idx] - 0.2) * dSSB));
+          dRecruitment = Recdevs[nRecdevIdx][cp] * (0.8 * R0[cp] * h[cp] * dSSB / (0.2 * SSBpR[cp] * R0[cp] * (1.0 - h[cp]) + (h[cp] - 0.2) * dSSB));
           bstack_3_2i = bstack_3_2i + 1;
           
           if (bstack_3_2i > stackSizeInt(bstack_3_2))
@@ -1201,7 +1176,7 @@ void D_OperatingModelBase::POPDYN_YEAR_BPAR(const ARRAY_2D qy/* nfleets,nsim */,
         }
         else
         {
-          dRecruitment = Recdevs[nRecdevIdx][cp][sim_idx] * aR[cp][sim_idx] * dSSB * exp(-(bR[cp][sim_idx] * dSSB));
+          dRecruitment = Recdevs[nRecdevIdx][cp] * aR[cp] * dSSB * exp(-(bR[cp] * dSSB));
           bstack_3_2i = bstack_3_2i + 1;
           
           if (bstack_3_2i > stackSizeInt(bstack_3_2))
@@ -1217,7 +1192,7 @@ void D_OperatingModelBase::POPDYN_YEAR_BPAR(const ARRAY_2D qy/* nfleets,nsim */,
         
         while ((cr <= nareas))
         {
-          NBefore[cr][cs][1][cp][sim_idx] = dRecruitment * RecSpatialDevs[cr][cp][sim_idx] * Recdist[cr][cp][sim_idx];
+          NBefore[cr][cs][1][cp] = dRecruitment * RecSpatialDevs[cr][cp] * Recdist[cr][cp];
           r4stack_3_2i = r4stack_3_2i + 1;
           
           if (r4stack_3_2i > stackSizeInt(r4stack_3_2))
@@ -1225,8 +1200,8 @@ void D_OperatingModelBase::POPDYN_YEAR_BPAR(const ARRAY_2D qy/* nfleets,nsim */,
             growStack(r4stack_3_2,r4stack_3_2i);
           }
           
-          r4stack_3_2[r4stack_3_2i] = N[cr][cs][1][cp][sim_idx];
-          N[cr][cs][1][cp][sim_idx] = NBefore[cr][cs][1][cp][sim_idx];
+          r4stack_3_2[r4stack_3_2i] = N[cr][cs][1][cp];
+          N[cr][cs][1][cp] = NBefore[cr][cs][1][cp];
           i4stack_3_2i = i4stack_3_2i + 1;
           
           if (i4stack_3_2i > stackSizeInt(i4stack_3_2))
@@ -1284,7 +1259,7 @@ void D_OperatingModelBase::POPDYN_YEAR_BPAR(const ARRAY_2D qy/* nfleets,nsim */,
           
           while ((cr2 <= nareas))
           {
-            dN = dN + N[cr2][cs][ca][cp][sim_idx] * mov[cr][cr2][cs][ca][cp][sim_idx];
+            dN = dN + N[cr2][cs][ca][cp] * mov[cr][cr2][cs][ca][cp];
             i4stack_3_2i = i4stack_3_2i + 1;
             
             if (i4stack_3_2i > stackSizeInt(i4stack_3_2))
@@ -1305,7 +1280,7 @@ void D_OperatingModelBase::POPDYN_YEAR_BPAR(const ARRAY_2D qy/* nfleets,nsim */,
           }
           
           i4stack_3_2[i4stack_3_2i] = ad_count2;
-          MovN[cr][sim_idx] = dN;
+          MovN[cr] = dN;
           i4stack_3_2i = i4stack_3_2i + 1;
           
           if (i4stack_3_2i > stackSizeInt(i4stack_3_2))
@@ -1338,8 +1313,8 @@ void D_OperatingModelBase::POPDYN_YEAR_BPAR(const ARRAY_2D qy/* nfleets,nsim */,
             growStack(r4stack_3_2,r4stack_3_2i);
           }
           
-          r4stack_3_2[r4stack_3_2i] = N[cr][cs][ca][cp][sim_idx];
-          N[cr][cs][ca][cp][sim_idx] = MovN[cr][sim_idx];
+          r4stack_3_2[r4stack_3_2i] = N[cr][cs][ca][cp];
+          N[cr][cs][ca][cp] = MovN[cr];
           i4stack_3_2i = i4stack_3_2i + 1;
           
           if (i4stack_3_2i > stackSizeInt(i4stack_3_2))
@@ -1396,7 +1371,7 @@ void D_OperatingModelBase::POPDYN_YEAR_BPAR(const ARRAY_2D qy/* nfleets,nsim */,
           
           while ((cf <= nfleets))
           {
-            dFM = Eannual[cf][cr][cs][sim_idx] * sel[ca][cf][sim_idx] * qy[cf][sim_idx];
+            dFM = Eannual[cf][cr][cs] * sel[ca][cf] * qy[cf];
             r4stack_3_2i = r4stack_3_2i + 1;
             
             if (r4stack_3_2i > stackSizeInt(r4stack_3_2))
@@ -1404,8 +1379,8 @@ void D_OperatingModelBase::POPDYN_YEAR_BPAR(const ARRAY_2D qy/* nfleets,nsim */,
               growStack(r4stack_3_2,r4stack_3_2i);
             }
             
-            r4stack_3_2[r4stack_3_2i] = FM[cf][sim_idx];
-            FM[cf][sim_idx] = dFM;
+            r4stack_3_2[r4stack_3_2i] = FM[cf];
+            FM[cf] = dFM;
             dFtot = dFtot + dFM;
             i4stack_3_2i = i4stack_3_2i + 1;
             
@@ -1435,7 +1410,7 @@ void D_OperatingModelBase::POPDYN_YEAR_BPAR(const ARRAY_2D qy/* nfleets,nsim */,
           }
           
           r4stack_3_2[r4stack_3_2i] = dZ;
-          dZ = dFtot + M[ca][cp][sim_idx] / nsubyears;
+          dZ = dFtot + M[ca][cp] / nsubyears;
           cf = 1;
           ad_count7 = 0;
           
@@ -1468,8 +1443,8 @@ void D_OperatingModelBase::POPDYN_YEAR_BPAR(const ARRAY_2D qy/* nfleets,nsim */,
             growStack(r4stack_3_2,r4stack_3_2i);
           }
           
-          r4stack_3_2[r4stack_3_2i] = N[cr][cs][ca][cp][sim_idx];
-          N[cr][cs][ca][cp][sim_idx] = N[cr][cs][ca][cp][sim_idx] * exp(-dZ);
+          r4stack_3_2[r4stack_3_2i] = N[cr][cs][ca][cp];
+          N[cr][cs][ca][cp] = N[cr][cs][ca][cp] * exp(-dZ);
           i4stack_3_2i = i4stack_3_2i + 1;
           
           if (i4stack_3_2i > stackSizeInt(i4stack_3_2))
@@ -1518,8 +1493,8 @@ void D_OperatingModelBase::POPDYN_YEAR_BPAR(const ARRAY_2D qy/* nfleets,nsim */,
         
         while ((cr <= nareas))
         {
-          dPlusGroup = N[cr][cs][nages][cp][sim_idx];
-          NBefore[cr][cs + 1][1][cp][sim_idx] = 0.0;
+          dPlusGroup = N[cr][cs][nages][cp];
+          NBefore[cr][cs + 1][1][cp] = 0.0;
           r4stack_3_2i = r4stack_3_2i + 1;
           
           if (r4stack_3_2i > stackSizeInt(r4stack_3_2))
@@ -1527,14 +1502,14 @@ void D_OperatingModelBase::POPDYN_YEAR_BPAR(const ARRAY_2D qy/* nfleets,nsim */,
             growStack(r4stack_3_2,r4stack_3_2i);
           }
           
-          r4stack_3_2[r4stack_3_2i] = N[cr][cs + 1][1][cp][sim_idx];
-          N[cr][cs + 1][1][cp][sim_idx] = 0.0;
+          r4stack_3_2[r4stack_3_2i] = N[cr][cs + 1][1][cp];
+          N[cr][cs + 1][1][cp] = 0.0;
           ca = nages - 1;
           ad_count10 = 0;
           
           while ((ca >= 1))
           {
-            NBefore[cr][cs + 1][ca + 1][cp][sim_idx] = N[cr][cs][ca][cp][sim_idx];
+            NBefore[cr][cs + 1][ca + 1][cp] = N[cr][cs][ca][cp];
             r4stack_3_2i = r4stack_3_2i + 1;
             
             if (r4stack_3_2i > stackSizeInt(r4stack_3_2))
@@ -1542,8 +1517,8 @@ void D_OperatingModelBase::POPDYN_YEAR_BPAR(const ARRAY_2D qy/* nfleets,nsim */,
               growStack(r4stack_3_2,r4stack_3_2i);
             }
             
-            r4stack_3_2[r4stack_3_2i] = N[cr][cs + 1][ca + 1][cp][sim_idx];
-            N[cr][cs + 1][ca + 1][cp][sim_idx] = NBefore[cr][cs + 1][ca + 1][cp][sim_idx];
+            r4stack_3_2[r4stack_3_2i] = N[cr][cs + 1][ca + 1][cp];
+            N[cr][cs + 1][ca + 1][cp] = NBefore[cr][cs + 1][ca + 1][cp];
             i4stack_3_2i = i4stack_3_2i + 1;
             
             if (i4stack_3_2i > stackSizeInt(i4stack_3_2))
@@ -1564,7 +1539,7 @@ void D_OperatingModelBase::POPDYN_YEAR_BPAR(const ARRAY_2D qy/* nfleets,nsim */,
           }
           
           i4stack_3_2[i4stack_3_2i] = ad_count10;
-          NBefore[cr][cs + 1][nages][cp][sim_idx] = NBefore[cr][cs + 1][nages][cp][sim_idx] + dPlusGroup;
+          NBefore[cr][cs + 1][nages][cp] = NBefore[cr][cs + 1][nages][cp] + dPlusGroup;
           r4stack_3_2i = r4stack_3_2i + 1;
           
           if (r4stack_3_2i > stackSizeInt(r4stack_3_2))
@@ -1572,8 +1547,8 @@ void D_OperatingModelBase::POPDYN_YEAR_BPAR(const ARRAY_2D qy/* nfleets,nsim */,
             growStack(r4stack_3_2,r4stack_3_2i);
           }
           
-          r4stack_3_2[r4stack_3_2i] = N[cr][cs + 1][nages][cp][sim_idx];
-          N[cr][cs + 1][nages][cp][sim_idx] = N[cr][cs + 1][nages][cp][sim_idx] + dPlusGroup;
+          r4stack_3_2[r4stack_3_2i] = N[cr][cs + 1][nages][cp];
+          N[cr][cs + 1][nages][cp] = N[cr][cs + 1][nages][cp] + dPlusGroup;
           i4stack_3_2i = i4stack_3_2i + 1;
           
           if (i4stack_3_2i > stackSizeInt(i4stack_3_2))
@@ -1680,66 +1655,51 @@ void D_OperatingModelBase::POPDYN_YEAR_BPAR(const ARRAY_2D qy/* nfleets,nsim */,
     ad_count13 = ad_count13 + 1;
   }
   
-  for (ix_1___ = 1;ix_1___ <= nsim; ++ix_1___)
+  for (ix_0___ = 1;ix_0___ <= nareas; ++ix_0___)
   {
-    for (ix_0___ = 1;ix_0___ <= nareas; ++ix_0___)
-    {
-      movnb2_par[ix_0___][ix_1___] = 0.0;
-    }
+    movnb2_par[ix_0___] = 0.0;
   }
   
-  for (ix_1___ = 1;ix_1___ <= nsim; ++ix_1___)
+  for (ix_0___ = 1;ix_0___ <= nfleets; ++ix_0___)
   {
-    for (ix_0___ = 1;ix_0___ <= nfleets; ++ix_0___)
-    {
-      fmb2_par[ix_0___][ix_1___] = 0.0;
-    }
+    fmb2_par[ix_0___] = 0.0;
   }
   
-  for (ix_4___ = 1;ix_4___ <= nsim; ++ix_4___)
+  for (ix_3___ = 1;ix_3___ <= npop; ++ix_3___)
   {
-    for (ix_3___ = 1;ix_3___ <= npop; ++ix_3___)
+    for (ix_2___ = 1;ix_2___ <= nages; ++ix_2___)
     {
-      for (ix_2___ = 1;ix_2___ <= nages; ++ix_2___)
+      for (ix_1___ = 1;ix_1___ <= nsubyears + 1; ++ix_1___)
       {
-        for (ix_1___ = 1;ix_1___ <= nsubyears + 1; ++ix_1___)
+        for (ix_0___ = 1;ix_0___ <= nareas; ++ix_0___)
         {
-          for (ix_0___ = 1;ix_0___ <= nareas; ++ix_0___)
-          {
-            nbeforeb2_par[ix_0___][ix_1___][ix_2___][ix_3___][ix_4___] = 0.0;
-          }
+          nbeforeb2_par[ix_0___][ix_1___][ix_2___][ix_3___] = 0.0;
         }
       }
     }
   }
   
-  for (ix_4___ = 1;ix_4___ <= nsim; ++ix_4___)
+  for (ix_3___ = 1;ix_3___ <= npop; ++ix_3___)
   {
-    for (ix_3___ = 1;ix_3___ <= npop; ++ix_3___)
+    for (ix_2___ = 1;ix_2___ <= nages; ++ix_2___)
     {
-      for (ix_2___ = 1;ix_2___ <= nages; ++ix_2___)
+      for (ix_1___ = 1;ix_1___ <= nsubyears + 1; ++ix_1___)
       {
-        for (ix_1___ = 1;ix_1___ <= nsubyears + 1; ++ix_1___)
+        for (ix_0___ = 1;ix_0___ <= nareas; ++ix_0___)
         {
-          for (ix_0___ = 1;ix_0___ <= nareas; ++ix_0___)
-          {
-            nb2_par[ix_0___][ix_1___][ix_2___][ix_3___][ix_4___] = 0.0;
-          }
+          nb2_par[ix_0___][ix_1___][ix_2___][ix_3___] = 0.0;
         }
       }
     }
   }
   
-  for (ix_3___ = 1;ix_3___ <= nsim; ++ix_3___)
+  for (ix_2___ = 1;ix_2___ <= nsubyears; ++ix_2___)
   {
-    for (ix_2___ = 1;ix_2___ <= nsubyears; ++ix_2___)
+    for (ix_1___ = 1;ix_1___ <= nareas; ++ix_1___)
     {
-      for (ix_1___ = 1;ix_1___ <= nareas; ++ix_1___)
+      for (ix_0___ = 1;ix_0___ <= nfleets; ++ix_0___)
       {
-        for (ix_0___ = 1;ix_0___ <= nfleets; ++ix_0___)
-        {
-          eannualb2_par[ix_0___][ix_1___][ix_2___][ix_3___] = 0.0;
-        }
+        eannualb2_par[ix_0___][ix_1___][ix_2___] = 0.0;
       }
     }
   }
@@ -1771,9 +1731,9 @@ void D_OperatingModelBase::POPDYN_YEAR_BPAR(const ARRAY_2D qy/* nfleets,nsim */,
         {
           cr = i4stack_3_2[i4stack_3_2i];
           i4stack_3_2i = i4stack_3_2i - 1;
-          N[cr][cs + 1][nages][cp][sim_idx] = r4stack_3_2[r4stack_3_2i];
+          N[cr][cs + 1][nages][cp] = r4stack_3_2[r4stack_3_2i];
           r4stack_3_2i = r4stack_3_2i - 1;
-          dplusgroupb2_par = nbeforeb2_par[cr][cs + 1][nages][cp][sim_idx] + nb2_par[cr][cs + 1][nages][cp][sim_idx];
+          dplusgroupb2_par = nbeforeb2_par[cr][cs + 1][nages][cp] + nb2_par[cr][cs + 1][nages][cp];
           ad_count10 = i4stack_3_2[i4stack_3_2i];
           i4stack_3_2i = i4stack_3_2i - 1;
           
@@ -1781,19 +1741,19 @@ void D_OperatingModelBase::POPDYN_YEAR_BPAR(const ARRAY_2D qy/* nfleets,nsim */,
           {
             ca = i4stack_3_2[i4stack_3_2i];
             i4stack_3_2i = i4stack_3_2i - 1;
-            N[cr][cs + 1][ca + 1][cp][sim_idx] = r4stack_3_2[r4stack_3_2i];
+            N[cr][cs + 1][ca + 1][cp] = r4stack_3_2[r4stack_3_2i];
             r4stack_3_2i = r4stack_3_2i - 1;
-            nbeforeb2_par[cr][cs + 1][ca + 1][cp][sim_idx] = nbeforeb2_par[cr][cs + 1][ca + 1][cp][sim_idx] + nb2_par[cr][cs + 1][ca + 1][cp][sim_idx];
-            nb2_par[cr][cs + 1][ca + 1][cp][sim_idx] = 0.0;
-            nb2_par[cr][cs][ca][cp][sim_idx] = nb2_par[cr][cs][ca][cp][sim_idx] + nbeforeb2_par[cr][cs + 1][ca + 1][cp][sim_idx];
-            nbeforeb2_par[cr][cs + 1][ca + 1][cp][sim_idx] = 0.0;
+            nbeforeb2_par[cr][cs + 1][ca + 1][cp] = nbeforeb2_par[cr][cs + 1][ca + 1][cp] + nb2_par[cr][cs + 1][ca + 1][cp];
+            nb2_par[cr][cs + 1][ca + 1][cp] = 0.0;
+            nb2_par[cr][cs][ca][cp] = nb2_par[cr][cs][ca][cp] + nbeforeb2_par[cr][cs + 1][ca + 1][cp];
+            nbeforeb2_par[cr][cs + 1][ca + 1][cp] = 0.0;
           }
           
-          N[cr][cs + 1][1][cp][sim_idx] = r4stack_3_2[r4stack_3_2i];
+          N[cr][cs + 1][1][cp] = r4stack_3_2[r4stack_3_2i];
           r4stack_3_2i = r4stack_3_2i - 1;
-          nb2_par[cr][cs + 1][1][cp][sim_idx] = 0.0;
-          nbeforeb2_par[cr][cs + 1][1][cp][sim_idx] = 0.0;
-          nb2_par[cr][cs][nages][cp][sim_idx] = nb2_par[cr][cs][nages][cp][sim_idx] + dplusgroupb2_par;
+          nb2_par[cr][cs + 1][1][cp] = 0.0;
+          nbeforeb2_par[cr][cs + 1][1][cp] = 0.0;
+          nb2_par[cr][cs][nages][cp] = nb2_par[cr][cs][nages][cp] + dplusgroupb2_par;
         }
       }
       
@@ -1811,10 +1771,10 @@ void D_OperatingModelBase::POPDYN_YEAR_BPAR(const ARRAY_2D qy/* nfleets,nsim */,
         {
           cr = i4stack_3_2[i4stack_3_2i];
           i4stack_3_2i = i4stack_3_2i - 1;
-          N[cr][cs][ca][cp][sim_idx] = r4stack_3_2[r4stack_3_2i];
+          N[cr][cs][ca][cp] = r4stack_3_2[r4stack_3_2i];
           r4stack_3_2i = r4stack_3_2i - 1;
-          dzb2_par = -(exp(-dZ) * N[cr][cs][ca][cp][sim_idx] * nb2_par[cr][cs][ca][cp][sim_idx]);
-          nb2_par[cr][cs][ca][cp][sim_idx] = exp(-dZ) * nb2_par[cr][cs][ca][cp][sim_idx];
+          dzb2_par = -(exp(-dZ) * N[cr][cs][ca][cp] * nb2_par[cr][cs][ca][cp]);
+          nb2_par[cr][cs][ca][cp] = exp(-dZ) * nb2_par[cr][cs][ca][cp];
           ad_count7 = i4stack_3_2[i4stack_3_2i];
           i4stack_3_2i = i4stack_3_2i - 1;
           
@@ -1822,14 +1782,14 @@ void D_OperatingModelBase::POPDYN_YEAR_BPAR(const ARRAY_2D qy/* nfleets,nsim */,
           {
             cf = i4stack_3_2[i4stack_3_2i];
             i4stack_3_2i = i4stack_3_2i - 1;
-            tempb2_par1 = (1 - exp(-dZ)) * cb2_par[cf][cr][cs][ca][cp][sim_idx];
-            temp1 = FM[cf][sim_idx] / dZ;
-            temp2 = N[cr][cs][ca][cp][sim_idx];
-            tempb2_par2 = temp2 * tempb2_par1 / dZ;
-            nb2_par[cr][cs][ca][cp][sim_idx] = nb2_par[cr][cs][ca][cp][sim_idx] + temp1 * tempb2_par1;
-            fmb2_par[cf][sim_idx] = fmb2_par[cf][sim_idx] + tempb2_par2;
-            dzb2_par = dzb2_par + exp(-dZ) * temp2 * temp1 * cb2_par[cf][cr][cs][ca][cp][sim_idx] - temp1 * tempb2_par2;
-            cb2_par[cf][cr][cs][ca][cp][sim_idx] = 0.0;
+            tempb2_par1 = (1 - exp(-dZ)) * cb2_par[cf][cr][cs][ca][cp];
+            temp0 = FM[cf] / dZ;
+            temp1 = N[cr][cs][ca][cp];
+            tempb2_par2 = temp1 * tempb2_par1 / dZ;
+            nb2_par[cr][cs][ca][cp] = nb2_par[cr][cs][ca][cp] + temp0 * tempb2_par1;
+            fmb2_par[cf] = fmb2_par[cf] + tempb2_par2;
+            dzb2_par = dzb2_par + exp(-dZ) * temp1 * temp0 * cb2_par[cf][cr][cs][ca][cp] - temp0 * tempb2_par2;
+            cb2_par[cf][cr][cs][ca][cp] = 0.0;
           }
           
           dZ = r4stack_3_2[r4stack_3_2i];
@@ -1842,11 +1802,11 @@ void D_OperatingModelBase::POPDYN_YEAR_BPAR(const ARRAY_2D qy/* nfleets,nsim */,
           {
             cf = i4stack_3_2[i4stack_3_2i];
             i4stack_3_2i = i4stack_3_2i - 1;
-            dfmb2_par = fmb2_par[cf][sim_idx] + dftotb2_par;
-            FM[cf][sim_idx] = r4stack_3_2[r4stack_3_2i];
+            dfmb2_par = fmb2_par[cf] + dftotb2_par;
+            FM[cf] = r4stack_3_2[r4stack_3_2i];
             r4stack_3_2i = r4stack_3_2i - 1;
-            fmb2_par[cf][sim_idx] = 0.0;
-            eannualb2_par[cf][cr][cs][sim_idx] = eannualb2_par[cf][cr][cs][sim_idx] + sel[ca][cf][sim_idx] * qy[cf][sim_idx] * dfmb2_par;
+            fmb2_par[cf] = 0.0;
+            eannualb2_par[cf][cr][cs] = eannualb2_par[cf][cr][cs] + sel[ca][cf] * qy[cf] * dfmb2_par;
           }
         }
       }
@@ -1865,10 +1825,10 @@ void D_OperatingModelBase::POPDYN_YEAR_BPAR(const ARRAY_2D qy/* nfleets,nsim */,
         {
           cr = i4stack_3_2[i4stack_3_2i];
           i4stack_3_2i = i4stack_3_2i - 1;
-          N[cr][cs][ca][cp][sim_idx] = r4stack_3_2[r4stack_3_2i];
+          N[cr][cs][ca][cp] = r4stack_3_2[r4stack_3_2i];
           r4stack_3_2i = r4stack_3_2i - 1;
-          movnb2_par[cr][sim_idx] = movnb2_par[cr][sim_idx] + nb2_par[cr][cs][ca][cp][sim_idx];
-          nb2_par[cr][cs][ca][cp][sim_idx] = 0.0;
+          movnb2_par[cr] = movnb2_par[cr] + nb2_par[cr][cs][ca][cp];
+          nb2_par[cr][cs][ca][cp] = 0.0;
         }
         
         ad_count3 = i4stack_3_2[i4stack_3_2i];
@@ -1878,8 +1838,8 @@ void D_OperatingModelBase::POPDYN_YEAR_BPAR(const ARRAY_2D qy/* nfleets,nsim */,
         {
           cr = i4stack_3_2[i4stack_3_2i];
           i4stack_3_2i = i4stack_3_2i - 1;
-          dnb2_par = movnb2_par[cr][sim_idx];
-          movnb2_par[cr][sim_idx] = 0.0;
+          dnb2_par = movnb2_par[cr];
+          movnb2_par[cr] = 0.0;
           ad_count2 = i4stack_3_2[i4stack_3_2i];
           i4stack_3_2i = i4stack_3_2i - 1;
           
@@ -1887,7 +1847,7 @@ void D_OperatingModelBase::POPDYN_YEAR_BPAR(const ARRAY_2D qy/* nfleets,nsim */,
           {
             cr2 = i4stack_3_2[i4stack_3_2i];
             i4stack_3_2i = i4stack_3_2i - 1;
-            nb2_par[cr2][cs][ca][cp][sim_idx] = nb2_par[cr2][cs][ca][cp][sim_idx] + mov[cr][cr2][cs][ca][cp][sim_idx] * dnb2_par;
+            nb2_par[cr2][cs][ca][cp] = nb2_par[cr2][cs][ca][cp] + mov[cr][cr2][cs][ca][cp] * dnb2_par;
           }
         }
       }
@@ -1905,12 +1865,12 @@ void D_OperatingModelBase::POPDYN_YEAR_BPAR(const ARRAY_2D qy/* nfleets,nsim */,
         {
           cr = i4stack_3_2[i4stack_3_2i];
           i4stack_3_2i = i4stack_3_2i - 1;
-          N[cr][cs][1][cp][sim_idx] = r4stack_3_2[r4stack_3_2i];
+          N[cr][cs][1][cp] = r4stack_3_2[r4stack_3_2i];
           r4stack_3_2i = r4stack_3_2i - 1;
-          nbeforeb2_par[cr][cs][1][cp][sim_idx] = nbeforeb2_par[cr][cs][1][cp][sim_idx] + nb2_par[cr][cs][1][cp][sim_idx];
-          nb2_par[cr][cs][1][cp][sim_idx] = 0.0;
-          drecruitmentb2_par = drecruitmentb2_par + Recdist[cr][cp][sim_idx] * RecSpatialDevs[cr][cp][sim_idx] * nbeforeb2_par[cr][cs][1][cp][sim_idx];
-          nbeforeb2_par[cr][cs][1][cp][sim_idx] = 0.0;
+          nbeforeb2_par[cr][cs][1][cp] = nbeforeb2_par[cr][cs][1][cp] + nb2_par[cr][cs][1][cp];
+          nb2_par[cr][cs][1][cp] = 0.0;
+          drecruitmentb2_par = drecruitmentb2_par + Recdist[cr][cp] * RecSpatialDevs[cr][cp] * nbeforeb2_par[cr][cs][1][cp];
+          nbeforeb2_par[cr][cs][1][cp] = 0.0;
         }
         
         branch = bstack_3_2[bstack_3_2i];
@@ -1918,15 +1878,14 @@ void D_OperatingModelBase::POPDYN_YEAR_BPAR(const ARRAY_2D qy/* nfleets,nsim */,
         
         if ((branch == 0))
         {
-          temp = 0.2 * SSBpR[cp][sim_idx] * R0[cp][sim_idx] * (-h[cp][sim_idx] + 1.0) + (h[cp][sim_idx] - 0.2) * dSSB;
-          tempb2_par = Recdevs[nRecdevIdx][cp][sim_idx] * h[cp][sim_idx] * R0[cp][sim_idx] * 0.8 * drecruitmentb2_par / temp;
-          dssbb2_par = (1.0 - dSSB * (h[cp][sim_idx] - 0.2) / temp) * tempb2_par;
+          temp = 0.2 * SSBpR[cp] * R0[cp] * (-h[cp] + 1.0) + (h[cp] - 0.2) * dSSB;
+          tempb2_par = Recdevs[nRecdevIdx][cp] * h[cp] * R0[cp] * 0.8 * drecruitmentb2_par / temp;
+          dssbb2_par = (1.0 - dSSB * (h[cp] - 0.2) / temp) * tempb2_par;
         }
         else
         {
-          temp0 = -(bR[cp][sim_idx] * dSSB);
-          tempb2_par0 = Recdevs[nRecdevIdx][cp][sim_idx] * aR[cp][sim_idx] * drecruitmentb2_par;
-          dssbb2_par = (exp(temp0) - exp(temp0) * dSSB * bR[cp][sim_idx]) * tempb2_par0;
+          tempb2_par0 = Recdevs[nRecdevIdx][cp] * aR[cp] * drecruitmentb2_par;
+          dssbb2_par = (exp(-(bR[cp] * dSSB)) - exp(-(bR[cp] * dSSB)) * dSSB * bR[cp]) * tempb2_par0;
         }
       }
       else
@@ -1949,8 +1908,8 @@ void D_OperatingModelBase::POPDYN_YEAR_BPAR(const ARRAY_2D qy/* nfleets,nsim */,
         {
           ca = i4stack_3_2[i4stack_3_2i];
           i4stack_3_2i = i4stack_3_2i - 1;
-          dssnb2_par = Wt_age[ca][cp][sim_idx] * dssb_areab2_par;
-          nbeforeb2_par[cr][cs][ca][cp][sim_idx] = nbeforeb2_par[cr][cs][ca][cp][sim_idx] + mat[ca][cp][sim_idx] * dssnb2_par;
+          dssnb2_par = Wt_age[ca][cp] * dssb_areab2_par;
+          nbeforeb2_par[cr][cs][ca][cp] = nbeforeb2_par[cr][cs][ca][cp] + mat[ca][cp] * dssnb2_par;
         }
       }
       

@@ -1,4 +1,3 @@
-int arg_nsim,
 int arg_npop,
 int arg_nages,
 int arg_nsubyears,

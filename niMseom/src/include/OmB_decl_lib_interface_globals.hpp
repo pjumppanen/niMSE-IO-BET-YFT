@@ -74,8 +74,6 @@ EXPORT SEXP OmB_get_nfleets(SEXP args);
 EXPORT SEXP OmB_set_nfleets(SEXP args);
 EXPORT SEXP OmB_get_npop(SEXP args);
 EXPORT SEXP OmB_set_npop(SEXP args);
-EXPORT SEXP OmB_get_nsim(SEXP args);
-EXPORT SEXP OmB_set_nsim(SEXP args);
 EXPORT SEXP OmB_get_nsubyears(SEXP args);
 EXPORT SEXP OmB_set_nsubyears(SEXP args);
 EXPORT SEXP OmB_R_popdyn_projection_objective(SEXP args);

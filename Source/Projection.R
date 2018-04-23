@@ -228,15 +228,6 @@ setMethod("initialize", "Projection",
     NLLI_Y             <- as.double(NA)
     C_Y                <- karray(as.double(NA),c(npop,nages,nsubyears,nareas,nfleets))
     SSBA_Y             <- karray(as.double(NA),c(npop))
-    M_Y                <- M[,,y]
-    mat_Y              <- mat[,,y]
-    Len_age_Y          <- Len_age[,,y]
-    Len_age_mid_Y      <- Len_age_mid[,,y]
-    Wt_age_Y           <- Wt_age[,,y]
-    #Wt_age_SB_Y        <- Wt_age_SB[,,y]
-    Wt_age_mid_Y       <- Wt_age_mid[,,y]
-    RecdevInd_Y        <- (y - 1) * nSpawnPerYr + 1
-    Recdevs_Y          <- Recdevs[sim,,keep(RecdevInd_Y:(RecdevInd_Y + nSpawnPerYr - 1))]
 
     # Initialise starting population. Note N_Y initialisation redundant for R case but
     # needed for C++ case
@@ -270,23 +261,26 @@ setMethod("initialize", "Projection",
                        ssModelData@Recsubyr)
 
       OmB.nt.initialiseParameters(Obj,
-                                  M_Y,
+                                  M[,,y],
                                   R0,
-                                  mat_Y,
+                                  mat[,,y],
                                   Idist,
-                                  Wt_age_Y,
+                                  Wt_age[,,y],
                                   h)
+
+      RecdevIndex <- (y - 1) * nSpawnPerYr + 1
+      Recdevs_Y   <- Recdevs[sim,,RecdevIndex:(RecdevIndex + nSpawnPerYr - 1)]
 
       OmB.nt.runHistoric(Obj,
                          as.double(1.0),
                          q,
                          EByQtrLastYr,
                          R0,
-                         M_Y,
-                         mat_Y,
+                         M[,,y],
+                         mat[,,y],
                          Idist,
-                         Len_age_Y,
-                         Wt_age_Y,
+                         Len_age[,,y],
+                         Wt_age[,,y],
                          sel,
                          mov,
                          h,
@@ -703,51 +697,43 @@ setMethod("initialize", "Projection",
       recSpatialDevs <- karray(exp(ssModelData@ReccvR * rnorm(length(Recdist))), dim=dim(Recdist))
       recSpatialDevs <- recSpatialDevs / karray(rep(apply(recSpatialDevs, FUN=mean, MARGIN=c(1)), nareas),dim=dim(Recdist))
 
-# Fix me
-#      if (MseDef@CppMethod != 0)
-#      {
-#        M_Y           <- M[,,,y]
-#        mat_Y         <- mat[,,,y]
-#        Len_age_Y     <- Len_age[,,,y]
-#        Len_age_mid_Y <- Len_age_mid[,,,y]
-#        Wt_age_Y      <- Wt_age[,,,y]
-#        #Wt_age_SB_Y   <- Wt_age_SB_Y[,,,y]
-#        Wt_age_mid_Y  <- Wt_age_mid[,,,y]
-#        RecdevInd_Y   <- (y - 1) * nSpawnPerYr + 1
-#        Recdevs_Y     <- Recdevs[sim,keep(RecdevInd_Y:(RecdevInd_Y + nSpawnPerYr - 1))]
-#
-#        Om.nt.projection(Obj,
-#                         y,
-#                         as.integer(if (Report) 1 else 0),
-#                         EffortCeiling,
-#                         TAC,
-#                         TAEbyF,
-#                         TACEError,
-#                         ECurrent,
-#                         CMCurrent,
-#                         q,
-#                         R0,
-#                         M_Y,
-#                         mat_Y,
-#                         Idist,
-#                         Len_age_Y,
-#                         Wt_age_Y,
-#                         Wt_age_mid_Y,
-#                         selTS,
-#                         mov,
-#                         h,
-#                         Recdist,
-#                         Recdevs_Y,
-#                         recSpatialDevs,
-#                         ssModelData@SRrel,
-#                         N_Y,
-#                         NBefore_Y,
-#                         SSN_Y,
-#                         C_Y,
-#                         SSBA_Y,
-#                         as.integer(100));
-#      }
-#      else  # R roption
+      if (MseDef@CppMethod != 0)
+      {
+        RecdevIndex <- (y - 1) * nSpawnPerYr + 1
+        Recdevs_Y   <- Recdevs[sim,,RecdevIndex:(RecdevIndex + nSpawnPerYr - 1)]
+
+        Om.nt.projection(Obj,
+                         y,
+                         as.integer(if (Report) 1 else 0),
+                         EffortCeiling,
+                         TAC,
+                         TAEbyF,
+                         TACEError,
+                         ECurrent,
+                         CMCurrent,
+                         q,
+                         R0,
+                         M[,,y],
+                         mat[,,y],
+                         Idist,
+                         Len_age[,,y],
+                         Wt_age[,,y],
+                         Wt_age_mid[,,y],
+                         selTS,
+                         mov,
+                         h,
+                         Recdist,
+                         Recdevs_Y,
+                         recSpatialDevs,
+                         ssModelData@SRrel,
+                         N_Y,
+                         NBefore_Y,
+                         SSN_Y,
+                         C_Y,
+                         SSBA_Y,
+                         as.integer(100))
+      }
+      else  # R roption
       {
         # distribute TAC by season and fleet for all sims, for all fishries that do not have TAEs
         isTACFleet        <- karray(NA, dim=dim(CMCurrent))
