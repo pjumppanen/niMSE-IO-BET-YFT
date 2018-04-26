@@ -464,37 +464,378 @@ setMethod("msevizPerformanceData", c("MseFramework"),
 
 # -----------------------------------------------------------------------------
 
+setGeneric("msevizTimeSeriesData", function(.Object, ...) standardGeneric("msevizTimeSeriesData"))
+
+setMethod("msevizTimeSeriesData", c("MseFramework"),
+  function(.Object, bHistoric)
+  {
+    statHandlers <- list()
+
+    # define handlers for all statistics
+    # ----------------------------------
+    statHandlers[["CPUE(aggregate)"]] <- list(
+      addFn = function(HistoricVars, RefVars, dt, origin)
+              {
+                # Aggregate CPUE series skips final year
+                return(addRows(dt, HistoricVars@IobsArchive, "CPUE(aggregate)", origin))
+              },
+
+      countFn = function(HistoricVars)
+                {
+                  return (HistoricVars@nyears * HistoricVars@nsim)
+                }
+      )
+
+    statHandlers[["Recruitment"]] <- list(
+      addFn = function(HistoricVars, RefVars, dt, origin)
+              {
+                # Recruitment
+                return (addRows(dt, HistoricVars@Rec, "Recruitment", origin))
+              },
+
+      countFn = function(HistoricVars)
+                {
+                  return (HistoricVars@nyears * HistoricVars@nsim)
+                }
+      )
+
+    statHandlers[["B/B0"]] <- list(
+      addFn = function(HistoricVars, RefVars, dt, origin)
+              {
+                #B/B0
+                B_B0 <- b_b0(HistoricVars, RefVars)
+
+                if (bHistoric)
+                {
+                  return (addRows(dt, apply(B_B0, MARGIN=c(2), FUN=sum), "B/B0", origin))
+
+                } else
+                {
+                  return (addRows(dt, apply(B_B0, MARGIN=c(1,3), FUN=sum), "B/B0", origin))
+                }
+              },
+
+      countFn = function(HistoricVars)
+                {
+                  return (HistoricVars@nyears * HistoricVars@nsim)
+                }
+      )
+
+    statHandlers[["B/BMSY"]] <- list(
+      addFn = function(HistoricVars, RefVars, dt, origin)
+              {
+                #B/BMSY
+                B_BMSY <- b_bmsy(HistoricVars, RefVars)
+                return (addRows(dt, B_BMSY, "B/BMSY", origin))
+              },
+
+      countFn = function(HistoricVars)
+                {
+                  return (HistoricVars@nyears * HistoricVars@nsim)
+                }
+      )
+
+    statHandlers[["SSB/SSB0"]] <- list(
+      addFn = function(HistoricVars, RefVars, dt, origin)
+              {
+                #SSB/SSB0
+                SSB_SSB0 <- ssb_ssb0(HistoricVars, RefVars)
+
+                if (bHistoric)
+                {
+                  return (addRows(dt, apply(SSB_SSB0, MARGIN=c(2), FUN=sum), "SSB/SSB0", origin))
+
+                } else
+                {
+                  return (addRows(dt, apply(SSB_SSB0, MARGIN=c(1,3), FUN=sum), "SSB/SSB0", origin))
+                }
+              },
+
+      countFn = function(HistoricVars)
+                {
+                  return (HistoricVars@nyears * HistoricVars@nsim)
+                }
+      )
+
+    statHandlers[["SSB/SSBMSY"]] <- list(
+      addFn = function(HistoricVars, RefVars, dt, origin)
+              {
+                #SSB/SSBMSY
+                SSB_SSBMSY <- ssb_ssbmsy(HistoricVars, RefVars)
+                return (addRows(dt, SSB_SSBMSY, "SSB/SSBMSY", origin))
+              },
+
+      countFn = function(HistoricVars)
+                {
+                  return (HistoricVars@nyears * HistoricVars@nsim)
+                }
+      )
+
+    statHandlers[["F/FMSY"]] <- list(
+      addFn = function(HistoricVars, RefVars, dt, origin)
+              {
+                #F/FMSY
+                F_FMSY <- f_fmsy(HistoricVars, RefVars)
+                return (addRows(dt, F_FMSY, "F/FMSY", origin))
+              },
+
+      countFn = function(HistoricVars)
+                {
+                  return (HistoricVars@nyears * HistoricVars@nsim)
+                }
+      )
+
+    statHandlers[["C"]] <- list(
+      addFn = function(HistoricVars, RefVars, dt, origin)
+              {
+                #Catch
+                if (bHistoric)
+                {
+                  return (addRows(dt, apply(HistoricVars@CM, MARGIN=c(2), FUN=sum), "C", origin))
+
+                } else
+                {
+                  return (addRows(dt, apply(HistoricVars@CM, MARGIN=c(1,3), FUN=sum), "C", origin))
+                }
+              },
+
+      countFn = function(HistoricVars)
+                {
+                  return (HistoricVars@nyears * HistoricVars@nsim)
+                }
+      )
+
+    statHandlers[["Recruitment by Qtr"]] <- list(
+      addFn = function(HistoricVars, RefVars, dt, origin)
+              {
+                # Rec by Qtr
+                QtrYrBases <- (0:(HistoricVars@nyears - 1)) * 4
+
+                #Recruitment by Qtr
+                if (bHistoric)
+                {
+                  res <- addRows(dt, HistoricVars@RecYrQtr[QtrYrBases + 1], "Recruitment Q1", origin)
+                  res <- addRows(res$dt, HistoricVars@RecYrQtr[QtrYrBases + 2], "Recruitment Q2", res$origin)
+                  res <- addRows(res$dt, HistoricVars@RecYrQtr[QtrYrBases + 3], "Recruitment Q3", res$origin)
+                  res <- addRows(res$dt, HistoricVars@RecYrQtr[QtrYrBases + 4], "Recruitment Q4", res$origin)
+
+                } else
+                {
+                  res <- addRows(dt, HistoricVars@RecYrQtr[,QtrYrBases + 1], "Recruitment Q1", origin)
+                  res <- addRows(res$dt, HistoricVars@RecYrQtr[,QtrYrBases + 2], "Recruitment Q2", res$origin)
+                  res <- addRows(res$dt, HistoricVars@RecYrQtr[,QtrYrBases + 3], "Recruitment Q3", res$origin)
+                  res <- addRows(res$dt, HistoricVars@RecYrQtr[,QtrYrBases + 4], "Recruitment Q4", res$origin)
+                }
+
+                return (res)
+              },
+
+      countFn = function(HistoricVars)
+                {
+                  return (4 * HistoricVars@nyears * HistoricVars@nsim)
+                }
+      )
+
+    statHandlers[["CbyRF"]] <- list(
+      addFn = function(HistoricVars, RefVars, dt, origin)
+              {
+                res <- list(dt=dt, origin=origin)
+
+                #Catch by fishery
+                if (HistoricVars@nfleets > 1)
+                {
+                  for (fi in 1:HistoricVars@nfleets)
+                  {
+                    if (bHistoric)
+                    {
+                      res <- addRows(res$dt, HistoricVars@CMbyF[.Object@MseDef@targpop,,fi], paste("C by Fleet",fi), res$origin)
+
+                    } else
+                    {
+                      res <- addRows(res$dt, HistoricVars@CMbyF[,.Object@MseDef@targpop,,fi], paste("C by Fleet",fi), res$origin)
+                    }
+                  }
+                }
+
+                return (res)
+              },
+
+      countFn = function(HistoricVars)
+                {
+                  count <- 0
+
+                  if (HistoricVars@nfleets > 1)
+                  {
+                    count <- HistoricVars@nfleets * HistoricVars@nyears * HistoricVars@nsim
+                  }
+
+                  return (count)
+                }
+      )
+
+    statHandlers[["CPUEbyArea"]] <- list(
+      addFn = function(HistoricVars, RefVars, dt, origin)
+              {
+                res <- list(dt=dt, origin=origin)
+
+                #CPUE by region
+                if (HistoricVars@nareas > 1)
+                {
+                  for (ri in 1:HistoricVars@nareas)
+                  {
+                    if (bHistoric)
+                    {
+                      res <- addRows(res$dt, HistoricVars@IobsRArchive[,ri], paste("CPU by Area", ri), res$origin)
+
+                    } else
+                    {
+                      res <- addRows(res$dt, HistoricVars@IobsRArchive[,,ri], paste("CPU by Area", ri), res$origin)
+                    }
+                  }
+                }
+
+                return (res)
+              },
+
+      countFn = function(HistoricVars)
+                {
+                  count <- 0
+
+                  if (HistoricVars@nareas > 1)
+                  {
+                    count <- HistoricVars@nareas * HistoricVars@nyears * HistoricVars@nsim
+                  }
+
+                  return (count)
+                }
+      )
+
+    # count number of result rows
+    row_count <- 0
+
+    if (bHistoric)
+    {
+      for (handler in statHandlers)
+      {
+        for (om in .Object@StockSynthesisModels)
+        {
+          row_count <- row_count + handler$countFn(om@HistoricVars)
+        }
+      }
+
+    } else
+    {
+      for (handler in statHandlers)
+      {
+        for (om in .Object@StockSynthesisModels)
+        {
+          for (ProjVar in om@ProjectedVars)
+          {
+            row_count <- row_count + handler$countFn(ProjVar)
+          }
+        }
+      }
+    }
+
+    row_count <- row_count - 1
+
+    # create result data.table
+    dt <- data.table(year=as.integer(rep(0, times=row_count)),
+                     data=as.double(rep(0, times=row_count)),
+                     iter=as.integer(rep(0, times=row_count)),
+                     qname=rep("", times=row_count))
+
+    # fill result data.table with data
+    res <- list(dt=dt, origin=0)
+
+    for (handler in statHandlers)
+    {
+      for (om in .Object@StockSynthesisModels)
+      {
+        if (bHistoric)
+        {
+          Yrs  <- .Object@MseDef@firstCalendarYr + (0:(om@HistoricVars@nyears - 1))
+
+          addRows <- function(dt, data, name, origin)
+          {
+            next_origin <- (origin + length(Yrs))
+            rows        <- origin:(next_origin - 1)
+            C1          <- Yrs
+            C2          <- as.array(data)
+            C3          <- rows
+            C4          <- rep(name, times=length(Yrs))
+
+            set(dt, rows, "year", C1)
+            set(dt, rows, "data", C2)
+            set(dt, rows, "iter", C3)
+            set(dt, rows, "qname", C4)
+
+            return (list(dt=dt, origin=next_origin))
+          }
+
+          res <- handler$addFn(om@HistoricVars, om@RefVars, res$dt, res$origin)
+
+        } else
+        {
+          for (ProjVar in om@ProjectedVars)
+          {
+            SY   <- as.matrix(expand.grid(nsims=1:ProjVar@nsim, nyrs=1:ProjVar@nyears))
+            Yrs  <- .Object@MseDef@firstCalendarYr + om@ModelData@nyears + (0:(ProjVar@nyears - 1))
+            C1   <- rep(ProjVar@MP, times=length(SY[,1]))
+            C2   <- Yrs[SY[,2]]
+
+            addRows <- function(dt, data, name, origin)
+            {
+              next_origin <- (origin + length(SY[,1]))
+              rows        <- origin:(next_origin - 1)
+              C3          <- data[SY]
+              C4          <- rows
+              C5          <- rep(name, times=length(SY[,1]))
+
+              set(dt, rows, "mp",    C1)
+              set(dt, rows, "year",  C2)
+              set(dt, rows, "data",  C3)
+              set(dt, rows, "iter",  C4)
+              set(dt, rows, "qname", C5)
+
+              if (length(C3) > 30)
+              {
+                browser()
+              }
+
+              return (list(dt=dt, origin=next_origin))
+            }
+
+            res <- handler$addFn(ProjVar, om@RefVars, res$dt, res$origin)
+          }
+        }
+      }
+    }
+
+    return (res$dt)
+  }
+)
+
+# -----------------------------------------------------------------------------
+
 setGeneric("msevizHistoricTimeSeriesData", function(.Object, ...) standardGeneric("msevizHistoricTimeSeriesData"))
 
 setMethod("msevizHistoricTimeSeriesData", c("MseFramework"),
-  function(.Object, plotByRF=TRUE)
+  function(.Object)
   {
-    df <- NULL
-
-    for (om in .Object@StockSynthesisModels)
-    {
-      df <- msevizHistoricTimeSeriesData(om, .Object, plotByRF, df)
-    }
-
-    return (as.data.table(df))
+    return (msevizTimeSeriesData(.Object, TRUE))
   }
 )
+
 
 # -----------------------------------------------------------------------------
 
 setGeneric("msevizProjectedTimeSeriesData", function(.Object, ...) standardGeneric("msevizProjectedTimeSeriesData"))
 
 setMethod("msevizProjectedTimeSeriesData", c("MseFramework"),
-  function(.Object, plotByRF=TRUE)
+  function(.Object)
   {
-    df <- NULL
-
-    for (om in .Object@StockSynthesisModels)
-    {
-      df <- msevizProjectedTimeSeriesData(om, .Object, plotByRF, df)
-    }
-
-    return (as.data.table(df))
+    return (msevizTimeSeriesData(.Object, FALSE))
   }
 )
 
