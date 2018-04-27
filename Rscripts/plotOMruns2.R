@@ -1,9 +1,18 @@
-#DK changes: ribbon colour arg (I think Toshi requested something other than red), y axis always includes 0
-#            y label argument, background predominantly white (for printing), historical variability
-#            3 worms are plotted if wormNums defined (3 simulation numbers are expected)
-#            in this case chosen by the SSB/SSBMSY(2019) 25th, 50, 75th percentiles (of first MP, which should not matter)
-plotOMruns2 <- function(om,
-                        runs,
+# Symantics of this function is now changed. Typical usage is:
+#
+#   histd <- msevizHistoricTimeSeriesData(mseFramework)
+#   projd <- msevizProjectedTimeSeriesData(mseFramework)
+#   plotOMruns2(histd, projd, "SSB/SSBMSY")
+#
+# for worms to work the projd data table must have "SSB/SSBMSY" results.
+#
+# DK changes: ribbon colour arg (I think Toshi requested something other than red), y axis always includes 0
+#             y label argument, background predominantly white (for printing), historical variability
+#             3 worms are plotted if wormNums defined (3 simulation numbers are expected)
+#             in this case chosen by the SSB/SSBMSY(2019) 25th, 50, 75th percentiles (of first MP, which should not matter)
+plotOMruns2 <- function(om.dt,
+                        runs.dt,
+                        indicator,
                         limit = missing,
                         target = missing,
                         probs = c(0.1, 0.25, 0.5, 0.75, 0.9),
@@ -13,28 +22,30 @@ plotOMruns2 <- function(om,
                         firstMPYr = 2019,
                         doWorms = TRUE)
 {
+  om    <- om.dt[qname==indicator,]
+  runs  <- runs.dt[qname==indicator,]
   worms <- NULL
 
   if (doWorms)
   {
-    MP  <- levels(factor(runs$mp))[1]
-    tmp <- runs[runs$mp == MP & runs$year == 2019 & runs$qname == "SSB/SSBMSY",]
+    MP  <- levels(factor(runs.dt$mp))[1]
+    tmp <- runs.dt[mp == MP & year == 2019 & qname == "SSB/SSBMSY",]
 
     if (nrow(tmp) > 0)
     {
       quants   <- quantile(tmp$data, probs = c(0.25,0.5,0.75), type=1)
       wormNums <- as.integer(unlist(tmp[tmp$data %in% quants, 'iter']))
-      worm1    <- runs[iter == wormNums[1] & qname == "SSB/SSBMSY"]
+      worm1    <- runs[iter == wormNums[1]]
       worm1    <- worm1[,c(1,5,2)]
 
       colnames(worm1)[3] <- "worm.1"
 
-      worm2   <- runs[iter == wormNums[2] & qname == "SSB/SSBMSY"]
+      worm2   <- runs[iter == wormNums[2]]
       worm2   <- worm2[,c(1,5,2)]
 
       colnames(worm2)[3] <- "worm.2"
 
-      worm3   <- runs[iter == wormNums[3] & qname == "SSB/SSBMSY"]
+      worm3   <- runs[iter == wormNums[3]]
       worm3   <- worm3[,c(1,5,2)]
 
       colnames(worm3)[3] <- "worm.3"
@@ -120,5 +131,3 @@ plotOMruns2 <- function(om,
   print(p2, vp = vplayout(2:4, 1:2))
   invisible()
 }
-
-plotOMruns2(histd[histd$qname=="SSB/SSBMSY",], projd[projd$qname=="SSB/SSBMSY",])
