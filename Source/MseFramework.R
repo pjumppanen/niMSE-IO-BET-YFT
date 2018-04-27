@@ -438,7 +438,7 @@ setMethod("runMse", c("MseFramework"),
 setGeneric("msevizPerformanceData", function(.Object, ...) standardGeneric("msevizPerformanceData"))
 
 setMethod("msevizPerformanceData", c("MseFramework"),
-  function(.Object, AvgFirstYr, AvgLastYr=NA)
+  function(.Object, AvgFirstYr, AvgLastYr=NA, prefix = "")
   {
     df <- NULL
 
@@ -455,7 +455,7 @@ setMethod("msevizPerformanceData", c("MseFramework"),
 
     for (om in .Object@StockSynthesisModels)
     {
-      df <- msevizPerformanceData(om, .Object, df, AvgYears)
+      df <- msevizPerformanceData(om, .Object, df, AvgYears, prefix)
     }
 
     return (as.data.table(df))

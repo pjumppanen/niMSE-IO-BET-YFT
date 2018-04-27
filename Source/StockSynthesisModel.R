@@ -776,7 +776,7 @@ setMethod("runMse", c("StockSynthesisModel"),
 # -----------------------------------------------------------------------------
 
 setMethod("msevizPerformanceData", c("StockSynthesisModel"),
-  function(.Object, mseFramework, df, AvgYears)
+  function(.Object, mseFramework, df, AvgYears, prefix = "")
   {
     if (class(mseFramework) != "MseFramework")
     {
@@ -796,7 +796,7 @@ setMethod("msevizPerformanceData", c("StockSynthesisModel"),
       {
         C1 <- rep(indicator, times=ManagementVars@nsim)
         C3 <- data
-        C5 <- rep(name, times=ManagementVars@nsim)
+        C5 <- rep(paste(prefix, name, sep=""), times=ManagementVars@nsim)
 
         df <- rbind(data.frame(df), data.frame(indicator=C1, year=C2, data=C3, iter=C4, name=C5, mp=C6))
 
@@ -812,7 +812,7 @@ setMethod("msevizPerformanceData", c("StockSynthesisModel"),
 
       # F2 Pr(SB>SBlim) where SBlim = 0.4SSBMSY
       SSB_SSBMSY  <- ssb_ssbmsy(ManagementVars, RefVars)
-      PrSBgtSBlim <- round(apply(as.karray(SSB_SSBMSY)[keep(Sims), AvgYears] > MseDef@SBlim, MARGIN=c(1), mean), digits=2)
+      PrSBgtSBlim <- round(apply(as.karray(SSB_SSBMSY)[keep(Sims), AvgYears] > mseFramework@MseDef@SBlim, MARGIN=c(1), mean), digits=2)
       df          <- addRows(df, PrSBgtSBlim, "F2", "Pr(SB>SBlim)")
 
       # S1 mean(SB/SB_0)
@@ -849,15 +849,15 @@ setMethod("msevizPerformanceData", c("StockSynthesisModel"),
       df          <- addRows(df, SBgtSBMSY, "S8", "Pr(SB>SB_MSY)")
 
       # T1 mean(C(t)/C(t-1))
-      CtonCtm1    <- apply((ManagementVars@CM[keep(Sims), MseDef@targpop, AvgYears] / ManagementVars@CM[keep(Sims), MseDef@targpop, AvgYearsm1]) , c(1), mean, na.rm = TRUE)
+      CtonCtm1    <- apply((ManagementVars@CM[keep(Sims), mseFramework@MseDef@targpop, AvgYears] / ManagementVars@CM[keep(Sims), mseFramework@MseDef@targpop, AvgYearsm1]) , c(1), mean, na.rm = TRUE)
       df          <- addRows(df, CtonCtm1, "T1", "mean(C(t)/C(t-1))")
 
       # T2 var(C)
-      varC        <- round(apply(as.karray(ManagementVars@CM)[keep(Sims), MseDef@targpop, AvgYears], MARGIN=c(1), var), 2)
+      varC        <- round(apply(as.karray(ManagementVars@CM)[keep(Sims), mseFramework@MseDef@targpop, AvgYears], MARGIN=c(1), var), 2)
       df          <- addRows(df, varC, "T2", "var(C)")
 
       # T3 var(F)
-#      varF        <- round(apply(as.karray(F_FMSY)[keep(Sims), MseDef@targpop, AvgYears] * RefVars@FMSY1, MARGIN=c(1), var), 2)
+#      varF        <- round(apply(as.karray(F_FMSY)[keep(Sims), mseFramework@MseDef@targpop, AvgYears] * RefVars@FMSY1, MARGIN=c(1), var), 2)
 #      df          <- addRows(df, varF, "T3", "var(F)")
 
       # T4 Pr(C<0.1MSY)
@@ -866,7 +866,7 @@ setMethod("msevizPerformanceData", c("StockSynthesisModel"),
       df          <- addRows(df, PrCltp1MSY, "T4", "Pr(C<0.1MSY)")
 
       # Y1 mean(C)
-      C           <- round(apply(ManagementVars@CM[keep(Sims), MseDef@targpop, AvgYears], MARGIN=c(1), mean), 0) / 1000.0
+      C           <- round(apply(ManagementVars@CM[keep(Sims), mseFramework@MseDef@targpop, AvgYears], MARGIN=c(1), mean), 0) / 1000.0
       df          <- addRows(df, C, "Y1", "mean(C)")
 
       # Y3 mean(C/MSY)
