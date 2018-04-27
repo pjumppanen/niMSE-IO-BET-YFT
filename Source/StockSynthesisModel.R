@@ -789,14 +789,14 @@ setMethod("msevizPerformanceData", c("StockSynthesisModel"),
       Sims <- 1:ManagementVars@nsim
       C2   <- rep(mseFramework@MseDef@firstMPYr + AvgYears[1], times=ManagementVars@nsim)
       C4   <- Sims
-      C6   <- rep(ManagementVars@MP, times=ManagementVars@nsim)
+      C6   <- rep(paste(prefix, ManagementVars@MP, sep=""), times=ManagementVars@nsim)
       df   <- NULL
 
       addRows <- function(df, data, indicator, name)
       {
         C1 <- rep(indicator, times=ManagementVars@nsim)
         C3 <- data
-        C5 <- rep(paste(prefix, name, sep=""), times=ManagementVars@nsim)
+        C5 <- rep(name, times=ManagementVars@nsim)
 
         df <- rbind(data.frame(df), data.frame(indicator=C1, year=C2, data=C3, iter=C4, name=C5, mp=C6))
 
