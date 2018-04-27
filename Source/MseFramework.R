@@ -467,7 +467,7 @@ setMethod("msevizPerformanceData", c("MseFramework"),
 setGeneric("msevizTimeSeriesData", function(.Object, ...) standardGeneric("msevizTimeSeriesData"))
 
 setMethod("msevizTimeSeriesData", c("MseFramework"),
-  function(.Object, bHistoric)
+  function(.Object, bHistoric, prefix = "", Indicators=NULL)
   {
     statHandlers <- list()
 
@@ -709,25 +709,40 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
     # count number of result rows
     row_count <- 0
 
+    if (is.null(Indicators))
+    {
+      Indicators <- names(statHandlers)
+    }
+
     if (bHistoric)
     {
-      for (handler in statHandlers)
+      for (Indicator in Indicators)
       {
-        for (om in .Object@StockSynthesisModels)
+        if (Indicator %in% names(statHandlers))
         {
-          row_count <- row_count + handler$countFn(om@HistoricVars)
+          handler <- statHandlers[[Indicator]]
+
+          for (om in .Object@StockSynthesisModels)
+          {
+            row_count <- row_count + handler$countFn(om@HistoricVars)
+          }
         }
       }
 
     } else
     {
-      for (handler in statHandlers)
+      for (Indicator in Indicators)
       {
-        for (om in .Object@StockSynthesisModels)
+        if (Indicator %in% names(statHandlers))
         {
-          for (ProjVar in om@ProjectedVars)
+          handler <- statHandlers[[Indicator]]
+
+          for (om in .Object@StockSynthesisModels)
           {
-            row_count <- row_count + handler$countFn(ProjVar)
+            for (ProjVar in om@ProjectedVars)
+            {
+              row_count <- row_count + handler$countFn(ProjVar)
+            }
           }
         }
       }
@@ -744,73 +759,77 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
     # fill result data.table with data
     res <- list(dt=dt, origin=0, iter=0)
 
-    for (handler in statHandlers)
+    for (Indicator in Indicators)
     {
-      res$iter <- 0
-
-      for (om in .Object@StockSynthesisModels)
+      if (Indicator %in% names(statHandlers))
       {
-        if (bHistoric)
+        handler  <- statHandlers[[Indicator]]
+        res$iter <- 0
+
+        for (om in .Object@StockSynthesisModels)
         {
-          Yrs <- .Object@MseDef@firstCalendarYr + (0:(om@HistoricVars@nyears - 1))
-
-          addRows <- function(context, data, name)
+          if (bHistoric)
           {
-            next_origin <- (context$origin + length(Yrs))
-            rows        <- context$origin:(next_origin - 1)
-
-            C1          <- Yrs
-            C2          <- as.array(data)
-            C3          <- as.integer(rep(context$iter + 1, times=length(Yrs)))
-            C4          <- rep(name, times=length(Yrs))
-
-            set(context$dt, rows, "year",  C1)
-            set(context$dt, rows, "data",  C2)
-            set(context$dt, rows, "iter",  C3)
-            set(context$dt, rows, "qname", C4)
-
-            context$origin <- next_origin
-
-            return (context)
-          }
-
-          res <- handler$addFn(om@HistoricVars, om@RefVars, res)
-
-          res$iter <- res$iter + 1
-
-        } else
-        {
-          for (ProjVar in om@ProjectedVars)
-          {
-            SY   <- as.matrix(expand.grid(nsims=1:ProjVar@nsim, nyrs=1:ProjVar@nyears))
-            Yrs  <- .Object@MseDef@firstCalendarYr + om@ModelData@nyears + (0:(ProjVar@nyears - 1))
-            C1   <- rep(ProjVar@MP, times=length(SY[,1]))
-            C2   <- Yrs[SY[,2]]
+            Yrs <- .Object@MseDef@firstCalendarYr + (0:(om@HistoricVars@nyears - 1))
 
             addRows <- function(context, data, name)
             {
               next_origin <- (context$origin + length(Yrs))
               rows        <- context$origin:(next_origin - 1)
 
-              C3          <- data[SY]
-              C4          <- as.integer(context$iter + SY[,1])
-              C5          <- rep(name, times=length(SY[,1]))
+              C1          <- Yrs
+              C2          <- as.array(data)
+              C3          <- as.integer(rep(context$iter + 1, times=length(Yrs)))
+              C4          <- rep(name, times=length(Yrs))
 
-              set(context$dt, rows, "mp",    C1)
-              set(context$dt, rows, "year",  C2)
-              set(context$dt, rows, "data",  C3)
-              set(context$dt, rows, "iter",  C4)
-              set(context$dt, rows, "qname", C5)
+              set(context$dt, rows, "year",  C1)
+              set(context$dt, rows, "data",  C2)
+              set(context$dt, rows, "iter",  C3)
+              set(context$dt, rows, "qname", C4)
 
               context$origin <- next_origin
 
               return (context)
             }
 
-            res <- handler$addFn(ProjVar, om@RefVars, res)
-          }
+            res <- handler$addFn(om@HistoricVars, om@RefVars, res)
 
-          res$iter <- res$iter + om@ModelData@nsim
+            res$iter <- res$iter + 1
+
+          } else
+          {
+            for (ProjVar in om@ProjectedVars)
+            {
+              SY   <- as.matrix(expand.grid(nsims=1:ProjVar@nsim, nyrs=1:ProjVar@nyears))
+              Yrs  <- .Object@MseDef@firstCalendarYr + om@ModelData@nyears + (0:(ProjVar@nyears - 1))
+              C1   <- rep(paste(prefix, ProjVar@MP, sep=""), times=length(SY[,1]))
+              C2   <- Yrs[SY[,2]]
+
+              addRows <- function(context, data, name)
+              {
+                next_origin <- (context$origin + length(Yrs))
+                rows        <- context$origin:(next_origin - 1)
+
+                C3          <- data[SY]
+                C4          <- as.integer(context$iter + SY[,1])
+                C5          <- rep(name, times=length(SY[,1]))
+
+                set(context$dt, rows, "mp",    C1)
+                set(context$dt, rows, "year",  C2)
+                set(context$dt, rows, "data",  C3)
+                set(context$dt, rows, "iter",  C4)
+                set(context$dt, rows, "qname", C5)
+
+                context$origin <- next_origin
+
+                return (context)
+              }
+
+              res <- handler$addFn(ProjVar, om@RefVars, res)
+            }
+
+            res$iter <- res$iter + om@ModelData@nsim
+          }
         }
       }
     }
@@ -824,9 +843,9 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
 setGeneric("msevizHistoricTimeSeriesData", function(.Object, ...) standardGeneric("msevizHistoricTimeSeriesData"))
 
 setMethod("msevizHistoricTimeSeriesData", c("MseFramework"),
-  function(.Object)
+  function(.Object, prefix="", Indicators=NULL)
   {
-    return (msevizTimeSeriesData(.Object, TRUE))
+    return (msevizTimeSeriesData(.Object, TRUE, prefix, Indicators))
   }
 )
 
@@ -836,9 +855,9 @@ setMethod("msevizHistoricTimeSeriesData", c("MseFramework"),
 setGeneric("msevizProjectedTimeSeriesData", function(.Object, ...) standardGeneric("msevizProjectedTimeSeriesData"))
 
 setMethod("msevizProjectedTimeSeriesData", c("MseFramework"),
-  function(.Object)
+  function(.Object, prefix="", Indicators=NULL)
   {
-    return (msevizTimeSeriesData(.Object, FALSE))
+    return (msevizTimeSeriesData(.Object, FALSE, prefix, Indicators))
   }
 )
 
@@ -847,7 +866,7 @@ setMethod("msevizProjectedTimeSeriesData", c("MseFramework"),
 setGeneric("performanceStatistics", function(.Object, ...) standardGeneric("performanceStatistics"))
 
 setMethod("performanceStatistics", c("MseFramework"),
-  function(.Object, Statistics, AvgFirstYr, AvgLastYr=NA, percentiles=c(0.1,0.25,0.5,0.75,0.9), thisMP=NA)
+  function(.Object, Statistics, AvgFirstYr, AvgLastYr=NA, percentiles=c(0.1,0.25,0.5,0.75,0.9), thisMP=NA, prefix="")
   {
     df <- NULL
 
@@ -1071,7 +1090,7 @@ setMethod("performanceStatistics", c("MseFramework"),
     dim(cnames)   <- dims[1] * dims[2]
 
     colnames(dataTable) <- cnames
-    rownames(dataTable) <- MPs
+    rownames(dataTable) <- paste(prefix, MPs, sep="")
 
     return (dataTable)
   }
