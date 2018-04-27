@@ -444,13 +444,13 @@ setMethod("msevizPerformanceData", c("MseFramework"),
 
     if (is.na(AvgLastYr))
     {
-      firstMPy    <- MseDef@firstMPYr - MseDef@lastCalendarYr
+      firstMPy    <- .Object@MseDef@firstMPYr - .Object@MseDef@lastCalendarYr
       AvgDuration <- AvgFirstYr
       AvgYears    <- firstMPy:(firstMPy + AvgDuration - 1)
     }
     else
     {
-      AvgYears    <- (AvgFirstYr - MseDef@lastCalendarYr):(AvgLastYr - MseDef@lastCalendarYr)
+      AvgYears    <- (AvgFirstYr - .Object@MseDef@lastCalendarYr):(AvgLastYr - .Object@MseDef@lastCalendarYr)
     }
 
     for (om in .Object@StockSynthesisModels)
