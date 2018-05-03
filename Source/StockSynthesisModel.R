@@ -805,15 +805,23 @@ setMethod("msevizPerformanceData", c("StockSynthesisModel"),
 
       AvgYearsm1 <- AvgYears - 1
 
-      # F1 Pr(SB>0.2SB0)
+
+      # Renumbered all performance indicators relative to the SC2017 table expectations
+      # Order is not consistent because of order of caluclations requirement
+      # S8 Pr(SB>0.2SB0)
       SSB_SSB0    <- ssb_ssb0(ManagementVars, RefVars)
       PrSBgtp2SB0 <- round(apply(as.karray(SSB_SSB0)[keep(Sims), mseFramework@MseDef@targpop, AvgYears] > 0.2, MARGIN=c(1), mean), digits=2)
-      df          <- addRows(df, PrSBgtp2SB0, "F1", "Pr(SB>0.2SB0)")
+      df          <- addRows(df, PrSBgtp2SB0, "S8", "Pr(SB>0.2SB0)")
 
-      # F2 Pr(SB>SBlim) where SBlim = 0.4SSBMSY
+      # S9 Pr(SB>SBlim) where SBlim is species dependent
       SSB_SSBMSY  <- ssb_ssbmsy(ManagementVars, RefVars)
       PrSBgtSBlim <- round(apply(as.karray(SSB_SSBMSY)[keep(Sims), AvgYears] > mseFramework@MseDef@SBlim, MARGIN=c(1), mean), digits=2)
-      df          <- addRows(df, PrSBgtSBlim, "F2", "Pr(SB>SBlim)")
+      df          <- addRows(df, PrSBgtSBlim, "S9", "Pr(SB>SBlim)")
+
+      # S16 Pr(C<0.1MSY)
+      C_MSY       <- c_msy(ManagementVars, RefVars)
+      PrCltp1MSY  <- round(apply(as.karray(C_MSY)[keep(Sims), , AvgYears] < 0.1, MARGIN=c(1), mean), digits=2)
+      df          <- addRows(df, PrCltp1MSY, "S16", "Pr(C<0.1MSY)")
 
       # S1 mean(SB/SB_0)
       SBoSB0      <- round(apply(as.karray(SSB_SSB0)[keep(Sims), , AvgYears], MARGIN=c(1), mean), digits=2)
@@ -827,7 +835,7 @@ setMethod("msevizPerformanceData", c("StockSynthesisModel"),
       SBoSBMSY    <- round(apply(as.karray(SSB_SSBMSY)[keep(Sims), AvgYears], MARGIN=c(1), mean), digits=2)
       df          <- addRows(df, SBoSBMSY, "S3", "mean(SB/SB_MSY)")
 
-      # S4 mean(F/F_target), in this case...Ftarget = FMSY
+      # S4 mean(F/F_target), in this case...Ftarget = FMSY - should generalize this
       F_FMSY      <- f_fmsy(ManagementVars, RefVars)
       FoFtarg     <- round(apply(as.karray(F_FMSY)[keep(Sims), AvgYears], MARGIN=c(1), mean), digits=2)
       df          <- addRows(df, FoFtarg, "S4", "mean(F/F_target)")
@@ -844,34 +852,43 @@ setMethod("msevizPerformanceData", c("StockSynthesisModel"),
       PrRed       <- round(apply(as.karray(F_FMSY)[keep(Sims), AvgYears] > 1 & as.karray(SSB_SSBMSY)[keep(Sims), AvgYears] < 1, c(1), sum) / length(AvgYears), 3)
       df          <- addRows(df, PrRed, "S7", "Pr(Red)")
 
-      # S8 Pr(SB>SB_MSY)
-      SBgtSBMSY   <- round(apply(as.karray(SSB_SSBMSY)[keep(Sims), AvgYears] > 1.0, MARGIN=c(1), mean), digits=2)
-      df          <- addRows(df, SBgtSBMSY, "S8", "Pr(SB>SB_MSY)")
+      # S8 Pr(SB>SB_MSY) defined above
+      # S9 Pr(SB>SBlim) defined above
+
+      # S10 (Y1) mean(C)
+      C           <- round(apply(ManagementVars@CM[keep(Sims), mseFramework@MseDef@targpop, AvgYears], MARGIN=c(1), mean), 0) / 1000.0
+      df          <- addRows(df, C, "S10", "mean(C)")
+
+      # S11 mean(C) by fishery
+
+
+
+      # S12 mean(C/MSY)
+      CoMSY       <- round(apply(as.karray(C_MSY)[keep(Sims), , AvgYears], MARGIN=c(1), mean), digits=2)
+      df          <- addRows(df, CoMSY, "S12", "mean(C/MSY)")
+
+      # S13 CPUE for index fleet relative to 2011-2015 average
+      relCPUE     <- round(apply(as.karray(relCPUE)[keep(Sims), , AvgYears], MARGIN=c(1), mean), digits=2)
+      df          <- addRows(df, relCPUE, "S13", "mean(CPUE)")
+
+      # S14 AAVY
+      AAVY        <- 100*apply(abs((as.karray(ManagementVars@CM)[keep(Sims),mseFramework@MseDef@targpop,AvgYears] -
+                                as.karray(ManagementVars@CM)[keep(Sims),mseFramework@MseDef@targpop,AvgYearsm1]) /
+                                as.karray(ManagementVars@CM)[keep(Sims),mseFramework@MseDef@targpop,AvgYearsm1]) , 1, mean)
+      df          <- addRows(df, AAVY, "S14", "Catch_Variablity")
+
+      # S15 CV(C)
+      cvC         <- round(apply(as.karray(ManagementVars@CM)[keep(Sims), mseFramework@MseDef@targpop, AvgYears], MARGIN=c(1), sd), 2)/
+                     round(apply(as.karray(ManagementVars@CM)[keep(Sims), mseFramework@MseDef@targpop, AvgYears], MARGIN=c(1), mean), 2)
+      df          <- addRows(df, cvC, "S15", "cv(C)")
 
       # T1 mean(C(t)/C(t-1))
-      CtonCtm1    <- apply((ManagementVars@CM[keep(Sims), mseFramework@MseDef@targpop, AvgYears] / ManagementVars@CM[keep(Sims), mseFramework@MseDef@targpop, AvgYearsm1]) , c(1), mean, na.rm = TRUE)
-      df          <- addRows(df, CtonCtm1, "T1", "mean(C(t)/C(t-1))")
-
-      # T2 var(C)
-      varC        <- round(apply(as.karray(ManagementVars@CM)[keep(Sims), mseFramework@MseDef@targpop, AvgYears], MARGIN=c(1), var), 2)
-      df          <- addRows(df, varC, "T2", "var(C)")
+#      CtonCtm1    <- apply((ManagementVars@CM[keep(Sims), mseFramework@MseDef@targpop, AvgYears] / ManagementVars@CM[keep(Sims), mseFramework@MseDef@targpop, AvgYearsm1]) , c(1), mean, na.rm = TRUE)
+#      df          <- addRows(df, CtonCtm1, "T1", "mean(C(t)/C(t-1))")
 
       # T3 var(F)
 #      varF        <- round(apply(as.karray(F_FMSY)[keep(Sims), mseFramework@MseDef@targpop, AvgYears] * RefVars@FMSY1, MARGIN=c(1), var), 2)
 #      df          <- addRows(df, varF, "T3", "var(F)")
-
-      # T4 Pr(C<0.1MSY)
-      C_MSY       <- c_msy(ManagementVars, RefVars)
-      PrCltp1MSY  <- round(apply(as.karray(C_MSY)[keep(Sims), , AvgYears] < 0.1, MARGIN=c(1), mean), digits=2)
-      df          <- addRows(df, PrCltp1MSY, "T4", "Pr(C<0.1MSY)")
-
-      # Y1 mean(C)
-      C           <- round(apply(ManagementVars@CM[keep(Sims), mseFramework@MseDef@targpop, AvgYears], MARGIN=c(1), mean), 0) / 1000.0
-      df          <- addRows(df, C, "Y1", "mean(C)")
-
-      # Y3 mean(C/MSY)
-      CoMSY       <- round(apply(as.karray(C_MSY)[keep(Sims), , AvgYears], MARGIN=c(1), mean), digits=2)
-      df          <- addRows(df, CoMSY, "Y3", "mean(C/MSY)")
 
       return (df)
     }
