@@ -868,7 +868,7 @@ setMethod("msevizPerformanceData", c("StockSynthesisModel"),
       df          <- addRows(df, CoMSY, "S12", "mean(C/MSY)")
 
       # S13 CPUE for index fleet relative to 2011-2015 average
-      relCPUE     <- round(apply(as.karray(relCPUE)[keep(Sims), , AvgYears], MARGIN=c(1), mean), digits=2)
+      relCPUE     <- round(apply(ManagementVars@IobsArchive[keep(Sims), keep(AvgYears)], MARGIN=c(1), mean) /  mean(HistoricVars@IobsArchive[(HistoricVars@nyears-4):HistoricVars@nyears]), digits=2)
       df          <- addRows(df, relCPUE, "S13", "mean(CPUE)")
 
       # S14 AAVY
