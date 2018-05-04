@@ -923,10 +923,8 @@ setMethod("msevizProjectedTimeSeriesData", c("MseFramework"),
 setGeneric("performanceStatistics", function(.Object, ...) standardGeneric("performanceStatistics"))
 
 setMethod("performanceStatistics", c("MseFramework"),
-  function(.Object, Statistics, AvgFirstYr, AvgLastYr=NA, percentiles=c(0.1,0.25,0.5,0.75,0.8,0.9), thisMP=NA, prefix="")
+  function(.Object, Statistics, AvgFirstYr, AvgLastYr=NA, percentiles=c(0.1,0.25,0.5,0.75,0.8,0.9), thisMP=NA, prefix="", appendTo=NULL)
   {
-    df <- NULL
-
     if (is.na(AvgLastYr))
     {
       firstMPy    <- .Object@MseDef@firstMPYr - .Object@MseDef@lastCalendarYr
@@ -1236,56 +1234,11 @@ setMethod("performanceStatistics", c("MseFramework"),
       stop()
     }
 
-    df <- NULL
-
-    for (MP in MPs)
-    {
-      df_row <- NA
-      df_set <- FALSE
-
-      for (Statistic in Statistics)
-      {
-        if (Statistic %in% names(statHandlers))
-        {
-          nparts <- statHandlers[[Statistic]]$partsFn()
-
-          for (cn in 1:nparts)
-          {
-            SourceData <- karray(NA, c(nproj_sims * nmodels))
-            nsim       <- 1
-
-            for (stockSynthesisModel in .Object@StockSynthesisModels)
-            {
-              nendsim <- nsim + nproj_sims - 1
-
-              SourceData[nsim:nendsim] <- statHandlers[[Statistic]]$statFn(stockSynthesisModel@ProjectedVars[[MP]], stockSynthesisModel@RefVars, stockSynthesisModel@HistoricVars, cn)
-
-              nsim <- nsim + nproj_sims
-            }
-
-            if (df_set)
-            {
-              df_row <- cbind(data.frame(df_row), rbind(c(mean(SourceData, na.rm=TRUE), quantile(SourceData, percentiles, na.rm=TRUE))))
-
-            } else
-            {
-              df_row <- rbind(c(mean(SourceData, na.rm=TRUE), quantile(SourceData, percentiles, na.rm=TRUE)))
-              df_set <- TRUE
-            }
-          }
-
-        } else
-        {
-          print(paste("ERROR: Statistic", Statistic, "not supported. Supported Statistics include:", names(statHandlers)))
-          stop()
-        }
-      }
-
-      df <- rbind(data.frame(df), data.frame(df_row))
-    }
-
-    dataTable <- as.data.table(df)
-    cnames    <- c()
+    # create result data.table. This needs to be done by building a code
+    # expression, parsing and evaluating it.
+    nMPs     <- length(MPs)
+    codeExpr <- "data.table(MP=rep('', times=nMPs),"
+    cnames   <- c()
 
     for (Statistic in Statistics)
     {
@@ -1304,9 +1257,65 @@ setMethod("performanceStatistics", c("MseFramework"),
       }
     }
 
-    colnames(dataTable) <- cnames
-    rownames(dataTable) <- paste(prefix, MPs, sep="")
+    extraColumns <- sapply(cnames, function(name)
+                                   {
+                                     return (paste(name, "=as.double(rep(NA, times=nMPs))", sep=""))
+                                   })
 
-    return (dataTable)
+    codeExpr <- paste(codeExpr, paste(extraColumns, collapse=","), ")", sep="")
+    dt       <- eval(parse(text=codeExpr))
+    nrow     <- 1
+
+    for (MP in MPs)
+    {
+      values <- list(MP=MP)
+
+      for (Statistic in Statistics)
+      {
+        if (Statistic %in% names(statHandlers))
+        {
+          nparts <- statHandlers[[Statistic]]$partsFn()
+
+          for (cn in 1:nparts)
+          {
+            cnames     <- if (nparts > 1) (paste(Statistic, cn, ".", sep="") %&% c("mean", percentiles)) else (Statistic %&% c("mean", percentiles))
+            SourceData <- karray(NA, c(nproj_sims * nmodels))
+            nsim       <- 1
+
+            for (stockSynthesisModel in .Object@StockSynthesisModels)
+            {
+              nendsim <- nsim + nproj_sims - 1
+
+              SourceData[nsim:nendsim] <- statHandlers[[Statistic]]$statFn(stockSynthesisModel@ProjectedVars[[MP]], stockSynthesisModel@RefVars, stockSynthesisModel@HistoricVars, cn)
+
+              nsim <- nsim + nproj_sims
+            }
+
+            data <- c(mean(SourceData, na.rm=TRUE), quantile(SourceData, percentiles, na.rm=TRUE))
+
+            for (cn in 1:length(cnames))
+            {
+              values[[cnames[cn]]] <- data[cn]
+            }
+          }
+
+        } else
+        {
+          print(paste("ERROR: Statistic", Statistic, "not supported. Supported Statistics include:", names(statHandlers)))
+          stop()
+        }
+      }
+
+      set(dt, i=as.integer(nrow), j=names(values), values)
+
+      nrow <- nrow + 1
+    }
+
+    if (!is.null(appendTo))
+    {
+      dt <- merge(appendTo, dt, all=TRUE)
+    }
+
+    return (dt)
   }
 )
