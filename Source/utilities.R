@@ -214,3 +214,142 @@ findTable2_Data <- function(years, results, MPs)
   return (results)
 }
 
+
+#------------------------------------------------------------------------------
+# Function to create table 1 results for IOTC report in word XML document
+#------------------------------------------------------------------------------
+# Typical usage:
+#
+# finalMPList <- c('TB1.1IT5.t25', 'TB1.1PT41.t25',
+#                  'TB2.IT5.t15',  'TB2.PT41.t15',
+#                  'TB3.IT5.t15',  'TB3.PT41.t15',
+#                  'TB4.IT5.t15'   'TB4.PT41.t15')
+#
+# finalMPList_short <- c('TB1.M', 'TB1.D',
+#                        'TB2.M', 'TB2.D',
+#                        'TB3.M', 'TB3.D',
+#                        'TB4.M', 'TB4.D')
+#
+# results <- list(mseOMrefB18.2.304.TB1.1,
+#                 mseOMrefB18.2.304.TB2,
+#                 mseOMrefB18.2.304.TB3,
+#                 mseOMrefB18.2.304.TB4)
+#
+# createTable1(20, results, MPs=finalMPList, MPs_short=finalMPList_short)
+#------------------------------------------------------------------------------
+createTable1 <- function(years, results, MPs, MPs_short)
+{
+  if (length(MPs) > 8)
+  {
+    print("ERROR: maximum number of MPs is 8")
+    stop()
+  }
+
+  Table1 <- findTable1_Data(years, results, MPs)
+
+  MPs                 <- Table1[,j=MP]
+  SBs                 <- Table1[,j=SBoSBMSY0.5]
+  SB25s               <- Table1[,j=SBoSBMSY0.25]
+  SB75s               <- Table1[,j=SBoSBMSY0.75]
+  GKs                 <- Table1[,j=GK0.5]
+  PrSBgtLims          <- Table1[,j=PrSBgtSBlim0.5]
+  Catches             <- Table1[,j=Y0.5]
+  Catch25s            <- Table1[,j=Y0.25]
+  Catch75s            <- Table1[,j=Y0.75]
+  Catch_variabilities <- Table1[,j=AAVY0.5]
+
+  DarkShade   <- 166
+  LightShade  <- 255
+
+  GreyShade <- function(x) {return (paste(x,x,x, sep=""))}
+
+  SB_shade                  <- GreyShade(as.hexmode(DarkShade + floor((max(SBs) - SBs) / (max(SBs) - min(SBs)) * (LightShade - DarkShade))))
+  GK_shade                  <- GreyShade(as.hexmode(DarkShade + floor((max(GKs) - GKs) / (max(GKs) - min(GKs)) * (LightShade - DarkShade))))
+  PrSBgtLims_shade          <- GreyShade(as.hexmode(DarkShade + floor((max(PrSBgtLims) - PrSBgtLims) / (max(PrSBgtLims) - min(PrSBgtLims)) * (LightShade - DarkShade))))
+  Catches_shade             <- GreyShade(as.hexmode(DarkShade + floor((max(Catches) - Catches) / (max(Catches) - min(Catches)) * (LightShade - DarkShade))))
+  Catch_variabilities_shade <- GreyShade(as.hexmode(DarkShade + floor((Catch_variabilities - min(Catch_variabilities)) / (max(Catch_variabilities) - min(Catch_variabilities)) * (LightShade - DarkShade))))
+
+  xml <- paste(readLines("./templates/table_1_template.xml.txt"), collapse="\n")
+
+  for (idx in 1:length(MPs))
+  {
+    MP_tag                        <- paste("\\{MP", idx, "\\}", sep="")
+    SB_tag                        <- paste("\\{SB", idx, "\\}", sep="")
+    SB25_tag                      <- paste("\\{SB", idx, "a\\}", sep="")
+    SB75_tag                      <- paste("\\{SB", idx, "b\\}", sep="")
+    SB_colour_tag                 <- paste("\\{SB", idx, "col\\}", sep="")
+    KobeGreen_tag                 <- paste("\\{KG", idx, "\\}", sep="")
+    KobeGreen_colour_tag          <- paste("\\{KG", idx, "col\\}", sep="")
+    PrSBgtLim_tag                 <- paste("\\{PSB", idx, "\\}", sep="")
+    PrSBgtLim_colour_tag          <- paste("\\{PSB", idx, "col\\}", sep="")
+    Catch_tag                     <- paste("\\{Y", idx, "\\}", sep="")
+    Catch25_tag                   <- paste("\\{Y", idx, "a\\}", sep="")
+    Catch75_tag                   <- paste("\\{Y", idx, "b\\}", sep="")
+    Catch_colour_tag              <- paste("\\{Y", idx, "col\\}", sep="")
+    Catch_variability_tag         <- paste("\\{CV", idx, "\\}", sep="")
+    Catch_variability_colour_tag  <- paste("\\{CV", idx, "col\\}", sep="")
+
+    xml <- gsub(MP_tag,        MPs_short[idx],               xml)
+    xml <- gsub(SB_tag,        format(SBs[idx],   digits=2), xml)
+    xml <- gsub(SB25_tag,      format(SB25s[idx], digits=2), xml)
+    xml <- gsub(SB75_tag,      format(SB75s[idx], digits=2), xml)
+    xml <- gsub(SB_colour_tag, SB_shade[idx],                xml)
+
+    xml <- gsub(KobeGreen_tag,        format(GKs[idx], digits=2), xml)
+    xml <- gsub(KobeGreen_colour_tag, GK_shade[idx],              xml)
+
+    xml <- gsub(PrSBgtLim_tag,        format(PrSBgtLims[idx], digits=2), xml)
+    xml <- gsub(PrSBgtLim_colour_tag, PrSBgtLims_shade[idx],             xml)
+
+    xml <- gsub(Catch_tag,        format(Catches[idx], digits=2),  xml)
+    xml <- gsub(Catch25_tag,      format(Catch25s[idx], digits=2), xml)
+    xml <- gsub(Catch75_tag,      format(Catch75s[idx], digits=2), xml)
+    xml <- gsub(Catch_colour_tag, Catches_shade[idx],              xml)
+
+    xml <- gsub(Catch_variability_tag,        format(Catch_variabilities[idx], digits=2), xml)
+    xml <- gsub(Catch_variability_colour_tag, Catch_variabilities_shade[idx],             xml)
+  }
+
+  for (idx in length(MPs):8)
+  {
+    MP_tag                        <- paste("\\{MP", idx, "\\}", sep="")
+    SB_tag                        <- paste("\\{SB", idx, "\\}", sep="")
+    SB25_tag                      <- paste("\\{SB", idx, "a\\}", sep="")
+    SB75_tag                      <- paste("\\{SB", idx, "b\\}", sep="")
+    SB_colour_tag                 <- paste("\\{SB", idx, "col\\}", sep="")
+    KobeGreen_tag                 <- paste("\\{KG", idx, "\\}", sep="")
+    KobeGreen_colour_tag          <- paste("\\{KG", idx, "col\\}", sep="")
+    PrSBgtLim_tag                 <- paste("\\{PSB", idx, "\\}", sep="")
+    PrSBgtLim_colour_tag          <- paste("\\{PSB", idx, "col\\}", sep="")
+    Catch_tag                     <- paste("\\{Y", idx, "\\}", sep="")
+    Catch25_tag                   <- paste("\\{Y", idx, "a\\}", sep="")
+    Catch75_tag                   <- paste("\\{Y", idx, "b\\}", sep="")
+    Catch_colour_tag              <- paste("\\{Y", idx, "col\\}", sep="")
+    Catch_variability_tag         <- paste("\\{CV", idx, "\\}", sep="")
+    Catch_variability_colour_tag  <- paste("\\{CV", idx, "col\\}", sep="")
+
+    xml <- gsub(MP_tag,        "",       xml)
+    xml <- gsub(SB_tag,        "",       xml)
+    xml <- gsub(SB25_tag,      "",       xml)
+    xml <- gsub(SB75_tag,      "",       xml)
+    xml <- gsub(SB_colour_tag, "ffffff", xml)
+
+    xml <- gsub(KobeGreen_tag,        "",       xml)
+    xml <- gsub(KobeGreen_colour_tag, "ffffff", xml)
+
+    xml <- gsub(PrSBgtLim_tag,        "",       xml)
+    xml <- gsub(PrSBgtLim_colour_tag, "ffffff", xml)
+
+    xml <- gsub(Catch_tag,        "",       xml)
+    xml <- gsub(Catch25_tag,      "",       xml)
+    xml <- gsub(Catch75_tag,      "",       xml)
+    xml <- gsub(Catch_colour_tag, "ffffff", xml)
+
+    xml <- gsub(Catch_variability_tag,        "",       xml)
+    xml <- gsub(Catch_variability_colour_tag, "ffffff", xml)
+  }
+
+  Xmlfile <- file("./Report/Table_1.xml", "wt")
+  writeLines(xml, con=Xmlfile)
+  close(Xmlfile)
+}
