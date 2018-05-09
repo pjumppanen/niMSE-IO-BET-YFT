@@ -220,10 +220,10 @@ findTable2_Data <- function(years, results, MPs)
 #------------------------------------------------------------------------------
 # Typical usage:
 #
-# finalMPList <- c('TB1.1IT5.t25', 'TB1.1PT41.t25',
-#                  'TB2.IT5.t15',  'TB2.PT41.t15',
-#                  'TB3.IT5.t15',  'TB3.PT41.t15',
-#                  'TB4.IT5.t15'   'TB4.PT41.t15')
+# finalMPList <- c('TB1.1PT41.t25', 'TB1.1IT5.t25',
+#                  'TB2.PT41.t15',  'TB2.IT5.t15',
+#                  'TB3.PT41.t15',  'TB3.IT5.t15',
+#                  'TB4.PT41.t15', 'TB4.IT5.t15')
 #
 # finalMPList_short <- c('TB1.M', 'TB1.D',
 #                        'TB2.M', 'TB2.D',
