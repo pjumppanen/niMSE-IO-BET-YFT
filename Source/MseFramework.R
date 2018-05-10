@@ -1203,9 +1203,9 @@ setMethod("performanceStatistics", c("MseFramework"),
     )
 
     # extract MP names
-    MPs        <- NA
-    nproj_sims <- NA
-    nmodels    <- length(.Object@StockSynthesisModels)
+    MPs         <- NA
+    nmodels     <- length(.Object@StockSynthesisModels)
+    ntotal_sims <- 0
 
     if (nmodels > 0)
     {
@@ -1214,8 +1214,7 @@ setMethod("performanceStatistics", c("MseFramework"),
       if (nMPs > 0)
       {
 
-        MPs        <- names(.Object@StockSynthesisModels[[1]]@ProjectedVars)
-        nproj_sims <- .Object@StockSynthesisModels[[1]]@ProjectedVars[[1]]@nsim
+        MPs <- names(.Object@StockSynthesisModels[[1]]@ProjectedVars)
 
         if (!is.na(thisMP))
         {
@@ -1226,6 +1225,11 @@ setMethod("performanceStatistics", c("MseFramework"),
       {
         print("ERROR: No MP projections in Stock Synthesis models.")
         stop()
+      }
+
+      for (stockSynthesisModel in .Object@StockSynthesisModels)
+      {
+        ntotal_sims <- ntotal_sims + stockSynthesisModel@ModelData@nsim
       }
 
     } else
@@ -1279,12 +1283,13 @@ setMethod("performanceStatistics", c("MseFramework"),
           for (cn in 1:nparts)
           {
             cnames     <- if (nparts > 1) (paste(Statistic, cn, ".", sep="") %&% c("mean", percentiles)) else (Statistic %&% c("mean", percentiles))
-            SourceData <- karray(NA, c(nproj_sims * nmodels))
+            SourceData <- karray(NA, ntotal_sims)
             nsim       <- 1
 
             for (stockSynthesisModel in .Object@StockSynthesisModels)
             {
-              nendsim <- nsim + nproj_sims - 1
+              nproj_sims <- stockSynthesisModel@ModelData@nsim
+              nendsim    <- nsim + nproj_sims - 1
 
               SourceData[nsim:nendsim] <- statHandlers[[Statistic]]$statFn(stockSynthesisModel@ProjectedVars[[MP]], stockSynthesisModel@RefVars, stockSynthesisModel@HistoricVars, cn)
 
