@@ -126,8 +126,8 @@ findTable1_Data <- function(years, results, MPs)
   }
 
   cnames  <- c("SBoSBMSY0.5",
-               "GK0.5",
-               "PrSBgtSBlim0.5",
+               "GKmean",
+               "PrSBgtSBlimmean",
                "Y0.5",
                "AAVY0.5",
                "SBoSBMSY0.25",
@@ -187,16 +187,16 @@ findTable2_Data <- function(years, results, MPs)
                "minSBoSB00.5",
                "SBoSBMSY0.5",
                "FoFMSY0.5",
-               "FoFtargmean",
+               "FoFtarg0.5",
                "GKmean",
                "RKmean",
                "PrSBgt0.2SB0mean",
                "PrSBgtSBlimmean",
-               "Ymean",
-               "YoMSYmean",
-               "relCPUEmean",
-               "AAVYmean",
-               "YcvPctmean",
+               "Y0.5",
+               "YoMSY0.5",
+               "relCPUE0.5",
+               "AAVY0.5",
+               "YcvPct0.5",
                "PrYlt0.1MSYmean")
 
   stats <- stats[MP %in% MPs, mget(c("MP",rnames))]
@@ -251,8 +251,8 @@ createTable1 <- function(years, results, MPs, MPs_short)
   SBs                 <- Table1[,j=SBoSBMSY0.5]
   SB25s               <- Table1[,j=SBoSBMSY0.25]
   SB75s               <- Table1[,j=SBoSBMSY0.75]
-  GKs                 <- Table1[,j=GK0.5]
-  PrSBgtLims          <- Table1[,j=PrSBgtSBlim0.5]
+  GKs                 <- Table1[,j=GKmean]
+  PrSBgtLims          <- Table1[,j=PrSBgtSBlimmean]
   Catches             <- Table1[,j=Y0.5]
   Catch25s            <- Table1[,j=Y0.25]
   Catch75s            <- Table1[,j=Y0.75]
@@ -349,7 +349,91 @@ createTable1 <- function(years, results, MPs, MPs_short)
     xml <- gsub(Catch_variability_colour_tag, "ffffff", xml)
   }
 
-  Xmlfile <- file("./Report/Table_1.xml", "wt")
+  Xmlfile <- file(paste("./Report/Table_1_", years, "yr.xml", sep=""), "wt")
+  writeLines(xml, con=Xmlfile)
+  close(Xmlfile)
+}
+
+
+#------------------------------------------------------------------------------
+# Function to create table 2 results for IOTC report in word XML document
+#------------------------------------------------------------------------------
+# Typical usage:
+#
+# finalMPList <- c('TB1.1PT41.t25', 'TB1.1IT5.t25',
+#                  'TB2.PT41.t15',  'TB2.IT5.t15',
+#                  'TB3.PT41.t15',  'TB3.IT5.t15',
+#                  'TB4.PT41.t15', 'TB4.IT5.t15')
+#
+# finalMPList_short <- c('TB1.M', 'TB1.D',
+#                        'TB2.M', 'TB2.D',
+#                        'TB3.M', 'TB3.D',
+#                        'TB4.M', 'TB4.D')
+#
+# results <- list(mseOMrefB18.2.304.TB1.1,
+#                 mseOMrefB18.2.304.TB2,
+#                 mseOMrefB18.2.304.TB3,
+#                 mseOMrefB18.2.304.TB4)
+#
+# createTable2(20, results, MPs=finalMPList, MPs_short=finalMPList_short)
+#------------------------------------------------------------------------------
+createTable2 <- function(years, results, MPs, MPs_short)
+{
+  if (length(MPs) > 8)
+  {
+    print("ERROR: maximum number of MPs is 8")
+    stop()
+  }
+
+  Table2 <- findTable2_Data(years, results, MPs)
+  rowMap <- list(SBoSB00.5=1,
+                 minSBoSB00.5=2,
+                 SBoSBMSY0.5=3,
+                 FoFMSY0.5=4,
+                 FoFtarg0.5=5,
+                 GKmean=6,
+                 RKmean=7,
+                 PrSBgt0.2SB0mean=8,
+                 PrSBgtSBlimmean=9,
+                 Y0.5=10,
+                 YoMSY0.5=12,
+                 relCPUE0.5=11,
+                 AAVY0.5=13,
+                 YcvPct0.5=14,
+                 PrYlt0.1MSYmean=15)
+
+  MPs   <- colnames(Table2)
+  stats <- rownames(Table2)
+
+  xml <- paste(readLines("./templates/table_2_template.xml.txt"), collapse="\n")
+  xml <- gsub("\\{PERIOD\\}", paste(years, "year average"), xml)
+
+  for (cn in 1:length(MPs))
+  {
+    tag <- paste("\\{MP", cn, "\\}", sep="")
+    xml <- gsub(tag, finalMPList_short[cn], xml)
+  }
+
+  for (cn in 1:length(stats))
+  {
+    nrow <- rowMap[[stats[cn]]]
+
+    for (ncol in 1:length(MPs))
+    {
+      tag   <- paste("\\{", nrow, "\\.", ncol, "\\}", sep="")
+      value <- format(Table2[nrow, ncol], digits=2)
+      xml   <- gsub(tag, value, xml)
+    }
+
+    for (cm in length(MPs):8)
+    {
+      tag   <- paste("\\{", nrow, "\\.", ncol, "\\}", sep="")
+      value <- ""
+      xml   <- gsub(tag, value, xml)
+    }
+  }
+
+  Xmlfile <- file(paste("./Report/Table_2_", years, "yr.xml", sep=""), "wt")
   writeLines(xml, con=Xmlfile)
   close(Xmlfile)
 }
