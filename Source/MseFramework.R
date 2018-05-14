@@ -608,9 +608,13 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
     statHandlers[["PrGreen"]] <- list(
       addFn = function(HistoricVars, RefVars, context)
               {
-                B_BMSY <- b_bmsy(HistoricVars, RefVars)
-                F_FMSY <- f_fmsy(HistoricVars, RefVars)
-                return (addRows(context, B_BMSY > 1 & F_FMSY < 1, "PrGreen"))
+                B_BMSY  <- b_bmsy(HistoricVars, RefVars)
+                F_FMSY  <- f_fmsy(HistoricVars, RefVars)
+                isGreen <- B_BMSY > 1 & F_FMSY < 1
+
+                storage.mode(isGreen) <- "double"
+
+                return (addRows(context, isGreen, "PrGreen"))
               },
 
       countFn = function(HistoricVars)
@@ -624,7 +628,11 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
               {
                 B_BMSY <- b_bmsy(HistoricVars, RefVars)
                 F_FMSY <- f_fmsy(HistoricVars, RefVars)
-                return (addRows(context, B_BMSY < 1 & F_FMSY > 1, "PrRed"))
+                isRed  <- B_BMSY < 1 & F_FMSY > 1
+
+                storage.mode(isRed) <- "double"
+
+                return (addRows(context, isRed, "PrRed"))
               },
 
       countFn = function(HistoricVars)
@@ -636,9 +644,13 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
     statHandlers[["PrOrange"]] <- list(
       addFn = function(HistoricVars, RefVars, context)
               {
-                B_BMSY <- b_bmsy(HistoricVars, RefVars)
-                F_FMSY <- f_fmsy(HistoricVars, RefVars)
-                return (addRows(context, B_BMSY > 1 & F_FMSY > 1, "PrOrange"))
+                B_BMSY   <- b_bmsy(HistoricVars, RefVars)
+                F_FMSY   <- f_fmsy(HistoricVars, RefVars)
+                isOrange <- B_BMSY > 1 & F_FMSY > 1
+
+                storage.mode(isOrange) <- "double"
+
+                return (addRows(context, isOrange, "PrOrange"))
               },
 
       countFn = function(HistoricVars)
@@ -650,9 +662,13 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
     statHandlers[["PrYellow"]] <- list(
       addFn = function(HistoricVars, RefVars, context)
               {
-                B_BMSY <- b_bmsy(HistoricVars, RefVars)
-                F_FMSY <- f_fmsy(HistoricVars, RefVars)
-                return (addRows(context, B_BMSY < 1 & F_FMSY < 1, "PrYellow"))
+                B_BMSY   <- b_bmsy(HistoricVars, RefVars)
+                F_FMSY   <- f_fmsy(HistoricVars, RefVars)
+                isYellow <- B_BMSY < 1 & F_FMSY < 1
+
+                storage.mode(isYellow) <- "double"
+
+                return (addRows(context, isYellow, "PrYellow"))
               },
 
       countFn = function(HistoricVars)
@@ -858,13 +874,18 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
             for (ProjVar in om@ProjectedVars)
             {
               SY   <- as.matrix(expand.grid(nsims=1:ProjVar@nsim, nyrs=1:ProjVar@nyears))
-              Yrs  <- .Object@MseDef@firstCalendarYr + om@ModelData@nyears + (0:(ProjVar@nyears - 1))
+#              Yrs  <- .Object@MseDef@firstCalendarYr + om@ModelData@nyears + (0:(ProjVar@nyears - 1))
+              # manually fudge this for now for the sake of the report. om@ModelData@nyears is 66 but
+              # should have been 65 I believe, which is why the plot time is out by a year. Not sure
+              # why it was initialised incorrectly but to fix that in objects themselves would require
+              # re-run so just fudge it here.
+              Yrs  <- as.integer(.Object@MseDef@firstCalendarYr + om@ModelData@nyears - 1 + (0:(ProjVar@nyears - 1)))
               C1   <- rep(paste(prefix, ProjVar@MP, sep=""), times=length(SY[,1]))
               C2   <- Yrs[SY[,2]]
 
               addRows <- function(context, data, name)
               {
-                next_origin <- (context$origin + length(Yrs))
+                next_origin <- (context$origin + length(Yrs) * ProjVar@nsim)
                 rows        <- context$origin:(next_origin - 1)
 
                 C3          <- data[SY]
