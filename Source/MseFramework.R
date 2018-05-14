@@ -864,12 +864,7 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
             for (ProjVar in om@ProjectedVars)
             {
               SY   <- as.matrix(expand.grid(nsims=1:ProjVar@nsim, nyrs=1:ProjVar@nyears))
-#              Yrs  <- .Object@MseDef@firstCalendarYr + om@ModelData@nyears + (0:(ProjVar@nyears - 1))
-              # manually fudge this for now for the sake of the report. om@ModelData@nyears is 66 but
-              # should have been 65 I believe, which is why the plot time is out by a year. Not sure
-              # why it was initialised incorrectly but to fix that in objects themselves would require
-              # re-run so just fudge it here.
-              Yrs  <- as.integer(.Object@MseDef@firstCalendarYr + om@ModelData@nyears - 1 + (0:(ProjVar@nyears - 1)))
+              Yrs  <- .Object@MseDef@firstCalendarYr + om@ModelData@nyears + (0:(ProjVar@nyears - 1))
               C1   <- rep(paste(prefix, ProjVar@MP, sep=""), times=length(SY[,1]))
               C2   <- Yrs[SY[,2]]
 
