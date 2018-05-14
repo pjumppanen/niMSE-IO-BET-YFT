@@ -787,30 +787,19 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
       Indicators <- names(statHandlers)
     }
 
-    if (bHistoric)
+    for (Indicator in Indicators)
     {
-      for (Indicator in Indicators)
+      if (Indicator %in% names(statHandlers))
       {
-        if (Indicator %in% names(statHandlers))
-        {
-          handler <- statHandlers[[Indicator]]
+        handler <- statHandlers[[Indicator]]
 
-          for (om in .Object@StockSynthesisModels)
+        for (om in .Object@StockSynthesisModels)
+        {
+          if (bHistoric)
           {
-            row_count <- row_count + handler$countFn(om@HistoricVars)
-          }
-        }
-      }
+            row_count <- row_count + handler$countFn(om@HistoricVars) * om@ModelData@nsim
 
-    } else
-    {
-      for (Indicator in Indicators)
-      {
-        if (Indicator %in% names(statHandlers))
-        {
-          handler <- statHandlers[[Indicator]]
-
-          for (om in .Object@StockSynthesisModels)
+          } else
           {
             for (ProjVar in om@ProjectedVars)
             {
@@ -843,17 +832,18 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
         {
           if (bHistoric)
           {
+            SY  <- as.matrix(expand.grid(nsims=1:om@ModelData@nsim, nyrs=1:om@HistoricVars@nyears))
             Yrs <- .Object@MseDef@firstCalendarYr + (0:(om@HistoricVars@nyears - 1))
 
             addRows <- function(context, data, name)
             {
-              next_origin <- (context$origin + length(Yrs))
+              next_origin <- (context$origin + length(Yrs) * om@ModelData@nsim)
               rows        <- context$origin:(next_origin - 1)
 
-              C1          <- Yrs
-              C2          <- as.array(data)
-              C3          <- as.integer(rep(context$iter + 1, times=length(Yrs)))
-              C4          <- rep(name, times=length(Yrs))
+              C1          <- Yrs[SY[,2]]
+              C2          <- data[SY[,2]]
+              C3          <- as.integer(context$iter + SY[,1])
+              C4          <- rep(name, times=length(SY[,2]))
 
               set(context$dt, rows, "year",  C1)
               set(context$dt, rows, "data",  C2)
@@ -867,7 +857,7 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
 
             res <- handler$addFn(om@HistoricVars, om@RefVars, res)
 
-            res$iter <- res$iter + 1
+            res$iter <- res$iter + om@ModelData@nsim
 
           } else
           {
