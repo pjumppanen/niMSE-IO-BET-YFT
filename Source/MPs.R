@@ -1,316 +1,402 @@
-
-# ===============================================================================================================
-# === Management Procedures for Indian Ocean MSE==========================================================================
-#
-# MP must provide an aggregate TAC and disaggregated TAE by fishery (if TAE>0, that fishery is given 0 TAC)
-# seasonal (and fishery in the case of TAC) disaggregations are currently based on the "recent" historical means
-# the R-based projection code assumes that TAC catch proportions remain constant among seasons within years
-# the Cpp-based projections assume that the TAC Effort proportions remain constant among seasons within years
-# ===============================================================================================================
+#------------------------------------------------------------------------------
+# Management Procedures for Indian Ocean MSE
+#------------------------------------------------------------------------------
+# MP must provide an aggregate TAC and disaggregated TAE by fishery (if TAE> 0,
+# that fishery is given 0 TAC) seasonal (and fishery in the case of TAC)
+# disaggregations are currently based on the "recent" historical means the
+# R-based projection code assumes that TAC catch proportions remain constant
+# among seasons within years the Cpp-based projections assume that the TAC
+# Effort proportions remain constant among seasons within years
+#------------------------------------------------------------------------------
 
 
 MP_FunctionExports <- c()
 
 
 #Pella-Tomlinson 40:10-type MPs (details implemented below)
-#===============================================================================
+#------------------------------------------------------------------------------
 
-#tuning
-PT41.tune.9<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0){
+# tuning
+PT41.tune.9 <- function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0)
+{
   return(PellaTomlinson4010(pset, BLower=BLower,BUpper=BUpper,CMaxProp=pset$tune * CMaxProp))
 }
-class(PT41.tune.9)<-"IO_MP_tune"
 
-PT41.tune.15<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1., deltaTACLimUp=0.15, deltaTACLimDown=0.15){
+class(PT41.tune.9) <- "IO_MP_tune"
+
+#------------------------------------------------------------------------------
+
+PT41.tune.15 <- function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1., deltaTACLimUp=0.15, deltaTACLimDown=0.15)
+{
   return(PellaTomlinson4010(pset, BLower=BLower,BUpper=BUpper,CMaxProp=pset$tune * CMaxProp, deltaTACLimUp=deltaTACLimUp, deltaTACLimDown=deltaTACLimDown))
 }
-class(PT41.tune.15)<-"IO_MP_tune"
 
-PT41.t15<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1., deltaTACLimUp=0.15, deltaTACLimDown=0.15){
+class(PT41.tune.15) <- "IO_MP_tune"
+
+#------------------------------------------------------------------------------
+
+PT41.tune.05 <- function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, deltaTACLimUp=0.05, deltaTACLimDown=0.05)
+{
   return(PellaTomlinson4010(pset, BLower=BLower,BUpper=BUpper,CMaxProp=pset$tune * CMaxProp, deltaTACLimUp=deltaTACLimUp, deltaTACLimDown=deltaTACLimDown))
 }
-class(PT41.t15)<-"IO_MP_tune"
 
-PT41.t25<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1., deltaTACLimUp=0.25, deltaTACLimDown=0.25){
+class(PT41.tune.05) <- "IO_MP_tune"
+
+#------------------------------------------------------------------------------
+
+PT61.tune.15 <- function(pset, BLower=0.1,BUpper=0.6,CMaxProp=1.0, deltaTACLimUp=0.15, deltaTACLimDown=0.15)
+{
   return(PellaTomlinson4010(pset, BLower=BLower,BUpper=BUpper,CMaxProp=pset$tune * CMaxProp, deltaTACLimUp=deltaTACLimUp, deltaTACLimDown=deltaTACLimDown))
 }
-class(PT41.t25)<-"IO_MP_tune"
 
-PT41.t10<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1., deltaTACLimUp=0.1, deltaTACLimDown=0.1){
+class(PT61.tune.15) <- "IO_MP_tune"
+
+#------------------------------------------------------------------------------
+
+PT40.tune.15 <- function(pset, BLower=0.,BUpper=0.4,CMaxProp=1.0, deltaTACLimUp=0.15, deltaTACLimDown=0.15)
+{
   return(PellaTomlinson4010(pset, BLower=BLower,BUpper=BUpper,CMaxProp=pset$tune * CMaxProp, deltaTACLimUp=deltaTACLimUp, deltaTACLimDown=deltaTACLimDown))
 }
-class(PT41.t10)<-"IO_MP_tune"
 
-PT80.t15<-function(pset, BLower=0.0,BUpper=0.8,CMaxProp=1., deltaTACLimUp=0.15, deltaTACLimDown=0.15){
+class(PT40.tune.15) <- "IO_MP_tune"
+
+#------------------------------------------------------------------------------
+
+PT30.tune.15 <- function(pset, BLower=0.,BUpper=0.3,CMaxProp=1.0, deltaTACLimUp=0.15, deltaTACLimDown=0.15)
+{
   return(PellaTomlinson4010(pset, BLower=BLower,BUpper=BUpper,CMaxProp=pset$tune * CMaxProp, deltaTACLimUp=deltaTACLimUp, deltaTACLimDown=deltaTACLimDown))
 }
-class(PT80.t15)<-"IO_MP_tune"
 
+class(PT30.tune.15) <- "IO_MP_tune"
 
-PT41.tune.05<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, deltaTACLimUp=0.05, deltaTACLimDown=0.05){
-  return(PellaTomlinson4010(pset, BLower=BLower,BUpper=BUpper,CMaxProp=pset$tune * CMaxProp, deltaTACLimUp=deltaTACLimUp, deltaTACLimDown=deltaTACLimDown))
-}
-class(PT41.tune.05)<-"IO_MP_tune"
+#------------------------------------------------------------------------------
 
-
-PT61.tune.15 <-function(pset, BLower=0.1,BUpper=0.6,CMaxProp=1.0, deltaTACLimUp=0.15, deltaTACLimDown=0.15){
-  return(PellaTomlinson4010(pset, BLower=BLower,BUpper=BUpper,CMaxProp=pset$tune * CMaxProp, deltaTACLimUp=deltaTACLimUp, deltaTACLimDown=deltaTACLimDown))
-}
-class(PT61.tune.15)<-"IO_MP_tune"
-
-PT40.tune.15 <-function(pset, BLower=0.,BUpper=0.4,CMaxProp=1.0, deltaTACLimUp=0.15, deltaTACLimDown=0.15){
-  return(PellaTomlinson4010(pset, BLower=BLower,BUpper=BUpper,CMaxProp=pset$tune * CMaxProp, deltaTACLimUp=deltaTACLimUp, deltaTACLimDown=deltaTACLimDown))
-}
-class(PT40.tune.15)<-"IO_MP_tune"
-
-PT30.tune.15 <-function(pset, BLower=0.,BUpper=0.3,CMaxProp=1.0, deltaTACLimUp=0.15, deltaTACLimDown=0.15){
-  return(PellaTomlinson4010(pset, BLower=BLower,BUpper=BUpper,CMaxProp=pset$tune * CMaxProp, deltaTACLimUp=deltaTACLimUp, deltaTACLimDown=deltaTACLimDown))
-}
-class(PT30.tune.15)<-"IO_MP_tune"
-
-#tuned to OM-ref, 216 reps, tuning level3
-PT41.15.216.t3<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.4395871){
+# tuned to OM-ref, 216 reps, tuning level3
+PT41.15.216.t3 <- function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.4395871)
+{
   return(PellaTomlinson4010(pset, BLower=BLower,BUpper=BUpper,CMaxProp=pset$tune * CMaxProp))
 }
-class(PT41.15.216.t3)<-"IO_MP"
 
+class(PT41.15.216.t3) <- "IO_MP"
+
+#------------------------------------------------------------------------------
 
 # the fishing mortality equivalent of PT41.tune.15
-PT41F.tune.15<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1., useF=T, deltaTACLimUp=0.15, deltaTACLimDown=0.15){
+PT41F.tune.15 <- function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1., useF=T, deltaTACLimUp=0.15, deltaTACLimDown=0.15)
+{
   return(PellaTomlinson4010(pset, BLower=BLower,BUpper=BUpper,CMaxProp=pset$tune * CMaxProp, deltaTACLimUp=deltaTACLimUp, deltaTACLimDown=deltaTACLimDown))
 }
-class(PT41F.tune.15)<-"IO_MP_tune"
+
+class(PT41F.tune.15) <- "IO_MP_tune"
 
 
 
 
 
+#------------------------------------------------------------------------------
 # non-tuning
+#------------------------------------------------------------------------------
 
-PT41.100.9<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0){
+PT41.100.9 <- function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0)
+{
   return(PellaTomlinson4010(pset, BLower=BLower,BUpper=BUpper,CMaxProp=CMaxProp))
 }
-class(PT41.100.9)<-"IO_MP"
 
-PT41.100.5<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, deltaTACLimUp=0.5, deltaTACLimDown=0.5){
+class(PT41.100.9) <- "IO_MP"
+
+#------------------------------------------------------------------------------
+
+PT41.100.5 <- function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, deltaTACLimUp=0.5, deltaTACLimDown=0.5)
+{
   return(PellaTomlinson4010(pset, BLower=BLower,BUpper=BUpper,CMaxProp=CMaxProp, deltaTACLimUp=deltaTACLimUp, deltaTACLimDown=deltaTACLimDown))
 }
-class(PT41.100.5)<-"IO_MP"
 
-PT41.100.2<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, deltaTACLimUp=0.2, deltaTACLimDown=0.2){
+class(PT41.100.5) <- "IO_MP"
+
+#------------------------------------------------------------------------------
+
+PT41.100.2 <- function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, deltaTACLimUp=0.2, deltaTACLimDown=0.2)
+{
   return(PellaTomlinson4010(pset, BLower=BLower,BUpper=BUpper,CMaxProp=CMaxProp, deltaTACLimUp=deltaTACLimUp, deltaTACLimDown=deltaTACLimDown))
 }
-class(PT41.100.2)<-"IO_MP"
 
-PT41.100.1<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, deltaTACLimUp=0.1, deltaTACLimDown=0.1){
+class(PT41.100.2) <- "IO_MP"
+
+#------------------------------------------------------------------------------
+
+PT41.100.1 <- function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, deltaTACLimUp=0.1, deltaTACLimDown=0.1)
+{
   return(PellaTomlinson4010(pset, BLower=BLower,BUpper=BUpper,CMaxProp=CMaxProp, deltaTACLimUp=deltaTACLimUp, deltaTACLimDown=deltaTACLimDown))
 }
-class(PT41.100.1)<-"IO_MP"
 
-PT42.125.2<-function(pset, BLower=0.2,BUpper=0.4,CMaxProp=1.25){
+class(PT41.100.1) <- "IO_MP"
+
+#------------------------------------------------------------------------------
+PT42.125.2 <- function(pset, BLower=0.2,BUpper=0.4,CMaxProp=1.25)
+{
   return(PellaTomlinson4010(pset, BLower=BLower,BUpper=BUpper,CMaxProp=CMaxProp))
 }
-class(PT42.125.2)<-"IO_MP"
 
-PT42.125.5<-function(pset, BLower=0.2,BUpper=0.4,CMaxProp=1.25){
+class(PT42.125.2) <- "IO_MP"
+
+#------------------------------------------------------------------------------
+
+PT42.125.5 <- function(pset, BLower=0.2,BUpper=0.4,CMaxProp=1.25)
+{
   return(PellaTomlinson4010(pset, BLower=BLower,BUpper=BUpper,CMaxProp=CMaxProp))
 }
-class(PT42.125.5)<-"IO_MP"
 
-PT61.75.2<-function(pset, BLower=0.1,BUpper=0.6,CMaxProp=0.75){
+class(PT42.125.5) <- "IO_MP"
+
+#------------------------------------------------------------------------------
+PT61.75.2 <- function(pset, BLower=0.1,BUpper=0.6,CMaxProp=0.75)
+{
   return(PellaTomlinson4010(pset, BLower=BLower,BUpper=BUpper,CMaxProp=CMaxProp))
 }
-class(PT61.75.2)<-"IO_MP"
 
-PT61.75.5<-function(pset, BLower=0.1,BUpper=0.6,CMaxProp=0.75){
+class(PT61.75.2) <- "IO_MP"
+
+#------------------------------------------------------------------------------
+
+PT61.75.5 <- function(pset, BLower=0.1,BUpper=0.6,CMaxProp=0.75)
+{
   return(PellaTomlinson4010(pset, BLower=BLower,BUpper=BUpper,CMaxProp=CMaxProp))
 }
-class(PT61.75.5)<-"IO_MP"
 
-PT62.125.2<-function(pset, BLower=0.2,BUpper=0.6,CMaxProp=1.25){
+class(PT61.75.5) <- "IO_MP"
+
+#------------------------------------------------------------------------------
+
+PT62.125.2<-function(pset, BLower=0.2,BUpper=0.6,CMaxProp=1.25)
+{
   return(PellaTomlinson4010(pset, BLower=BLower,BUpper=BUpper,CMaxProp=CMaxProp))
 }
-class(PT62.125.2)<-"IO_MP"
 
-PT62.125.5<-function(pset, BLower=0.2,BUpper=0.6,CMaxProp=1.25){
+class(PT62.125.2) <- "IO_MP"
+
+#------------------------------------------------------------------------------
+
+PT62.125.5 <- function(pset, BLower=0.2,BUpper=0.6,CMaxProp=1.25)
+{
   return(PellaTomlinson4010(pset, BLower=BLower,BUpper=BUpper,CMaxProp=CMaxProp))
 }
-class(PT62.125.5)<-"IO_MP"
 
-PT82.150.2<-function(pset, BLower=0.2,BUpper=0.8,CMaxProp=1.5){
+class(PT62.125.5) <- "IO_MP"
+
+#------------------------------------------------------------------------------
+
+PT82.150.2 <- function(pset, BLower=0.2,BUpper=0.8,CMaxProp=1.5)
+{
   return(PellaTomlinson4010(pset, BLower=BLower,BUpper=BUpper,CMaxProp=CMaxProp))
 }
-class(PT82.150.2)<-"IO_MP"
 
-PT82.150.5<-function(pset, BLower=0.2,BUpper=0.8,CMaxProp=1.5){
+class(PT82.150.2) <- "IO_MP"
+
+#------------------------------------------------------------------------------
+
+PT82.150.5 <- function(pset, BLower=0.2,BUpper=0.8,CMaxProp=1.5)
+{
   return(PellaTomlinson4010(pset, BLower=BLower,BUpper=BUpper,CMaxProp=CMaxProp))
 }
-class(PT82.150.5)<-"IO_MP"
 
-PT82.100.2<-function(pset, BLower=0.2,BUpper=0.8,CMaxProp=1.0){
+class(PT82.150.5) <- "IO_MP"
+
+#------------------------------------------------------------------------------
+
+PT82.100.2 <- function(pset, BLower=0.2,BUpper=0.8,CMaxProp=1.0)
+{
   return(PellaTomlinson4010(pset, BLower=BLower,BUpper=BUpper,CMaxProp=CMaxProp))
 }
-class(PT82.100.2)<-"IO_MP"
 
-PT82.100.5<-function(pset, BLower=0.2,BUpper=0.8,CMaxProp=1.0){
+class(PT82.100.2) <- "IO_MP"
+
+#------------------------------------------------------------------------------
+
+PT82.100.5 <- function(pset, BLower=0.2,BUpper=0.8,CMaxProp=1.0)
+{
   return(PellaTomlinson4010(pset, BLower=BLower,BUpper=BUpper,CMaxProp=CMaxProp))
 }
-class(PT82.100.5)<-"IO_MP"
 
+class(PT82.100.5) <- "IO_MP"
+
+
+#------------------------------------------------------------------------------
 # Aim fot CPUE target MPs
-#===============================================================================
+#------------------------------------------------------------------------------
 
-#tuning
-IT5.tune.15 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2, deltaTACLimUp=0.15, deltaTACLimDown=0.15){
+# tuning
+IT5.tune.15 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2, deltaTACLimUp=0.15, deltaTACLimDown=0.15)
+{
   return(CPUETarget(pset, ITargPars=c(pset$tune *1.0,deltaTACLimUp,deltaTACLimDown,0.2,0.1,0.1,0.1,0.1), yrsmth=yrsmth,lambda=lambda,xx=xx))
 }
+
 class(IT5.tune.15) <- "IO_MP_tune"
 
-IT5.t15 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2, deltaTACLimUp=0.15, deltaTACLimDown=0.15){
+#------------------------------------------------------------------------------
+
+IT10.tune.15 <- function(pset,yrsmth=10,lambda=0.4,xx=0.2, deltaTACLimUp=0.15, deltaTACLimDown=0.15)
+{
   return(CPUETarget(pset, ITargPars=c(pset$tune *1.0,deltaTACLimUp,deltaTACLimDown,0.2,0.1,0.1,0.1,0.1), yrsmth=yrsmth,lambda=lambda,xx=xx))
 }
-class(IT5.t15) <- "IO_MP_tune"
 
-IT5.t15.l1 <- function(pset,yrsmth=5,lambda=0.1,xx=0.2, deltaTACLimUp=0.15, deltaTACLimDown=0.15){
+class(IT10.tune.15) <- "IO_MP_tune"
+
+#------------------------------------------------------------------------------
+
+IT5.tune.05 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2, deltaTACLimUp=0.05, deltaTACLimDown=0.05)
+{
   return(CPUETarget(pset, ITargPars=c(pset$tune *1.0,deltaTACLimUp,deltaTACLimDown,0.2,0.1,0.1,0.1,0.1), yrsmth=yrsmth,lambda=lambda,xx=xx))
 }
-class(IT5.t15.l1) <- "IO_MP_tune"
 
-IT5.t10 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2, deltaTACLimUp=0.1, deltaTACLimDown=0.1){
-  return(CPUETarget(pset, ITargPars=c(pset$tune *1.0,deltaTACLimUp,deltaTACLimDown,0.2,0.1,0.1,0.1,0.1), yrsmth=yrsmth,lambda=lambda,xx=xx))
-}
-class(IT5.t10) <- "IO_MP_tune"
-
-
-
-IT5.t25 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2, deltaTACLimUp=0.25, deltaTACLimDown=0.25){
-  return(CPUETarget(pset, ITargPars=c(pset$tune *1.0,deltaTACLimUp,deltaTACLimDown,0.2,0.1,0.1,0.1,0.1), yrsmth=yrsmth,lambda=lambda,xx=xx))
-}
-class(IT5.t25) <- "IO_MP_tune"
-
-
-
-IT10.t15 <- function(pset,yrsmth=10,lambda=0.4,xx=0.2, deltaTACLimUp=0.15, deltaTACLimDown=0.15){
-  return(CPUETarget(pset, ITargPars=c(pset$tune *1.0,deltaTACLimUp,deltaTACLimDown,0.2,0.1,0.1,0.1,0.1), yrsmth=yrsmth,lambda=lambda,xx=xx))
-}
-class(IT10.t15) <- "IO_MP_tune"
-
-
-IT5.tune.05 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2, deltaTACLimUp=0.05, deltaTACLimDown=0.05){
-  return(CPUETarget(pset, ITargPars=c(pset$tune *1.0,deltaTACLimUp,deltaTACLimDown,0.2,0.1,0.1,0.1,0.1), yrsmth=yrsmth,lambda=lambda,xx=xx))
-}
 class(IT5.tune.05) <- "IO_MP_tune"
 
+#------------------------------------------------------------------------------
 
 #tuned to OM-ref, 216 reps, tuning level3
-IT5.15.216.t3 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2, deltaTACLimUp=0.15, deltaTACLimDown=0.15){
+IT5.15.216.t3 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2, deltaTACLimUp=0.15, deltaTACLimDown=0.15)
+{
   return(CPUETarget(pset, ITargPars=c(3.1349248,deltaTACLimUp,deltaTACLimDown,0.2,0.1,0.1,0.1,0.1), yrsmth=yrsmth,lambda=lambda,xx=xx))
 }
+
 class(IT5.15.216.t3) <- "IO_MP"
 
-
-
-
+#------------------------------------------------------------------------------
 
 #non-tuning
-IT1.00 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2){
+IT1.00 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2)
+{
   return(CPUETarget(pset, ITargPars=c(1.0,0.2,0.2,0.1,0.1,0.1,0.1), yrsmth=yrsmth,lambda=lambda,xx=xx))
 }
-class(IT1.00)<-"IO_MP"
 
-IT1.50 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2){
+class(IT1.00) <- "IO_MP"
+
+#------------------------------------------------------------------------------
+
+IT1.50 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2)
+{
   return(CPUETarget(pset, ITargPars=c(1.5,0.2,0.2,0.1,0.1,0.1,0.1), yrsmth=yrsmth,lambda=lambda,xx=xx))
 }
-class(IT1.50)<-"IO_MP"
 
-IT1.50.9 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2){
+class(IT1.50) <- "IO_MP"
+
+#------------------------------------------------------------------------------
+
+IT1.50.9 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2)
+{
   return(CPUETarget(pset, ITargPars=c(1.5,0.9,0.9,0.1,0.1,0.1,0.1), yrsmth=yrsmth,lambda=lambda,xx=xx))
 }
-class(IT1.50.9)<-"IO_MP"
 
-IT2.00 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2){
+class(IT1.50.9) <- "IO_MP"
+
+#------------------------------------------------------------------------------
+
+IT2.00 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2)
+{
   return(CPUETarget(pset, ITargPars=c(2.0,0.2,0.2,0.1,0.1,0.1,0.1), yrsmth=yrsmth,lambda=lambda,xx=xx))
 }
-class(IT2.00)<-"IO_MP"
+class(IT2.00) <- "IO_MP"
 
-IT2.50 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2){
+#------------------------------------------------------------------------------
+
+IT2.50 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2)
+{
   return(CPUETarget(pset, ITargPars=c(2.5,0.2,0.2,0.1,0.1,0.1,0.1), yrsmth=yrsmth,lambda=lambda,xx=xx))
 }
-class(IT2.50)<-"IO_MP"
 
-IT2.50.9 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2){
+class(IT2.50) <- "IO_MP"
+
+#------------------------------------------------------------------------------
+
+IT2.50.9 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2)
+{
   return(CPUETarget(pset, ITargPars=c(2.5,0.9,0.9,0.1,0.1,0.1,0.1), yrsmth=yrsmth,lambda=lambda,xx=xx))
 }
-class(IT2.50.9)<-"IO_MP"
 
-IT3.00 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2){
+class(IT2.50.9) <- "IO_MP"
+
+#------------------------------------------------------------------------------
+
+IT3.00 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2)
+{
   return(CPUETarget(pset, ITargPars=c(3.0,0.2,0.2,0.1,0.1,0.1,0.1), yrsmth=yrsmth,lambda=lambda,xx=xx))
 }
-class(IT3.00)<-"IO_MP"
 
-IT3.50 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2){
+class(IT3.00) <- "IO_MP"
+
+#------------------------------------------------------------------------------
+
+IT3.50 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2)
+{
   return(CPUETarget(pset, ITargPars=c(3.5,0.2,0.2,0.1,0.1,0.1,0.1), yrsmth=yrsmth,lambda=lambda,xx=xx))
 }
-class(IT3.50)<-"IO_MP"
 
+class(IT3.50) <- "IO_MP"
+
+#------------------------------------------------------------------------------
 
 
 MP_FunctionExports <- c(MP_FunctionExports, "PellaTomlinson4010")
 
-# Pella Tomlinson Production model with generic 40-10 type rule - MPs are defined with tuning parameters above
-# useF option uses the 40:10 rule for F rather than C, in which case FMax = FMSY*CMaxProp
-PellaTomlinson4010<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, deltaTACLimUp=0.9, deltaTACLimDown=0.9, useF=F){
+
+#------------------------------------------------------------------------------
+# Pella Tomlinson Production model with generic 40-10 type rule - MPs are
+# defined with tuning parameters above useF option uses the 40:10 rule for F
+# rather than C, in which case FMax = FMSY * CMaxProp
+#------------------------------------------------------------------------------
+PellaTomlinson4010 <- function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, deltaTACLimUp=0.9, deltaTACLimDown=0.9, useF=F)
+{
   C_hist <- pset$Cobs
   I_hist <- pset$Iobs
   CMCsum <- pset$CMCsum  # "recent" annual catch in mass
 
   #Initial Model parameters
   rInit <- 0.1
-  KInit <- 20.*CMCsum
+  KInit <- 20.0 * CMCsum
   p     <- -0.16  # don't bother trying to estimate p; for p = -0.16, BMSY/K ~0.33
 
   params<-log(c(rInit,KInit))
-#print("PT4010 1")
-#browser()
-  #par(mfrow=c(3,3))
-  opt<-optim(par=params,fn=PT.f, returnOpt=1,
-             C_hist=C_hist,I_hist=I_hist, CMCsum=CMCsum, p=p,
-             method="L-BFGS-B",
-             lower=log(exp(params)/20),upper=log(exp(params)*20),
-             hessian=F, doPlot=F)
+
+  opt <- optim(par=params,fn=PT.f, returnOpt=1,
+               C_hist=C_hist,I_hist=I_hist, CMCsum=CMCsum, p=p,
+               method="L-BFGS-B",
+               lower=log(exp(params)/20),upper=log(exp(params)*20),
+               hessian=F, doPlot=F)
 
   #get the biomass/BMSY estimate
   d <- PT.f(params=opt$par, returnOpt=2, C_hist=C_hist, I_hist=I_hist, CMCsum=CMCsum, p=p, doPlot=F)
   lastTAC <- pset$prevTACE$TAC
 
   #Apply something like a 40-10 rule for catch relative to MSY
-  if(useF==F){
-    if(d["BY"]/d["K"] <= BLower)                        newTAC <- 1.    #i.e. shutdown fishery
-    if(d["BY"]/d["K"] >  BLower & d["BY"]/d["K"] <= BUpper) newTAC <- CMaxProp*d["MSY"]*(d["BY"]/d["K"])/(BUpper-BLower) + CMaxProp*d["MSY"]*( 1 - (BUpper/(BUpper-BLower)))
-    if(d["BY"]/d["K"] >  BUpper)                         newTAC <- CMaxProp*d["MSY"]
+  if (useF == F)
+  {
+    if (d["BY"] / d["K"] <= BLower)                              newTAC <- 1.    #i.e. shutdown fishery
+    if (d["BY"] / d["K"] >  BLower & d["BY"] / d["K"] <= BUpper) newTAC <- CMaxProp * d["MSY"] * (d["BY"] / d["K"]) / (BUpper - BLower) + CMaxProp * d["MSY"] * ( 1 - (BUpper / (BUpper - BLower)))
+    if (d["BY"] / d["K"] >  BUpper)                              newTAC <- CMaxProp * d["MSY"]
   }
+
   #Apply the 40:10 rule to F rather than catch...
-  if(useF){
-    FMSY = -log(1-d["MSY"]/d["K"])
+  if (useF)
+  {
+    FMSY = -log(1 - d["MSY"] / d["K"])
     FMult = CMaxProp # maximum F relative to FMSY
-    if(d["BY"]/d["K"] <= BLower)   TACF <- 0.0001    #i.e. shutdown fishery
-    if(d["BY"]/d["K"] >  BLower & d["BY"]/d["K"] <= BUpper) TACF <- FMult*FMSY*(d["BY"]/d["K"])/(BUpper-BLower) + FMult*FMSY*( 1 - (BUpper/(BUpper-BLower)))
-    if(d["BY"]/d["K"] >  BUpper)   TACF <- FMult*FMSY
-    newTAC <-  d["BY"]*(1-exp(-TACF))
+    if (d["BY"] / d["K"] <= BLower)                               TACF <- 0.0001    #i.e. shutdown fishery
+    if (d["BY"] / d["K"] >  BLower & d["BY"] / d["K"] <= BUpper)  TACF <- FMult * FMSY * (d["BY"] / d["K"]) / (BUpper - BLower) + FMult * FMSY * ( 1 - (BUpper / (BUpper - BLower)))
+    if (d["BY"] / d["K"] >  BUpper)                               TACF <- FMult * FMSY
+
+    newTAC <- d["BY"] * (1 - exp(-TACF))
   }
-
-
-
 
   names(newTAC) <- "TAC"
 
   deltaTAC <- newTAC/lastTAC - 1
 
-#print(deltaTAC)
-  if(deltaTAC >  deltaTACLimUp)   deltaTAC =  deltaTACLimUp
-  if(deltaTAC < -deltaTACLimDown) deltaTAC = -deltaTACLimDown
-  newTAC <- lastTAC*(1+deltaTAC)
-  if(newTAC<9) newTAC <- 9 #shut the fishery down, except collect some data
+  if (deltaTAC >  deltaTACLimUp)   deltaTAC =  deltaTACLimUp
+  if (deltaTAC < -deltaTACLimDown) deltaTAC = -deltaTACLimDown
+
+  newTAC <- lastTAC * (1 + deltaTAC)
+
+  if (newTAC < 9) newTAC <- 9 #shut the fishery down, except collect some data
+
   TAEbyF <- 0.0 * pset$prevTACE$TAEbyF #TAE by fishery
 
   if (min(TAEbyF) < 0)
@@ -331,11 +417,13 @@ PellaTomlinson4010<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, deltaTACL
 
 MP_FunctionExports <- c(MP_FunctionExports, "PT.f")
 
-#Pella-Tomlinson Model function
-PT.f <- function(params, C_hist,I_hist, CMCsum, p, doPlot=F, returnOpt=1){
-
+#------------------------------------------------------------------------------
+# Pella-Tomlinson Model function
+#------------------------------------------------------------------------------
+PT.f <- function(params, C_hist,I_hist, CMCsum, p, doPlot=F, returnOpt=1)
+{
   #Model parameters
-  #B(t+1)=B(t) + (r/p)B(1-(B/K)^p) - C    ; MSY = rK/4 ?
+  #B(t + 1) = B(t) + (r / p)B(1-(B / K)^p) - C    ; MSY = rK / 4 ?
   Y <- length(C_hist)
   r <- exp(params[1])
   K <- exp(params[2])
@@ -343,51 +431,54 @@ PT.f <- function(params, C_hist,I_hist, CMCsum, p, doPlot=F, returnOpt=1){
   B <- array(NA,dim=Y)
 
   B[1] <- K
-  for(y in 2:Y){
-    B[y] <- B[y-1] + ((p+1)/p)*r*B[y-1]*(1-(B[y-1]/K)^p) - C_hist[y-1]
-    if(B[y]<1e-5) B[y] <- 1e-5
-  }
-  q <- sum(I_hist[!is.na(I_hist)])/sum(B[!is.na(I_hist)])
-  LLH <- sum((q*B[!is.na(I_hist)]-I_hist[!is.na(I_hist)])^2)
 
-  MSY <- r*K/((p+1)^(1/p))
+  for (y in 2:Y)
+  {
+    B[y] <- B[y-1] + ((p + 1)/p) * r * B[y - 1] * (1 - (B[y - 1] / K)^p) - C_hist[y - 1]
+    if (B[y] < 1.0e-5) B[y] <- 1.0e-5
+  }
+
+  q   <- sum(I_hist[!is.na(I_hist)]) / sum(B[!is.na(I_hist)])
+  LLH <- sum((q * B[!is.na(I_hist)] - I_hist[!is.na(I_hist)])^2)
+
+  MSY <- r * K / ((p + 1) ^ (1 / p))
 
   # quick and dirty plausibility constraints - no claim that this is a good approach for constraining the PT model
-  if(MSY < 0.2*CMCsum) LLH <- LLH + (MSY - 0.2*CMCsum)^2
-  if(MSY > 5.0*CMCsum)  LLH <- LLH + (MSY - 5.0*CMCsum)^2
+  if (MSY < 0.2 * CMCsum) LLH <- LLH + (MSY - 0.2 * CMCsum)^2
+  if (MSY > 5.0 * CMCsum) LLH <- LLH + (MSY - 5.0 * CMCsum)^2
 
-#print(c("PT.f",r,K,B[Y],MSY, B[Y]/K))
-#browser()
-
-  if(doPlot){
-    plot(I_hist/q, main="MSY: " %&% MSY %&% " C(Y)/MSY: " %&% as.character(CMCsum/MSY), ylim=c(0,max(I_hist/q, na.rm=T)))
+  if (doPlot)
+  {
+    plot(I_hist / q, main="MSY: " %&% MSY %&% " C(Y)/MSY: " %&% as.character(CMCsum / MSY), ylim=c(0,max(I_hist / q, na.rm=T)))
     lines(B)
-    lines(C_hist,col=2)
+    lines(C_hist, col=2)
   }
 
-  if(returnOpt == 1){ # return objective function
+  if (returnOpt == 1)
+  {
+    # return objective function
     return(LLH)
-  } else {         # return MSY-related stuff
-    BMSY <- K/((p+1)^(1/p))
+
+  } else
+  {
+    # return MSY-related stuff
+    BMSY    <- K / ((p + 1) ^ (1 / p))
     outList <- c(B[Y], K, MSY, BMSY)
+
     names(outList) <- c("BY","K","MSY","BMSY")
+
     return(outList)
   }
 }
-#for(C in c(1:100)/100){
-#  print(C)
-#  PT.f(params=log(c(.1,100)), C_hist=rep(C,10000), I_hist=rep(1,10000), CMCsum=1,p=-0.16,doPlot=F)
+
+# Commented this out because it considerably slows load time of the code.
+# I presume this was for debugging only.
+#for (p in c(-100:200) / 100)
+#{
+#  print(c("p, BMSY/K: ", p, 1 / ((p + 1) ^ (1 / p))) )    #p=-0.16   BMSY/K~0.33
 #}
-for(p in c(-100:200)/100){
-  print(c("p, BMSY/K: ", p,1/((p+1)^(1/p))) )    #p=-0.16   BMSY/K~0.33
-}
 
 
-
-MP_FunctionExports <- c(MP_FunctionExports, "CPUETarget")
-
-#MP resembling first level of ETBF Harvest Strategy (CPUE slope to target)
-#Raise or lower TAC proportional to (recent weighted average) Index difference from a target
 MP_FunctionExports <- c(MP_FunctionExports, "CPUETarget")
 
 #------------------------------------------------------------------------------
@@ -444,10 +535,10 @@ CPUETarget <- function(pset, ITargPars=c(2.5,0.2,0.2,0.1,0.1,0.1,0.1), yrsmth=5,
 }
 
 
-
+#------------------------------------------------------------------------------
 # constant catch projections
-#===============================================================================
-#for tuning
+#------------------------------------------------------------------------------
+# for tuning
 CCt <- function(pset,Cinit=400000)
 {
   TAC     <- Cinit * pset$tune #aggregate TAC (annual) by fishery
@@ -509,18 +600,6 @@ CC050 <- function(pset)
 }
 
 class(CC050) <- "IO_MP"
-
-#------------------------------------------------------------------------------
-
-CC087 <- function(pset)
-{
-  TAC     <- 87000.0 #aggregate TAC (annual) by fishery (BET reported in 2016)
-  TAEbyF  <- 0.0 * pset$prevTACE$TAEbyF #TAE by fishery
-
-  return (list(TAEbyF=TAEbyF,TAC=TAC))
-}
-
-class(CC087) <- "IO_MP"
 
 #------------------------------------------------------------------------------
 
@@ -655,8 +734,9 @@ CC450 <- function(pset)
 class(CC450) <- "IO_MP"
 
 
+#------------------------------------------------------------------------------
 # constant effort projections
-#===============================================================================
+#------------------------------------------------------------------------------
 CE1.0 <- function(pset)
 {
   # Current effort projection
@@ -803,9 +883,3 @@ CC50CE1.0bet <- function(pset)
 }
 
 class(CC50CE1.0bet) <- "IO_MP"
-
-
-
-
-
-
