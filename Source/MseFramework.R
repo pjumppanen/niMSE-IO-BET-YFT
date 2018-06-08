@@ -605,6 +605,79 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
                 }
       )
 
+    statHandlers[["PrGreen"]] <- list(
+      addFn = function(HistoricVars, RefVars, context)
+              {
+                B_BMSY  <- b_bmsy(HistoricVars, RefVars)
+                F_FMSY  <- f_fmsy(HistoricVars, RefVars)
+                isGreen <- B_BMSY > 1 & F_FMSY < 1
+
+                storage.mode(isGreen) <- "double"
+
+                return (addRows(context, isGreen, "PrGreen"))
+              },
+
+      countFn = function(HistoricVars)
+                {
+                  return (HistoricVars@nyears * HistoricVars@nsim)
+                }
+      )
+
+    statHandlers[["PrRed"]] <- list(
+      addFn = function(HistoricVars, RefVars, context)
+              {
+                B_BMSY <- b_bmsy(HistoricVars, RefVars)
+                F_FMSY <- f_fmsy(HistoricVars, RefVars)
+                isRed  <- B_BMSY < 1 & F_FMSY > 1
+
+                storage.mode(isRed) <- "double"
+
+                return (addRows(context, isRed, "PrRed"))
+              },
+
+      countFn = function(HistoricVars)
+                {
+                  return (HistoricVars@nyears * HistoricVars@nsim)
+                }
+      )
+
+    statHandlers[["PrOrange"]] <- list(
+      addFn = function(HistoricVars, RefVars, context)
+              {
+                B_BMSY   <- b_bmsy(HistoricVars, RefVars)
+                F_FMSY   <- f_fmsy(HistoricVars, RefVars)
+                isOrange <- B_BMSY > 1 & F_FMSY > 1
+
+                storage.mode(isOrange) <- "double"
+
+                return (addRows(context, isOrange, "PrOrange"))
+              },
+
+      countFn = function(HistoricVars)
+                {
+                  return (HistoricVars@nyears * HistoricVars@nsim)
+                }
+      )
+
+    statHandlers[["PrYellow"]] <- list(
+      addFn = function(HistoricVars, RefVars, context)
+              {
+                B_BMSY   <- b_bmsy(HistoricVars, RefVars)
+                F_FMSY   <- f_fmsy(HistoricVars, RefVars)
+                isYellow <- B_BMSY < 1 & F_FMSY < 1
+
+                storage.mode(isYellow) <- "double"
+
+                return (addRows(context, isYellow, "PrYellow"))
+              },
+
+      countFn = function(HistoricVars)
+                {
+                  return (HistoricVars@nyears * HistoricVars@nsim)
+                }
+      )
+
+
     statHandlers[["Recruitment by Qtr"]] <- list(
       addFn = function(HistoricVars, RefVars, context)
               {
@@ -714,30 +787,19 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
       Indicators <- names(statHandlers)
     }
 
-    if (bHistoric)
+    for (Indicator in Indicators)
     {
-      for (Indicator in Indicators)
+      if (Indicator %in% names(statHandlers))
       {
-        if (Indicator %in% names(statHandlers))
-        {
-          handler <- statHandlers[[Indicator]]
+        handler <- statHandlers[[Indicator]]
 
-          for (om in .Object@StockSynthesisModels)
+        for (om in .Object@StockSynthesisModels)
+        {
+          if (bHistoric)
           {
-            row_count <- row_count + handler$countFn(om@HistoricVars)
-          }
-        }
-      }
+            row_count <- row_count + handler$countFn(om@HistoricVars) * om@ModelData@nsim
 
-    } else
-    {
-      for (Indicator in Indicators)
-      {
-        if (Indicator %in% names(statHandlers))
-        {
-          handler <- statHandlers[[Indicator]]
-
-          for (om in .Object@StockSynthesisModels)
+          } else
           {
             for (ProjVar in om@ProjectedVars)
             {
@@ -770,17 +832,18 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
         {
           if (bHistoric)
           {
+            SY  <- as.matrix(expand.grid(nsims=1:om@ModelData@nsim, nyrs=1:om@HistoricVars@nyears))
             Yrs <- .Object@MseDef@firstCalendarYr + (0:(om@HistoricVars@nyears - 1))
 
             addRows <- function(context, data, name)
             {
-              next_origin <- (context$origin + length(Yrs))
+              next_origin <- (context$origin + length(Yrs) * om@ModelData@nsim)
               rows        <- context$origin:(next_origin - 1)
 
-              C1          <- Yrs
-              C2          <- as.array(data)
-              C3          <- as.integer(rep(context$iter + 1, times=length(Yrs)))
-              C4          <- rep(name, times=length(Yrs))
+              C1          <- Yrs[SY[,2]]
+              C2          <- data[SY[,2]]
+              C3          <- as.integer(context$iter + SY[,1])
+              C4          <- rep(name, times=length(SY[,2]))
 
               set(context$dt, rows, "year",  C1)
               set(context$dt, rows, "data",  C2)
@@ -794,7 +857,7 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
 
             res <- handler$addFn(om@HistoricVars, om@RefVars, res)
 
-            res$iter <- res$iter + 1
+            res$iter <- res$iter + om@ModelData@nsim
 
           } else
           {
@@ -807,7 +870,7 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
 
               addRows <- function(context, data, name)
               {
-                next_origin <- (context$origin + length(Yrs))
+                next_origin <- (context$origin + length(Yrs) * ProjVar@nsim)
                 rows        <- context$origin:(next_origin - 1)
 
                 C3          <- data[SY]
@@ -866,154 +929,289 @@ setMethod("msevizProjectedTimeSeriesData", c("MseFramework"),
 setGeneric("performanceStatistics", function(.Object, ...) standardGeneric("performanceStatistics"))
 
 setMethod("performanceStatistics", c("MseFramework"),
-  function(.Object, Statistics, AvgFirstYr, AvgLastYr=NA, percentiles=c(0.1,0.25,0.5,0.75,0.9), thisMP=NA, prefix="")
+  function(.Object, Statistics, AvgFirstYr, AvgLastYr=NA, percentiles=c(0.1,0.25,0.5,0.75,0.8,0.9), thisMP=NA, prefix="", appendTo=NULL)
   {
-    df <- NULL
-
     if (is.na(AvgLastYr))
     {
       firstMPy    <- .Object@MseDef@firstMPYr - .Object@MseDef@lastCalendarYr
       AvgDuration <- AvgFirstYr
-      AvgYears    <- firstMPy:(firstMPy + AvgDuration - 1)
+      AvgYears    <- karray(firstMPy:(firstMPy + AvgDuration - 1), dim=c(AvgDuration))
     }
     else
     {
-      AvgYears    <- (AvgFirstYr - .Object@MseDef@lastCalendarYr):(AvgLastYr - .Object@MseDef@lastCalendarYr)
+      AvgYears    <- karray((AvgFirstYr - .Object@MseDef@lastCalendarYr):(AvgLastYr - .Object@MseDef@lastCalendarYr), dim=c(AvgFirstYr - AvgLastYr + 1))
     }
 
     # Define stat handlers
     statHandlers = list()
 
-    statHandlers[["SBoSB0"]] <- function(ManagementVars, RefVars)
-    {
-      # S1 mean(SB/SB_0)
-      SSB_SSB0 <- ssb_ssb0(ManagementVars, RefVars)
+    statHandlers[["SBoSB0"]] <- list(
+      statFn = function(ManagementVars, RefVars, HistoricVars, npart)
+      {
+        # S1 mean(SB/SB_0)
+        SSB_SSB0 <- ssb_ssb0(ManagementVars, RefVars)
 
-      return (round(apply(as.karray(SSB_SSB0)[ , , AvgYears], MARGIN=c(1), mean), digits=2))
-    }
+        return (round(apply(as.karray(SSB_SSB0)[ , , keep(AvgYears)], MARGIN=c(1), mean), digits=2))
+      },
+      partsFn = function()
+      {
+        return (1)
+      }
+    )
 
-    statHandlers[["minSBoSB0"]] <- function(ManagementVars, RefVars)
-    {
-      # S2 min(SB/SB0)
-      SSB_SSB0 <- ssb_ssb0(ManagementVars, RefVars)
+    statHandlers[["minSBoSB0"]] <- list(
+      statFn = function(ManagementVars, RefVars, HistoricVars, npart)
+      {
+        # S2 min(SB/SB0)
+        SSB_SSB0 <- ssb_ssb0(ManagementVars, RefVars)
 
-      return (round(apply(as.karray(SSB_SSB0)[ , , AvgYears], MARGIN=c(1), min), digits=3))
-    }
+        return (round(apply(as.karray(SSB_SSB0)[ , , keep(AvgYears)], MARGIN=c(1), min), digits=3))
+      },
+      partsFn = function()
+      {
+        return (1)
+      }
+    )
 
-    statHandlers[["SBoSBMSY"]] <- function(ManagementVars, RefVars)
-    {
-      # S3 mean(SB/SB_MSY)
-      SSB_SSBMSY <- ssb_ssbmsy(ManagementVars, RefVars)
+    statHandlers[["SBoSBMSY"]] <- list(
+      statFn = function(ManagementVars, RefVars, HistoricVars, npart)
+      {
+        # S3 mean(SB/SB_MSY)
+        SSB_SSBMSY <- ssb_ssbmsy(ManagementVars, RefVars)
 
-      return (round(apply(as.karray(SSB_SSBMSY)[ , AvgYears], MARGIN=c(1), mean), digits=2))
-    }
+        return (round(apply(as.karray(SSB_SSBMSY)[ , keep(AvgYears)], MARGIN=c(1), mean), digits=2))
+      },
+      partsFn = function()
+      {
+        return (1)
+      }
+    )
 
-    statHandlers[["FoFMSY"]] <- function(ManagementVars, RefVars)
-    {
-      # S5 mean(F/F_MSY)
-      F_FMSY <- f_fmsy(ManagementVars, RefVars)
+    statHandlers[["FoFMSY"]] <- list(
+      statFn = function(ManagementVars, RefVars, HistoricVars, npart)
+      {
+        # S5 mean(F/F_MSY)
+        F_FMSY <- f_fmsy(ManagementVars, RefVars)
 
-      return (round(apply(as.karray(F_FMSY)[ , AvgYears], MARGIN=c(1), mean), digits=2))
-    }
+        return (round(apply(as.karray(F_FMSY)[ , keep(AvgYears)], MARGIN=c(1), mean), digits=2))
+      },
+      partsFn = function()
+      {
+        return (1)
+      }
+    )
 
-    statHandlers[["FoFtarg"]] <- function(ManagementVars, RefVars)
-    {
-      # S4 mean(F/F_target), in this case...Ftarget = FMSY
-      F_FMSY <- f_fmsy(ManagementVars, RefVars)
+    statHandlers[["FoFtarg"]] <- list(
+      statFn = function(ManagementVars, RefVars, HistoricVars, npart)
+      {
+        # S4 mean(F/F_target), in this case...Ftarget = FMSY
+        F_FMSY <- f_fmsy(ManagementVars, RefVars)
 
-      return (round(apply(as.karray(F_FMSY)[ , AvgYears], MARGIN=c(1), mean), digits=2))
-    }
+        return (round(apply(as.karray(F_FMSY)[ , keep(AvgYears)], MARGIN=c(1), mean), digits=2))
+      },
+      partsFn = function()
+      {
+        return (1)
+      }
+    )
 
-    statHandlers[["GK"]] <- function(ManagementVars, RefVars)
-    {
-      # S6 Pr(Green)
-      F_FMSY     <- f_fmsy(ManagementVars, RefVars)
-      SSB_SSBMSY <- ssb_ssbmsy(ManagementVars, RefVars)
+    statHandlers[["GK"]] <- list(
+      statFn = function(ManagementVars, RefVars, HistoricVars, npart)
+      {
+        # S6 Pr(Green)
+        F_FMSY     <- f_fmsy(ManagementVars, RefVars)
+        SSB_SSBMSY <- ssb_ssbmsy(ManagementVars, RefVars)
 
-      return (round(apply(as.karray(F_FMSY)[ , AvgYears] < 1 & as.karray(SSB_SSBMSY)[ , AvgYears] > 1, c(1), sum) / length(AvgYears), 3))
-    }
+        return (round(apply(as.karray(F_FMSY)[ , keep(AvgYears)] < 1 & as.karray(SSB_SSBMSY)[ , keep(AvgYears)] > 1, c(1), sum) / length(AvgYears), 3))
+      },
+      partsFn = function()
+      {
+        return (1)
+      }
+    )
 
-    statHandlers[["RK"]] <- function(ManagementVars, RefVars)
-    {
-      # S7 Pr(Red)
-      F_FMSY     <- f_fmsy(ManagementVars, RefVars)
-      SSB_SSBMSY <- ssb_ssbmsy(ManagementVars, RefVars)
+    statHandlers[["RK"]] <- list(
+      statFn = function(ManagementVars, RefVars, HistoricVars, npart)
+      {
+        # S7 Pr(Red)
+        F_FMSY     <- f_fmsy(ManagementVars, RefVars)
+        SSB_SSBMSY <- ssb_ssbmsy(ManagementVars, RefVars)
 
-      return (round(apply(as.karray(F_FMSY)[ , AvgYears] > 1 & as.karray(SSB_SSBMSY)[ , AvgYears] < 1, c(1), sum) / length(AvgYears), 3))
-    }
+        return (round(apply(as.karray(F_FMSY)[ , keep(AvgYears)] > 1 & as.karray(SSB_SSBMSY)[ , keep(AvgYears)] < 1, c(1), sum) / length(AvgYears), 3))
+      },
+      partsFn = function()
+      {
+        return (1)
+      }
+    )
 
-    statHandlers[["PrSBgtSBMSY"]] <- function(ManagementVars, RefVars)
-    {
-      # S8 Pr(SB>SB_MSY)
-      SSB_SSBMSY <- ssb_ssbmsy(ManagementVars, RefVars)
+    statHandlers[["PrSBgtSBMSY"]] <- list(
+      statFn = function(ManagementVars, RefVars, HistoricVars, npart)
+      {
+        # S8 Pr(SB>SB_MSY)
+        SSB_SSBMSY <- ssb_ssbmsy(ManagementVars, RefVars)
 
-      return (round(apply(as.karray(SSB_SSBMSY)[ , AvgYears] > 1.0, MARGIN=c(1), mean), digits=2))
-    }
+        return (round(apply(as.karray(SSB_SSBMSY)[ , keep(AvgYears)] > 1.0, MARGIN=c(1), mean), digits=2))
+      },
+      partsFn = function()
+      {
+        return (1)
+      }
+    )
 
-    statHandlers[["PrSBgt0.2SB0"]] <- function(ManagementVars, RefVars)
-    {
-      # F1 Pr(SB>0.2SB0)
-      SSB_SSB0 <- ssb_ssb0(ManagementVars, RefVars)
+    statHandlers[["PrSBgt0.2SB0"]] <- list(
+      statFn = function(ManagementVars, RefVars, HistoricVars, npart)
+      {
+        # F1 Pr(SB>0.2SB0)
+        SSB_SSB0 <- ssb_ssb0(ManagementVars, RefVars)
 
-      return (round(apply(as.karray(SSB_SSB0)[ , .Object@MseDef@targpop, AvgYears] > 0.2, MARGIN=c(1), mean), digits=2))
-    }
+        return (round(apply(as.karray(SSB_SSB0)[ , .Object@MseDef@targpop, keep(AvgYears)] > 0.2, MARGIN=c(1), mean), digits=2))
+      },
+      partsFn = function()
+      {
+        return (1)
+      }
+    )
 
-    statHandlers[["PrSBgtSBlim"]] <- function(ManagementVars, RefVars)
-    {
-      # F2 Pr(SB>SBlim) where SBlim = 0.4SSBMSY
-      SSB_SSBMSY <- ssb_ssbmsy(ManagementVars, RefVars)
+    statHandlers[["PrSBgtSBlim"]] <- list(
+      statFn = function(ManagementVars, RefVars, HistoricVars, npart)
+      {
+        # F2 Pr(SB>SBlim) where SBlim = 0.4SSBMSY
+        SSB_SSBMSY <- ssb_ssbmsy(ManagementVars, RefVars)
 
-      return (round(apply(as.karray(SSB_SSBMSY)[ , AvgYears] > .Object@MseDef@SBlim, MARGIN=c(1), mean), digits=2))
-    }
+        return (round(apply(as.karray(SSB_SSBMSY)[ , keep(AvgYears)] > .Object@MseDef@SBlim, MARGIN=c(1), mean), digits=2))
+      },
+      partsFn = function()
+      {
+        return (1)
+      }
+    )
 
-    statHandlers[["Y"]] <- function(ManagementVars, RefVars)
-    {
-      # Y1 mean(C)
-      return (round(apply(ManagementVars@CM[ , .Object@MseDef@targpop, AvgYears], MARGIN=c(1), mean), 0) / 1000.0)
-    }
+    statHandlers[["Y"]] <- list(
+      statFn = function(ManagementVars, RefVars, HistoricVars, npart)
+      {
+        # Y1 mean(C)
+        return (round(apply(ManagementVars@CM[ , .Object@MseDef@targpop, keep(AvgYears)], MARGIN=c(1), mean), 0) / 1000.0)
+      },
+      partsFn = function()
+      {
+        return (1)
+      }
+    )
 
-    statHandlers[["relCPUE"]] <- function(ManagementVars, RefVars)
-    {
-      # mean catch rates relative to catch rates over last data year; see summaryByAF for region and gear breakdown
-      return (round(apply(ManagementVars@IobsArchive[ , AvgYears], MARGIN=c(1), mean) / (ManagementVars@IobsArchive[ , ManagementVars@nyears]), digits=2))
-    }
+    statHandlers[["relCPUE"]] <- list(
+      statFn = function(ManagementVars, RefVars, HistoricVars, npart)
+      {
+        # mean catch rates relative to catch rates over four last data years
+        return (round(apply(ManagementVars@IobsArchive[ , keep(AvgYears)], MARGIN=c(1), mean) /  mean(HistoricVars@IobsArchive[(HistoricVars@nyears-4):HistoricVars@nyears]), digits=2))
+      },
+      partsFn = function()
+      {
+        return (1)
+      }
+    )
 
-    statHandlers[["YoMSY"]] <- function(ManagementVars, RefVars)
-    {
-      # Y3 mean(C/MSY)
-      C_MSY <- c_msy(ManagementVars, RefVars)
+    statHandlers[["YoMSY"]] <- list(
+      statFn = function(ManagementVars, RefVars, HistoricVars, npart)
+      {
+        # Y3 mean(C/MSY)
+        C_MSY <- c_msy(ManagementVars, RefVars)
 
-      return (round(apply(as.karray(C_MSY)[ , , AvgYears], MARGIN=c(1), mean), digits=2))
-    }
+        return (round(apply(as.karray(C_MSY)[ , , keep(AvgYears)], MARGIN=c(1), mean), digits=2))
+      },
+      partsFn = function()
+      {
+        return (1)
+      }
+    )
 
-    statHandlers[["APCY"]] <- function(ManagementVars, RefVars)
-    {
-      AvgYearsm1 <- AvgYears - 1
+    statHandlers[["APCY"]] <- list(
+      statFn = function(ManagementVars, RefVars, HistoricVars, npart)
+      {
+        AvgYearsm1 <- AvgYears - 1
 
-      # T1 mean(C(t)/C(t-1))
-      return (apply((ManagementVars@CM[ , .Object@MseDef@targpop, AvgYears] / ManagementVars@CM[ , .Object@MseDef@targpop, AvgYearsm1]) , c(1), mean, na.rm = TRUE))
-    }
+        # T1 mean(C(t)/C(t-1))
+        return (apply((ManagementVars@CM[ , .Object@MseDef@targpop, keep(AvgYears)] / ManagementVars@CM[ , .Object@MseDef@targpop, AvgYearsm1]) , c(1), mean, na.rm = TRUE))
+      },
+      partsFn = function()
+      {
+        return (1)
+      }
+    )
 
-    statHandlers[["YcvPct"]] <- function(ManagementVars, RefVars)
-    {
-      # T2 var(C)
-      Y <- round(apply(ManagementVars@CM[ , .Object@MseDef@targpop, AvgYears], MARGIN=c(1), mean), 0) / 1000.0;
+    statHandlers[["AAVY"]] <- list(
+      statFn = function(ManagementVars, RefVars, HistoricVars, npart)
+      {
+        AvgYearsm1 <- AvgYears - 1
 
-      return (round(apply(ManagementVars@CM[ , .Object@MseDef@targpop, AvgYears], MARGIN=c(1), sd), 2)/Y)
-    }
+        # Tx average(abs(change in catch))
+        AAVY <- 100*apply(abs(ManagementVars@CM[ , .Object@MseDef@targpop, keep(AvgYears)] - ManagementVars@CM[ , .Object@MseDef@targpop, AvgYearsm1]) /
+             ManagementVars@CM[ , .Object@MseDef@targpop, AvgYearsm1], c(1), mean, na.rm=T)
 
-    statHandlers[["PrYlt0.1MSY"]] <- function(ManagementVars, RefVars)
-    {
-      # T4 Pr(C<0.1MSY)
-      C_MSY <- c_msy(ManagementVars, RefVars)
+        return (AAVY)
+      },
+      partsFn = function()
+      {
+        return (1)
+      }
+    )
 
-      return (round(apply(as.karray(C_MSY)[ , , AvgYears] < 0.1, MARGIN=c(1), mean), digits=2))
-    }
+    statHandlers[["YcvPct"]] <- list(
+      statFn = function(ManagementVars, RefVars, HistoricVars, npart)
+      {
+        # T2 var(C)
+        Y <- round(apply(ManagementVars@CM[ , .Object@MseDef@targpop, keep(AvgYears)], MARGIN=c(1), mean), 0);
+
+        return (round(apply(as.karray(ManagementVars@CM)[ , .Object@MseDef@targpop, keep(AvgYears)], MARGIN=c(1), sd), 2)/Y)
+      },
+      partsFn = function()
+      {
+        return (1)
+      }
+    )
+
+    statHandlers[["PrYlt0.1MSY"]] <- list(
+      statFn = function(ManagementVars, RefVars, HistoricVars, npart)
+      {
+        # T4 Pr(C<0.1MSY)
+        C_MSY <- c_msy(ManagementVars, RefVars)
+
+        return (round(apply(as.karray(C_MSY)[ , , keep(AvgYears)] < 0.1, MARGIN=c(1), mean), digits=2))
+      },
+      partsFn = function()
+      {
+        return (1)
+      }
+    )
+
+    statHandlers[["Yf"]] <- list(
+      statFn = function(ManagementVars, RefVars, HistoricVars, npart)
+      {
+        #11 mean Catch by fishery
+        return (round(apply(as.karray(ManagementVars@CMbyF)[ , keep(.Object@MseDef@targpop), keep(AvgYears), npart], MARGIN=c(1), mean), 0))
+      },
+      partsFn = function()
+      {
+        return (.Object@MseDef@nfleets)
+      }
+    )
+
+    statHandlers[["CPUEr"]] <- list(
+      statFn = function(ManagementVars, RefVars, HistoricVars, npart)
+      {
+        # mean catch rates relative to catch rates over four last data years
+        return (round(apply(ManagementVars@IobsRArchive[ , keep(AvgYears), npart], MARGIN=c(1), mean) /  mean(HistoricVars@IobsRArchive[(HistoricVars@nyears-4):HistoricVars@nyears], npart), digits=2))
+      },
+      partsFn = function()
+      {
+        return (.Object@StockSynthesisModels[[1]]@ProjectedVars[[1]]@nareas)
+      }
+    )
 
     # extract MP names
-    MPs        <- NA
-    nproj_sims <- NA
-    nmodels    <- length(.Object@StockSynthesisModels)
+    MPs         <- NA
+    nmodels     <- length(.Object@StockSynthesisModels)
+    ntotal_sims <- 0
 
     if (nmodels > 0)
     {
@@ -1021,8 +1219,8 @@ setMethod("performanceStatistics", c("MseFramework"),
 
       if (nMPs > 0)
       {
-        MPs        <- names(.Object@StockSynthesisModels[[1]]@ProjectedVars)
-        nproj_sims <- .Object@StockSynthesisModels[[1]]@ProjectedVars[[1]]@nsim
+
+        MPs <- names(.Object@StockSynthesisModels[[1]]@ProjectedVars)
 
         if (!is.na(thisMP))
         {
@@ -1035,43 +1233,81 @@ setMethod("performanceStatistics", c("MseFramework"),
         stop()
       }
 
+      for (stockSynthesisModel in .Object@StockSynthesisModels)
+      {
+        ntotal_sims <- ntotal_sims + stockSynthesisModel@ModelData@nsim
+      }
+
     } else
     {
       print("ERROR: No Stock Synthesis models in mseFramework.")
       stop()
     }
 
-    df <- NULL
+    # create result data.table. This needs to be done by building a code
+    # expression, parsing and evaluating it.
+    nMPs     <- length(MPs)
+    codeExpr <- "data.table(MP=rep('', times=nMPs),"
+    cnames   <- c()
+
+    for (Statistic in Statistics)
+    {
+      nparts <- statHandlers[[Statistic]]$partsFn()
+
+      if (nparts > 1)
+      {
+        for (cn in 1:nparts)
+        {
+          cnames <- c(cnames, paste(Statistic, cn, ".", sep="") %&% c("mean", percentiles))
+        }
+
+      } else
+      {
+        cnames <- c(cnames, Statistic %&% c("mean", percentiles))
+      }
+    }
+
+    extraColumns <- sapply(cnames, function(name)
+                                   {
+                                     return (paste(name, "=as.double(rep(NA, times=nMPs))", sep=""))
+                                   })
+
+    codeExpr <- paste(codeExpr, paste(extraColumns, collapse=","), ")", sep="")
+    dt       <- eval(parse(text=codeExpr))
+    nrow     <- 1
 
     for (MP in MPs)
     {
-      df_row <- NA
-      df_set <- FALSE
+      values <- list(MP=MP)
 
       for (Statistic in Statistics)
       {
         if (Statistic %in% names(statHandlers))
         {
-          SourceData <- karray(NA, c(nproj_sims * nmodels))
-          nsim       <- 1
+          nparts <- statHandlers[[Statistic]]$partsFn()
 
-          for (stockSynthesisModel in .Object@StockSynthesisModels)
+          for (cn in 1:nparts)
           {
-            nendsim <- nsim + nproj_sims - 1
+            cnames     <- if (nparts > 1) (paste(Statistic, cn, ".", sep="") %&% c("mean", percentiles)) else (Statistic %&% c("mean", percentiles))
+            SourceData <- karray(NA, ntotal_sims)
+            nsim       <- 1
 
-            SourceData[nsim:nendsim] <- statHandlers[[Statistic]](stockSynthesisModel@ProjectedVars[[MP]], stockSynthesisModel@RefVars)
+            for (stockSynthesisModel in .Object@StockSynthesisModels)
+            {
+              nproj_sims <- stockSynthesisModel@ModelData@nsim
+              nendsim    <- nsim + nproj_sims - 1
 
-            nsim <- nsim + nproj_sims
-          }
+              SourceData[nsim:nendsim] <- statHandlers[[Statistic]]$statFn(stockSynthesisModel@ProjectedVars[[MP]], stockSynthesisModel@RefVars, stockSynthesisModel@HistoricVars, cn)
 
-          if (df_set)
-          {
-            df_row <- cbind(data.frame(df_row), rbind(c(mean(SourceData, na.rm=TRUE), quantile(SourceData, percentiles, na.rm=TRUE))))
+              nsim <- nsim + nproj_sims
+            }
 
-          } else
-          {
-            df_row <- rbind(c(mean(SourceData, na.rm=TRUE), quantile(SourceData, percentiles, na.rm=TRUE)))
-            df_set <- TRUE
+            data <- c(mean(SourceData, na.rm=TRUE), quantile(SourceData, percentiles, na.rm=TRUE))
+
+            for (cn in 1:length(cnames))
+            {
+              values[[cnames[cn]]] <- data[cn]
+            }
           }
 
         } else
@@ -1081,17 +1317,16 @@ setMethod("performanceStatistics", c("MseFramework"),
         }
       }
 
-      df <- rbind(data.frame(df), data.frame(df_row))
+      set(dt, i=as.integer(nrow), j=names(values), values)
+
+      nrow <- nrow + 1
     }
 
-    dataTable     <- as.data.table(df)
-    cnames        <- sapply(Statistics, function(stat) {return(stat %&% c("mean", percentiles))})
-    dims          <- dim(cnames)
-    dim(cnames)   <- dims[1] * dims[2]
+    if (!is.null(appendTo))
+    {
+      dt <- merge(appendTo, dt, all=TRUE)
+    }
 
-    colnames(dataTable) <- cnames
-    rownames(dataTable) <- paste(prefix, MPs, sep="")
-
-    return (dataTable)
+    return (dt)
   }
 )
