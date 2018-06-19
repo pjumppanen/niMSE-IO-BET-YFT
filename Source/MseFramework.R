@@ -939,7 +939,7 @@ setMethod("performanceStatistics", c("MseFramework"),
     }
     else
     {
-      AvgYears    <- karray((AvgFirstYr - .Object@MseDef@lastCalendarYr):(AvgLastYr - .Object@MseDef@lastCalendarYr), dim=c(AvgFirstYr - AvgLastYr + 1))
+      AvgYears    <- karray((AvgFirstYr - .Object@MseDef@lastCalendarYr):(AvgLastYr - .Object@MseDef@lastCalendarYr), dim=c(AvgLastYr - AvgFirstYr + 1))
     }
 
     # Define stat handlers

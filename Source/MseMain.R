@@ -16,6 +16,7 @@ library(abind)
 library(stringr)
 library(data.table)
 library(mseviz)
+library(ggstance)
 
 
 #load Mseom module and R interface code
@@ -67,3 +68,5 @@ source("Source/Projection.R")
 source("Source/ManagementVars.R")
 source("Source/MseFramework.R")
 source("Source/StockSynthesisModel.R")
+source("Source/mseviz2.R")
+source("Source\\utilities.R")
