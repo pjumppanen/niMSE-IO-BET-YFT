@@ -211,7 +211,7 @@ setMethod("initialize", "Projection",
 
     # historical simulation of one year to re-create N for first projection year
     # ---------------------------------------------------------------------------
-    cat("Re-running final year of OM")
+    cat("\nRe-running final year of OM")
     cat("\n")
 
     y           <- initYear

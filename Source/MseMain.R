@@ -18,7 +18,6 @@ library(data.table)
 library(mseviz)
 library(ggstance)
 
-
 #load Mseom module and R interface code
 # Load the library
 if (version$os == "mingw32")
@@ -70,3 +69,4 @@ source("Source/MseFramework.R")
 source("Source/StockSynthesisModel.R")
 source("Source/mseviz2.R")
 source("Source/utilities.R")
+source("Source/clusterLogging.R")
