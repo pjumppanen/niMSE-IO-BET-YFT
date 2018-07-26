@@ -106,62 +106,37 @@ setMethod("initialize", "MseFramework",
     {
       if (UseCluster)
       {
-        require(keep)
-
-        # In a cluster context we re-direct output to file so we can then play
-        # it back in the host
-        StdOutFileName <- paste("msyStdOutFile", Job$which, ".txt", sep="")
-        sink(file=StdOutFileName, append=FALSE, type=c("output", "message"))
+        beginLog(Job$which)
       }
 
       StockSynthesisModel <- new("StockSynthesisModel", MseDef, Job$which, Job$seed, Report, UseMSYss)
 
       if (UseCluster)
       {
-        sink()
+        endLog()
       }
 
       return (StockSynthesisModel)
     }
 
-    printJobOutput <- function(Job)
-    {
-      StdOutFileName <- paste("msyStdOutFile", Job$which, ".txt", sep="")
-
-      if (file.exists(StdOutFileName))
-      {
-        Con <- file(StdOutFileName, "rt")
-
-        writeLines(readLines(Con))
-        close(Con)
-        unlink(StdOutFileName)
-      }
-    }
-
-    nCores  <- detectCores()
-    nJobs   <- length(JobList)
+    nJobs <- length(JobList)
 
     if (is.na(UseCluster))
     {
       UseCluster <- .Object@MseDef@UseCluster
     }
 
-    if (nJobs < nCores)
+    if (UseCluster && (nJobs > 1))
     {
-      nCores <- nJobs
-    }
-
-    if (UseCluster && (nCores > 1))
-    {
-      cl <- makeCluster(nCores)
+      cl <- openCluster(nJobs)
 
       clusterEvalQ(cl, eval(parse("Source/MseMain.R")))
 
       .Object@StockSynthesisModels <- parLapply(cl, JobList, FUN=runJob, .Object@MseDef, Report, UseMSYss, UseCluster)
 
-      stopCluster(cl)
+      closeCluster()
 
-      lapply(JobList, FUN=printJobOutput)
+      lapply(JobList, FUN=function(Job) {printLog(Job$which)})
     }
     else
     {
@@ -188,8 +163,7 @@ setMethod("runMse", c("MseFramework"),
 
     if (UseCluster)
     {
-      nCores  <- detectCores()
-      cluster <- makeCluster(nCores)
+      cluster <- openCluster()
 
       clusterEvalQ(cluster, eval(parse("Source/MseMain.R")))
     }
@@ -200,35 +174,19 @@ setMethod("runMse", c("MseFramework"),
       {
         runJob <- function(om)
         {
-          # In a cluster context we re-direct output to file so we can then play
-          # it back in the host
-          StdOutFileName <- paste("projStdOutFile", om@ModelData@which, ".txt", sep="")
-          sink(file=StdOutFileName, append=FALSE, type=c("output", "message"))
+          beginLog(om@ModelData@which)
 
           om <- runMse(om, .Object@MseDef, MPs, tune, interval, Report, CppMethod, cluster=NA, EffortCeiling, TACTime, rULim)
 
           print("\n")
-          sink()
+
+          endLog()
 
           return (om)
         }
 
-        printJobOutput <- function(om)
-        {
-          StdOutFileName <- paste("projStdOutFile", om@ModelData@which, ".txt", sep="")
-
-          if (file.exists(StdOutFileName))
-          {
-            Con <- file(StdOutFileName, "rt")
-
-            writeLines(readLines(Con))
-            close(Con)
-            unlink(StdOutFileName)
-          }
-        }
-
         StockSynthesisModels <- parLapply(cluster, StockSynthesisModels, fun=runJob)
-        lapply(StockSynthesisModels, FUN=printJobOutput)
+        lapply(StockSynthesisModels, FUN=function(om) {printLog(om@ModelData@which)})
       }
       else
       {
@@ -426,7 +384,7 @@ setMethod("runMse", c("MseFramework"),
 
     if (UseCluster)
     {
-      stopCluster(cluster)
+      closeCluster()
     }
 
     return (.Object)
