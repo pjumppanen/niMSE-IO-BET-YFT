@@ -291,7 +291,7 @@ setMethod("runProjection", c("ManagementVars", "ReferenceVars", "StockSynthesisM
 
     for (res in results)
     {
-      if (!is.na(res))
+      if (class(res) == "Projection")
       {
         sim <- res@which
 

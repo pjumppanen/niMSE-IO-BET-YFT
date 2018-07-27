@@ -66,7 +66,6 @@ setMethod("initialize", "StockSynthesisModel",
 
     .Object@ModelData@Recdist   <- karray(NA, dim=c(.Object@ModelData@npop, ssMod$nareas)) #recruitment distribution by areas
 
-    .Object@ModelData@Recdevs      <- karray(as.double(NA), dim=c(.Object@ModelData@nsim, .Object@ModelData@npop, allyears * length(.Object@ModelData@Recsubyr)))
     .Object@ModelData@Len_age      <- karray(as.double(NA), dim=c(.Object@ModelData@npop, .Object@ModelData@nages, allyears))      #cm
     .Object@ModelData@Len_age_mid  <- karray(as.double(NA), dim=c(.Object@ModelData@npop, .Object@ModelData@nages, allyears))      #cm
     .Object@ModelData@Wt_age       <- karray(as.double(NA), dim=c(.Object@ModelData@npop, .Object@ModelData@nages, allyears))      #kg
@@ -75,8 +74,6 @@ setMethod("initialize", "StockSynthesisModel",
     .Object@ModelData@mat          <- karray(as.double(NA), dim=c(.Object@ModelData@npop, .Object@ModelData@nages, allyears))
     .Object@ModelData@sel          <- karray(as.double(NA), dim=c(.Object@ModelData@nfleets, .Object@ModelData@nages))
     .Object@ModelData@CPUEsel      <- karray(as.double(NA), dim=c(.Object@ModelData@nages, .Object@ModelData@nCPUE))
-    .Object@ModelData@selTSSign    <- karray(as.double(NA), dim=c(.Object@ModelData@nsim, .Object@ModelData@nfleets, 2))
-    .Object@ModelData@selTSWaveLen <- karray(as.double(NA), dim=c(.Object@ModelData@nsim, .Object@ModelData@nfleets, 2))
 
      # Initialise to 1 because C++ model requires valid mov
     .Object@ModelData@mov          <- karray(as.double(1.0), dim=c(.Object@ModelData@npop, .Object@ModelData@nages, .Object@ModelData@nsubyears, .Object@ModelData@nareas, .Object@ModelData@nareas))
@@ -115,9 +112,6 @@ setMethod("initialize", "StockSynthesisModel",
 
     # Longline-selected Numbers over all ages, areas, populations for aggregate abundance index
     .Object@ModelData@NLLIss       <- karray(as.double(NA), dim=c(allyears))
-
-    # Initial population at the beginning of projection before movement and mortality for reporting
-    .Object@ModelData@NBeforeInit  <- karray(as.double(NA), dim=c(.Object@ModelData@nsim, .Object@ModelData@npop, .Object@ModelData@nages, .Object@ModelData@nareas))
 
     .Object@ModelData@q            <- karray(as.double(0.0), dim=c(.Object@ModelData@nfleets))
 
@@ -164,16 +158,16 @@ setMethod("initialize", "StockSynthesisModel",
     rm(tmp)
 
     #assumes all sims and pops identical for given OMFile
-    #.Object@ModelData@ReccvT <- karray(ssMod$parameters[ssMod$parameters$Label == "SR_sigmaR",]$Value, dim=c(.Object@ModelData@nsim, .Object@ModelData@npop))
+    #.Object@ModelData@ReccvT <- karray(ssMod$parameters[ssMod$parameters$Label == "SR_sigmaR",]$Value, dim=c(.Object@ModelData@npop))
 
     # Rec sigma - if ReccvTin is negative use the SS file, if non-positive use ReccvTin
     if (MseDef@ReccvTin[1] >= 0)
     {
-      .Object@ModelData@ReccvT <- karray(MseDef@ReccvTin, dim=c(.Object@ModelData@nsim, .Object@ModelData@npop))
+      .Object@ModelData@ReccvT <- karray(MseDef@ReccvTin, dim=c(.Object@ModelData@npop))
     }
     else
     {
-      .Object@ModelData@ReccvT <- karray(ssMod$parameters[ssMod$parameters$Label == "SR_sigmaR",]$Value, dim=c(.Object@ModelData@nsim, .Object@ModelData@npop))
+      .Object@ModelData@ReccvT <- karray(ssMod$parameters[ssMod$parameters$Label == "SR_sigmaR",]$Value, dim=c(.Object@ModelData@npop))
     }
 
     #assumes all sims and pops identical for given OMFile
@@ -197,10 +191,9 @@ setMethod("initialize", "StockSynthesisModel",
       .Object@ModelData@Recdist <- karray(1.0, dim=c(.Object@ModelData@npop, ssMod$nareas))
     }
 
-    RecACT <- karray(MseDef@RecACTin, dim=c(.Object@ModelData@nsim, .Object@ModelData@npop))  #input value; could extract from each OM file
-
     .Object@ModelData@ReccvR    <- karray(MseDef@ReccvRin, dim=c(.Object@ModelData@npop, .Object@ModelData@nareas))
-    .Object@ModelData@IAC       <- MseDef@IACin   #input value; could extract from each OM file
+    .Object@ModelData@RecACT    <- MseDef@RecACTin  #input value; could extract from each OM file
+    .Object@ModelData@IAC       <- MseDef@IACin     #input value; could extract from each OM file
 
     # Trend in CPUE observation error (Multiplier)
     if (MseDef@ITrendin < 0)
@@ -217,40 +210,6 @@ setMethod("initialize", "StockSynthesisModel",
       # Use the input value for all sims
       .Object@ModelData@ITrend[(.Object@ModelData@nyears + 1):(.Object@ModelData@nyears + .Object@ModelData@proyears)] <- cumprod(rep(1 + 0.01 * MseDef@ITrendin, .Object@ModelData@proyears))
     }
-
-    # Autocorrelated rec devs for projection years
-    rndDevs <- karray(rep(.Object@ModelData@ReccvT, times=.Object@ModelData@npop * allyears * length(.Object@ModelData@Recsubyr)) * rnorm(.Object@ModelData@nsim * .Object@ModelData@npop * allyears * length(.Object@ModelData@Recsubyr)),
-                      dim=c(.Object@ModelData@nsim, .Object@ModelData@npop, allyears * length(.Object@ModelData@Recsubyr)))
-
-    for (t in (.Object@ModelData@nyears * length(.Object@ModelData@Recsubyr) + 1):(allyears * length(.Object@ModelData@Recsubyr)))
-    {
-      rndDevs[,,t] <- RecACT * rndDevs[,,t - 1] + rndDevs[,,t] * sqrt(1 - RecACT ^ 2)
-    }
-
-    rm(RecACT)
-
-    # We attach any recruitment scaling (recuitment shock implementation) to the recruitment deviates.
-    SPTm      <- as.matrix(expand.grid(1:.Object@ModelData@nsim, 1:.Object@ModelData@npop, 1:(allyears * length(.Object@ModelData@Recsubyr))))
-    S         <- SPTm[,c(1)]
-    PTm       <- SPTm[,c(2,3)]
-    Y         <- floor((SPTm[,c(3)] - 1) / length(.Object@ModelData@Recsubyr)) + 1  # Calculate year from timestep
-
-    if (length(MseDef@RecScale) == 1)
-    {
-      .Object@ModelData@Recdevs[SPTm] <- exp(rndDevs[SPTm] - 0.5 * .Object@ModelData@ReccvT[keep(S)] ^ 2)
-    }
-    else if (length(MseDef@RecScale) == MseDef@proyears)
-    {
-      RecScale              <- karray(c(rep(1.0, times=.Object@ModelData@nyears), MseDef@RecScale))
-      .Object@ModelData@Recdevs[SPTm] <- RecScale[Y] * exp(rndDevs[SPTm] - 0.5 * .Object@ModelData@ReccvT[keep(S)] ^ 2)
-    }
-    else
-    {
-      print("ERROR: MSE definition RecScale vector is wrong length. It must be nyears in length")
-      stop()
-    }
-
-    rm(rndDevs, SPTm, S, PTm, Y)
 
     # Len_age relationships
     .Object@ModelData@Len_age     <- karray(rep(ssMod$endgrowth$Len_Beg, each=.Object@ModelData@npop), dim=c(.Object@ModelData@npop, .Object@ModelData@nages, allyears))
@@ -295,7 +254,7 @@ setMethod("initialize", "StockSynthesisModel",
     .Object@ModelData@CPUEobsY[] <- apply(.Object@ModelData@CPUEobsMR, FUN=sum, MARGIN=c(1))
 
     # Calculate initial aggregate annual CPUE index deviate for aggregate autocorrelation of index
-    lastYrIndices    <- (max(ssMod$cpue$Yr) - 3):max(ssMod$cpue$Yr)
+    lastYrIndices              <- (max(ssMod$cpue$Yr) - 3):max(ssMod$cpue$Yr)
     .Object@ModelData@initIDev <- log(sum(ssMod$cpue$Exp[(ssMod$cpue$Yr %in% lastYrIndices)]) / sum(ssMod$cpue$Obs[(ssMod$cpue$Yr %in% lastYrIndices)]))
 
     sel     <- karray(NA, c(.Object@ModelData@nfleets, .Object@ModelData@nages))
@@ -426,7 +385,7 @@ setMethod("initialize", "StockSynthesisModel",
     }  # end if (nareas > 1)
 
     # R0 extracted from SS
-    R0ss       <- ssMod$parameters[ssMod$parameters$Label == "SR_LN(R0)",]$Value  # in thousands
+    R0ss                 <- ssMod$parameters[ssMod$parameters$Label == "SR_LN(R0)",]$Value  # in thousands
     .Object@ModelData@R0 <- karray(exp(R0ss), dim=c(.Object@ModelData@npop))
 
     # Total numbers and spawning stock numbers
@@ -485,19 +444,13 @@ setMethod("initialize", "StockSynthesisModel",
     }
 
     # This is the N by SPAYMR in the last year of the assessment, that is re-iterated in the first year of projections
-    .Object@ModelData@NBeforeInit[1:.Object@ModelData@nsim,,,] <- rep(NBefore[,,.Object@ModelData@nyears,1,], each=.Object@ModelData@nsim)
+    .Object@ModelData@NBeforeInit <- NBefore[,,.Object@ModelData@nyears,1,]
 
-    # Add noise to NBeforeInit
-    CVMatBySPA  <- rep(MseDef@NInitCV * exp(-MseDef@NInitCVdecay * (0:(.Object@ModelData@nages - 1))), each=.Object@ModelData@nsim * .Object@ModelData@npop)
-    CVMatBySPAR <- karray(rep(CVMatBySPA, times=.Object@ModelData@nareas), dim=c(.Object@ModelData@nsim, .Object@ModelData@npop, .Object@ModelData@nages, .Object@ModelData@nareas))
-    Ndevs       <- exp(CVMatBySPAR * rnorm(prod(dim(.Object@ModelData@NBeforeInit[keep(1:.Object@ModelData@nsim),,,]))) - 0.5 * CVMatBySPAR*CVMatBySPAR)
-
-    .Object@ModelData@NBeforeInit[1:.Object@ModelData@nsim,,,] <- karray(.Object@ModelData@NBeforeInit[keep(1:.Object@ModelData@nsim),,,], dim=c(.Object@ModelData@nsim, .Object@ModelData@npop, .Object@ModelData@nages, .Object@ModelData@nareas)) * Ndevs
-    .Object@ModelData@SSBAss[]                       <- apply(karray(SSN[,,keep(1:allyears),.Object@ModelData@nsubyears,], c(.Object@ModelData@npop,.Object@ModelData@nages,allyears,.Object@ModelData@nareas)) * karray(.Object@ModelData@Wt_age[,,1:allyears], c(.Object@ModelData@npop,.Object@ModelData@nages,allyears,.Object@ModelData@nareas)), c(1,3), sum)
+    .Object@ModelData@SSBAss[] <- apply(karray(SSN[,,keep(1:allyears),.Object@ModelData@nsubyears,], c(.Object@ModelData@npop,.Object@ModelData@nages,allyears,.Object@ModelData@nareas)) * karray(.Object@ModelData@Wt_age[,,1:allyears], c(.Object@ModelData@npop,.Object@ModelData@nages,allyears,.Object@ModelData@nareas)), c(1,3), sum)
 
     # Bss mean over seasons
-    BbyM            <- apply(NBefore[,,keep(1:allyears),,] * karray(.Object@ModelData@Wt_age[,,keep(1:allyears)], c(.Object@ModelData@npop,.Object@ModelData@nages,allyears,.Object@ModelData@nsubyears,.Object@ModelData@nareas)), c(1,3,4), sum)
-    BbyY            <- apply(BbyM, c(1,2), mean)
+    BbyM                      <- apply(NBefore[,,keep(1:allyears),,] * karray(.Object@ModelData@Wt_age[,,keep(1:allyears)], c(.Object@ModelData@npop,.Object@ModelData@nages,allyears,.Object@ModelData@nsubyears,.Object@ModelData@nareas)), c(1,3,4), sum)
+    BbyY                      <- apply(BbyM, c(1,2), mean)
     .Object@ModelData@Bss     <- BbyY
     .Object@ModelData@Recss[] <- apply(NBefore[,1,keep(1:allyears),,], c(2), sum)
 
@@ -697,11 +650,6 @@ setMethod("initialize", "StockSynthesisModel",
     # Do MSY projections
     .Object@RefVars <- new("ReferenceVars", .Object@ModelData, MseDef, Report)
 
-    # selectvity temporal variability
-    .Object@ModelData@selTSSign[]                                 <- round(runif(prod(dim(.Object@ModelData@selTSSign))))
-    .Object@ModelData@selTSSign[.Object@ModelData@selTSSign < 1]  <- -1 # -1 or 1 indicate initial sin wave trend
-    .Object@ModelData@selTSWaveLen[]                              <- runif(prod(dim(.Object@ModelData@selTSWaveLen))) * (MseDef@selWLRange[2] - MseDef@selWLRange[1]) + MseDef@selWLRange[1]
-
     .Object@HistoricVars <- new("ManagementVars", .Object@ModelData, TRUE, 0)
 
     rm(ssMod)
@@ -883,8 +831,8 @@ setMethod("msevizPerformanceData", c("StockSynthesisModel"),
       df          <- addRows(df, cvC, "S15", "cv(C)")
 
       # T1 mean(C(t)/C(t-1))
-#      CtonCtm1    <- apply((ManagementVars@CM[keep(Sims), mseFramework@MseDef@targpop, AvgYears] / ManagementVars@CM[keep(Sims), mseFramework@MseDef@targpop, AvgYearsm1]) , c(1), mean, na.rm = TRUE)
-#      df          <- addRows(df, CtonCtm1, "T1", "mean(C(t)/C(t-1))")
+      CtonCtm1    <- apply((ManagementVars@CM[keep(Sims), mseFramework@MseDef@targpop, AvgYears] / ManagementVars@CM[keep(Sims), mseFramework@MseDef@targpop, AvgYearsm1]) , c(1), mean, na.rm = TRUE)
+      df          <- addRows(df, CtonCtm1, "T1", "mean(C(t)/C(t-1))")
 
       # T3 var(F)
 #      varF        <- round(apply(as.karray(F_FMSY)[keep(Sims), mseFramework@MseDef@targpop, AvgYears] * RefVars@FMSY1, MARGIN=c(1), var), 2)

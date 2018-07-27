@@ -177,7 +177,6 @@ setMethod("initialize", "Projection",
     Idist         <- ssModelData@Idist
     M             <- ssModelData@M
     mat           <- ssModelData@mat
-    Recdevs       <- ssModelData@Recdevs
     Recdist       <- ssModelData@Recdist
 #    Linf          <- ssModelData@Linf
 #    K             <- ssModelData@K
@@ -209,6 +208,58 @@ setMethod("initialize", "Projection",
     bR      <- log(5.0 * h) / (0.8 * SSB0)
     aR      <- exp(bR * SSB0) / SSBpR
 
+
+    # Autocorrelated rec devs for projection years
+    # --------------------------------------------
+    rndDevs <- karray(rep(ssModelData@ReccvT, times=ssModelData@npop * allyears * length(ssModelData@Recsubyr)) * rnorm(ssModelData@npop * allyears * length(ssModelData@Recsubyr)),
+                      dim=c(ssModelData@npop, allyears * length(ssModelData@Recsubyr)))
+
+    for (t in (ssModelData@nyears * length(ssModelData@Recsubyr) + 1):(allyears * length(ssModelData@Recsubyr)))
+    {
+      rndDevs[,t] <- ssModelData@RecACT * rndDevs[,t - 1] + rndDevs[,t] * sqrt(1 - ssModelData@RecACT ^ 2)
+    }
+
+    # We attach any recruitment scaling (recuitment shock implementation) to the recruitment deviates.
+    Recdevs   <- karray(as.double(NA), dim=c(ssModelData@npop, allyears * length(ssModelData@Recsubyr)))
+    PTm       <- as.matrix(expand.grid(1:ssModelData@npop, 1:(allyears * length(ssModelData@Recsubyr))))
+    P         <- PTm[,c(1)]
+    Y         <- floor((PTm[,c(2)] - 1) / length(ssModelData@Recsubyr)) + 1  # Calculate year from timestep
+
+    if (length(MseDef@RecScale) == 1)
+    {
+      RecScale <- karray(c(rep(1.0, times=ssModelData@nyears), rep(MseDef@RecScale, times=MseDef@proyears)))
+    }
+    else if (length(MseDef@RecScale) == MseDef@proyears)
+    {
+      RecScale <- karray(c(rep(1.0, times=ssModelData@nyears), MseDef@RecScale))
+    }
+    else
+    {
+      print("ERROR: MSE definition RecScale vector is wrong length. It must be nyears in length")
+      stop()
+    }
+
+    Recdevs[PTm] <- RecScale[Y] * exp(rndDevs[PTm] - 0.5 * ssModelData@ReccvT[P] ^ 2)
+
+    rm(rndDevs, PTm, P, Y)
+
+    # Initial population at the beginning of projection before movement and mortality for reporting with noise
+    # --------------------------------------------------------------------------------------------------------
+    CVMatByPA   <- rep(MseDef@NInitCV * exp(-MseDef@NInitCVdecay * (0:(ssModelData@nages - 1))), each=ssModelData@npop)
+    CVMatByPAR  <- karray(rep(CVMatByPA, times=ssModelData@nareas), dim=c(ssModelData@npop, ssModelData@nages, ssModelData@nareas))
+    Ndevs       <- exp(CVMatByPAR * rnorm(prod(dim(ssModelData@NBeforeInit))) - 0.5 * CVMatByPAR * CVMatByPAR)
+    NBeforeInit <- ssModelData@NBeforeInit * Ndevs
+
+    rm(CVMatByPA, CVMatByPAR, Ndevs)
+
+
+    # selectivity temporal variability
+    # --------------------------------
+    selTSSign                 <- karray(round(runif(ssModelData@nfleets * 2)), dim=c(ssModelData@nfleets, 2))
+    selTSWaveLen              <- karray(runif(ssModelData@nfleets * 2) * (MseDef@selWLRange[2] - MseDef@selWLRange[1]) + MseDef@selWLRange[1], dim=c(ssModelData@nfleets, 2))
+    selTSSign[selTSSign < 1]  <- -1 # -1 or 1 indicate initial sin wave trend
+
+
     # historical simulation of one year to re-create N for first projection year
     # ---------------------------------------------------------------------------
     cat("\nRe-running final year of OM")
@@ -231,8 +282,8 @@ setMethod("initialize", "Projection",
 
     # Initialise starting population. Note N_Y initialisation redundant for R case but
     # needed for C++ case
-    NBefore_Y[,,1,] <- ssModelData@NBeforeInit[sim,,,]
-    N_Y[,,1,]       <- ssModelData@NBeforeInit[sim,,,]
+    NBefore_Y[,,1,] <- NBeforeInit
+    N_Y[,,1,]       <- NBeforeInit
 
     # Matrix index arrays used in historic and projection R code
     PAYMRF <- as.matrix(expand.grid(1:npop, 1:nages, initYear, 1, 1:nareas, 1:nfleets))
@@ -269,7 +320,7 @@ setMethod("initialize", "Projection",
                                   h)
 
       RecdevIndex <- (y - 1) * nSpawnPerYr + 1
-      Recdevs_Y   <- Recdevs[sim,,RecdevIndex:(RecdevIndex + nSpawnPerYr - 1)]
+      Recdevs_Y   <- Recdevs[,RecdevIndex:(RecdevIndex + nSpawnPerYr - 1)]
 
       OmB.nt.runHistoric(Obj,
                          as.double(1.0),
@@ -322,12 +373,12 @@ setMethod("initialize", "Projection",
             if (ssModelData@SRrel[pp] == 1)
             {
               # Beverton-Holt recruitment
-              rec <- Recdevs[sim,pp,RecdevInd] * ((0.8 * R0[pp] * h[pp] * SSBA_Y[pp]) / (0.2 * SSBpR[pp] * R0[pp] * (1 - h[pp]) + (h[pp] - 0.2) * SSBA_Y[pp]))
+              rec <- Recdevs[pp,RecdevInd] * ((0.8 * R0[pp] * h[pp] * SSBA_Y[pp]) / (0.2 * SSBpR[pp] * R0[pp] * (1 - h[pp]) + (h[pp] - 0.2) * SSBA_Y[pp]))
             }
             else
             {
               # Most transparent form of the Ricker uses alpha and beta params
-              rec <- Recdevs[sim,pp,RecdevInd] * aR[pp] * SSBA_Y[pp] * exp(-bR[pp] * SSBA_Y[pp])
+              rec <- Recdevs[pp,RecdevInd] * aR[pp] * SSBA_Y[pp] * exp(-bR[pp] * SSBA_Y[pp])
             }
 
             NBefore_Y[pp,1,mm,] <- rec * Recdist[pp,]
@@ -544,7 +595,7 @@ setMethod("initialize", "Projection",
       if (MseDef@selAgeRange >= 1)
       {
         #add an age shift to the selectivity noise
-        selAge <- karray(rep(round(ssModelData@selTSSign[sim,,2] * sin((y - nyears - 1) * ssModelData@selTSWaveLen[sim,,2]) * MseDef@selAgeRange), nages), dim=dim(sel))
+        selAge <- karray(rep(round(selTSSign[,2] * sin((y - nyears - 1) * selTSWaveLen[,2]) * MseDef@selAgeRange), nages), dim=dim(sel))
 
         for (fi in 1:nfleets)
         {
@@ -564,7 +615,7 @@ setMethod("initialize", "Projection",
         }
       }
 
-      selExp    <- exp(ssModelData@selTSSign[sim,,1] * sin((y-nyears-1) * ssModelData@selTSWaveLen[sim,,1]) * (MseDef@selExpRange))
+      selExp    <- exp(selTSSign[,1] * sin((y-nyears-1) * selTSWaveLen[,1]) * (MseDef@selExpRange))
       selTS     <- selTS ^ rep(selExp, nages)
       CPUEselTS <- CPUEsel
 
@@ -700,7 +751,7 @@ setMethod("initialize", "Projection",
       if (MseDef@CppMethod != 0)
       {
         RecdevIndex <- (y - 1) * nSpawnPerYr + 1
-        Recdevs_Y   <- Recdevs[sim,,RecdevIndex:(RecdevIndex + nSpawnPerYr - 1)]
+        Recdevs_Y   <- Recdevs[,RecdevIndex:(RecdevIndex + nSpawnPerYr - 1)]
 
         Om.nt.projection(Obj,
                          y,
@@ -768,12 +819,12 @@ setMethod("initialize", "Projection",
               if (ssModelData@SRrel[pp] == 1)
               {
                 # Beverton-Holt recruitment
-                rec <- Recdevs[sim,pp,RecdevInd] * ((0.8 * R0[pp] * h[pp] * SSBA_Y[pp]) / (0.2 * SSBpR[pp] * R0[pp] * (1 - h[pp]) + (h[pp] - 0.2) * SSBA_Y[pp]))
+                rec <- Recdevs[pp,RecdevInd] * ((0.8 * R0[pp] * h[pp] * SSBA_Y[pp]) / (0.2 * SSBpR[pp] * R0[pp] * (1 - h[pp]) + (h[pp] - 0.2) * SSBA_Y[pp]))
               }
               else
               {
                 # Most transparent form of the Ricker uses alpha and beta params
-                rec <- Recdevs[sim,pp,RecdevInd] * aR[pp] * SSBA_Y[pp] * exp(-bR[pp] * SSBA_Y[pp])
+                rec <- Recdevs[pp,RecdevInd] * aR[pp] * SSBA_Y[pp] * exp(-bR[pp] * SSBA_Y[pp])
               }
 
               N_Y[pp,1,mm,]       <- rec * Recdist[pp,] * recSpatialDevs[pp,]

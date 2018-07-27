@@ -93,8 +93,9 @@ performanceStatistics(OMyft2r108, c("SBoSB0","GK","RK","PrSBgtSBMSY","PrSBgt0.2S
 # Do various performance plots
 perfd <- msevizPerformanceData(OMyft2r108, YearsAveraged)
 
-print(plotTOs(perfd))
-print(plotBPs(perfd))
+
+print(plotTOs(perfd, x="S10", y=c("T1","S3","S6","S9")))
+print(plotBPs(perfd, indicators=c("T1","S3","S6","S9","S10")))
 print(kobeMPs(perfd))
 
 
@@ -111,7 +112,7 @@ TuningPars@tuningTolerance          <- 0.01
 
 MPL2 <- c("PT41.100.2", "PT41.100.9", "PT41.tune.9")
 
-print(system.time(OMyft2r108 <- runMse(OMyft2r108, TuningPars=TuningPars, MPs=MPL2, interval=3, Report=F, UseCluster=0)))
+print(system.time(OMyft2r108 <- runMse(OMyft2r108, TuningPars=TuningPars, MPs=MPL2, interval=3, Report=F, UseCluster=1)))
 
 # Plot some key time series
 histd <- msevizHistoricTimeSeriesData(OMyft2r108)
@@ -125,8 +126,8 @@ plotOMruns(histd[histd$qname=="F/FMSY",], projd[projd$qname=="F/FMSY",])
 # Do various performance plots
 perfd <- msevizPerformanceData(OMyft2r108, YearsAveraged)
 
-print(plotTOs(perfd))
-print(plotBPs(perfd))
+print(plotTOs(perfd, x="S10", y=c("T1","S3","S6","S9")))
+print(plotBPs(perfd, indicators=c("T1","S3","S6","S9","S10")))
 print(kobeMPs(perfd))
 
 

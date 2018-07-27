@@ -31,13 +31,13 @@ MseDef@Flim           <- 1.4
 source("./OMconditioning/RStuff/makeGridY3.f.R")
 gridY3List            <- makeGridY3.f(makeGrid=F)
 MseDef@OMList         <- as.list(gridY3List[c(2,51)])
-MseDef@nsimPerOMFile  <- array(rep(2,length(MseDef@OMList)),dim=length(MseDef@OMList))  # Number of simulations per each SS specification file (vector of length OMList allows differental weighting, i.e. c(10,50,25)
-MseDef@proyears       <- as.integer(26)                                                 # Number projection years
-MseDef@targpop        <- as.integer(1)                                                  # summary stats by population; irrelevant for single stock case
-MseDef@seed           <- as.integer(1)                                                  # rnd seed
-MseDef@recentPerFirst <- as.integer(0)                                                  # number of most recent seasons to include in "recent" C and E definition counting backward (0 means use last season of assessment)
-MseDef@recentPerLast  <- as.integer(8)                                                  # number of most recent seasons to include in "recent" C and E definition counting backward
-MseDef@seasonCEDist   <- as.integer(0)                                                  # 0/1 - 1=use seasonal pattern of C/E (recentPeriod must be multiple of recentPeriod) or all easons equal
+MseDef@nsimPerOMFile  <- array(rep(108,length(MseDef@OMList)),dim=length(MseDef@OMList))  # Number of simulations per each SS specification file (vector of length OMList allows differental weighting, i.e. c(10,50,25)
+MseDef@proyears       <- as.integer(26)                                                   # Number projection years
+MseDef@targpop        <- as.integer(1)                                                    # summary stats by population; irrelevant for single stock case
+MseDef@seed           <- as.integer(1)                                                    # rnd seed
+MseDef@recentPerFirst <- as.integer(0)                                                    # number of most recent seasons to include in "recent" C and E definition counting backward (0 means use last season of assessment)
+MseDef@recentPerLast  <- as.integer(8)                                                    # number of most recent seasons to include in "recent" C and E definition counting backward
+MseDef@seasonCEDist   <- as.integer(0)                                                    # 0/1 - 1=use seasonal pattern of C/E (recentPeriod must be multiple of recentPeriod) or all easons equal
 
 # some assessment specific time mapping requirements to align SS years as quarters with OM year-seasons and real-time
 MseDef@nsubyears        <- as.integer(4)
