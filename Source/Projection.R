@@ -235,7 +235,7 @@ setMethod("initialize", "Projection",
     }
     else
     {
-      print("ERROR: MSE definition RecScale vector is wrong length. It must be nyears in length")
+      print("ERROR: MSE definition RecScale vector is wrong length. It must be proyears in length")
       stop()
     }
 
@@ -412,6 +412,9 @@ setMethod("initialize", "Projection",
 
       } #Initial projection year mm loop
     }  #R option initial year set up
+
+    UpdateRecentEbyF <- FALSE
+    RecentEbyF       <- karray(1.0, dim=c(nfleets))
 
     # Calculate final year Frep
     NsoRbyPAM    <- apply(NBefore_Y[,,keep(1:(nsubyears+1)),], FUN=sum, MARGIN=c(1:3))
@@ -742,6 +745,25 @@ setMethod("initialize", "Projection",
       .Object@TAC[y]     <- TAC
       .Object@TAEbyF[y,] <- TAEbyF
 
+      if ((length(MseDef@ImplErrBias) > 1) && (y >= firstMPy))
+      {
+        if (MseDef@ImplErrBias[y - nyears] < 0)
+        {
+          TAC              <- 0.0
+          TAEbyF           <- RecentEbyF * abs(MseDef@ImplErrBias[y - nyears])
+          UpdateRecentEbyF <- FALSE
+        }
+        else if (MseDef@ImplErrBias[y - nyears] > 0)
+        {
+          TAC              <- TAC * MseDef@ImplErrBias[y - nyears]
+          UpdateRecentEbyF <- TRUE
+        }
+        else
+        {
+          UpdateRecentEbyF <- TRUE
+        }
+      }
+
       # Start of annual projection
       #---------------------------------------------------------------------
       #Spatial devs in rec (affect spatial distribution but not total; streamlined implementationsame for all sims, pops, area)
@@ -783,6 +805,11 @@ setMethod("initialize", "Projection",
                          C_Y,
                          SSBA_Y,
                          as.integer(100))
+
+        if (UpdateRecentEbyF)
+        {
+          RecentEbyF <- Om.get.nt.LastEbyF(Obj)
+        }
       }
       else  # R roption
       {
@@ -792,6 +819,12 @@ setMethod("initialize", "Projection",
         Fim               <- MRFim[,c(3)]
         isTACFleet[MRFim] <- karray((!TAEbyF) * 1.0, dim=c(nfleets))[Fim]  # exclude TAC fleets
         TACbyMRF          <- TAC * CMCurrent * isTACFleet / sum(CMCurrent * isTACFleet)
+
+        if (UpdateRecentEbyF)
+        {
+          RecentEbyF[1:nfleets] <- 0.0
+          TotalCbyF             <- rep(1.0e-10, times=nfleets) # Initialise to non-zero but small value to avoid NA
+        }
 
         for (mm in 1:nsubyears)
         {
@@ -837,6 +870,11 @@ setMethod("initialize", "Projection",
           {
             N_Y[,,mm,] <- projection.domov(Ntemp=karray(N_Y[,,mm,], dim=c(npop,nages,nareas)),
                                            movtemp=karray(mov[,,mm,,], dim=c(npop,nages,nareas,nareas)))
+          }
+
+          if (UpdateRecentEbyF)
+          {
+            N_Ystart <- apply(N_Y[,,mm,], FUN=sum, MARGIN=c(2,3))
           }
 
           #---------------------------------------------------------------------
@@ -948,6 +986,41 @@ setMethod("initialize", "Projection",
             print(CMTACsum)
             print(CMTAEsum)
             print(CMTACsum + CMTAEsum)
+          }
+
+          if (UpdateRecentEbyF)
+          {
+            ARF2   <- as.matrix(expand.grid(1:nages, 1:nareas, 1:nfleets))
+            AR2    <- ARF2[,c(1,2)]
+            RF2    <- ARF2[,c(2,3)]
+            FA2    <- ARF2[,c(3,1)]
+            F2     <- ARF2[,c(3)]
+            EbyARF <- karray(0.0, dim=c(nages,nareas,nfleets))
+
+            # Need to figure out what the recent effective EbyF is. Find Z and
+            # fish deaths (Mort) by pop,age and area; find catch by age, area
+            # and fleet; find total catch by fleet; find F by age, area and
+            # fleet; finally find RecentEbyF by doing a weighted sum of E by
+            # age, area and fishery. We weight it according to catch so that
+            # large catch EbyARF contributes the most to the final result. This
+            # should help minimise any bias in the estimate.
+            N_Yend       <- apply(N_Y[,,mm,], FUN=sum, MARGIN=c(2,3))
+            Ztot         <- -log(N_Yend / N_Ystart)
+            Mort         <- N_Ystart - N_Yend
+            CbyARF       <- apply(C_Y[,,mm,,], FUN=sum, MARGIN=c(2,3,4))
+            SumCbyF      <- apply(CbyARF, FUN=sum, MARGIN=c(3))
+            TotalCbyF    <- TotalCbyF + SumCbyF
+            Fest         <- Ztot[AR2] * CbyARF[ARF2] / Mort[AR2]
+            EbyARF[ARF2] <- (CbyARF[ARF2] / SumCbyF[F2]) * (Fest / (ECurrent[mm,,][RF2] * selTS[FA2] * q[F2] * TACEError[F2]))
+            RecentEbyF   <- RecentEbyF + (SumCbyF * apply(EbyARF, FUN=sum, MARGIN=c(3), na.rm=TRUE))
+
+            if (mm == nsubyears)
+            {
+              RecentEbyF <- RecentEbyF / TotalCbyF
+              selectTAE  <- (TAEbyF != 0) * 1.0
+              selectTAC  <- (TAEbyF == 0) * 1.0
+              RecentEbyF <- (TAEbyF * selectTAE) + (RecentEbyF * selectTAC)
+            }
           }
 
           # end harvest calculations

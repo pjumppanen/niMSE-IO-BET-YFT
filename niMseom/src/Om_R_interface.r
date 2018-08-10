@@ -70,6 +70,26 @@ Om.set.nt.last_par <- function(Context, Arg, ...)
   return (.External('_Om.set.nt.last_par', Context, as.double(Arg), list(...)))
 }
 
+Om.get.LastEbyF <- function(Context, ...)
+{
+  return (.External('_Om.get.LastEbyF', Context, list(...)))
+}
+
+Om.set.LastEbyF <- function(Context, Arg, ...)
+{
+  return (.External('_Om.set.LastEbyF', Context, as.double(Arg), list(...)))
+}
+
+Om.get.nt.LastEbyF <- function(Context, ...)
+{
+  return (.External('_Om.get.nt.LastEbyF', Context, list(...)))
+}
+
+Om.set.nt.LastEbyF <- function(Context, Arg, ...)
+{
+  return (.External('_Om.set.nt.LastEbyF', Context, as.double(Arg), list(...)))
+}
+
 Om.get.nbefored1_par <- function(Context, ...)
 {
   return (.External('_Om.get.nbefored1_par', Context, list(...)))

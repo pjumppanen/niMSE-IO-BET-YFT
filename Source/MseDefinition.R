@@ -28,7 +28,9 @@ setClass("MseDefinition",
     UseCluster       = "numeric",
 
     nfleets          = "integer",
-    RecScale         = "karray",
+    ImplErrBias      = "karray",    # Vector proyears in length. If +ve it is a multiplier on TAC. If -ve it is a multiplier on fishing mortality prior to the
+                                    # -ve value coming in. This is used to add implementation error bias.
+    RecScale         = "karray",    # Scaling parameter on recuitment. Either a single value or a vector of length proyears
     ReccvTin         = "karray",
     RecACTin         = "karray",
     ReccvRin         = "numeric",
@@ -50,7 +52,7 @@ setClass("MseDefinition",
     catchBridgeCV    = "numeric",   # error to add onto catch for bridge years with unknown catch
 
     indexFisheries   = "integer",   # vector of fisheries to aggregate for index calculations (e.g. LL CPUEfleets)
-                                   #Observation errors (original ABT code had a separate observation class)
+                                    # Observation errors (original ABT code had a separate observation class)
     TACEcv           = "karray",    # fleet-specific lognormal errors on TAC/TAE (independent among fleets and seasons)
     Ccv              = "numeric",   # Observation error
     Cbcv             = "numeric",   # bias in total annual catches
@@ -85,6 +87,7 @@ setClass("MseDefinition",
   ),
 
   prototype = list(
+    ImplErrBias   = karray(c(NA)),
     RecScale      = karray(c(1)),
     modelWeight   = karray(c(1)),
     totalSims     = 0               # default of 0 means simulations are based only on nsimPerOMFile.

@@ -465,6 +465,34 @@ SEXP D_OperatingModelMin::_set_nt_last_par(SEXP arg_last_par, SEXP sArgList)
   return (Result);
 }
 
+SEXP D_OperatingModelMin::_get_LastEbyF(SEXP sArgList) const
+{
+  SEXP Result = R_ImplGetter(MemAllocator, false, (char*)LastEbyF, "LastEbyF", sArgList, __FILE__, __LINE__);
+  
+  return (Result);
+}
+
+SEXP D_OperatingModelMin::_set_LastEbyF(SEXP arg_LastEbyF, SEXP sArgList)
+{
+  SEXP Result = R_ImplSetter(MemAllocator, false, (char*)LastEbyF, "LastEbyF", arg_LastEbyF, sArgList, __FILE__, __LINE__);
+  
+  return (Result);
+}
+
+SEXP D_OperatingModelMin::_get_nt_LastEbyF(SEXP sArgList) const
+{
+  SEXP Result = R_ImplGetter(MemAllocator, true, (char*)LastEbyF, "LastEbyF", sArgList, __FILE__, __LINE__);
+  
+  return (Result);
+}
+
+SEXP D_OperatingModelMin::_set_nt_LastEbyF(SEXP arg_LastEbyF, SEXP sArgList)
+{
+  SEXP Result = R_ImplSetter(MemAllocator, true, (char*)LastEbyF, "LastEbyF", arg_LastEbyF, sArgList, __FILE__, __LINE__);
+  
+  return (Result);
+}
+
 SEXP D_OperatingModelMin::_get_nbefored1_par(SEXP sArgList) const
 {
   SEXP Result = R_ImplGetter(MemAllocator, false, (char*)nbefored1_par, "nbefored1_par", sArgList, __FILE__, __LINE__);

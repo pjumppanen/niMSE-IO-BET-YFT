@@ -6,12 +6,8 @@
 
 
 
-
 #include "D_niMseom.hpp"
 
-
-
-// ----------------------------------------------------------------------------
 
 D_OperatingModelBase::D_OperatingModelBase(int arg_npop, int arg_nages, int arg_nsubyears, int arg_nareas, int arg_nfleets, const ARRAY_1I arg_Recsubyr)
  : OperatingModelBase(arg_npop,arg_nages,arg_nsubyears,arg_nareas,arg_nfleets,arg_Recsubyr)
@@ -35,9 +31,8 @@ D_OperatingModelBase::D_OperatingModelBase(int arg_npop, int arg_nages, int arg_
   createStack(bstack_3_2);
   bstack_3_2i = 0;
 }
-;
 
-// ----------------------------------------------------------------------------
+
 
 D_OperatingModelBase::D_OperatingModelBase(const D_OperatingModelBase& rCopy)
  : OperatingModelBase(rCopy)
@@ -61,9 +56,8 @@ D_OperatingModelBase::D_OperatingModelBase(const D_OperatingModelBase& rCopy)
   createStack(bstack_3_2);
   bstack_3_2i = 0;
 }
-;
 
-// ----------------------------------------------------------------------------
+
 
 D_OperatingModelBase::~D_OperatingModelBase()
 {
@@ -81,7 +75,6 @@ D_OperatingModelBase::~D_OperatingModelBase()
   destroy(bstack_3_2);
 }
 
-// ----------------------------------------------------------------------------
 
 //   Differentiation of operatingmodelbase__msyrefs_objective in forward (tangent) mode:
 //    variations   of useful results: operatingmodelbase__msyrefs_objective
@@ -89,6 +82,8 @@ D_OperatingModelBase::~D_OperatingModelBase()
 //    RW status of diff variables: movn:(loc) fm:(loc) eforyear:(loc)
 //                 nbefore:(loc) n:(loc) operatingmodelbase__msyrefs_objective:out
 //                 par:in c:(loc)
+//   ----------------------------------------------------------------------------
+
 double D_OperatingModelBase::MSYREFS_OBJECTIVE_DPAR(double par, double pard1_par, int nReport, const ARRAY_3D ECurrent/* nfleets,nareas,nsubyears */, const ARRAY_1D qy/* nfleets */, const ARRAY_1D R0/* npop */, const ARRAY_2D M/* nages,npop */, const ARRAY_2D mat/* nages,npop */, const ARRAY_3D Idist/* nareas,nages,npop */, const ARRAY_2D Len_age/* nages,npop */, const ARRAY_2D Wt_age/* nages,npop */, const ARRAY_2D sel/* nages,nfleets */, const ARRAY_5D mov/* nareas,nareas,nsubyears,nages,npop */, const ARRAY_1D h/* npop */, const ARRAY_2D Recdist/* nareas,npop */, const ARRAY_1I SRrel/* npop */, ARRAY_4D N/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D nd1_par/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D NBefore/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D nbefored1_par/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D SSN/* nareas,nsubyears,nages,npop */, ARRAY_5D C/* nfleets,nareas,nsubyears,nages,npop */, ARRAY_5D cd1_par/* nfleets,nareas,nsubyears,nages,npop */, ARRAY_1D SSBA/* npop */, int ntargets, const ARRAY_1I targpop/* ntargets */, int run_years, double& MSYrefs_objective)
 {
   int ca;
@@ -103,6 +98,10 @@ double D_OperatingModelBase::MSYREFS_OBJECTIVE_DPAR(double par, double pard1_par
   int p;
   double ret_MSYREFS_OBJECTIVE_DPAR;
   POPDYN_MSY_PAR_DPAR(par,pard1_par,ECurrent,qy,R0,M,mat,Idist,Len_age,Wt_age,sel,mov,h,Recdist,SRrel,N,nd1_par,NBefore,nbefored1_par,SSN,C,cd1_par,SSBA,run_years);
+  //   return(-log(sum(
+  //   array(C[targpop,,nyears,,,],c(length(targpop),nages,nsubyears,nareas,nfleets))*
+  //   array(Wt_age[targpop,,nyears],c(length(targpop),nages,nsubyears,nareas,nfleets)))))
+  //   Use a small number to stop the function returning +inf for objective
   dCatch = 1.0e-6;
   cp = 1;
   dcatchd1_par = 0.0;
@@ -150,11 +149,12 @@ double D_OperatingModelBase::MSYREFS_OBJECTIVE_DPAR(double par, double pard1_par
   return (ret_MSYREFS_OBJECTIVE_DPAR);
 }
 
-// ----------------------------------------------------------------------------
 
 //   Differentiation of operatingmodelbase__popdyn_msy_par in forward (tangent) mode:
 //    variations   of useful results: c
 //    with respect to varying inputs: par
+//   ----------------------------------------------------------------------------
+
 void D_OperatingModelBase::POPDYN_MSY_PAR_DPAR(double par, double pard1_par, const ARRAY_3D ECurrent/* nfleets,nareas,nsubyears */, const ARRAY_1D qy/* nfleets */, const ARRAY_1D R0/* npop */, const ARRAY_2D M/* nages,npop */, const ARRAY_2D mat/* nages,npop */, const ARRAY_3D Idist/* nareas,nages,npop */, const ARRAY_2D Len_age/* nages,npop */, const ARRAY_2D Wt_age/* nages,npop */, const ARRAY_2D sel/* nages,nfleets */, const ARRAY_5D mov/* nareas,nareas,nsubyears,nages,npop */, const ARRAY_1D h/* npop */, const ARRAY_2D Recdist/* nareas,npop */, const ARRAY_1I SRrel/* npop */, ARRAY_4D N/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D nd1_par/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D NBefore/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D nbefored1_par/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D SSN/* nareas,nsubyears,nages,npop */, ARRAY_5D C/* nfleets,nareas,nsubyears,nages,npop */, ARRAY_5D cd1_par/* nfleets,nareas,nsubyears,nages,npop */, ARRAY_1D SSBA/* npop */, int run_years)
 {
   int cf;
@@ -272,11 +272,12 @@ void D_OperatingModelBase::POPDYN_MSY_PAR_DPAR(double par, double pard1_par, con
   POPDYN_YEAR_DPAR(qy,R0,M,mat,Len_age,Wt_age,sel,EforYear,eforyeard1_par,mov,h,Recdist,MSY_Recdevs,MSY_RecSpatialDevs,SRrel,N,nd1_par,NBefore,nbefored1_par,SSN,C,cd1_par,SSBA,0);
 }
 
-// ----------------------------------------------------------------------------
 
 //   Differentiation of operatingmodelbase__nextyear in forward (tangent) mode:
 //    variations   of useful results: nbefore n
 //    with respect to varying inputs: nbefore n
+//   ----------------------------------------------------------------------------
+
 void D_OperatingModelBase::NEXTYEAR_DPAR(ARRAY_4D N/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D nd1_par/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D NBefore/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D nbefored1_par/* nareas,nsubyears + 1,nages,npop */)
 {
   int ca;
@@ -308,11 +309,12 @@ void D_OperatingModelBase::NEXTYEAR_DPAR(ARRAY_4D N/* nareas,nsubyears + 1,nages
   }
 }
 
-// ----------------------------------------------------------------------------
 
 //   Differentiation of operatingmodelbase__popdyn_year in forward (tangent) mode:
 //    variations   of useful results: movn fm nbefore n c
 //    with respect to varying inputs: movn fm nbefore n eannual c
+//   ----------------------------------------------------------------------------
+
 void D_OperatingModelBase::POPDYN_YEAR_DPAR(const ARRAY_1D qy/* nfleets */, const ARRAY_1D R0/* npop */, const ARRAY_2D M/* nages,npop */, const ARRAY_2D mat/* nages,npop */, const ARRAY_2D Len_age/* nages,npop */, const ARRAY_2D Wt_age/* nages,npop */, const ARRAY_2D sel/* nages,nfleets */, const ARRAY_3D Eannual/* nfleets,nareas,nsubyears */, const ARRAY_3D eannuald1_par/* nfleets,nareas,nsubyears */, const ARRAY_5D mov/* nareas,nareas,nsubyears,nages,npop */, const ARRAY_1D h/* npop */, const ARRAY_2D Recdist/* nareas,npop */, const ARRAY_2D Recdevs/* SpawnPerYr,npop */, const ARRAY_2D RecSpatialDevs/* nareas,npop */, const ARRAY_1I SRrel/* npop */, ARRAY_4D N/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D nd1_par/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D NBefore/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D nbefored1_par/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D SSN/* nareas,nsubyears,nages,npop */, ARRAY_5D C/* nfleets,nareas,nsubyears,nages,npop */, ARRAY_5D cd1_par/* nfleets,nareas,nsubyears,nages,npop */, ARRAY_1D SSBA/* npop */, int bIgnoreLast)
 {
   int ca;
@@ -348,6 +350,7 @@ void D_OperatingModelBase::POPDYN_YEAR_DPAR(const ARRAY_1D qy/* nfleets */, cons
     cp = 1;
     
     while ((cp <= npop))
+    //   Update SSB and SSN and do recruitment.
     {
       dSSB = 0.0;
       cr = 1;
@@ -376,6 +379,7 @@ void D_OperatingModelBase::POPDYN_YEAR_DPAR(const ARRAY_1D qy/* nfleets */, cons
       
       SSBA[cp] = dSSB;
       
+      //   Run recruitment
       if ((Recsubyr[cs] != 0))
       {
         if ((SRrel[cp] == 1))
@@ -401,6 +405,11 @@ void D_OperatingModelBase::POPDYN_YEAR_DPAR(const ARRAY_1D qy/* nfleets */, cons
         }
       }
       
+      //  rec<-OM@Recdevs[,pp,RecdevInd]*((0.8*OM@R0[,pp]*OM@h[,pp]*SSBA[,pp,y])/(0.2*SSBpR[,pp]*OM@R0[,pp]*(1-OM@h[,pp])+(OM@h[,pp]-0.2)
+      // *SSBA[,pp,y]))
+      //   Beverton Holt stock recruitment relationship
+      //   Most transparent form of the Ricker uses alpha and beta params
+      //   Move Fish
       ca = 1;
       
       while ((ca <= nages))
@@ -408,6 +417,7 @@ void D_OperatingModelBase::POPDYN_YEAR_DPAR(const ARRAY_1D qy/* nfleets */, cons
         cr = 1;
         
         while ((cr <= nareas))
+        //   N[,,y,m,]<-domov2(N[,,y,m,],mov[,,m,,])
         {
           dN = 0.0;
           cr2 = 1;
@@ -437,6 +447,7 @@ void D_OperatingModelBase::POPDYN_YEAR_DPAR(const ARRAY_1D qy/* nfleets */, cons
         ca = ca + 1;
       }
       
+      //   Fishing and natural mortality
       ca = 1;
       
       while ((ca <= nages))
@@ -450,6 +461,7 @@ void D_OperatingModelBase::POPDYN_YEAR_DPAR(const ARRAY_1D qy/* nfleets */, cons
           dftotd1_par = 0.0;
           
           while ((cf <= nfleets))
+          //  FM[PAYMRF2] <- totF*ECurrent[MRF2]*sel[FA2]
           {
             dfmd1_par = sel[ca][cf] * qy[cf] * eannuald1_par[cf][cr][cs];
             dFM = Eannual[cf][cr][cs] * sel[ca][cf] * qy[cf];
@@ -460,17 +472,21 @@ void D_OperatingModelBase::POPDYN_YEAR_DPAR(const ARRAY_1D qy/* nfleets */, cons
             cf = cf + 1;
           }
           
+          //  Ftot <- apply(FM[,,y,m,,,drop=F],c(1,2,5),sum)
+          //  Z[PAYMR] <- Ftot[PAR]+M[PAY]/nsubyears
           dzd1_par = dftotd1_par;
           dZ = dFtot + M[ca][cp] / nsubyears;
           cf = 1;
           
           while ((cf <= nfleets))
+          //  C[PAYMRF2] <- N[PAYMR2]*(1-exp(-Z[PAYMR2]))*(FM[PAYMRF2]/Z[PAYMR2])
           {
             cd1_par[cf][cr][cs][ca][cp] = (nd1_par[cr][cs][ca][cp] * FM[cf] / dZ + N[cr][cs][ca][cp] * (fmd1_par[cf] * dZ - FM[cf] * dzd1_par) / pow(dZ,2)) * (1 - exp(-dZ)) + N[cr][cs][ca][cp] * FM[cf] * dzd1_par * exp(-dZ) / dZ;
             C[cf][cr][cs][ca][cp] = N[cr][cs][ca][cp] * (1 - exp(-dZ)) * (FM[cf] / dZ);
             cf = cf + 1;
           }
           
+          //  N[,,y,m,]<-N[,,y,m,]*exp(-Z[,,y,m,])
           nd1_par[cr][cs][ca][cp] = nd1_par[cr][cs][ca][cp] * exp(-dZ) - N[cr][cs][ca][cp] * dzd1_par * exp(-dZ);
           N[cr][cs][ca][cp] = N[cr][cs][ca][cp] * exp(-dZ);
           cr = cr + 1;
@@ -510,6 +526,11 @@ void D_OperatingModelBase::POPDYN_YEAR_DPAR(const ARRAY_1D qy/* nfleets */, cons
         }
       }
       
+      //   Age fish.
+      //  N[,pp,nages-1,y,mm,]          <- N[,pp,nages-1,y,mm,] + N[,pp,nages,y,mm,]
+      //  NBefore[,pp,2:nages,y,mm+1,]  <- N[,pp,1:(nages-1),y,mm,]
+      //  NBefore[,pp,1,y,mm+1,]        <- rec*recSpatialDevs[,pp,]
+      //  N[,pp,,y,mm+1,]               <- NBefore[,pp,,y,mm+1,]
       cp = cp + 1;
     }
     
@@ -522,7 +543,6 @@ void D_OperatingModelBase::POPDYN_YEAR_DPAR(const ARRAY_1D qy/* nfleets */, cons
   }
 }
 
-// ----------------------------------------------------------------------------
 
 //   Differentiation of operatingmodelbase__popdyn_projection_objective in reverse (adjoint) mode:
 //    gradient     of useful results: operatingmodelbase__popdyn_projection_objective
@@ -530,6 +550,8 @@ void D_OperatingModelBase::POPDYN_YEAR_DPAR(const ARRAY_1D qy/* nfleets */, cons
 //    RW status of diff variables: movn:(loc) fm:(loc) eforyear:(loc)
 //                 nbefore:(loc) n:(loc) operatingmodelbase__popdyn_projection_objective:in-killed
 //                 par:out c:(loc)
+//   ----------------------------------------------------------------------------
+
 void D_OperatingModelBase::POPDYN_PROJECTION_OBJECTIVE_BPAR(const ARRAY_1D par/* 0:npar - 1 */, ARRAY_1D parb2_par/* 0:npar - 1 */, int npar, int nfixed, const ARRAY_1D TAC/* 0:npar - 1 */, const ARRAY_1D TAE/* 0:nfixed - 1 */, const ARRAY_1I FbyPar/* 0:npar - 1 */, const ARRAY_1I FbyFixed/* 0:nfixed - 1 */, const ARRAY_3D ECurrent/* nfleets,nareas,nsubyears */, const ARRAY_1D qy/* nfleets */, const ARRAY_1D R0/* npop */, const ARRAY_2D M/* nages,npop */, const ARRAY_2D mat/* nages,npop */, const ARRAY_3D Idist/* nareas,nages,npop */, const ARRAY_2D Len_age/* nages,npop */, const ARRAY_2D Wt_age/* nages,npop */, const ARRAY_2D Wt_age_mid/* nages,npop */, const ARRAY_2D sel/* nages,nfleets */, const ARRAY_5D mov/* nareas,nareas,nsubyears,nages,npop */, const ARRAY_1D h/* npop */, const ARRAY_2D Recdist/* nareas,npop */, const ARRAY_2D Recdevs/* SpawnPerYr,npop */, const ARRAY_2D RecSpatialDevs/* nareas,npop */, const ARRAY_1I SRrel/* npop */, ARRAY_4D N/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D nb2_par/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D NBefore/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D nbeforeb2_par/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D SSN/* nareas,nsubyears,nages,npop */, ARRAY_5D C/* nfleets,nareas,nsubyears,nages,npop */, ARRAY_5D cb2_par/* nfleets,nareas,nsubyears,nages,npop */, ARRAY_1D SSBA/* npop */, double& popdyn_projection_objectiveb2_par)
 {
   int ad_count;
@@ -790,11 +812,12 @@ void D_OperatingModelBase::POPDYN_PROJECTION_OBJECTIVE_BPAR(const ARRAY_1D par/*
   POPDYN_PROJECTION_PAR_BPAR(par,parb2_par,npar,nfixed,TAE,FbyPar,FbyFixed,ECurrent,qy,R0,M,mat,Idist,Len_age,Wt_age,sel,mov,h,Recdist,Recdevs,RecSpatialDevs,SRrel,N,nb2_par,NBefore,nbeforeb2_par,SSN,C,cb2_par,SSBA,1);
 }
 
-// ----------------------------------------------------------------------------
 
 //   Differentiation of operatingmodelbase__popdyn_projection_par in reverse (adjoint) mode:
 //    gradient     of useful results: c
 //    with respect to varying inputs: par
+//   ----------------------------------------------------------------------------
+
 void D_OperatingModelBase::POPDYN_PROJECTION_PAR_BPAR(const ARRAY_1D par/* 0:npar - 1 */, ARRAY_1D parb2_par/* 0:npar - 1 */, int npar, int nfixed, const ARRAY_1D TAE/* 0:nfixed - 1 */, const ARRAY_1I FbyPar/* 0:npar - 1 */, const ARRAY_1I FbyFixed/* 0:nfixed - 1 */, const ARRAY_3D ECurrent/* nfleets,nareas,nsubyears */, const ARRAY_1D qy/* nfleets */, const ARRAY_1D R0/* npop */, const ARRAY_2D M/* nages,npop */, const ARRAY_2D mat/* nages,npop */, const ARRAY_3D Idist/* nareas,nages,npop */, const ARRAY_2D Len_age/* nages,npop */, const ARRAY_2D Wt_age/* nages,npop */, const ARRAY_2D sel/* nages,nfleets */, const ARRAY_5D mov/* nareas,nareas,nsubyears,nages,npop */, const ARRAY_1D h/* npop */, const ARRAY_2D Recdist/* nareas,npop */, const ARRAY_2D Recdevs/* SpawnPerYr,npop */, const ARRAY_2D RecSpatialDevs/* nareas,npop */, const ARRAY_1I SRrel/* npop */, ARRAY_4D N/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D nb2_par/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D NBefore/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D nbeforeb2_par/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D SSN/* nareas,nsubyears,nages,npop */, ARRAY_5D C/* nfleets,nareas,nsubyears,nages,npop */, ARRAY_5D cb2_par/* nfleets,nareas,nsubyears,nages,npop */, ARRAY_1D SSBA/* npop */, int bIgnoreLast)
 {
   int ad_count;
@@ -817,6 +840,7 @@ void D_OperatingModelBase::POPDYN_PROJECTION_PAR_BPAR(const ARRAY_1D par/* 0:npa
   ad_count3 = 0;
   
   while ((cr <= nareas))
+  //   Set effort series for year
   {
     cx = 0;
     ad_count0 = 0;
@@ -950,6 +974,7 @@ void D_OperatingModelBase::POPDYN_PROJECTION_PAR_BPAR(const ARRAY_1D par/* 0:npa
   }
   
   i4stack_2_2[i4stack_2_2i] = ad_count3;
+  //   Initialise N and SSN
   nextYear(N,NBefore);
   POPDYN_YEAR_BPAR(qy,R0,M,mat,Len_age,Wt_age,sel,EforYear,eforyearb2_par,mov,h,Recdist,Recdevs,RecSpatialDevs,SRrel,N,nb2_par,NBefore,nbeforeb2_par,SSN,C,cb2_par,SSBA,bIgnoreLast);
   
@@ -1008,11 +1033,12 @@ void D_OperatingModelBase::POPDYN_PROJECTION_PAR_BPAR(const ARRAY_1D par/* 0:npa
   }
 }
 
-// ----------------------------------------------------------------------------
 
 //   Differentiation of operatingmodelbase__popdyn_year in reverse (adjoint) mode:
 //    gradient     of useful results: c
 //    with respect to varying inputs: eannual
+//   ----------------------------------------------------------------------------
+
 void D_OperatingModelBase::POPDYN_YEAR_BPAR(const ARRAY_1D qy/* nfleets */, const ARRAY_1D R0/* npop */, const ARRAY_2D M/* nages,npop */, const ARRAY_2D mat/* nages,npop */, const ARRAY_2D Len_age/* nages,npop */, const ARRAY_2D Wt_age/* nages,npop */, const ARRAY_2D sel/* nages,nfleets */, const ARRAY_3D Eannual/* nfleets,nareas,nsubyears */, ARRAY_3D eannualb2_par/* nfleets,nareas,nsubyears */, const ARRAY_5D mov/* nareas,nareas,nsubyears,nages,npop */, const ARRAY_1D h/* npop */, const ARRAY_2D Recdist/* nareas,npop */, const ARRAY_2D Recdevs/* SpawnPerYr,npop */, const ARRAY_2D RecSpatialDevs/* nareas,npop */, const ARRAY_1I SRrel/* npop */, ARRAY_4D N/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D nb2_par/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D NBefore/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D nbeforeb2_par/* nareas,nsubyears + 1,nages,npop */, ARRAY_4D SSN/* nareas,nsubyears,nages,npop */, ARRAY_5D C/* nfleets,nareas,nsubyears,nages,npop */, ARRAY_5D cb2_par/* nfleets,nareas,nsubyears,nages,npop */, ARRAY_1D SSBA/* npop */, int bIgnoreLast)
 {
   int ad_count;
@@ -1160,6 +1186,7 @@ void D_OperatingModelBase::POPDYN_YEAR_BPAR(const ARRAY_1D qy/* nfleets */, cons
       
       i4stack_3_2[i4stack_3_2i] = ad_count0;
       
+      //   Run recruitment
       if ((Recsubyr[cs] != 0))
       {
         if ((SRrel[cp] == 1))
@@ -1243,6 +1270,11 @@ void D_OperatingModelBase::POPDYN_YEAR_BPAR(const ARRAY_1D qy/* nfleets */, cons
         bstack_3_2[bstack_3_2i] = 1;
       }
       
+      //  rec<-OM@Recdevs[,pp,RecdevInd]*((0.8*OM@R0[,pp]*OM@h[,pp]*SSBA[,pp,y])/(0.2*SSBpR[,pp]*OM@R0[,pp]*(1-OM@h[,pp])+(OM@h[,pp]-0.2)
+      // *SSBA[,pp,y]))
+      //   Beverton Holt stock recruitment relationship
+      //   Most transparent form of the Ricker uses alpha and beta params
+      //   Move Fish
       ca = 1;
       ad_count5 = 0;
       
@@ -1252,6 +1284,7 @@ void D_OperatingModelBase::POPDYN_YEAR_BPAR(const ARRAY_1D qy/* nfleets */, cons
         ad_count3 = 0;
         
         while ((cr <= nareas))
+        //   N[,,y,m,]<-domov2(N[,,y,m,],mov[,,m,,])
         {
           dN = 0.0;
           cr2 = 1;
@@ -1355,6 +1388,7 @@ void D_OperatingModelBase::POPDYN_YEAR_BPAR(const ARRAY_1D qy/* nfleets */, cons
       }
       
       i4stack_3_2[i4stack_3_2i] = ad_count5;
+      //   Fishing and natural mortality
       ca = 1;
       ad_count9 = 0;
       
@@ -1370,6 +1404,7 @@ void D_OperatingModelBase::POPDYN_YEAR_BPAR(const ARRAY_1D qy/* nfleets */, cons
           ad_count6 = 0;
           
           while ((cf <= nfleets))
+          //  FM[PAYMRF2] <- totF*ECurrent[MRF2]*sel[FA2]
           {
             dFM = Eannual[cf][cr][cs] * sel[ca][cf] * qy[cf];
             r4stack_3_2i = r4stack_3_2i + 1;
@@ -1918,6 +1953,9 @@ void D_OperatingModelBase::POPDYN_YEAR_BPAR(const ARRAY_1D qy/* nfleets */, cons
     }
   }
 }
+
+
+
 
 #include "include/OmB_impl_lib_interface_methods.hpp"
 #include "include/OmB_impl_lib_interface_globals.hpp"

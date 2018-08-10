@@ -2,6 +2,10 @@ Plan_4.create(MemAllocator, TACbyF);
 
 zero(TACbyF);
 
+Plan_4.create(MemAllocator, LastEbyF);
+
+zero(LastEbyF);
+
 Plan_12.create(MemAllocator, nd1_par);
 
 zero(nd1_par);

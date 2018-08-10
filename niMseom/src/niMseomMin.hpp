@@ -22,6 +22,7 @@ protected:
 
   /* AUTODEC */
   ARRAY_1D TACbyF/* nfleets */;
+  ARRAY_1D LastEbyF/* nfleets */;
 
 public:
   ARRAY_4D nd1_par/* nareas,nsubyears + 1,nages,npop */;

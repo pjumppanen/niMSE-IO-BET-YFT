@@ -309,6 +309,72 @@ EXPORT SEXP Om_set_nt_last_par(SEXP args)
 }
 
 
+EXPORT SEXP Om_get_LastEbyF(SEXP args)
+{
+  SEXP rInstance;
+  SEXP sArgList;
+  args = CDR(args); rInstance = CAR(args);
+  args = CDR(args); sArgList = CAR(args);
+  
+  ASSERT_TYPE_TAG(rInstance, D_OperatingModelBase);
+  
+  D_OperatingModelMin* pContext = (D_OperatingModelMin*)R_ExternalPtrAddr(rInstance);
+  
+  return (pContext->_get_LastEbyF(sArgList));
+}
+
+EXPORT SEXP Om_set_LastEbyF(SEXP args)
+{
+  SEXP rInstance;
+  SEXP arg_LastEbyF;
+  SEXP sArgList;
+  
+  
+  args = CDR(args); rInstance = CAR(args);
+  args = CDR(args); arg_LastEbyF = CAR(args);
+  args = CDR(args); sArgList = CAR(args);
+  
+  ASSERT_TYPE_TAG(rInstance, D_OperatingModelBase);
+  
+  D_OperatingModelMin* pContext = (D_OperatingModelMin*)R_ExternalPtrAddr(rInstance);
+  
+  return (pContext->_set_LastEbyF(arg_LastEbyF, sArgList));
+}
+
+
+EXPORT SEXP Om_get_nt_LastEbyF(SEXP args)
+{
+  SEXP rInstance;
+  SEXP sArgList;
+  args = CDR(args); rInstance = CAR(args);
+  args = CDR(args); sArgList = CAR(args);
+  
+  ASSERT_TYPE_TAG(rInstance, D_OperatingModelBase);
+  
+  D_OperatingModelMin* pContext = (D_OperatingModelMin*)R_ExternalPtrAddr(rInstance);
+  
+  return (pContext->_get_nt_LastEbyF(sArgList));
+}
+
+EXPORT SEXP Om_set_nt_LastEbyF(SEXP args)
+{
+  SEXP rInstance;
+  SEXP arg_LastEbyF;
+  SEXP sArgList;
+  
+  
+  args = CDR(args); rInstance = CAR(args);
+  args = CDR(args); arg_LastEbyF = CAR(args);
+  args = CDR(args); sArgList = CAR(args);
+  
+  ASSERT_TYPE_TAG(rInstance, D_OperatingModelBase);
+  
+  D_OperatingModelMin* pContext = (D_OperatingModelMin*)R_ExternalPtrAddr(rInstance);
+  
+  return (pContext->_set_nt_LastEbyF(arg_LastEbyF, sArgList));
+}
+
+
 EXPORT SEXP Om_get_nbefored1_par(SEXP args)
 {
   SEXP rInstance;

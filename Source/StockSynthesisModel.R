@@ -170,6 +170,20 @@ setMethod("initialize", "StockSynthesisModel",
       .Object@ModelData@ReccvT <- karray(ssMod$parameters[ssMod$parameters$Label == "SR_sigmaR",]$Value, dim=c(.Object@ModelData@npop))
     }
 
+    # check recruitment scaling parameter so errors are picked up early
+    if ((length(MseDef@RecScale) != 1) && (length(MseDef@RecScale) != MseDef@proyears))
+    {
+      print("ERROR: MSE definition RecScale vector is wrong length. It must be proyears in length")
+      stop()
+    }
+
+    # check implementation error bias parameter so errors are picked up early
+    if ((length(MseDef@ImplErrBias) != 1) && (length(MseDef@ImplErrBias) != MseDef@proyears))
+    {
+      print("ERROR: MSE definition ImplErrBias vector is wrong length. It must be proyears in length")
+      stop()
+    }
+
     #assumes all sims and pops identical for given OMFile
     if (.Object@ModelData@nareas > 1)
     {

@@ -669,11 +669,15 @@ void OperatingModelMin::projection(const int nProjectionYear,
     for (cn = 0 ; cn < Context.nPar ; cn++)
     {
       px[cn] += log(TACEError[FbyPar[cn]]);
+
+      LastEbyF[FbyPar[cn]] = exp(px[cn]);
     }
 
     for (cn = 0 ; cn < Context.nFixed ; cn++)
     {
       TAE[cn] *= TACEError[FbyFixed[cn]];
+
+      LastEbyF[FbyFixed[cn]] = TAE[cn];
     }
 
     runProjection(px,
