@@ -11,14 +11,21 @@ setClass("TuningParameters",
     tuningTolerance         = "numeric",   # relative level of precision required in tuning
     tuningLogDomain         = "numeric",   # log base 10 of search domain for tuning solution. It is a log domain to improve search dynamic range
     bisectMethod            = "logical"
-  ),
-
-  prototype = list(
-    performanceMeasureYears = 20,
-    tuningTolerance         = 0.01,
-    tuningLogDomain         = c(-3,0.5),   # -3, 0.5; maybe should transform relevant MP paramters so this domain can remain unchanged
-    bisectMethod            = TRUE
   )
+)
+
+# -----------------------------------------------------------------------------
+
+setMethod("initialize", "TuningParameters",
+  function(.Object)
+  {
+    .Object@performanceMeasureYears = 20
+    .Object@tuningTolerance         = 0.01
+    .Object@tuningLogDomain         = c(-3,0.5) # -3, 0.5; maybe should transform relevant MP paramters so this domain can remain unchanged
+    .Object@bisectMethod            = TRUE
+
+    return (.Object)
+  }
 )
 
 

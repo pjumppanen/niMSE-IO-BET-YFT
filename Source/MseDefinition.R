@@ -84,14 +84,21 @@ setClass("MseDefinition",
     IMSYbcv          = "numeric",   # Bias in observation of target CPUE (CPUE @ MSY)
     MSYbcv           = "numeric",   # Bias in observation of target catch (MSY)
     BMSYbcv          = "numeric"    # Bias in observation of target biomass (BMSY)
-  ),
+  )
+)
 
-  prototype = list(
-    ImplErrBias   = karray(c(NA)),
-    RecScale      = karray(c(1)),
-    modelWeight   = karray(c(1)),
-    totalSims     = 0               # default of 0 means simulations are based only on nsimPerOMFile.
-  )                                 # non 0 totalSims and the nsimPerOMFile is calculated based on modelWeight and totalSims.
+# -----------------------------------------------------------------------------
+
+setMethod("initialize", "MseDefinition",
+  function(.Object)
+  {
+    .Object@ImplErrBias   = karray(c(NA))
+    .Object@RecScale      = karray(c(1))
+    .Object@modelWeight   = karray(c(1))
+    .Object@totalSims     = 0 # default of 0 means simulations are based only on nsimPerOMFile.
+                              # non 0 totalSims and the nsimPerOMFile is calculated based on modelWeight and totalSims.
+    return (.Object)
+  }
 )
 
 # -----------------------------------------------------------------------------
