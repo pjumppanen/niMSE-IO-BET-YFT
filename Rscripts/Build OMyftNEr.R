@@ -96,3 +96,6 @@ MseDef@Lcv        <- c(0., 0.)
 MseDef@Ibeta      <- c(0.999, 1.0001) # hyperstability parm, cv # c(0.66,1.5) #exp(runif(nsim,log(0.75),log(1.25))) #check definition
 MseDef@IACin      <- 0.5              # cpue autocorrelation
 MseDef@ITrendin   <- -1               # cpue trend % per annum compounded, negative means the trend is extracted from the assessment model filname, i.e. q1 = 1%
+
+#Implementation error bias
+MseDef@ImplErrBias <-as.karray(c(rep(1,times=4),rep(-1,times=6),rep(1,times=15),rep(1,times=4),rep(-1,times=6),rep(1,times=15)))

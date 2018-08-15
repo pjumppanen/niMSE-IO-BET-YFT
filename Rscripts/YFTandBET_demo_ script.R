@@ -18,7 +18,7 @@ source("Source/MseMain.R")
 source("RScripts/Build OMyftNEr.R")
 
 # Create an MseFramework object for the MseDefinition
-print(system.time(OMyftNEr <- createMseFramework(MseDef)))
+print(system.time(OMyftNEr <- createMseFramework(MseDef, UseCluster=0)))
 
 # Save the MseFramework
 save(OMyftNEr, file=paste(getwd(),"/Objects/OMyftNEr.RDA",sep=""))
@@ -39,16 +39,41 @@ plotOMruns(histd[histd$qname=="C",], projd[projd$qname=="C",])
 plotOMruns(histd[histd$qname=="F/FMSY",], projd[projd$qname=="F/FMSY",])
 
 # Re-Run the MSE with the C++ projection code this time
-#print(system.time(OMyftNEr <- runMse(OMyftNEr, MPs="CC001", interval=3, Report=F, CppMethod=1, UseCluster=0)))
+print(system.time(OMyftNErCpp <- runMse(OMyftNEr, MPs="CC001", interval=3, Report=F, CppMethod=1, UseCluster=0)))
 
 # Plot some key time series
-#histd <- msevizHistoricTimeSeriesData(OMyftNEr)
-#projd <- msevizProjectedTimeSeriesData(OMyftNEr)
+histd <- msevizHistoricTimeSeriesData(OMyftNErCpp)
+projd <- msevizProjectedTimeSeriesData(OMyftNErCpp)
 
-#plotOMruns(histd[histd$qname=="SSB/SSBMSY",], projd[projd$qname=="SSB/SSBMSY",])
-#plotOMruns(histd[histd$qname=="CPUE(aggregate)",], projd[projd$qname=="CPUE(aggregate)",])
-#plotOMruns(histd[histd$qname=="C",], projd[projd$qname=="C",])
-#plotOMruns(histd[histd$qname=="F/FMSY",], projd[projd$qname=="F/FMSY",])
+plotOMruns(histd[histd$qname=="SSB/SSBMSY",], projd[projd$qname=="SSB/SSBMSY",])
+plotOMruns(histd[histd$qname=="CPUE(aggregate)",], projd[projd$qname=="CPUE(aggregate)",])
+plotOMruns(histd[histd$qname=="C",], projd[projd$qname=="C",])
+plotOMruns(histd[histd$qname=="F/FMSY",], projd[projd$qname=="F/FMSY",])
+
+
+# Run an MSE; "CC100" for higher effort to test Implementation error bias
+print(system.time(OMyftNEr <- runMse(OMyftNEr, MPs="CC100", interval=3, Report=F)))
+
+# Plot some key time series
+histd <- msevizHistoricTimeSeriesData(OMyftNEr)
+projd <- msevizProjectedTimeSeriesData(OMyftNEr)
+
+plotOMruns(histd[histd$qname=="SSB/SSBMSY",], projd[projd$qname=="SSB/SSBMSY",])
+plotOMruns(histd[histd$qname=="CPUE(aggregate)",], projd[projd$qname=="CPUE(aggregate)",])
+plotOMruns(histd[histd$qname=="C",], projd[projd$qname=="C",])
+plotOMruns(histd[histd$qname=="F/FMSY",], projd[projd$qname=="F/FMSY",])
+
+# Re-Run the MSE with the C++ projection code this time
+print(system.time(OMyftNErCpp <- runMse(OMyftNEr, MPs="CC100", interval=3, Report=F, CppMethod=1)))
+
+# Plot some key time series
+histd <- msevizHistoricTimeSeriesData(OMyftNErCpp)
+projd <- msevizProjectedTimeSeriesData(OMyftNErCpp)
+
+plotOMruns(histd[histd$qname=="SSB/SSBMSY",], projd[projd$qname=="SSB/SSBMSY",])
+plotOMruns(histd[histd$qname=="CPUE(aggregate)",], projd[projd$qname=="CPUE(aggregate)",])
+plotOMruns(histd[histd$qname=="C",], projd[projd$qname=="C",])
+plotOMruns(histd[histd$qname=="F/FMSY",], projd[projd$qname=="F/FMSY",])
 
 
 #------------------------------------------------------------------------------
