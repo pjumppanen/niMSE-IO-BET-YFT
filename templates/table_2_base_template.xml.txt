@@ -27,1806 +27,1155 @@
         <w:body>
           <w:tbl>
             <w:tblPr>
-              <w:tblW w:w="8642" w:type="dxa" />
-              <w:tblBorders>
-                <w:top w:val="single" w:sz="4" w:space="0" w:color="auto" />
-                <w:left w:val="single" w:sz="4" w:space="0" w:color="auto" />
-                <w:bottom w:val="single" w:sz="4" w:space="0" w:color="auto" />
-                <w:right w:val="single" w:sz="4" w:space="0" w:color="auto" />
-                <w:insideH w:val="single" w:sz="4" w:space="0" w:color="auto" />
-                <w:insideV w:val="single" w:sz="4" w:space="0" w:color="auto" />
-              </w:tblBorders>
+              <w:tblStyle w:val="TableGrid" />
               <w:tblLook w:val="04A0" w:firstRow="1" w:lastRow="0" w:firstColumn="1" w:lastColumn="0" w:noHBand="0" w:noVBand="1" />
             </w:tblPr>
-            <w:tblGrid>
-              <w:gridCol w:w="1276" />
-              <w:gridCol w:w="1763" />
-              <w:gridCol w:w="1354" />
-              <w:gridCol w:w="1560" />
-              <w:gridCol w:w="1697" />
-              <w:gridCol w:w="992" />
-            </w:tblGrid>
-            <w:tr w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidTr="007C1AC2">
+            <w:tr w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidTr="00BE37D5">
               <w:trPr>
                 <w:trHeight w:val="300" />
               </w:trPr>
               <w:tc>
                 <w:tcPr>
-                  <w:tcW w:w="1276" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="auto" w:fill="auto" />
+                  <w:tcW w:w="2500" w:type="dxa" />
+                  <w:shd w:val="clear" w:color="auto" w:fill="E7E6E6" w:themeFill="background2" />
                   <w:noWrap />
-                  <w:vAlign w:val="bottom" />
+                  <w:hideMark />
                 </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00B87BC1" w:rsidP="007C1AC2">
+                <w:p w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidRDefault="00DD58D3" w:rsidP="00BE37D5">
                   <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="center" />
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
                       <w:b />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:bCs />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
+                    </w:rPr>
+                  </w:pPr>
+                  <w:bookmarkStart w:id="0" w:name="_GoBack" />
+                  <w:bookmarkEnd w:id="0" />
+                  <w:r w:rsidRPr="0073293B">
+                    <w:rPr>
+                      <w:b />
+                      <w:bCs />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
+                    </w:rPr>
+                    <w:t>Status : maximise stock status</w:t>
+                  </w:r>
+                </w:p>
+              </w:tc>
+              <w:tc>
+                <w:tcPr>
+                  <w:tcW w:type="auto" />
+                  <w:shd w:val="clear" w:color="auto" w:fill="E7E6E6" w:themeFill="background2" />
+                  <w:noWrap />
+                  <w:hideMark />
+                </w:tcPr>
+                <w:p w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidRDefault="00DD58D3" w:rsidP="00BE37D5">
+                  <w:pPr>
+                    <w:rPr>
+                      <w:b />
+                      <w:bCs />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
                   </w:pPr>
                 </w:p>
               </w:tc>
               <w:tc>
                 <w:tcPr>
-                  <w:tcW w:w="7366" w:type="dxa" />
-                  <w:gridSpan w:val="5" />
-                  <w:shd w:val="clear" w:color="auto" w:fill="auto" />
+                  <w:tcW w:type="auto" />
+                  <w:gridSpan w:val="{MP_col_span}" />
+                  <w:shd w:val="clear" w:color="auto" w:fill="E7E6E6" w:themeFill="background2" />
                   <w:noWrap />
-                  <w:vAlign w:val="bottom" />
+                  <w:hideMark />
                 </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00307CFC" w:rsidRDefault="00B87BC1" w:rsidP="007C1AC2">
+                <w:p w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidRDefault="00CD133D" w:rsidP="00BE37D5">
                   <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="center" />
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:b />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
                   </w:pPr>
-                  <w:r w:rsidRPr="00307CFC">
+                  <w:r>
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
                       <w:b />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:bCs />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
-                    <w:t>Performance Measure</w:t>
+                    <w:t>{PERIOD}</w:t>
                   </w:r>
                 </w:p>
               </w:tc>
             </w:tr>
-            <w:tr w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidTr="007C1AC2">
+            <w:tr w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidTr="00BE37D5">
               <w:trPr>
                 <w:trHeight w:val="300" />
               </w:trPr>
               <w:tc>
                 <w:tcPr>
-                  <w:tcW w:w="1276" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="auto" w:fill="auto" />
+                  <w:tcW w:w="2500" w:type="dxa" />
+                  <w:shd w:val="clear" w:color="auto" w:fill="E7E6E6" w:themeFill="background2" />
                   <w:noWrap />
-                  <w:vAlign w:val="bottom" />
                   <w:hideMark />
                 </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00B87BC1" w:rsidP="007C1AC2">
+                <w:p w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidRDefault="00DD58D3" w:rsidP="00BE37D5">
                   <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="center" />
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:b />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
                   </w:pPr>
-                  <w:r w:rsidRPr="00950BDB">
+                </w:p>
+              </w:tc>
+              <w:tc>
+                <w:tcPr>
+                  <w:tcW w:type="auto" />
+                  <w:shd w:val="clear" w:color="auto" w:fill="E7E6E6" w:themeFill="background2" />
+                  <w:noWrap />
+                  <w:hideMark />
+                </w:tcPr>
+                <w:p w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidRDefault="00DD58D3" w:rsidP="00BE37D5">
+                  <w:pPr>
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:b />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
-                    <w:t>Management Procedure</w:t>
+                  </w:pPr>
+                </w:p>
+              </w:tc>
+{MP_title_columns}
+            </w:tr>
+            <w:tr w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidTr="00BE37D5">
+              <w:trPr>
+                <w:trHeight w:val="300" />
+              </w:trPr>
+              <w:tc>
+                <w:tcPr>
+                  <w:tcW w:w="2500" w:type="dxa" />
+                  <w:noWrap />
+                  <w:hideMark />
+                </w:tcPr>
+                <w:p w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidRDefault="00DD58D3" w:rsidP="00BE37D5">
+                  <w:pPr>
+                    <w:rPr>
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
+                    </w:rPr>
+                  </w:pPr>
+                  <w:r w:rsidRPr="0073293B">
+                    <w:rPr>
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
+                    </w:rPr>
+                    <w:t>Mean spawner biomass relative to pristine</w:t>
                   </w:r>
                 </w:p>
               </w:tc>
               <w:tc>
                 <w:tcPr>
-                  <w:tcW w:w="1763" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="auto" w:fill="auto" />
+                  <w:tcW w:type="auto" />
                   <w:noWrap />
-                  <w:vAlign w:val="bottom" />
                   <w:hideMark />
                 </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00B87BC1" w:rsidP="007C1AC2">
+                <w:p w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidRDefault="00DD58D3" w:rsidP="00BE37D5">
                   <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="center" />
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
                   </w:pPr>
-                  <w:r w:rsidRPr="00950BDB">
+                  <w:r w:rsidRPr="0073293B">
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
                     <w:t>SB/SB</w:t>
                   </w:r>
-                  <w:r w:rsidRPr="00950BDB">
+                  <w:r w:rsidRPr="0073293B">
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                       <w:vertAlign w:val="subscript" />
-                      <w:lang w:eastAsia="en-AU" />
+                    </w:rPr>
+                    <w:t>0</w:t>
+                  </w:r>
+                  <w:r w:rsidR="00A770A3">
+                     <w:rPr>
+                        <w:sz w:val="16" />
+                        <w:szCs w:val="16" />
+                        <w:vertAlign w:val="subscript" />
+                     </w:rPr>
+                     <w:t>&#160;</w:t>
+                  </w:r>
+                </w:p>
+              </w:tc>
+{MP_data_1_columns}
+            </w:tr>
+            <w:tr w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidTr="00BE37D5">
+              <w:trPr>
+                <w:trHeight w:val="300" />
+              </w:trPr>
+              <w:tc>
+                <w:tcPr>
+                  <w:tcW w:w="2500" w:type="dxa" />
+                  <w:noWrap />
+                  <w:hideMark />
+                </w:tcPr>
+                <w:p w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidRDefault="00DD58D3" w:rsidP="00BE37D5">
+                  <w:pPr>
+                    <w:rPr>
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
+                    </w:rPr>
+                  </w:pPr>
+                  <w:r w:rsidRPr="0073293B">
+                    <w:rPr>
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
+                    </w:rPr>
+                    <w:t>Minimum spawner biomass relative to pristine</w:t>
+                  </w:r>
+                </w:p>
+              </w:tc>
+              <w:tc>
+                <w:tcPr>
+                  <w:tcW w:type="auto" />
+                  <w:noWrap />
+                  <w:hideMark />
+                </w:tcPr>
+                <w:p w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidRDefault="00DD58D3" w:rsidP="00BE37D5">
+                  <w:pPr>
+                    <w:rPr>
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
+                    </w:rPr>
+                  </w:pPr>
+                  <w:r w:rsidRPr="0073293B">
+                    <w:rPr>
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
+                    </w:rPr>
+                    <w:t>SB/SB</w:t>
+                  </w:r>
+                  <w:r w:rsidRPr="0073293B">
+                    <w:rPr>
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
+                      <w:vertAlign w:val="subscript" />
+                    </w:rPr>
+                    <w:t>0</w:t>
+                  </w:r>
+                  <w:r w:rsidR="00A770A3">
+                     <w:rPr>
+                        <w:sz w:val="16" />
+                        <w:szCs w:val="16" />
+                        <w:vertAlign w:val="subscript" />
+                     </w:rPr>
+                     <w:t>&#160;</w:t>
+                  </w:r>
+                </w:p>
+              </w:tc>
+{MP_data_2_columns}
+            </w:tr>
+            <w:tr w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidTr="00BE37D5">
+              <w:trPr>
+                <w:trHeight w:val="300" />
+              </w:trPr>
+              <w:tc>
+                <w:tcPr>
+                  <w:tcW w:w="2500" w:type="dxa" />
+                  <w:noWrap />
+                  <w:hideMark />
+                </w:tcPr>
+                <w:p w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidRDefault="00DD58D3" w:rsidP="00BE37D5">
+                  <w:pPr>
+                    <w:rPr>
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
+                    </w:rPr>
+                  </w:pPr>
+                  <w:r w:rsidRPr="0073293B">
+                    <w:rPr>
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
+                    </w:rPr>
+                    <w:t>Mean spawner biomass relative to SBMSY</w:t>
+                  </w:r>
+                </w:p>
+              </w:tc>
+              <w:tc>
+                <w:tcPr>
+                  <w:tcW w:type="auto" />
+                  <w:noWrap />
+                  <w:hideMark />
+                </w:tcPr>
+                <w:p w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidRDefault="00DD58D3" w:rsidP="00BE37D5">
+                  <w:r w:rsidRPr="0073293B">
+                    <w:rPr>
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
+                    </w:rPr>
+                    <w:t>SB/SB</w:t>
+                  </w:r>
+                  <w:r w:rsidRPr="0073293B">
+                    <w:rPr>
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
+                      <w:vertAlign w:val="subscript" />
                     </w:rPr>
                     <w:t>MSY</w:t>
                   </w:r>
-                </w:p>
-              </w:tc>
-              <w:tc>
-                <w:tcPr>
-                  <w:tcW w:w="1354" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="auto" w:fill="auto" />
-                  <w:noWrap />
-                  <w:vAlign w:val="bottom" />
-                  <w:hideMark />
-                </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00B87BC1" w:rsidP="007C1AC2">
-                  <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="center" />
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                  </w:pPr>
-                  <w:proofErr w:type="spellStart" />
-                  <w:r w:rsidRPr="00950BDB">
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                    <w:t>Prob</w:t>
-                  </w:r>
-                  <w:proofErr w:type="spellEnd" />
-                  <w:r w:rsidRPr="00950BDB">
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                    <w:t>(Green)</w:t>
+                  <w:r w:rsidR="00A770A3">
+                     <w:rPr>
+                        <w:sz w:val="16" />
+                        <w:szCs w:val="16" />
+                        <w:vertAlign w:val="subscript" />
+                     </w:rPr>
+                     <w:t>&#160;</w:t>
                   </w:r>
                 </w:p>
               </w:tc>
-              <w:tc>
-                <w:tcPr>
-                  <w:tcW w:w="1560" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="auto" w:fill="auto" />
-                  <w:noWrap />
-                  <w:vAlign w:val="bottom" />
-                  <w:hideMark />
-                </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00B87BC1" w:rsidP="007C1AC2">
-                  <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="center" />
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                  </w:pPr>
-                  <w:proofErr w:type="spellStart" />
-                  <w:r w:rsidRPr="00950BDB">
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                    <w:t>Prob</w:t>
-                  </w:r>
-                  <w:proofErr w:type="spellEnd" />
-                  <w:r w:rsidRPr="00950BDB">
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                    <w:t>(SB&gt;limit)</w:t>
-                  </w:r>
-                </w:p>
-              </w:tc>
-              <w:tc>
-                <w:tcPr>
-                  <w:tcW w:w="1697" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="auto" w:fill="auto" />
-                  <w:noWrap />
-                  <w:vAlign w:val="bottom" />
-                  <w:hideMark />
-                </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00B87BC1" w:rsidP="007C1AC2">
-                  <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="center" />
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                  </w:pPr>
-                  <w:r w:rsidRPr="00950BDB">
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                    <w:t>Mean Catch</w:t>
-                  </w:r>
-                </w:p>
-              </w:tc>
-              <w:tc>
-                <w:tcPr>
-                  <w:tcW w:w="992" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="auto" w:fill="auto" />
-                  <w:noWrap />
-                  <w:vAlign w:val="bottom" />
-                  <w:hideMark />
-                </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00B87BC1" w:rsidP="007C1AC2">
-                  <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="center" />
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                  </w:pPr>
-                  <w:r w:rsidRPr="00950BDB">
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                    <w:t>Catch Variability</w:t>
-                  </w:r>
-                </w:p>
-              </w:tc>
+{MP_data_3_columns}
             </w:tr>
-            <w:tr w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidTr="007C1AC2">
+            <w:tr w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidTr="00BE37D5">
               <w:trPr>
                 <w:trHeight w:val="300" />
               </w:trPr>
               <w:tc>
                 <w:tcPr>
-                  <w:tcW w:w="1276" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="auto" w:fill="auto" />
+                  <w:tcW w:w="2500" w:type="dxa" />
                   <w:noWrap />
-                  <w:vAlign w:val="bottom" />
                   <w:hideMark />
                 </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00B947B3" w:rsidP="007C1AC2">
+                <w:p w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidRDefault="00DD58D3" w:rsidP="00BE37D5">
                   <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="center" />
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
                   </w:pPr>
-                  <w:r>
+                  <w:r w:rsidRPr="0073293B">
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
-                    <w:t>{MP1}</w:t>
+                    <w:t>Mean fishing mortality relative to FMSY</w:t>
                   </w:r>
                 </w:p>
               </w:tc>
               <w:tc>
                 <w:tcPr>
-                  <w:tcW w:w="1763" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="000000" w:fill="{SB1col}" />
+                  <w:tcW w:type="auto" />
                   <w:noWrap />
-                  <w:vAlign w:val="bottom" />
                   <w:hideMark />
                 </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="000B7E40" w:rsidP="00BA61F0">
+                <w:p w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidRDefault="00DD58D3" w:rsidP="00BE37D5">
                   <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="right" />
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
                   </w:pPr>
-                  <w:r w:rsidRPr="000B7E40">
+                  <w:r w:rsidRPr="0073293B">
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
-                    <w:t>{SB1} ({SB1a}-{SB1b})</w:t>
+                    <w:t>F/</w:t>
+                  </w:r>
+                  <w:r w:rsidRPr="0073293B">
+                    <w:rPr>
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
+                    </w:rPr>
+                    <w:t>F</w:t>
+                  </w:r>
+                  <w:r w:rsidRPr="0073293B">
+                    <w:rPr>
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
+                      <w:vertAlign w:val="subscript" />
+                    </w:rPr>
+                    <w:t>tar</w:t>
+                  </w:r>
+                  <w:r w:rsidR="00A770A3">
+                     <w:rPr>
+                        <w:sz w:val="16" />
+                        <w:szCs w:val="16" />
+                        <w:vertAlign w:val="subscript" />
+                     </w:rPr>
+                     <w:t>&#160;</w:t>
                   </w:r>
                 </w:p>
               </w:tc>
-              <w:tc>
-                <w:tcPr>
-                  <w:tcW w:w="1354" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="000000" w:fill="{KG1col}" />
-                  <w:noWrap />
-                  <w:vAlign w:val="bottom" />
-                  <w:hideMark />
-                </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00BA61F0" w:rsidP="00BA61F0">
-                  <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="right" />
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                  </w:pPr>
-                  <w:r>
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                    <w:t>{KG1}</w:t>
-                  </w:r>
-                </w:p>
-              </w:tc>
-              <w:tc>
-                <w:tcPr>
-                  <w:tcW w:w="1560" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="000000" w:fill="{PSB1col}" />
-                  <w:noWrap />
-                  <w:vAlign w:val="bottom" />
-                  <w:hideMark />
-                </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00BA61F0" w:rsidP="00BA61F0">
-                  <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="right" />
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                  </w:pPr>
-                  <w:r>
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                    <w:t>{PSB1}</w:t>
-                  </w:r>
-                </w:p>
-              </w:tc>
-              <w:tc>
-                <w:tcPr>
-                  <w:tcW w:w="1697" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="000000" w:fill="{Y1col}" />
-                  <w:noWrap />
-                  <w:vAlign w:val="bottom" />
-                  <w:hideMark />
-                </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="000B7E40" w:rsidP="00BA61F0">
-                  <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="right" />
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                  </w:pPr>
-                  <w:r w:rsidRPr="000B7E40">
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                    <w:t>{Y1} ({Y1a}-{Y1b})</w:t>
-                  </w:r>
-                  <w:bookmarkStart w:id="0" w:name="_GoBack" />
-                  <w:bookmarkEnd w:id="0" />
-                </w:p>
-              </w:tc>
-              <w:tc>
-                <w:tcPr>
-                  <w:tcW w:w="992" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="000000" w:fill="{CV1col}" />
-                  <w:noWrap />
-                  <w:vAlign w:val="bottom" />
-                  <w:hideMark />
-                </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00BA61F0" w:rsidP="007C1AC2">
-                  <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="right" />
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                  </w:pPr>
-                  <w:r>
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                    <w:t>{CV1}</w:t>
-                  </w:r>
-                </w:p>
-              </w:tc>
+{MP_data_4_columns}
             </w:tr>
-            <w:tr w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidTr="007C1AC2">
+            <w:tr w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidTr="00BE37D5">
               <w:trPr>
                 <w:trHeight w:val="300" />
               </w:trPr>
               <w:tc>
                 <w:tcPr>
-                  <w:tcW w:w="1276" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="auto" w:fill="auto" />
+                  <w:tcW w:w="2500" w:type="dxa" />
                   <w:noWrap />
-                  <w:vAlign w:val="bottom" />
                   <w:hideMark />
                 </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00B947B3" w:rsidP="00B947B3">
+                <w:p w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidRDefault="00DD58D3" w:rsidP="00BE37D5">
                   <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="center" />
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
                   </w:pPr>
-                  <w:r>
+                  <w:r w:rsidRPr="0073293B">
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
-                    <w:t>{MP2}</w:t>
+                    <w:t>Mean fishing mortality relative to target</w:t>
                   </w:r>
                 </w:p>
               </w:tc>
               <w:tc>
                 <w:tcPr>
-                  <w:tcW w:w="1763" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="000000" w:fill="{SB2col}" />
+                  <w:tcW w:type="auto" />
                   <w:noWrap />
-                  <w:vAlign w:val="bottom" />
                   <w:hideMark />
                 </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00BA61F0" w:rsidP="007C1AC2">
+                <w:p w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidRDefault="00DD58D3" w:rsidP="00BE37D5">
                   <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="right" />
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
                   </w:pPr>
-                  <w:r w:rsidRPr="00BA61F0">
+                  <w:r w:rsidRPr="0073293B">
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
-                    <w:t>{SB2} ({SB2a}-{SB2b})</w:t>
+                    <w:t>F/F</w:t>
+                  </w:r>
+                  <w:r w:rsidRPr="0073293B">
+                    <w:rPr>
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
+                      <w:vertAlign w:val="subscript" />
+                    </w:rPr>
+                    <w:t>MSY</w:t>
+                  </w:r>
+                  <w:r w:rsidR="00A770A3">
+                     <w:rPr>
+                        <w:sz w:val="16" />
+                        <w:szCs w:val="16" />
+                        <w:vertAlign w:val="subscript" />
+                     </w:rPr>
+                     <w:t>&#160;</w:t>
                   </w:r>
                 </w:p>
               </w:tc>
-              <w:tc>
-                <w:tcPr>
-                  <w:tcW w:w="1354" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="000000" w:fill="{KG2col}" />
-                  <w:noWrap />
-                  <w:vAlign w:val="bottom" />
-                  <w:hideMark />
-                </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00BA61F0" w:rsidP="007C1AC2">
-                  <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="right" />
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                  </w:pPr>
-                  <w:r w:rsidRPr="00BA61F0">
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                    <w:t>{KG2}</w:t>
-                  </w:r>
-                </w:p>
-              </w:tc>
-              <w:tc>
-                <w:tcPr>
-                  <w:tcW w:w="1560" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="000000" w:fill="{PSB2col}" />
-                  <w:noWrap />
-                  <w:vAlign w:val="bottom" />
-                  <w:hideMark />
-                </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00BA61F0" w:rsidP="007C1AC2">
-                  <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="right" />
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                  </w:pPr>
-                  <w:r w:rsidRPr="00BA61F0">
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                    <w:t>{PSB2}</w:t>
-                  </w:r>
-                </w:p>
-              </w:tc>
-              <w:tc>
-                <w:tcPr>
-                  <w:tcW w:w="1697" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="000000" w:fill="{Y2col}" />
-                  <w:noWrap />
-                  <w:vAlign w:val="bottom" />
-                  <w:hideMark />
-                </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00BA61F0" w:rsidP="007C1AC2">
-                  <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="right" />
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                  </w:pPr>
-                  <w:r w:rsidRPr="00BA61F0">
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                    <w:t>{Y2}</w:t>
-                  </w:r>
-                  <w:r w:rsidR="00B87BC1" w:rsidRPr="00950BDB">
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                    <w:t xml:space="preserve"> </w:t>
-                  </w:r>
-                  <w:r w:rsidRPr="00BA61F0">
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                    <w:t>({Y2a}-{Y2b})</w:t>
-                  </w:r>
-                </w:p>
-              </w:tc>
-              <w:tc>
-                <w:tcPr>
-                  <w:tcW w:w="992" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="000000" w:fill="{CV2col}" />
-                  <w:noWrap />
-                  <w:vAlign w:val="bottom" />
-                  <w:hideMark />
-                </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00BA61F0" w:rsidP="007C1AC2">
-                  <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="right" />
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                  </w:pPr>
-                  <w:r w:rsidRPr="00BA61F0">
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                    <w:t>{CV2}</w:t>
-                  </w:r>
-                </w:p>
-              </w:tc>
+{MP_data_5_columns}
             </w:tr>
-            <w:tr w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidTr="007C1AC2">
+            <w:tr w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidTr="00BE37D5">
               <w:trPr>
                 <w:trHeight w:val="300" />
               </w:trPr>
               <w:tc>
                 <w:tcPr>
-                  <w:tcW w:w="1276" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="auto" w:fill="auto" />
+                  <w:tcW w:w="2500" w:type="dxa" />
                   <w:noWrap />
-                  <w:vAlign w:val="bottom" />
                   <w:hideMark />
                 </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00B947B3" w:rsidP="00B947B3">
+                <w:p w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidRDefault="00DD58D3" w:rsidP="00BE37D5">
                   <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="center" />
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
                   </w:pPr>
-                  <w:r>
+                  <w:r w:rsidRPr="0073293B">
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
-                    <w:t>{MP3}</w:t>
+                    <w:t>Probability of being in Kobe green quadrant</w:t>
                   </w:r>
                 </w:p>
               </w:tc>
               <w:tc>
                 <w:tcPr>
-                  <w:tcW w:w="1763" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="000000" w:fill="{SB3col}" />
+                  <w:tcW w:type="auto" />
                   <w:noWrap />
-                  <w:vAlign w:val="bottom" />
                   <w:hideMark />
                 </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00BA61F0" w:rsidP="007C1AC2">
+                <w:p w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidRDefault="00DD58D3" w:rsidP="00BE37D5">
                   <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="right" />
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
                   </w:pPr>
-                  <w:r w:rsidRPr="00BA61F0">
+                  <w:r w:rsidRPr="0073293B">
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
-                    <w:t>{SB3} ({SB3a}-{SB3b})</w:t>
+                    <w:t>SB,F</w:t>
+                  </w:r>
+                  <w:r w:rsidR="00A770A3">
+                     <w:rPr>
+                        <w:sz w:val="16" />
+                        <w:szCs w:val="16" />
+                        <w:vertAlign w:val="subscript" />
+                     </w:rPr>
+                     <w:t>&#160;</w:t>
                   </w:r>
                 </w:p>
               </w:tc>
-              <w:tc>
-                <w:tcPr>
-                  <w:tcW w:w="1354" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="000000" w:fill="{KG3col}" />
-                  <w:noWrap />
-                  <w:vAlign w:val="bottom" />
-                  <w:hideMark />
-                </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00BA61F0" w:rsidP="007C1AC2">
-                  <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="right" />
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                  </w:pPr>
-                  <w:r w:rsidRPr="00BA61F0">
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                    <w:t>{KG3}</w:t>
-                  </w:r>
-                </w:p>
-              </w:tc>
-              <w:tc>
-                <w:tcPr>
-                  <w:tcW w:w="1560" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="000000" w:fill="{PSB3col}" />
-                  <w:noWrap />
-                  <w:vAlign w:val="bottom" />
-                  <w:hideMark />
-                </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00BA61F0" w:rsidP="007C1AC2">
-                  <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="right" />
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                  </w:pPr>
-                  <w:r w:rsidRPr="00BA61F0">
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                    <w:t>{PSB3}</w:t>
-                  </w:r>
-                </w:p>
-              </w:tc>
-              <w:tc>
-                <w:tcPr>
-                  <w:tcW w:w="1697" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="000000" w:fill="{Y3col}" />
-                  <w:noWrap />
-                  <w:vAlign w:val="bottom" />
-                  <w:hideMark />
-                </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00BA61F0" w:rsidP="007C1AC2">
-                  <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="right" />
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                  </w:pPr>
-                  <w:r w:rsidRPr="00BA61F0">
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                    <w:t>{Y3} ({Y3a}-{Y3b})</w:t>
-                  </w:r>
-                </w:p>
-              </w:tc>
-              <w:tc>
-                <w:tcPr>
-                  <w:tcW w:w="992" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="000000" w:fill="{CV3col}" />
-                  <w:noWrap />
-                  <w:vAlign w:val="bottom" />
-                  <w:hideMark />
-                </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00BA61F0" w:rsidP="007C1AC2">
-                  <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="right" />
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                  </w:pPr>
-                  <w:r w:rsidRPr="00BA61F0">
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                    <w:t>{CV3}</w:t>
-                  </w:r>
-                </w:p>
-              </w:tc>
+{MP_data_6_columns}
             </w:tr>
-            <w:tr w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidTr="007C1AC2">
+            <w:tr w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidTr="00BE37D5">
               <w:trPr>
                 <w:trHeight w:val="300" />
               </w:trPr>
               <w:tc>
                 <w:tcPr>
-                  <w:tcW w:w="1276" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="auto" w:fill="auto" />
+                  <w:tcW w:w="2500" w:type="dxa" />
                   <w:noWrap />
-                  <w:vAlign w:val="bottom" />
                   <w:hideMark />
                 </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00B947B3" w:rsidP="007C1AC2">
+                <w:p w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidRDefault="00DD58D3" w:rsidP="00BE37D5">
                   <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="center" />
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
                   </w:pPr>
-                  <w:r>
+                  <w:r w:rsidRPr="0073293B">
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
-                    <w:t>{MP4}</w:t>
+                    <w:t>Probability of being in Kobe red quadrant</w:t>
                   </w:r>
                 </w:p>
               </w:tc>
               <w:tc>
                 <w:tcPr>
-                  <w:tcW w:w="1763" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="000000" w:fill="{SB4col}" />
+                  <w:tcW w:type="auto" />
                   <w:noWrap />
-                  <w:vAlign w:val="bottom" />
                   <w:hideMark />
                 </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00BA61F0" w:rsidP="007C1AC2">
+                <w:p w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidRDefault="00DD58D3" w:rsidP="00BE37D5">
                   <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="right" />
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
                   </w:pPr>
-                  <w:r w:rsidRPr="00BA61F0">
+                  <w:r w:rsidRPr="0073293B">
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
-                    <w:t>{SB4} ({SB4a}-{SB4b})</w:t>
+                    <w:t>SB,F</w:t>
+                  </w:r>
+                  <w:r w:rsidR="00A770A3">
+                     <w:rPr>
+                        <w:sz w:val="16" />
+                        <w:szCs w:val="16" />
+                        <w:vertAlign w:val="subscript" />
+                     </w:rPr>
+                     <w:t>&#160;</w:t>
                   </w:r>
                 </w:p>
               </w:tc>
-              <w:tc>
-                <w:tcPr>
-                  <w:tcW w:w="1354" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="000000" w:fill="{KG4col}" />
-                  <w:noWrap />
-                  <w:vAlign w:val="bottom" />
-                  <w:hideMark />
-                </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00BA61F0" w:rsidP="007C1AC2">
-                  <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="right" />
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                  </w:pPr>
-                  <w:r w:rsidRPr="00BA61F0">
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                    <w:t>{KG4}</w:t>
-                  </w:r>
-                </w:p>
-              </w:tc>
-              <w:tc>
-                <w:tcPr>
-                  <w:tcW w:w="1560" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="000000" w:fill="{PSB4col}" />
-                  <w:noWrap />
-                  <w:vAlign w:val="bottom" />
-                  <w:hideMark />
-                </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00BA61F0" w:rsidP="007C1AC2">
-                  <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="right" />
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                  </w:pPr>
-                  <w:r w:rsidRPr="00BA61F0">
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                    <w:t>{PSB4}</w:t>
-                  </w:r>
-                </w:p>
-              </w:tc>
-              <w:tc>
-                <w:tcPr>
-                  <w:tcW w:w="1697" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="000000" w:fill="{Y4col}" />
-                  <w:noWrap />
-                  <w:vAlign w:val="bottom" />
-                  <w:hideMark />
-                </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00BA61F0" w:rsidP="007C1AC2">
-                  <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="right" />
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                  </w:pPr>
-                  <w:r w:rsidRPr="00BA61F0">
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                    <w:t>{Y4} ({Y4a}-{Y4b})</w:t>
-                  </w:r>
-                </w:p>
-              </w:tc>
-              <w:tc>
-                <w:tcPr>
-                  <w:tcW w:w="992" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="000000" w:fill="{CV4col}" />
-                  <w:noWrap />
-                  <w:vAlign w:val="bottom" />
-                  <w:hideMark />
-                </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00BA61F0" w:rsidP="007C1AC2">
-                  <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="right" />
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                  </w:pPr>
-                  <w:r w:rsidRPr="00BA61F0">
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                    <w:t>{CV4}</w:t>
-                  </w:r>
-                </w:p>
-              </w:tc>
+{MP_data_7_columns}
             </w:tr>
-            <w:tr w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidTr="007C1AC2">
+            <w:tr w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidTr="00BE37D5">
               <w:trPr>
                 <w:trHeight w:val="300" />
               </w:trPr>
               <w:tc>
                 <w:tcPr>
-                  <w:tcW w:w="1276" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="auto" w:fill="auto" />
+                  <w:tcW w:type="auto" />
+                  <w:gridSpan w:val="{MP_col_span_p2}" />
+                  <w:shd w:val="clear" w:color="auto" w:fill="E7E6E6" w:themeFill="background2" />
                   <w:noWrap />
-                  <w:vAlign w:val="bottom" />
                   <w:hideMark />
                 </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00B947B3" w:rsidP="007C1AC2">
+                <w:p w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidRDefault="00DD58D3" w:rsidP="00BE37D5">
                   <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="center" />
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
                   </w:pPr>
-                  <w:r>
+                  <w:r w:rsidRPr="0073293B">
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:b />
+                      <w:bCs />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
-                    <w:t>{MP5}</w:t>
-                  </w:r>
-                </w:p>
-              </w:tc>
-              <w:tc>
-                <w:tcPr>
-                  <w:tcW w:w="1763" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="000000" w:fill="{SB5col}" />
-                  <w:noWrap />
-                  <w:vAlign w:val="bottom" />
-                  <w:hideMark />
-                </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00BA61F0" w:rsidP="007C1AC2">
-                  <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="right" />
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                  </w:pPr>
-                  <w:r w:rsidRPr="00BA61F0">
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                    <w:t>{SB5} ({SB5a}-{SB5b})</w:t>
-                  </w:r>
-                </w:p>
-              </w:tc>
-              <w:tc>
-                <w:tcPr>
-                  <w:tcW w:w="1354" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="000000" w:fill="{KG5col}" />
-                  <w:noWrap />
-                  <w:vAlign w:val="bottom" />
-                  <w:hideMark />
-                </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00BA61F0" w:rsidP="007C1AC2">
-                  <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="right" />
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                  </w:pPr>
-                  <w:r w:rsidRPr="00BA61F0">
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                    <w:t>{KG5}</w:t>
-                  </w:r>
-                </w:p>
-              </w:tc>
-              <w:tc>
-                <w:tcPr>
-                  <w:tcW w:w="1560" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="000000" w:fill="{PSB5col}" />
-                  <w:noWrap />
-                  <w:vAlign w:val="bottom" />
-                  <w:hideMark />
-                </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00BA61F0" w:rsidP="007C1AC2">
-                  <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="right" />
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                  </w:pPr>
-                  <w:r w:rsidRPr="00BA61F0">
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                    <w:t>{PSB5}</w:t>
-                  </w:r>
-                </w:p>
-              </w:tc>
-              <w:tc>
-                <w:tcPr>
-                  <w:tcW w:w="1697" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="000000" w:fill="{Y5col}" />
-                  <w:noWrap />
-                  <w:vAlign w:val="bottom" />
-                  <w:hideMark />
-                </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00BA61F0" w:rsidP="007C1AC2">
-                  <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="right" />
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                  </w:pPr>
-                  <w:r w:rsidRPr="00BA61F0">
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                    <w:t>{Y5} ({Y5a}-{Y5b})</w:t>
-                  </w:r>
-                </w:p>
-              </w:tc>
-              <w:tc>
-                <w:tcPr>
-                  <w:tcW w:w="992" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="000000" w:fill="{CV5col}" />
-                  <w:noWrap />
-                  <w:vAlign w:val="bottom" />
-                  <w:hideMark />
-                </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00BA61F0" w:rsidP="007C1AC2">
-                  <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="right" />
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                  </w:pPr>
-                  <w:r w:rsidRPr="00BA61F0">
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                    <w:t>{CV5}</w:t>
+                    <w:t>Safety : maximise the probability of remaining above low stock status (i.e. minimise risk)</w:t>
                   </w:r>
                 </w:p>
               </w:tc>
             </w:tr>
-            <w:tr w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidTr="007C1AC2">
+            <w:tr w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidTr="00BE37D5">
               <w:trPr>
                 <w:trHeight w:val="300" />
               </w:trPr>
               <w:tc>
                 <w:tcPr>
-                  <w:tcW w:w="1276" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="auto" w:fill="auto" />
+                  <w:tcW w:w="2500" w:type="dxa" />
                   <w:noWrap />
-                  <w:vAlign w:val="bottom" />
                   <w:hideMark />
                 </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00BA61F0" w:rsidP="007C1AC2">
+                <w:p w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidRDefault="00DD58D3" w:rsidP="00BE37D5">
                   <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="center" />
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
                   </w:pPr>
-                  <w:r>
+                  <w:r w:rsidRPr="0073293B">
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
-                    <w:t>{MP6}</w:t>
+                    <w:t>Probability of spawner biomass being above 20% of SB0</w:t>
                   </w:r>
                 </w:p>
               </w:tc>
               <w:tc>
                 <w:tcPr>
-                  <w:tcW w:w="1763" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="000000" w:fill="{SB6col}" />
+                  <w:tcW w:type="auto" />
                   <w:noWrap />
-                  <w:vAlign w:val="bottom" />
                   <w:hideMark />
                 </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00507964" w:rsidP="007C1AC2">
+                <w:p w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidRDefault="00DD58D3" w:rsidP="00BE37D5">
                   <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="right" />
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
                   </w:pPr>
-                  <w:r w:rsidRPr="00507964">
+                  <w:r w:rsidRPr="0073293B">
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
-                    <w:t>{SB6} ({SB6a}-{SB6b})</w:t>
+                    <w:t>SB</w:t>
+                  </w:r>
+                  <w:r w:rsidR="00A770A3">
+                     <w:rPr>
+                        <w:sz w:val="16" />
+                        <w:szCs w:val="16" />
+                        <w:vertAlign w:val="subscript" />
+                     </w:rPr>
+                     <w:t>&#160;</w:t>
                   </w:r>
                 </w:p>
               </w:tc>
-              <w:tc>
-                <w:tcPr>
-                  <w:tcW w:w="1354" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="000000" w:fill="{KG6col}" />
-                  <w:noWrap />
-                  <w:vAlign w:val="bottom" />
-                  <w:hideMark />
-                </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00507964" w:rsidP="007C1AC2">
-                  <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="right" />
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                  </w:pPr>
-                  <w:r w:rsidRPr="00507964">
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                    <w:t>{KG6}</w:t>
-                  </w:r>
-                </w:p>
-              </w:tc>
-              <w:tc>
-                <w:tcPr>
-                  <w:tcW w:w="1560" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="000000" w:fill="{PSB6col}" />
-                  <w:noWrap />
-                  <w:vAlign w:val="bottom" />
-                  <w:hideMark />
-                </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00507964" w:rsidP="007C1AC2">
-                  <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="right" />
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                  </w:pPr>
-                  <w:r w:rsidRPr="00507964">
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                    <w:t>{PSB6}</w:t>
-                  </w:r>
-                </w:p>
-              </w:tc>
-              <w:tc>
-                <w:tcPr>
-                  <w:tcW w:w="1697" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="000000" w:fill="{Y6col}" />
-                  <w:noWrap />
-                  <w:vAlign w:val="bottom" />
-                  <w:hideMark />
-                </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00507964" w:rsidP="007C1AC2">
-                  <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="right" />
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                  </w:pPr>
-                  <w:r w:rsidRPr="00507964">
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                    <w:t>{Y6} ({Y6a}-{Y6b})</w:t>
-                  </w:r>
-                </w:p>
-              </w:tc>
-              <w:tc>
-                <w:tcPr>
-                  <w:tcW w:w="992" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="000000" w:fill="{CV6col}" />
-                  <w:noWrap />
-                  <w:vAlign w:val="bottom" />
-                  <w:hideMark />
-                </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00507964" w:rsidP="007C1AC2">
-                  <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="right" />
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                  </w:pPr>
-                  <w:r w:rsidRPr="00507964">
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                    <w:t>{CV6}</w:t>
-                  </w:r>
-                </w:p>
-              </w:tc>
+{MP_data_8_columns}
             </w:tr>
-            <w:tr w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidTr="007C1AC2">
+            <w:tr w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidTr="00BE37D5">
               <w:trPr>
                 <w:trHeight w:val="300" />
               </w:trPr>
               <w:tc>
                 <w:tcPr>
-                  <w:tcW w:w="1276" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="auto" w:fill="auto" />
+                  <w:tcW w:w="2500" w:type="dxa" />
                   <w:noWrap />
-                  <w:vAlign w:val="bottom" />
                   <w:hideMark />
                 </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00BA61F0" w:rsidP="007C1AC2">
+                <w:p w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidRDefault="00DD58D3" w:rsidP="00BE37D5">
                   <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="center" />
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
                   </w:pPr>
-                  <w:r>
+                  <w:r w:rsidRPr="0073293B">
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
-                    <w:t>{MP7}</w:t>
+                    <w:t xml:space="preserve">Probability of spawner biomass being above </w:t>
+                  </w:r>
+                  <w:r w:rsidRPr="0073293B">
+                    <w:rPr>
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
+                    </w:rPr>
+                    <w:t>BLim</w:t>
+                  </w:r>
+                  <w:r w:rsidR="00A770A3">
+                     <w:rPr>
+                        <w:sz w:val="16" />
+                        <w:szCs w:val="16" />
+                        <w:vertAlign w:val="subscript" />
+                     </w:rPr>
+                     <w:t>&#160;</w:t>
                   </w:r>
                 </w:p>
               </w:tc>
               <w:tc>
                 <w:tcPr>
-                  <w:tcW w:w="1763" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="000000" w:fill="{SB7col}" />
+                  <w:tcW w:type="auto" />
                   <w:noWrap />
-                  <w:vAlign w:val="bottom" />
                   <w:hideMark />
                 </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00507964" w:rsidP="007C1AC2">
+                <w:p w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidRDefault="00DD58D3" w:rsidP="00BE37D5">
                   <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="right" />
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
                   </w:pPr>
-                  <w:r w:rsidRPr="00507964">
+                  <w:r w:rsidRPr="0073293B">
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
-                    <w:t>{SB7} ({SB7a}-{SB7b})</w:t>
+                    <w:t>SB</w:t>
+                  </w:r>
+                  <w:r w:rsidR="00A770A3">
+                     <w:rPr>
+                        <w:sz w:val="16" />
+                        <w:szCs w:val="16" />
+                        <w:vertAlign w:val="subscript" />
+                     </w:rPr>
+                     <w:t>&#160;</w:t>
                   </w:r>
                 </w:p>
               </w:tc>
-              <w:tc>
-                <w:tcPr>
-                  <w:tcW w:w="1354" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="000000" w:fill="{KG7col}" />
-                  <w:noWrap />
-                  <w:vAlign w:val="bottom" />
-                  <w:hideMark />
-                </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00507964" w:rsidP="007C1AC2">
-                  <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="right" />
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                  </w:pPr>
-                  <w:r w:rsidRPr="00507964">
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                    <w:t>{KG7}</w:t>
-                  </w:r>
-                </w:p>
-              </w:tc>
-              <w:tc>
-                <w:tcPr>
-                  <w:tcW w:w="1560" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="000000" w:fill="{PSB7col}" />
-                  <w:noWrap />
-                  <w:vAlign w:val="bottom" />
-                  <w:hideMark />
-                </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00507964" w:rsidP="007C1AC2">
-                  <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="right" />
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                  </w:pPr>
-                  <w:r w:rsidRPr="00507964">
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                    <w:t>{PSB7}</w:t>
-                  </w:r>
-                </w:p>
-              </w:tc>
-              <w:tc>
-                <w:tcPr>
-                  <w:tcW w:w="1697" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="000000" w:fill="{Y7col}" />
-                  <w:noWrap />
-                  <w:vAlign w:val="bottom" />
-                  <w:hideMark />
-                </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00507964" w:rsidP="007C1AC2">
-                  <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="right" />
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                  </w:pPr>
-                  <w:r w:rsidRPr="00507964">
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                    <w:t>{Y7} ({Y7a}-{Y7b})</w:t>
-                  </w:r>
-                </w:p>
-              </w:tc>
-              <w:tc>
-                <w:tcPr>
-                  <w:tcW w:w="992" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="000000" w:fill="{CV7col}" />
-                  <w:noWrap />
-                  <w:vAlign w:val="bottom" />
-                  <w:hideMark />
-                </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00507964" w:rsidP="007C1AC2">
-                  <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="right" />
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                  </w:pPr>
-                  <w:r w:rsidRPr="00507964">
-                    <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
-                    </w:rPr>
-                    <w:t>{CV7}</w:t>
-                  </w:r>
-                </w:p>
-              </w:tc>
+{MP_data_9_columns}
             </w:tr>
-            <w:tr w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidTr="007C1AC2">
+            <w:tr w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidTr="00BE37D5">
               <w:trPr>
                 <w:trHeight w:val="300" />
               </w:trPr>
               <w:tc>
                 <w:tcPr>
-                  <w:tcW w:w="1276" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="auto" w:fill="auto" />
+                  <w:tcW w:type="auto" />
+                  <w:gridSpan w:val="{MP_col_span_p2}" />
+                  <w:shd w:val="clear" w:color="auto" w:fill="E7E6E6" w:themeFill="background2" />
                   <w:noWrap />
-                  <w:vAlign w:val="bottom" />
                   <w:hideMark />
                 </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00BA61F0" w:rsidP="007C1AC2">
+                <w:p w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidRDefault="00DD58D3" w:rsidP="00BE37D5">
                   <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="center" />
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
                   </w:pPr>
-                  <w:r>
+                  <w:r w:rsidRPr="0073293B">
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:b />
+                      <w:bCs />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
-                    <w:t>{MP8}</w:t>
+                    <w:t>Yield : maximise catches across regions and gears</w:t>
+                  </w:r>
+                </w:p>
+              </w:tc>
+            </w:tr>
+            <w:tr w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidTr="00BE37D5">
+              <w:trPr>
+                <w:trHeight w:val="300" />
+              </w:trPr>
+              <w:tc>
+                <w:tcPr>
+                  <w:tcW w:w="2500" w:type="dxa" />
+                  <w:noWrap />
+                  <w:hideMark />
+                </w:tcPr>
+                <w:p w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidRDefault="00DD58D3" w:rsidP="00BE37D5">
+                  <w:pPr>
+                    <w:rPr>
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
+                    </w:rPr>
+                  </w:pPr>
+                  <w:r w:rsidRPr="0073293B">
+                    <w:rPr>
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
+                    </w:rPr>
+                    <w:t>Mean catch (1000 t)</w:t>
                   </w:r>
                 </w:p>
               </w:tc>
               <w:tc>
                 <w:tcPr>
-                  <w:tcW w:w="1763" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="000000" w:fill="{SB8col}" />
+                  <w:tcW w:type="auto" />
                   <w:noWrap />
-                  <w:vAlign w:val="bottom" />
                   <w:hideMark />
                 </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00507964" w:rsidP="007C1AC2">
+                <w:p w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidRDefault="00DD58D3" w:rsidP="00BE37D5">
                   <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="right" />
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
                   </w:pPr>
-                  <w:r w:rsidRPr="00507964">
+                  <w:r w:rsidRPr="0073293B">
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
-                    <w:t>{SB8} ({SB8a}-{SB8b})</w:t>
+                    <w:t>C</w:t>
+                  </w:r>
+                  <w:r w:rsidR="00A770A3">
+                     <w:rPr>
+                        <w:sz w:val="16" />
+                        <w:szCs w:val="16" />
+                        <w:vertAlign w:val="subscript" />
+                     </w:rPr>
+                     <w:t>&#160;</w:t>
+                  </w:r>
+                </w:p>
+              </w:tc>
+{MP_data_10_columns}
+            </w:tr>
+            <w:tr w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidTr="00BE37D5">
+              <w:trPr>
+                <w:trHeight w:val="300" />
+              </w:trPr>
+              <w:tc>
+                <w:tcPr>
+                  <w:tcW w:w="2500" w:type="dxa" />
+                  <w:noWrap />
+                  <w:hideMark />
+                </w:tcPr>
+                <w:p w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidRDefault="00DD58D3" w:rsidP="00BE37D5">
+                  <w:pPr>
+                    <w:rPr>
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
+                    </w:rPr>
+                  </w:pPr>
+                  <w:r w:rsidRPr="0073293B">
+                    <w:rPr>
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
+                    </w:rPr>
+                    <w:t>Mean relative CPUE (aggregate)</w:t>
                   </w:r>
                 </w:p>
               </w:tc>
               <w:tc>
                 <w:tcPr>
-                  <w:tcW w:w="1354" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="000000" w:fill="{KG8col}" />
+                  <w:tcW w:type="auto" />
                   <w:noWrap />
-                  <w:vAlign w:val="bottom" />
                   <w:hideMark />
                 </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00507964" w:rsidP="007C1AC2">
+                <w:p w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidRDefault="00DD58D3" w:rsidP="00BE37D5">
                   <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="right" />
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
                   </w:pPr>
-                  <w:r w:rsidRPr="00507964">
+                  <w:r w:rsidRPr="0073293B">
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
-                    <w:t>{KG8}</w:t>
+                    <w:t>C</w:t>
+                  </w:r>
+                  <w:r w:rsidR="00A770A3">
+                     <w:rPr>
+                        <w:sz w:val="16" />
+                        <w:szCs w:val="16" />
+                        <w:vertAlign w:val="subscript" />
+                     </w:rPr>
+                     <w:t>&#160;</w:t>
+                  </w:r>
+                </w:p>
+              </w:tc>
+{MP_data_11_columns}
+            </w:tr>
+            <w:tr w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidTr="00BE37D5">
+              <w:trPr>
+                <w:trHeight w:val="300" />
+              </w:trPr>
+              <w:tc>
+                <w:tcPr>
+                  <w:tcW w:w="2500" w:type="dxa" />
+                  <w:noWrap />
+                  <w:hideMark />
+                </w:tcPr>
+                <w:p w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidRDefault="00DD58D3" w:rsidP="00BE37D5">
+                  <w:pPr>
+                    <w:rPr>
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
+                    </w:rPr>
+                  </w:pPr>
+                  <w:r w:rsidRPr="0073293B">
+                    <w:rPr>
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
+                    </w:rPr>
+                    <w:t>Mean catch relative to MSY</w:t>
                   </w:r>
                 </w:p>
               </w:tc>
               <w:tc>
                 <w:tcPr>
-                  <w:tcW w:w="1560" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="000000" w:fill="{PSB8col}" />
+                  <w:tcW w:type="auto" />
                   <w:noWrap />
-                  <w:vAlign w:val="bottom" />
                   <w:hideMark />
                 </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00507964" w:rsidP="007C1AC2">
+                <w:p w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidRDefault="00DD58D3" w:rsidP="00BE37D5">
                   <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="right" />
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
                   </w:pPr>
-                  <w:r w:rsidRPr="00507964">
+                  <w:r w:rsidRPr="0073293B">
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
-                    <w:t>{PSB8}</w:t>
+                    <w:t>C/MSY</w:t>
+                  </w:r>
+                  <w:r w:rsidR="00A770A3">
+                     <w:rPr>
+                        <w:sz w:val="16" />
+                        <w:szCs w:val="16" />
+                        <w:vertAlign w:val="subscript" />
+                     </w:rPr>
+                     <w:t>&#160;</w:t>
+                  </w:r>
+                </w:p>
+              </w:tc>
+{MP_data_12_columns}
+            </w:tr>
+            <w:tr w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidTr="00BE37D5">
+              <w:trPr>
+                <w:trHeight w:val="300" />
+              </w:trPr>
+              <w:tc>
+                <w:tcPr>
+                  <w:tcW w:type="auto" />
+                  <w:gridSpan w:val="{MP_col_span_p2}" />
+                  <w:shd w:val="clear" w:color="auto" w:fill="E7E6E6" w:themeFill="background2" />
+                  <w:noWrap />
+                  <w:hideMark />
+                </w:tcPr>
+                <w:p w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidRDefault="00DD58D3" w:rsidP="00BE37D5">
+                  <w:pPr>
+                    <w:rPr>
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
+                    </w:rPr>
+                  </w:pPr>
+                  <w:r w:rsidRPr="0073293B">
+                    <w:rPr>
+                      <w:b />
+                      <w:bCs />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
+                    </w:rPr>
+                    <w:t>Stability: maximise stability in catches to reduce commercial uncertainty</w:t>
+                  </w:r>
+                </w:p>
+              </w:tc>
+            </w:tr>
+            <w:tr w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidTr="00BE37D5">
+              <w:trPr>
+                <w:trHeight w:val="300" />
+              </w:trPr>
+              <w:tc>
+                <w:tcPr>
+                  <w:tcW w:w="2500" w:type="dxa" />
+                  <w:noWrap />
+                  <w:hideMark />
+                </w:tcPr>
+                <w:p w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidRDefault="00DD58D3" w:rsidP="00BE37D5">
+                  <w:pPr>
+                    <w:rPr>
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
+                    </w:rPr>
+                  </w:pPr>
+                  <w:r w:rsidRPr="0073293B">
+                    <w:rPr>
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
+                    </w:rPr>
+                    <w:t>Mean absolute proportional change in catch</w:t>
                   </w:r>
                 </w:p>
               </w:tc>
               <w:tc>
                 <w:tcPr>
-                  <w:tcW w:w="1697" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="000000" w:fill="{Y8col}" />
+                  <w:tcW w:type="auto" />
                   <w:noWrap />
-                  <w:vAlign w:val="bottom" />
                   <w:hideMark />
                 </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00507964" w:rsidP="007C1AC2">
+                <w:p w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidRDefault="00DD58D3" w:rsidP="00BE37D5">
                   <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="right" />
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
                   </w:pPr>
-                  <w:r w:rsidRPr="00507964">
+                  <w:r w:rsidRPr="0073293B">
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
-                    <w:t>{Y8} ({Y8a}-{Y8b})</w:t>
+                    <w:t>C</w:t>
+                  </w:r>
+                  <w:r w:rsidR="00A770A3">
+                     <w:rPr>
+                        <w:sz w:val="16" />
+                        <w:szCs w:val="16" />
+                        <w:vertAlign w:val="subscript" />
+                     </w:rPr>
+                     <w:t>&#160;</w:t>
+                  </w:r>
+                </w:p>
+              </w:tc>
+{MP_data_13_columns}
+            </w:tr>
+            <w:tr w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidTr="00BE37D5">
+              <w:trPr>
+                <w:trHeight w:val="300" />
+              </w:trPr>
+              <w:tc>
+                <w:tcPr>
+                  <w:tcW w:w="2500" w:type="dxa" />
+                  <w:noWrap />
+                  <w:hideMark />
+                </w:tcPr>
+                <w:p w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidRDefault="00DD58D3" w:rsidP="00BE37D5">
+                  <w:pPr>
+                    <w:rPr>
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
+                    </w:rPr>
+                  </w:pPr>
+                  <w:r w:rsidRPr="0073293B">
+                    <w:rPr>
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
+                    </w:rPr>
+                    <w:t>% Catch coefficient of variation</w:t>
                   </w:r>
                 </w:p>
               </w:tc>
               <w:tc>
                 <w:tcPr>
-                  <w:tcW w:w="992" w:type="dxa" />
-                  <w:shd w:val="clear" w:color="000000" w:fill="{CV8col}" />
+                  <w:tcW w:type="auto" />
                   <w:noWrap />
-                  <w:vAlign w:val="bottom" />
                   <w:hideMark />
                 </w:tcPr>
-                <w:p w:rsidR="00B87BC1" w:rsidRPr="00950BDB" w:rsidRDefault="00507964" w:rsidP="007C1AC2">
+                <w:p w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidRDefault="00DD58D3" w:rsidP="00BE37D5">
                   <w:pPr>
-                    <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
-                    <w:jc w:val="right" />
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
                   </w:pPr>
-                  <w:r w:rsidRPr="00507964">
+                  <w:r w:rsidRPr="0073293B">
                     <w:rPr>
-                      <w:rFonts w:ascii="Calibri" w:eastAsia="Times New Roman" w:hAnsi="Calibri" w:cs="Times New Roman" />
-                      <w:color w:val="000000" />
-                      <w:sz w:val="18" />
-                      <w:lang w:eastAsia="en-AU" />
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
                     </w:rPr>
-                    <w:t>{CV8}</w:t>
+                    <w:t>C</w:t>
+                  </w:r>
+                  <w:r w:rsidR="00A770A3">
+                     <w:rPr>
+                        <w:sz w:val="16" />
+                        <w:szCs w:val="16" />
+                        <w:vertAlign w:val="subscript" />
+                     </w:rPr>
+                     <w:t>&#160;</w:t>
                   </w:r>
                 </w:p>
               </w:tc>
+{MP_data_14_columns}
+            </w:tr>
+            <w:tr w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidTr="00BE37D5">
+              <w:trPr>
+                <w:trHeight w:val="300" />
+              </w:trPr>
+              <w:tc>
+                <w:tcPr>
+                  <w:tcW w:w="2500" w:type="dxa" />
+                  <w:noWrap />
+                  <w:hideMark />
+                </w:tcPr>
+                <w:p w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidRDefault="00DD58D3" w:rsidP="00BE37D5">
+                  <w:pPr>
+                    <w:rPr>
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
+                    </w:rPr>
+                  </w:pPr>
+                  <w:r w:rsidRPr="0073293B">
+                    <w:rPr>
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
+                    </w:rPr>
+                    <w:t>Probability of shutdown</w:t>
+                  </w:r>
+                </w:p>
+              </w:tc>
+              <w:tc>
+                <w:tcPr>
+                  <w:tcW w:type="auto" />
+                  <w:noWrap />
+                  <w:hideMark />
+                </w:tcPr>
+                <w:p w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidRDefault="00DD58D3" w:rsidP="00BE37D5">
+                  <w:pPr>
+                    <w:rPr>
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
+                    </w:rPr>
+                  </w:pPr>
+                  <w:r w:rsidRPr="0073293B">
+                    <w:rPr>
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
+                    </w:rPr>
+                    <w:t>C</w:t>
+                  </w:r>
+                  <w:r w:rsidR="00A770A3">
+                     <w:rPr>
+                        <w:sz w:val="16" />
+                        <w:szCs w:val="16" />
+                        <w:vertAlign w:val="subscript" />
+                     </w:rPr>
+                     <w:t>&#160;</w:t>
+                  </w:r>
+                </w:p>
+              </w:tc>
+{MP_data_15_columns}
             </w:tr>
           </w:tbl>
-          <w:p w:rsidR="009D4FB4" w:rsidRDefault="000B7E40" />
-          <w:sectPr w:rsidR="009D4FB4">
-            <w:pgSz w:w="11906" w:h="16838" />
+          <w:p w:rsidR="00DD58D3" w:rsidRDefault="00DD58D3" w:rsidP="00DD58D3">
+            <w:pPr>
+              <w:rPr>
+                <w:sz w:val="16" />
+                <w:szCs w:val="16" />
+              </w:rPr>
+            </w:pPr>
+          </w:p>
+          <w:sectPr w:rsidR="00DD58D3">
+            <w:pgSz w:w="{Page_Width}" w:h="{Page_Height}" w:orient="{Page_Orientation}" />
             <w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440" w:header="708" w:footer="708" w:gutter="0" />
             <w:cols w:space="708" />
             <w:docGrid w:linePitch="360" />
@@ -2112,15 +1461,13 @@
           <w:compatSetting w:name="differentiateMultirowTableHeaders" w:uri="http://schemas.microsoft.com/office/word" w:val="1" />
         </w:compat>
         <w:rsids>
-          <w:rsidRoot w:val="00B87BC1" />
-          <w:rsid w:val="000B7E40" />
-          <w:rsid w:val="00507964" />
+          <w:rsidRoot w:val="00DD58D3" />
           <w:rsid w:val="005E0271" />
           <w:rsid w:val="008F4AD7" />
-          <w:rsid w:val="00B87BC1" />
-          <w:rsid w:val="00B947B3" />
-          <w:rsid w:val="00BA61F0" />
-          <w:rsid w:val="00EA41B4" />
+          <w:rsid w:val="00C97371" />
+          <w:rsid w:val="00CD133D" />
+          <w:rsid w:val="00DD58D3" />
+          <w:rsid w:val="00E30C20" />
         </w:rsids>
         <m:mathPr>
           <m:mathFont m:val="Cambria Math" />
@@ -2146,7 +1493,7 @@
         <w:decimalSymbol w:val="." />
         <w:listSeparator w:val="," />
         <w15:chartTrackingRefBased />
-        <w15:docId w15:val="{64C00AA1-49CC-490A-8551-CB18DDC714AC}" />
+        <w15:docId w15:val="{9A15D72B-ECE7-4841-8C89-8C808C5211E2}" />
       </w:settings>
     </pkg:xmlData>
   </pkg:part>
@@ -2179,10 +1526,7 @@
   </pkg:part>
   <pkg:part pkg:name="/word/webSettings.xml" pkg:contentType="application/vnd.openxmlformats-officedocument.wordprocessingml.webSettings+xml">
     <pkg:xmlData>
-      <w:webSettings xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" xmlns:w15="http://schemas.microsoft.com/office/word/2012/wordml" mc:Ignorable="w14 w15">
-        <w:optimizeForBrowser />
-        <w:allowPNG />
-      </w:webSettings>
+      <w:webSettings xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" xmlns:w15="http://schemas.microsoft.com/office/word/2012/wordml" mc:Ignorable="w14 w15" />
     </pkg:xmlData>
   </pkg:part>
   <pkg:part pkg:name="/docProps/app.xml" pkg:contentType="application/vnd.openxmlformats-officedocument.extended-properties+xml" pkg:padding="256">
@@ -2190,13 +1534,8 @@
       <Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">
         <Template>Normal.dotm</Template>
         <TotalTime>0</TotalTime>
-        <Pages>1</Pages>
-        <Words>96</Words>
-        <Characters>550</Characters>
         <Application>Microsoft Office Word</Application>
         <DocSecurity>0</DocSecurity>
-        <Lines>4</Lines>
-        <Paragraphs>1</Paragraphs>
         <ScaleCrop>false</ScaleCrop>
         <HeadingPairs>
           <vt:vector size="2" baseType="variant">
@@ -2215,7 +1554,6 @@
         </TitlesOfParts>
         <Company>CSIRO</Company>
         <LinksUpToDate>false</LinksUpToDate>
-        <CharactersWithSpaces>645</CharactersWithSpaces>
         <SharedDoc>false</SharedDoc>
         <HyperlinksChanged>false</HyperlinksChanged>
         <AppVersion>15.0000</AppVersion>
@@ -2225,15 +1563,11 @@
   <pkg:part pkg:name="/docProps/core.xml" pkg:contentType="application/vnd.openxmlformats-package.core-properties+xml" pkg:padding="256">
     <pkg:xmlData>
       <cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcmitype="http://purl.org/dc/dcmitype/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-        <dc:title />
-        <dc:subject />
         <dc:creator>Jumppanen, Paavo (O&amp;A, Hobart)</dc:creator>
-        <cp:keywords />
-        <dc:description />
         <cp:lastModifiedBy>Jumppanen, Paavo (O&amp;A, Hobart)</cp:lastModifiedBy>
-        <cp:revision>2</cp:revision>
-        <dcterms:created xsi:type="dcterms:W3CDTF">2018-05-04T06:43:00Z</dcterms:created>
-        <dcterms:modified xsi:type="dcterms:W3CDTF">2018-05-04T06:43:00Z</dcterms:modified>
+        <cp:revision>1</cp:revision>
+        <dcterms:created xsi:type="dcterms:W3CDTF">2018-05-10T02:51:00Z</dcterms:created>
+        <dcterms:modified xsi:type="dcterms:W3CDTF">2018-05-10T02:51:00Z</dcterms:modified>
       </cp:coreProperties>
     </pkg:xmlData>
   </pkg:part>
@@ -2631,7 +1965,7 @@
         <w:style w:type="paragraph" w:default="1" w:styleId="Normal">
           <w:name w:val="Normal" />
           <w:qFormat />
-          <w:rsid w:val="00B87BC1" />
+          <w:rsid w:val="00DD58D3" />
         </w:style>
         <w:style w:type="character" w:default="1" w:styleId="DefaultParagraphFont">
           <w:name w:val="Default Paragraph Font" />
@@ -2659,6 +1993,25 @@
           <w:uiPriority w:val="99" />
           <w:semiHidden />
           <w:unhideWhenUsed />
+        </w:style>
+        <w:style w:type="table" w:styleId="TableGrid">
+          <w:name w:val="Table Grid" />
+          <w:basedOn w:val="TableNormal" />
+          <w:uiPriority w:val="39" />
+          <w:rsid w:val="00DD58D3" />
+          <w:pPr>
+            <w:spacing w:after="0" w:line="240" w:lineRule="auto" />
+          </w:pPr>
+          <w:tblPr>
+            <w:tblBorders>
+              <w:top w:val="single" w:sz="4" w:space="0" w:color="auto" />
+              <w:left w:val="single" w:sz="4" w:space="0" w:color="auto" />
+              <w:bottom w:val="single" w:sz="4" w:space="0" w:color="auto" />
+              <w:right w:val="single" w:sz="4" w:space="0" w:color="auto" />
+              <w:insideH w:val="single" w:sz="4" w:space="0" w:color="auto" />
+              <w:insideV w:val="single" w:sz="4" w:space="0" w:color="auto" />
+            </w:tblBorders>
+          </w:tblPr>
         </w:style>
       </w:styles>
     </pkg:xmlData>

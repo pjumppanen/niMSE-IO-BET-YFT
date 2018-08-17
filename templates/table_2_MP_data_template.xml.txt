@@ -1,0 +1,23 @@
+              <w:tc>
+                <w:tcPr>
+                  <w:tcW w:w="692" w:type="dxa" />
+                  <w:noWrap />
+                  <w:hideMark />
+                </w:tcPr>
+                <w:p w:rsidR="00DD58D3" w:rsidRPr="0073293B" w:rsidRDefault="00DD58D3" w:rsidP="00CD133D">
+                  <w:pPr>
+                    <w:jc w:val="right" />
+                    <w:rPr>
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
+                    </w:rPr>
+                  </w:pPr>
+                  <w:r>
+                    <w:rPr>
+                      <w:sz w:val="16" />
+                      <w:szCs w:val="16" />
+                    </w:rPr>
+                    <w:t>{Data}</w:t>
+                  </w:r>
+                </w:p>
+              </w:tc>
