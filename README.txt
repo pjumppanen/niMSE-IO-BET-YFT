@@ -25,7 +25,7 @@ OS X or Linux by downloading the ADT project from https://github.com/pjumppanen/
 then from a command prompt, change directory to the root folder for the project
 and execute the following shell commands.
 
-chmod 755 ./*
+chmod -R 755 ./*
 ./init_config.sh
 ./configure --disable-tapenade --with-r-lib-path={path to the R shared library import lib} --with-r-include-path={path to the R include files}
 
