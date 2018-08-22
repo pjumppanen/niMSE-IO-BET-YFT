@@ -359,39 +359,23 @@ double OperatingModelMin::findUpperLimit(double dEffortCeiling,
                                          int nFleet,
                                          const ARRAY_3D ECurrent/* nfleets, nareas, nsubyears */) const
 {
-  int     cf;
   int     ca;
   int     cm;
   double  dLimit;
-  double  dMaxE   = 0.0;
-  double  dFleetE = 0.0;
+  double  dMaxE = 0.0;
+  double  dSumE = 0.0;
 
-  // Scale effort ceiling such that all fisheries can grow to the same
-  // absolute level of effort
-  for (cf = 1 ; cf <= nfleets ; cf++)
+  // dEffortCeiling corresponds to the maximum anualised E allowed in fitting
+  // the foward projection.
+  for (ca = 1 ; ca <= nareas ; ca++)
   {
-    double dSumE = 0.0;
-
-    for (ca = 1 ; ca <= nareas ; ca++)
+    for (cm = 1 ; cm <= nsubyears ; cm++)
     {
-      for (cm = 1 ; cm <= nsubyears ; cm++)
-      {
-        dSumE += ECurrent[cf][ca][cm];
-      }
-    }
-
-    if (dMaxE < dSumE)
-    {
-      dMaxE = dSumE;
-    }
-
-    if (cf == nFleet)
-    {
-      dFleetE = dSumE;
+      dSumE += ECurrent[nFleet][ca][cm];
     }
   }
 
-  dLimit = (dFleetE != 0.0) ? dEffortCeiling * dMaxE / dFleetE : dEffortCeiling;
+  dLimit = (dSumE != 0.0) ? dEffortCeiling / dSumE : dEffortCeiling;
 
   return (dLimit);
 }
