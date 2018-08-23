@@ -490,7 +490,7 @@ class(CCt.216.t3) <- "IO_MP"
 # non-tuning
 CC001 <- function(pset)
 {
-  TAC     <- 1.0 #aggregate TAC (annual) by fishery
+  TAC     <- 1000.0 #aggregate TAC (annual) by fishery
   TAEbyF  <- 0.0 * pset$prevTACE$TAEbyF #TAE by fishery
 
   return (list(TAEbyF=TAEbyF,TAC=TAC))
@@ -803,7 +803,6 @@ CC50CE1.0bet <- function(pset)
 }
 
 class(CC50CE1.0bet) <- "IO_MP"
-
 
 
 
