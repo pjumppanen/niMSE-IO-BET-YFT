@@ -50,6 +50,8 @@ plotOMruns(histd[histd$qname=="CPUE(aggregate)",], projd[projd$qname=="CPUE(aggr
 plotOMruns(histd[histd$qname=="C",], projd[projd$qname=="C",])
 plotOMruns(histd[histd$qname=="F/FMSY",], projd[projd$qname=="F/FMSY",])
 
+# add 100 ton catch bridge
+OMyftNEr@MseDef@catchBridge <- as.karray(c(100000))
 
 # Run an MSE; "CC100" for higher effort to test Implementation error bias
 print(system.time(OMyftNEr <- runMse(OMyftNEr, MPs="CC100", interval=3, Report=F)))
