@@ -125,6 +125,11 @@ setMethod("initialize", "Projection",
     # Repeat the same stochastic history for each MP to keep the comparison fair
     set.seed(seed)
 
+    if (is.na(CppMethod))
+    {
+      CppMethod <- MseDef@CppMethod
+    }
+
     npop      <- ssModelData@npop
     nareas    <- ssModelData@nareas
     nyears    <- ssModelData@nyears
@@ -302,7 +307,7 @@ setMethod("initialize", "Projection",
     PAR    <- PAYMR[,c(1,2,5)]
     A      <- PAYMR[,c(2)]
 
-    if (MseDef@CppMethod != 0) # use C++ Baranov sub-routine
+    if (CppMethod != 0) # use C++ Baranov sub-routine
     {
       Obj <- Om.create(npop,
                        nages,
@@ -577,7 +582,7 @@ setMethod("initialize", "Projection",
     .Object@TAC[initYear]     <- TAC
     .Object@TAEbyF[initYear,] <- TAE
 
-    if (MseDef@CppMethod != 0)
+    if (CppMethod != 0)
     {
       Om.nt.beginProjection(Obj, as.double(rep(log(0.001), nfleets)))
     }
@@ -588,7 +593,7 @@ setMethod("initialize", "Projection",
       PAY[,3]    <- y
 
       #projection years loop includes repeat of first year for rec and initializtion ... seemingly not anymore?
-      if (MseDef@CppMethod == 0)
+      if (CppMethod == 0)
       {
         cat(".")
       }
@@ -770,7 +775,7 @@ setMethod("initialize", "Projection",
       recSpatialDevs <- karray(exp(ssModelData@ReccvR * rnorm(length(Recdist))), dim=dim(Recdist))
       recSpatialDevs <- recSpatialDevs / karray(rep(apply(recSpatialDevs, FUN=mean, MARGIN=c(1)), nareas),dim=dim(Recdist))
 
-      if (MseDef@CppMethod != 0)
+      if (CppMethod != 0)
       {
         RecdevIndex <- (y - 1) * nSpawnPerYr + 1
         Recdevs_Y   <- Recdevs[,RecdevIndex:(RecdevIndex + nSpawnPerYr - 1)]
@@ -1089,7 +1094,7 @@ setMethod("initialize", "Projection",
 
     .Object@IobsRArchive[1:y,] <- IobsR[1:y,]
 
-    if (MseDef@CppMethod != 0)
+    if (CppMethod != 0)
     {
       Om.destroy(Obj)
     }
