@@ -699,21 +699,48 @@ setMethod("runMse", c("StockSynthesisModel"),
       # need to initialise this first without running the projection because it
       # initialises seeds with random numbers and needs to be done prior to any
       # cluster processing.
-      .Object@ProjectedVars[[MP]] <- new("ManagementVars", .Object@ModelData, FALSE, idx)
+      .Object@ProjectedVars[[idx]] <- new("ManagementVars", .Object@ModelData, FALSE, idx)
 
       idx <- idx + 1
     }
 
-    idx <- 1
+    idx      <- 1
+    MP_Names <- names(MPs)
+
+    if (is.null(MP_Names))
+    {
+      MP_Names <- rep("", times=length(MPs))
+    }
 
     for (MP in MPs)
     {
+      MP_Name    <- MP_Names[idx]
+      tune_value <- tune[idx]
+
+      if (class(MP) == "MP_Spec")
+      {
+        if (nchar(MP_Name) == 0)
+        {
+          MP_Name <- MP@MP_Name
+        }
+
+        tune_value <- MP@tune
+        MP         <- MP@MP
+      }
+      else
+      {
+        if (nchar(MP_Name) == 0)
+        {
+          MP_Name <- MP
+        }
+      }
+
       MP_class      <- class(get(MP))
-      ProjectedVars <- .Object@ProjectedVars[[MP]]
+      ProjectedVars <- .Object@ProjectedVars[[idx]]
 
       if ((MP_class == "IO_MP") || (MP_class == "IO_MP_tune"))
       {
-        ProjectedVars <- runProjection(ProjectedVars, .Object@RefVars, .Object@ModelData, MseDef, MP, tune[idx], interval, Report, CppMethod, cluster, EffortCeiling, TACTime, rULim)
+        ProjectedVars <- runProjection(ProjectedVars, .Object@RefVars, .Object@ModelData, MseDef, MP, MP_Name, tune_value, interval, Report, CppMethod, cluster, EffortCeiling, TACTime, rULim)
 
       } else
       {
@@ -721,7 +748,7 @@ setMethod("runMse", c("StockSynthesisModel"),
         stop()
       }
 
-      .Object@ProjectedVars[[MP]] <- ProjectedVars
+      .Object@ProjectedVars[[idx]] <- ProjectedVars
 
       if (is.na(.Object@HistoricVars@F[.Object@ModelData@nyears]))
       {
@@ -732,6 +759,15 @@ setMethod("runMse", c("StockSynthesisModel"),
     }
 
     return (.Object)
+  }
+)
+
+# -----------------------------------------------------------------------------
+
+setMethod("getMPs", c("StockSynthesisModel"),
+  function(.Object)
+  {
+    lapply(.Object@ProjectedVars, function(ProjectedVar) {return (ProjectedVar@MP)})
   }
 )
 
@@ -751,7 +787,7 @@ setMethod("msevizPerformanceData", c("StockSynthesisModel"),
       Sims <- 1:ManagementVars@nsim
       C2   <- rep(mseFramework@MseDef@firstMPYr + AvgYears[1], times=ManagementVars@nsim)
       C4   <- Sims
-      C6   <- rep(paste(prefix, ManagementVars@MP, sep=""), times=ManagementVars@nsim)
+      C6   <- rep(paste(prefix, ManagementVars@MP@MP_Name, sep=""), times=ManagementVars@nsim)
       df   <- NULL
 
       addRows <- function(df, data, indicator, name)

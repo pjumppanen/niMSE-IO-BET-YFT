@@ -1,4 +1,29 @@
 # -----------------------------------------------------------------------------
+# MP_Spec class
+# -----------------------------------------------------------------------------
+setClass("MP_Spec",
+  slots = c(
+    MP      = "character", # MP to run
+    MP_Name = "character", # name given to MP run
+    tune    = "numeric"    # Tuning parameter for MP run
+  )
+)
+
+# -----------------------------------------------------------------------------
+
+setMethod("initialize", "MP_Spec",
+  function(.Object, MP, MP_Name=NA, tune=1.0)
+  {
+    .Object@MP      = MP
+    .Object@MP_Name = if (is.na(MP_Name)) MP else MP_Name
+    .Object@tune    = tune
+
+    return (.Object)
+  }
+)
+
+
+# -----------------------------------------------------------------------------
 # ManagementVars class
 # -----------------------------------------------------------------------------
 setClass("ManagementVars",
@@ -11,7 +36,7 @@ setClass("ManagementVars",
     nsubyears     = "integer",
     seed          = "integer",
     FlastYr       = "numeric",
-    MP            = "character",
+    MP            = "MP_Spec",
     which         = "integer",
 
     F             = "karray",
@@ -56,7 +81,9 @@ setMethod("initialize", "ManagementVars",
     .Object@seed      <- as.integer(runif(ssModelData@nsim, 0, .Machine$integer.max))
     .Object@FlastYr   <- as.double(NA)
 
-    .Object@MP        <- ""
+    empty             <- NA
+    class(empty)      <-"MP_Spec"
+    .Object@MP        <- empty
     .Object@which     <- as.integer(which)
 
     if (bHistoric)
@@ -192,7 +219,7 @@ setMethod("b_b0", c("ManagementVars", "ReferenceVars"),
 setGeneric("runProjection", function(.Object, RefVars, ssModelData, MseDef, ...) standardGeneric("runProjection"))
 
 setMethod("runProjection", c("ManagementVars", "ReferenceVars", "StockSynthesisModelData", "MseDefinition"),
-  function(.Object, RefVars, ssModelData, MseDef, MP, tune, interval, Report, CppMethod, cluster, EffortCeiling, TACTime, rULim)
+  function(.Object, RefVars, ssModelData, MseDef, MP, MP_Name, tune, interval, Report, CppMethod, cluster, EffortCeiling, TACTime, rULim)
   {
     runJob <- function(sim, ssModelData, RefVars, MseDef, MP, interval, Report, CppMethod, EffortCeiling, TACTime, rULim, seed, tune, UseCluster)
     {
@@ -287,7 +314,7 @@ setMethod("runProjection", c("ManagementVars", "ReferenceVars", "StockSynthesisM
     years   <- (ssModelData@nyears + 1):(ssModelData@nyears + ssModelData@proyears)
     months  <- ((ssModelData@nyears) * ssModelData@nsubyears + 1):((ssModelData@nyears + ssModelData@proyears) * ssModelData@nsubyears)
 
-    .Object@MP <- MP
+    .Object@MP <- new("MP_Spec", MP, MP_Name, tune)
 
     for (res in results)
     {

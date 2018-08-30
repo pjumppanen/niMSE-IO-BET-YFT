@@ -400,6 +400,17 @@ setMethod("runMse", c("MseFramework"),
 
 # -----------------------------------------------------------------------------
 
+setGeneric("getMPs", function(.Object, ...) standardGeneric("getMPs"))
+
+setMethod("getMPs", c("MseFramework"),
+  function(.Object)
+  {
+    return (getMPs(.Object@StockSynthesisModels[[1]]))
+  }
+)
+
+# -----------------------------------------------------------------------------
+
 setGeneric("msevizPerformanceData", function(.Object, ...) standardGeneric("msevizPerformanceData"))
 
 setMethod("msevizPerformanceData", c("MseFramework"),
@@ -830,7 +841,7 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
             {
               SY   <- as.matrix(expand.grid(nsims=1:ProjVar@nsim, nyrs=1:ProjVar@nyears))
               Yrs  <- .Object@MseDef@firstCalendarYr + om@ModelData@nyears + (0:(ProjVar@nyears - 1))
-              C1   <- rep(paste(prefix, ProjVar@MP, sep=""), times=length(SY[,1]))
+              C1   <- rep(paste(prefix, ProjVar@MP@MP_Name, sep=""), times=length(SY[,1]))
               C2   <- Yrs[SY[,2]]
 
               addRows <- function(context, data, name)
@@ -1175,17 +1186,18 @@ setMethod("performanceStatistics", c("MseFramework"),
 
     # extract MP names
     MPs         <- NA
+    AllMPs      <- NA
     nmodels     <- length(.Object@StockSynthesisModels)
     ntotal_sims <- 0
 
     if (nmodels > 0)
     {
-      nMPs <- length(.Object@StockSynthesisModels[[1]]@ProjectedVars)
+      AllMPs <- getMPs(.Object@StockSynthesisModels[[1]])
+      nMPs   <- length(AllMPs)
 
       if (nMPs > 0)
       {
-
-        MPs <- names(.Object@StockSynthesisModels[[1]]@ProjectedVars)
+        MPs <- AllMPs
 
         if (!is.na(thisMP))
         {
@@ -1240,10 +1252,25 @@ setMethod("performanceStatistics", c("MseFramework"),
     codeExpr <- paste(codeExpr, paste(extraColumns, collapse=","), ")", sep="")
     dt       <- eval(parse(text=codeExpr))
     nrow     <- 1
+    LUT      <- list()
+
+    for (idx in 1:length(AllMPs))
+    {
+      LUT[[AllMPs[[idx]]@MP_Name]] <- idx
+    }
 
     for (MP in MPs)
     {
-      values <- list(MP=MP)
+      if (class(MP) == "MP_Spec")
+      {
+        MP_Name <- MP@MP_Name
+      }
+      else
+      {
+        MP_Name <- MP
+      }
+
+      values <- list(MP=MP_Name)
 
       for (Statistic in Statistics)
       {
@@ -1262,7 +1289,7 @@ setMethod("performanceStatistics", c("MseFramework"),
               nproj_sims <- stockSynthesisModel@ModelData@nsim
               nendsim    <- nsim + nproj_sims - 1
 
-              SourceData[nsim:nendsim] <- statHandlers[[Statistic]]$statFn(stockSynthesisModel@ProjectedVars[[MP]], stockSynthesisModel@RefVars, stockSynthesisModel@HistoricVars, cn)
+              SourceData[nsim:nendsim] <- statHandlers[[Statistic]]$statFn(stockSynthesisModel@ProjectedVars[[LUT[[MP_Name]]]], stockSynthesisModel@RefVars, stockSynthesisModel@HistoricVars, cn)
 
               nsim <- nsim + nproj_sims
             }
