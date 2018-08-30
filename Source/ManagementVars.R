@@ -225,12 +225,7 @@ setMethod("runProjection", c("ManagementVars", "ReferenceVars", "StockSynthesisM
     {
       if (UseCluster)
       {
-        require(keep)
-
-        # In a cluster context we re-direct output to file so we can then play
-        # it back in the host
-        StdOutFileName <- paste("projStdOutFile", sim, ".txt", sep="")
-        sink(file=StdOutFileName, append=FALSE, type=c("output", "message"))
+        beginLog(sim)
       }
 
       Proj <- NA
@@ -248,24 +243,10 @@ setMethod("runProjection", c("ManagementVars", "ReferenceVars", "StockSynthesisM
       if (UseCluster)
       {
         print("\n")
-        sink()
+        endLog()
       }
 
       return (Proj)
-    }
-
-    printJobOutput <- function(sim)
-    {
-      StdOutFileName <- paste("projStdOutFile", sim, ".txt", sep="")
-
-      if (file.exists(StdOutFileName))
-      {
-        Con <- file(StdOutFileName, "rt")
-
-        writeLines(readLines(Con))
-        close(Con)
-        unlink(StdOutFileName)
-      }
     }
 
     sims       <- 1:length(.Object@seed)
@@ -290,7 +271,7 @@ setMethod("runProjection", c("ManagementVars", "ReferenceVars", "StockSynthesisM
                            tune,
                            UseCluster)
 
-      sapply(sims, FUN=printJobOutput)
+      sapply(sims, FUN=function(nsim) {printLog(nsim)})
     }
     else
     {
