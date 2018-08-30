@@ -92,7 +92,8 @@ load(file=paste(getwd(), "/Objects/OMyft2r108.RDA", sep=""))
 # MSE on a list of candidate MPs
 MPL1 <- c("CC200", "CC400","IT1.50","IT3.50","PT41.100.2","PT41.100.9")
 
-print(system.time(OMyft2r108 <- runMse(OMyft2r108, MPs=MPL1, interval=3, Report=F, UseCluster=1)))
+# forcing C++ method because it runs faster
+print(system.time(OMyft2r108 <- runMse(OMyft2r108, MPs=MPL1, interval=3, Report=F, UseCluster=1, CppMethod=1)))
 save(OMyft2r108, file=paste(getwd(), "/Objects/mseOMyft2r108.MPL1.RDA", sep=""))
 load(file=paste(getwd(), "/Objects/mseOMyft2r108.MPL1.RDA", sep=""))
 
@@ -139,7 +140,8 @@ TuningPars@tuningTolerance          <- 0.01
 
 MPL2 <- c("PT41.100.2", "PT41.100.9", "PT41.tune.9")
 
-print(system.time(OMyft2r108 <- runMse(OMyft2r108, TuningPars=TuningPars, MPs=MPL2, interval=3, Report=F, UseCluster=1)))
+# forcing C++ method because it runs faster
+print(system.time(OMyft2r108 <- runMse(OMyft2r108, TuningPars=TuningPars, MPs=MPL2, interval=3, Report=F, UseCluster=1, CppMethod=1)))
 
 # Plot some key time series
 histd <- msevizHistoricTimeSeriesData(OMyft2r108)
@@ -157,6 +159,28 @@ print(plotTOs(perfd, x="S10", y=c("T1","S3","S6","S9")))
 print(plotBPs(perfd, indicators=c("T1","S3","S6","S9","S10")))
 print(kobeMPs(perfd))
 
+# Illustration of using tuned MP along side other MPs and renaming MPs
+LastMPs <- getMPs(OMyft2r108)
+MPL3    <- list(MP1="CC200", MP2="CC400",MP3="IT1.50",MP4="IT3.50",MP5="PT41.100.2",MP6=LastMPs[[3]])
+
+# forcing C++ method because it runs faster
+print(system.time(OMyft2r108 <- runMse(OMyft2r108, MPs=MPL3, interval=3, Report=F, UseCluster=1, CppMethod=1)))
+
+# Plot some key time series
+histd <- msevizHistoricTimeSeriesData(OMyft2r108)
+projd <- msevizProjectedTimeSeriesData(OMyft2r108)
+
+plotOMruns(histd[histd$qname=="SSB/SSBMSY",], projd[projd$qname=="SSB/SSBMSY",])
+plotOMruns(histd[histd$qname=="CPUE(aggregate)",], projd[projd$qname=="CPUE(aggregate)",])
+plotOMruns(histd[histd$qname=="C",], projd[projd$qname=="C",])
+plotOMruns(histd[histd$qname=="F/FMSY",], projd[projd$qname=="F/FMSY",])
+
+# Do various performance plots
+perfd <- msevizPerformanceData(OMyft2r108, YearsAveraged)
+
+print(plotTOs(perfd, x="S10", y=c("T1","S3","S6","S9")))
+print(plotBPs(perfd, indicators=c("T1","S3","S6","S9","S10")))
+print(kobeMPs(perfd))
 
 print("Remaining demos yet to be ported from MSE-IO-BET-YFT")
 stop()
