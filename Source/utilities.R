@@ -338,7 +338,7 @@ createTable2 <- function(years, results, MPs, MPs_short, prefix="")
 
   if (length(MPs) > 14)
   {
-    print("ERROR: maximum number of MPs is 8")
+    print("ERROR: maximum number of MPs is 14")
     stop()
   }
   else if (length(MPs) > 8)
@@ -383,7 +383,7 @@ createTable2 <- function(years, results, MPs, MPs_short, prefix="")
   {
     title_xml <- paste(readLines("./templates/table_2_MP_title_template.xml.txt"), collapse="\n")
 
-    title_cols_xml <- paste(title_cols_xml, gsub("\\{MP\\}", finalMPList_short[cn], title_xml), sep="")
+    title_cols_xml <- paste(title_cols_xml, gsub("\\{MP\\}", MPs_short[cn], title_xml), sep="")
   }
 
   xml <- gsub("\\{MP_title_columns\\}", title_cols_xml, xml)

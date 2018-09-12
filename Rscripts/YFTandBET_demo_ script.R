@@ -158,6 +158,12 @@ print(plotTOs2(perfd))
 print(plotBPs2(perfd))
 print(kobeMPs2(perfd))
 
+# create Table1 example
+createTable1(20, list(OMyft2r108), c("PT41.100.2", "PT41.100.9", "PT41.tune.9"), c("MP1", "MP2", "MP3"))
+
+# create Table2 example
+createTable2(20, list(OMyft2r108), c("PT41.100.2", "PT41.100.9", "PT41.tune.9"), c("MP1", "MP2", "MP3"))
+
 # Illustration of using tuned MP along side other MPs and renaming MPs
 LastMPs <- getMPs(OMyft2r108)
 MPL3    <- list(MP1="CC200", MP2="CC400",MP3="IT1.50",MP4="IT3.50",MP5="PT41.100.2",MP6=LastMPs[[3]])
