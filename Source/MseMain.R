@@ -18,7 +18,7 @@ library(data.table)
 library(mseviz)
 library(ggstance)
 
-#load Mseom module and R interface code
+# load niMseom module and R interface code
 # Load the library
 if (version$os == "mingw32")
 {
