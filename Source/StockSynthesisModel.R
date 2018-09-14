@@ -675,7 +675,7 @@ setMethod("initialize", "StockSynthesisModel",
 # -----------------------------------------------------------------------------
 
 setMethod("runMse", c("StockSynthesisModel"),
-  function(.Object, MseDef, MPs, tune=NA, interval=3, Report=FALSE, CppMethod=NA, cluster=NA, EffortCeiling = as.double(20.0), TACTime = 0.5, rULim = 0.5)
+  function(.Object, MseDef, MPs, tune=NA, tune_error=NA, interval=3, Report=FALSE, CppMethod=NA, cluster=NA, EffortCeiling = as.double(20.0), TACTime = 0.5, rULim = 0.5)
   {
     if (class(MseDef) != "MseDefinition")
     {
@@ -691,7 +691,13 @@ setMethod("runMse", c("StockSynthesisModel"),
 
     if ((length(tune) == 1) && is.na(tune))
     {
-      tune <- rep(1.0, times=length(MPs))
+      tune       <- rep(1.0, times=length(MPs))
+      tune_error <- rep(0.0, times=length(MPs))
+    }
+
+    if ((length(tune_error) == 1) && is.na(tune_error))
+    {
+      tune_error <- rep(0.0, times=length(MPs))
     }
 
     for (MP in MPs)
@@ -716,6 +722,7 @@ setMethod("runMse", c("StockSynthesisModel"),
     {
       MP_Name    <- MP_Names[idx]
       tune_value <- tune[idx]
+      tuneError  <- tune_error[idx]
 
       if (class(MP) == "MP_Spec")
       {
@@ -725,6 +732,7 @@ setMethod("runMse", c("StockSynthesisModel"),
         }
 
         tune_value <- MP@tune
+        tuneError  <- MP@tuneError
         MP         <- MP@MP
       }
       else
@@ -740,7 +748,7 @@ setMethod("runMse", c("StockSynthesisModel"),
 
       if ((MP_class == "IO_MP") || (MP_class == "IO_MP_tune"))
       {
-        ProjectedVars <- runProjection(ProjectedVars, .Object@RefVars, .Object@ModelData, MseDef, MP, MP_Name, tune_value, interval, Report, CppMethod, cluster, EffortCeiling, TACTime, rULim)
+        ProjectedVars <- runProjection(ProjectedVars, .Object@RefVars, .Object@ModelData, MseDef, MP, MP_Name, tune_value, tuneError, interval, Report, CppMethod, cluster, EffortCeiling, TACTime, rULim)
 
       } else
       {

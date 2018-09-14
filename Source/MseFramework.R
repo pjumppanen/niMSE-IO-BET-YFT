@@ -36,6 +36,7 @@ setClass("MseFramework",
   slots = c(
     MseDef                = "MseDefinition",  # parent MSE definition
     tune                  = "numeric",        # vector of tuning parameters from last runMse() call
+    tuneError             = "numeric",        # vector of tuning error / degree fit parameters from last runMse() call
     StockSynthesisModels  = "list"            # list of StockSynthesisModel objects
   )
 )
@@ -175,7 +176,7 @@ setMethod("runMse", c("MseFramework"),
       clusterEvalQ(cluster, eval(parse("Source/MseMain.R")))
     }
 
-    runModels <- function(StockSynthesisModels, MPs, tune, interval, Report, CppMethod, EffortCeiling, TACTime, rULim)
+    runModels <- function(StockSynthesisModels, MPs, tune, tune_error, interval, Report, CppMethod, EffortCeiling, TACTime, rULim)
     {
       if (UseCluster)
       {
@@ -183,7 +184,7 @@ setMethod("runMse", c("MseFramework"),
         {
           beginLog(om@ModelData@which)
 
-          om <- runMse(om, .Object@MseDef, MPs, tune, interval, Report, CppMethod, cluster=NA, EffortCeiling, TACTime, rULim)
+          om <- runMse(om, .Object@MseDef, MPs, tune, tune_error, interval, Report, CppMethod, cluster=NA, EffortCeiling, TACTime, rULim)
 
           print("\n")
 
@@ -197,13 +198,14 @@ setMethod("runMse", c("MseFramework"),
       }
       else
       {
-        StockSynthesisModels <- lapply(StockSynthesisModels, FUN=function(om) {return(runMse(om, .Object@MseDef, MPs, tune, interval, Report, CppMethod, cluster=NA, EffortCeiling, TACTime, rULim))})
+        StockSynthesisModels <- lapply(StockSynthesisModels, FUN=function(om) {return(runMse(om, .Object@MseDef, MPs, tune, tune_error, interval, Report, CppMethod, cluster=NA, EffortCeiling, TACTime, rULim))})
       }
 
       return (StockSynthesisModels)
     }
 
-    .Object@tune <- rep(1.0, times=length(MPs))
+    .Object@tune      <- rep(1.0, times=length(MPs))
+    .Object@tuneError <- rep(0.0, times=length(MPs))
 
     if (class(TuningPars) == "TuningParameters")
     {
@@ -218,6 +220,12 @@ setMethod("runMse", c("MseFramework"),
 
         for (MP in MPs)
         {
+          if (class(MP) == "MP_Spec")
+          {
+            print("ERROR: Running tuning on a tuned MP. Remove TuningPars from call to runMse()\n")
+            stop()
+          }
+
           MP_class <- class(get(MP))
 
           if (MP_class == "IO_MP_tune")
@@ -262,7 +270,7 @@ setMethod("runMse", c("MseFramework"),
         optimiseObjFn <- function(tuneLog10, MP)
         {
           tune                         <- 10 ^ tuneLog10
-          .Object@StockSynthesisModels <- runModels(.Object@StockSynthesisModels, MP, tune, interval, Report, CppMethod, EffortCeiling, TACTime, rULim)
+          .Object@StockSynthesisModels <- runModels(.Object@StockSynthesisModels, MP, tune, NA, interval, Report, CppMethod, EffortCeiling, TACTime, rULim)
 
           tuneValue <- getPerformanceMeasure(.Object, MP)
           tuneError <- abs((TuningPars@tuningTarget - tuneValue) / TuningPars@tuningTarget)
@@ -280,7 +288,7 @@ setMethod("runMse", c("MseFramework"),
         bisectObjFn <- function(tuneLog10, MP)
         {
           tune                         <- 10 ^ tuneLog10
-          .Object@StockSynthesisModels <- runModels(.Object@StockSynthesisModels, MP, tune, interval, Report, CppMethod, EffortCeiling, TACTime, rULim)
+          .Object@StockSynthesisModels <- runModels(.Object@StockSynthesisModels, MP, tune, NA, interval, Report, CppMethod, EffortCeiling, TACTime, rULim)
 
           tuneValue <- getPerformanceMeasure(.Object, MP)
           tuneError <- abs((TuningPars@tuningTarget - tuneValue) / TuningPars@tuningTarget)
@@ -336,9 +344,10 @@ setMethod("runMse", c("MseFramework"),
               print(c("hiPar  ",  hiPar, "      hiVal ", hiVal))
               print(c("tmpPar ", tmpPar, "     tmpVal ", tmpVal))
 
-              nFnEval <- 4
+              nFnEval   <- 4
+              tuneError <- abs((tmpVal - TuningPars@tuningTarget) / TuningPars@tuningTarget)
 
-              while (abs((tmpVal - TuningPars@tuningTarget) / TuningPars@tuningTarget) > TuningPars@tuningTolerance & abs(10 ^ hiPar - 10 ^ loPar) / (10 ^ loPar) > 0.005)
+              while (tuneError > TuningPars@tuningTolerance & abs(10 ^ hiPar - 10 ^ loPar) / (10 ^ loPar) > 0.005)
               {
                 if (tmpVal > TuningPars@tuningTarget)
                 {
@@ -368,10 +377,12 @@ setMethod("runMse", c("MseFramework"),
                 print(c("hiPar   ",hiPar,  "     hiVal ", hiVal))
                 print(c("tmpPar  ",tmpPar, "    tmpVal ", tmpVal))
 
-                nFnEval <- nFnEval + 1
+                nFnEval   <- nFnEval + 1
+                tuneError <- abs((tmpVal - TuningPars@tuningTarget) / TuningPars@tuningTarget)
               }
 
-              .Object@tune[tuneIdx[[MP]]] <- 10 ^ tmpPar
+              .Object@tune[tuneIdx[[MP]]]      <- 10 ^ tmpPar
+              .Object@tuneError[tuneIdx[[MP]]] <- tuneError
             }
 
           } else
@@ -380,14 +391,15 @@ setMethod("runMse", c("MseFramework"),
 
             print(res)
 
-            .Object@tune[tuneIdx[[MP]]] <- 10 ^ res$minimum
+            .Object@tune[tuneIdx[[MP]]]      <- 10 ^ res$minimum
+            .Object@tuneError[tuneIdx[[MP]]] <- res$objective
           }
         }
       }
     }
 
     # re-run all models with final tuning
-    .Object@StockSynthesisModels <- runModels(.Object@StockSynthesisModels, MPs, .Object@tune, interval, Report, CppMethod, EffortCeiling, TACTime, rULim)
+    .Object@StockSynthesisModels <- runModels(.Object@StockSynthesisModels, MPs, .Object@tune, .Object@tuneError, interval, Report, CppMethod, EffortCeiling, TACTime, rULim)
 
     if (UseCluster)
     {
