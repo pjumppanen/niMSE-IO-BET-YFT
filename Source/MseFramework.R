@@ -333,21 +333,25 @@ setMethod("runMse", c("MseFramework"),
             if ((loVal < TuningPars@tuningTarget & hiVal < TuningPars@tuningTarget & tmpVal < TuningPars@tuningTarget) ||
                 (loVal > TuningPars@tuningTarget & hiVal > TuningPars@tuningTarget & tmpVal > TuningPars@tuningTarget))
             {
-              print("\n Aborting tuning because Par values do not bracket the target")
+              print("Aborting tuning because Par values do not bracket the target")
               print("This could be because the par bounds are too narrow, tuning objective is not attainable, or function is non-monotonic")
               .Object@tune[tuneIdx[[MP]]] <- NaN
 
             } else
             {
-              print("\n bisection minimization for quantiles")
-              print(c("loPar  ",  loPar, "      loVal ", loVal))
-              print(c("hiPar  ",  hiPar, "      hiVal ", hiVal))
-              print(c("tmpPar ", tmpPar, "     tmpVal ", tmpVal))
+              print("Bisection minimization")
+              print(c("loPar   ", loPar,   "     loVal ", loVal), digits=4)
+              print(c("hiPar   ", hiPar,   "     hiVal ", hiVal), digits=4)
+              print(c("tmpPar  ", tmpPar,  "     tmpVal ", tmpVal), digits=4)
 
               nFnEval   <- 4
               tuneError <- abs((tmpVal - TuningPars@tuningTarget) / TuningPars@tuningTarget)
 
-              while (tuneError > TuningPars@tuningTolerance & abs(10 ^ hiPar - 10 ^ loPar) / (10 ^ loPar) > 0.005)
+              bestTuneError <- tuneError
+              bestPar <- tmpPar
+              bestVal <- tmpVal
+
+              while (bestTuneError > TuningPars@tuningTolerance & abs(10 ^ hiPar - 10 ^ loPar) / (10 ^ loPar) > 0.0001)
               {
                 if (tmpVal > TuningPars@tuningTarget)
                 {
@@ -361,28 +365,38 @@ setMethod("runMse", c("MseFramework"),
                   loVal <- tmpVal
                 }
 
-                #linear interpolation - should be more effective... predict par value as fn of obj function
+                #linear interpolation - could be more effective... predict par value as fn of obj function
                 #not much difference over bisection in a handful of trials - sometimes worse
-                linMod <- lm(pars ~ vals, data=as.data.frame(cbind(vals=c(loVal, hiVal), pars=c(loPar, hiPar))))
-                b      <- linMod$coef[1]
-                m      <- linMod$coef[2]
-                tmpPar <- m * TuningPars@tuningTarget + b
+                #linMod <- lm(pars ~ vals, data=as.data.frame(cbind(vals=c(loVal, hiVal), pars=c(loPar, hiPar))))
+                #b      <- linMod$coef[1]
+                #m      <- linMod$coef[2]
+                #tmpPar <- m * TuningPars@tuningTarget + b
 
-                print(c("next tmpPar ",tmpPar))
+                #Bisection - probably more consistent - linear interpolation seems slow under particular circumstances
+                tmpPar <- (loPar + hiPar) / 2
                 tmpVal <- bisectObjFn(tmpPar, MP)
-
-                print("                                        bisection minimization for quantiles")
-                print(c("nFnEval ",nFnEval))
-                print(c("loPar   ",loPar,  "     loVal ", loVal))
-                print(c("hiPar   ",hiPar,  "     hiVal ", hiVal))
-                print(c("tmpPar  ",tmpPar, "    tmpVal ", tmpVal))
 
                 nFnEval   <- nFnEval + 1
                 tuneError <- abs((tmpVal - TuningPars@tuningTarget) / TuningPars@tuningTarget)
-              }
 
-              .Object@tune[tuneIdx[[MP]]]      <- 10 ^ tmpPar
-              .Object@tuneError[tuneIdx[[MP]]] <- tuneError
+                if(tuneError < bestTuneError){
+                  bestTuneError <- tuneError
+                  bestPar <- tmpPar
+                  bestVal <- tmpVal
+                }
+
+                print("Bisection minimization")
+                print("nFnEval  " %&% nFnEval)
+                print("loPar    " %&%  round(loPar, digits=4)   %&%  "   loVal   " %&%  round(loVal, digits=4))
+                print("hiPar    " %&%  round(hiPar, digits=4)   %&%  "   hiVal   " %&%  round(hiVal, digits=4))
+                print("tmpPar   " %&%  round(tmpPar, digits=4)  %&%  "   tmpVal  " %&%  round(tmpVal, digits=4) %&%    "  tuneError " %&%  round(tuneError, digits=4))
+                print("bestPar  " %&%  round(bestPar, digits=4) %&%  "   bestVal " %&%  round(bestVal, digits=4) %&%   "  bestError " %&%  round(bestTuneError, digits=4))
+
+              }
+               #tuneError <- abs((bestVal - TuningPars@tuningTarget) / TuningPars@tuningTarget)
+
+              .Object@tune[tuneIdx[[MP]]]      <- 10 ^ bestPar
+              .Object@tuneError[tuneIdx[[MP]]] <- bestTuneError
             }
 
           } else
