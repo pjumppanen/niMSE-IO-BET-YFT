@@ -365,13 +365,6 @@ setMethod("runMse", c("MseFramework"),
                   loVal <- tmpVal
                 }
 
-                #linear interpolation - could be more effective... predict par value as fn of obj function
-                #not much difference over bisection in a handful of trials - sometimes worse
-                #linMod <- lm(pars ~ vals, data=as.data.frame(cbind(vals=c(loVal, hiVal), pars=c(loPar, hiPar))))
-                #b      <- linMod$coef[1]
-                #m      <- linMod$coef[2]
-                #tmpPar <- m * TuningPars@tuningTarget + b
-
                 #Bisection - probably more consistent - linear interpolation seems slow under particular circumstances
                 tmpPar <- (loPar + hiPar) / 2
                 tmpVal <- bisectObjFn(tmpPar, MP)
