@@ -1341,3 +1341,283 @@ setMethod("performanceStatistics", c("MseFramework"),
     return (dt)
   }
 )
+
+# -----------------------------------------------------------------------------
+
+setGeneric("getParameters", function(.Object, ...) standardGeneric("getParameters"))
+
+setMethod("getParameters", c("MseFramework"),
+  function(.Object)
+  {
+    parameters <- list(CppMethod      = .Object@MseDef@CppMethod,
+                       targpop        = .Object@MseDef@targpop,
+                       RecScale       = .Object@MseDef@RecScale,
+                       NInitCV        = .Object@MseDef@NInitCV,
+                       NInitCVdecay   = .Object@MseDef@NInitCVdecay,
+                       selWLRange     = .Object@MseDef@selWLRange,
+                       nCAAobs        = .Object@MseDef@nCAAobs,
+                       indexFisheries = .Object@MseDef@indexFisheries,
+                       Ccv            = .Object@MseDef@Ccv,
+                       Cbcv           = .Object@MseDef@Cbcv,
+                       Icv            = .Object@MseDef@Icv,
+                       Ibeta          = .Object@MseDef@Ibeta,
+                       Btcv           = .Object@MseDef@Btcv,
+                       Btbcv          = .Object@MseDef@Btbcv,
+                       Mbcv           = .Object@MseDef@Mbcv,
+                       Kbcv           = .Object@MseDef@Kbcv,
+                       Linfbcv        = .Object@MseDef@Linfbcv,
+                       MSYbcv         = .Object@MseDef@MSYbcv,
+                       BMSYbcv        = .Object@MseDef@BMSYbcv,
+                       IMSYbcv        = .Object@MseDef@IMSYbcv,
+                       FMSYbcv        = .Object@MseDef@FMSYbcv,
+                       FMSY_Mbcv      = .Object@MseDef@FMSY_Mbcv,
+                       ageMbcv        = .Object@MseDef@ageMbcv,
+                       TACEcv         = .Object@MseDef@TACEcv,
+                       selAgeRange    = .Object@MseDef@selAgeRange,
+                       selExpRange    = .Object@MseDef@selExpRange,
+                       catchBridge    = .Object@MseDef@catchBridge,
+                       catchBridgeCV  = .Object@MseDef@catchBridgeCV,
+                       MPDataLag      = .Object@MseDef@MPDataLag,
+                       ImplErrBias    = .Object@MseDef@ImplErrBias)
+
+    return (parameters)
+  }
+)
+
+# -----------------------------------------------------------------------------
+
+setGeneric("setParameters", function(.Object, ...) standardGeneric("setParameters"))
+
+setMethod("setParameters", c("MseFramework"),
+  function(.Object, parameters)
+  {
+    parameterHandlers <- list(CppMethod = function(param)
+                              {
+                                return (param)
+                              },
+
+                              targpop = function(param)
+                              {
+                                return (param)
+                              },
+
+                              RecScale = function(param)
+                              {
+                                if ((length(param) != 1) && (length(param) != .Object@MseDef@proyears))
+                                {
+                                  print("ERROR: RecScale vector is wrong length. It must be singular or proyears in length")
+                                  stop()
+                                }
+
+                                return (param)
+                              },
+
+                              NInitCV = function(param)
+                              {
+                                return (param)
+                              },
+
+                              NInitCVdecay = function(param)
+                              {
+                                return (param)
+                              },
+
+                              nCAAobs = function(param)
+                              {
+                                return (param)
+                              },
+
+                              indexFisheries = function(param)
+                              {
+                                if ((length(param) < 1) || (length(param) > .Object@MseDef@nfleets))
+                                {
+                                  print("ERROR: indexFisheries vector has too few or too many values")
+                                  stop()
+                                }
+
+                                return (param)
+                              },
+
+                              Ccv = function(param)
+                              {
+                                if (length(param) != 2)
+                                {
+                                  print("ERROR: Ccv vector is wrong length. It must be 2 in length")
+                                  stop()
+                                }
+
+                                return (param)
+                              },
+
+                              Cbcv = function(param)
+                              {
+                                return (param)
+                              },
+
+                              Icv = function(param)
+                              {
+                                if (length(param) != 2)
+                                {
+                                  print("ERROR: Icv vector is wrong length. It must be 2 in length")
+                                  stop()
+                                }
+
+                                return (param)
+                              },
+
+                              Ibeta = function(param)
+                              {
+                                if (length(param) != 2)
+                                {
+                                  print("ERROR: Ibeta vector is wrong length. It must be 2 in length")
+                                  stop()
+                                }
+
+                                return (param)
+                              },
+
+                              Btcv = function(param)
+                              {
+                                if (length(param) != 2)
+                                {
+                                  print("ERROR: Btcv vector is wrong length. It must be 2 in length")
+                                  stop()
+                                }
+
+                                return (param)
+                              },
+
+                              Btbcv = function(param)
+                              {
+                                return (param)
+                              },
+
+                              Mbcv = function(param)
+                              {
+                                return (param)
+                              },
+
+                              Kbcv = function(param)
+                              {
+                                return (param)
+                              },
+
+                              Linfbcv = function(param)
+                              {
+                                return (param)
+                              },
+
+                              MSYbcv = function(param)
+                              {
+                                return (param)
+                              },
+
+                              BMSYbcv = function(param)
+                              {
+                                return (param)
+                              },
+
+                              IMSYbcv = function(param)
+                              {
+                                return (param)
+                              },
+
+                              FMSYbcv = function(param)
+                              {
+                                return (param)
+                              },
+
+                              FMSY_Mbcv = function(param)
+                              {
+                                return (param)
+                              },
+
+                              ageMbcv = function(param)
+                              {
+                                return (param)
+                              },
+
+                              TACEcv = function(param)
+                              {
+                                return (param)
+                              },
+
+                              selAgeRange = function(param)
+                              {
+                                return (param)
+                              },
+
+                              selExpRange = function(param)
+                              {
+                                return (param)
+                              },
+
+                              selWLRange = function(param)
+                              {
+                                if (length(param) != 2)
+                                {
+                                  print("ERROR: selWLRange vector is wrong length. It must be 2 in length")
+                                  stop()
+                                }
+
+                                return (param)
+                              },
+
+                              catchBridge = function(param)
+                              {
+                                if (length(param) > .Object@MseDef@firstMPYr - .Object@MseDef@lastCalendarYr - 1)
+                                {
+                                  print("ERROR: catchBridge vector too many values")
+                                  stop()
+                                }
+
+                                return (param)
+                              },
+
+                              catchBridgeCV = function(param)
+                              {
+                                return (param)
+                              },
+
+                              MPDataLag = function(param)
+                              {
+                                return (param)
+                              },
+
+                              ImplErrBias = function(param)
+                              {
+                                if ((length(param) != 1) && (length(param) != .Object@MseDef@proyears))
+                                {
+                                  print("ERROR: ImplErrBias vector is wrong length. It must be singular or proyears in length")
+                                  stop()
+                                }
+
+                                return (param)
+                              })
+
+    if (class(parameters) != "list")
+    {
+      print("ERROR: parameters must be in a named list\n")
+      stop()
+    }
+
+    srcNames  <- names(parameters)
+    destNames <- names(parameterHandlers)
+
+    for (paramName in srcNames)
+    {
+      if (!(paramName %in% destNames))
+      {
+        print("ERROR: parameter not set. unknown parameter\n")
+        stop()
+      }
+
+      handler <- parameterHandlers[[paramName]]
+
+      slot(.Object@MseDef, paramName) <- handler(parameters[[paramName]])
+    }
+
+    return (.Object)
+  }
+)
+
