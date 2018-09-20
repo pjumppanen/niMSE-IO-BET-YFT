@@ -51,7 +51,7 @@ plotOMruns2(histd, projd, "C", doWorms=FALSE)
 plotOMruns2(histd, projd, "F/FMSY", doWorms=FALSE)
 
 # add 100 ton catch bridge
-OMyftNEr@MseDef@catchBridge <- as.karray(c(100000))
+OMyftNEr <- setParameters(OMyftNEr, list(catchBridge=as.karray(c(100000))))
 
 # Run an MSE; "CC100" for higher effort to test Implementation error bias
 print(system.time(OMyftNEr <- runMse(OMyftNEr, MPs="CC100", interval=3, Report=F)))
