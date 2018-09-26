@@ -58,7 +58,7 @@ setClass("ManagementVars",
 # -----------------------------------------------------------------------------
 
 setMethod("initialize", "ManagementVars",
-  function(.Object, ssModelData, bHistoric, which)
+  function(.Object, ssModelData, bHistoric, which, seeds)
   {
     if (class(ssModelData) != "StockSynthesisModelData")
     {
@@ -80,7 +80,12 @@ setMethod("initialize", "ManagementVars",
     .Object@nyears    <- nyears
     .Object@nsubyears <- nsubyears
 
-    .Object@seed      <- as.integer(runif(ssModelData@nsim, 0, .Machine$integer.max))
+    if (length(seeds) != ssModelData@nsim)
+    {
+      stop("ERROR: Too few random number seeds in ManagmentVars initialize() method")
+    }
+
+    .Object@seed      <- as.integer(seeds)
     .Object@FlastYr   <- as.double(NA)
 
     empty             <- NA

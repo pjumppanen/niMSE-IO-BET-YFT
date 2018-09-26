@@ -702,12 +702,14 @@ setMethod("runMse", c("StockSynthesisModel"),
       tune_error <- rep(0.0, times=length(MPs))
     }
 
+    seeds <- runif(.Object@ModelData@nsim, 0, .Machine$integer.max)
+
     for (MP in MPs)
     {
       # need to initialise this first without running the projection because it
       # initialises seeds with random numbers and needs to be done prior to any
       # cluster processing.
-      .Object@ProjectedVars[[idx]] <- new("ManagementVars", .Object@ModelData, FALSE, idx)
+      .Object@ProjectedVars[[idx]] <- new("ManagementVars", .Object@ModelData, FALSE, idx, seeds)
 
       idx <- idx + 1
     }
