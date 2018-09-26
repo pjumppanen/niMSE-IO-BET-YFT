@@ -219,11 +219,6 @@ setMethod("initialize", "StockSynthesisModel",
 
       .Object@ModelData@ITrend[(.Object@ModelData@nyears + 1):(.Object@ModelData@nyears + .Object@ModelData@proyears)] <- cumprod(rep(1 + 0.01 * qVal, .Object@ModelData@proyears))
     }
-    else
-    {
-      # Use the input value for all sims
-      .Object@ModelData@ITrend[(.Object@ModelData@nyears + 1):(.Object@ModelData@nyears + .Object@ModelData@proyears)] <- cumprod(rep(1 + 0.01 * MseDef@ITrendin, .Object@ModelData@proyears))
-    }
 
     # Len_age relationships
     .Object@ModelData@Len_age     <- karray(rep(ssMod$endgrowth$Len_Beg, each=.Object@ModelData@npop), dim=c(.Object@ModelData@npop, .Object@ModelData@nages, allyears))
@@ -681,6 +676,13 @@ setMethod("runMse", c("StockSynthesisModel"),
     {
       print(paste("ERROR: Could not create StockSynthesisModel.",deparse(substitute(MseDef)),"not of class MseDefinition"))
       stop()
+    }
+
+    # Trend in CPUE observation error (Multiplier)
+    if (MseDef@ITrendin >= 0)
+    {
+      # Use the input value for all sims
+      .Object@ModelData@ITrend[(.Object@ModelData@nyears + 1):(.Object@ModelData@nyears + .Object@ModelData@proyears)] <- cumprod(rep(1 + 0.01 * MseDef@ITrendin, .Object@ModelData@proyears))
     }
 
     .Object@ProjectedVars <- list()

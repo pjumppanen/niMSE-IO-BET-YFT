@@ -1378,7 +1378,8 @@ setMethod("getParameters", c("MseFramework"),
                        catchBridge    = .Object@MseDef@catchBridge,
                        catchBridgeCV  = .Object@MseDef@catchBridgeCV,
                        MPDataLag      = .Object@MseDef@MPDataLag,
-                       ImplErrBias    = .Object@MseDef@ImplErrBias)
+                       ImplErrBias    = .Object@MseDef@ImplErrBias,
+                       ITrendin       = .Object@MseDef@ITrendin)
 
     return (parameters)
   }
@@ -1593,6 +1594,11 @@ setMethod("setParameters", c("MseFramework"),
                                 }
 
                                 return (param)
+                              },
+
+                              ITrendin = function(param)
+                              {
+                                return (param)
                               })
 
     if (class(parameters) != "list")
@@ -1620,4 +1626,3 @@ setMethod("setParameters", c("MseFramework"),
     return (.Object)
   }
 )
-
