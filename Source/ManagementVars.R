@@ -332,3 +332,19 @@ setMethod("runProjection", c("ManagementVars", "ReferenceVars", "StockSynthesisM
     return (.Object)
   }
 )
+
+# -----------------------------------------------------------------------------
+
+setGeneric("changeMP_Names", function(.Object, ...) standardGeneric("changeMP_Names"))
+
+setMethod("changeMP_Names", c("ManagementVars"),
+  function(.Object, namedList)
+  {
+    if (.Object@MP@MP_Name %in% names(namedList))
+    {
+      .Object@MP@MP_Name <- namedList[[.Object@MP@MP_Name]]
+    }
+
+    return (.Object)
+  }
+)

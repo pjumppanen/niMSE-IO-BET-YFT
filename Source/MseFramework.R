@@ -430,6 +430,20 @@ setMethod("getMPs", c("MseFramework"),
 
 # -----------------------------------------------------------------------------
 
+setMethod("changeMP_Names", c("MseFramework"),
+  function(.Object, namedList)
+  {
+    for (idx in 1:length(.Object@StockSynthesisModels))
+    {
+      .Object@StockSynthesisModels[[idx]] <- changeMP_Names(.Object@StockSynthesisModels[[idx]], namedList)
+    }
+
+    return (.Object)
+  }
+)
+
+# -----------------------------------------------------------------------------
+
 setGeneric("msevizPerformanceData", function(.Object, ...) standardGeneric("msevizPerformanceData"))
 
 setMethod("msevizPerformanceData", c("MseFramework"),

@@ -785,6 +785,20 @@ setMethod("getMPs", c("StockSynthesisModel"),
 
 # -----------------------------------------------------------------------------
 
+setMethod("changeMP_Names", c("StockSynthesisModel"),
+  function(.Object, namedList)
+  {
+    for (idx in 1:length(.Object@ProjectedVars))
+    {
+      .Object@ProjectedVars[[idx]] <- changeMP_Names(.Object@ProjectedVars[[idx]], namedList)
+    }
+
+    return (.Object)
+  }
+)
+
+# -----------------------------------------------------------------------------
+
 setMethod("msevizPerformanceData", c("StockSynthesisModel"),
   function(.Object, mseFramework, df, AvgYears, prefix = "")
   {
