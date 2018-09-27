@@ -15,25 +15,23 @@ the command,
 
 source('RScripts/YFTandBET_demo_ script.R', print.eval=TRUE)
 
-Note that to run on Mac OS X or Linux it is necessary to build the 64 bit Mseom
-shared library (libMseom.so) and copy it to the lib sub-directory. A 64 bit
-Windows dll is only provided with this distribution at this point in time.
+Note that to run on Mac OS X or Linux it is necessary to build the niMseom
+shared library (libniMseom.so) and copy it to the lib/linux sub-directory.
+64 bit and 32 bit Windows dlls are provided with this distribution.
 
 To build the shared library on OS X, Linux, Cygwin or mingWin you must have
-automake and libtool installed. You can build the niMseom shared library for
-OS X or Linux by downloading the ADT project from https://github.com/pjumppanen/ADT ,
-then from a command prompt, change directory to the root folder for the project
-and execute the following shell commands.
+automake and libtool installed. To build the niMseom shared library for
+OS X or Linux go to the niMseom sub-directory at the command prompt and
+then run,
 
 chmod -R 755 ./*
 ./init_config.sh
-./configure --disable-tapenade --with-r-lib-path={path to the R shared library import lib} --with-r-include-path={path to the R include files}
 
-After configure script has run successfully build the library using the
-shell commands,
+then,
 
+./configure
 make clean
 make
 
-then copy the libMseom.so file from the folder adt/objs/sample/Mseom/.libs
-to the lib folder under the MSE-IO-BET-YFT project...
+then copy the libniMseom.so file to the lib/linux directory under the
+niMSE-IO-BET-YFT project...
