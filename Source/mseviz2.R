@@ -211,7 +211,7 @@ plotOMruns2 <- function(om.dt,
   if (doWorms)
   {
     MP  <- levels(factor(runs.dt$mp))[1]
-    tmp <- runs.dt[mp == MP & year == 2019 & qname == "SSB/SSBMSY",]
+    tmp <- runs.dt[mp == MP & year == firstMPYr & qname == "SSB/SSBMSY",]
 
     if (nrow(tmp) > 0)
     {
@@ -379,4 +379,3 @@ plotKobeCols <- function (om, runs, ylab="", lastHistYr=2015, firstMPYr = 2019)
 
     invisible()
 }
-
