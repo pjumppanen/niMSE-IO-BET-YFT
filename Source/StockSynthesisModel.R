@@ -659,7 +659,7 @@ setMethod("initialize", "StockSynthesisModel",
     # Do MSY projections
     .Object@RefVars <- new("ReferenceVars", .Object@ModelData, MseDef, Report)
 
-    .Object@HistoricVars <- new("ManagementVars", .Object@ModelData, TRUE, 0)
+    .Object@HistoricVars <- new("ManagementVars", .Object@ModelData, TRUE, 0, seeds=rep(-999,.Object@ModelData@nsim))
 
     rm(ssMod)
 
