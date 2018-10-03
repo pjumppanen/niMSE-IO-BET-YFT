@@ -55,6 +55,7 @@ kobeMPs2 <- function (data, x = "S3", y = "S4", xlim = 0.4, ylim = 1.4, probs = 
     return(p)
 }
 
+
 #DK changes:  indicator list, ref line colours reversed, backgournd color white
 plotBPs2 <- function (data, indicators =  c("S3", "S9", "S6", "S10", "S14"),
     target = missing, limit = missing, blackRef = missing)
@@ -108,6 +109,7 @@ plotBPs2 <- function (data, indicators =  c("S3", "S9", "S6", "S10", "S14"),
 
     return(p)
 }
+
 
 #DK changes: added SSB ref lines, independent Y axes, backgournd color white
 plotTOs2 <- function (data, x = "S10", indicators = c("S3", "S6", "S9", "S14"), probs = c(0.1,
@@ -187,9 +189,9 @@ plotOMruns2 <- function(om.dt,
                         lastHistYr = 2015,
                         firstMPYr = 2019,
                         doWorms = TRUE,
-                        CScale=0.001)
+                        CScale=0.001,
+                        title = "")
 {
-
   om.dt$data[om.dt$qname == "F/FMSY" & om.dt$data > 3] <- 3
   runs.dt$data[runs.dt$qname == "F/FMSY" & runs.dt$data > 3] <- 3
 
@@ -201,12 +203,8 @@ plotOMruns2 <- function(om.dt,
   runs  <- runs.dt[qname==indicator,]
   worms <- NULL
 
-
-
-
   # make this automatic when BET off by 1 year problem resolved
   #if(!missing(Cref) & indicator=="C") Cref <- om[om$year==lastHistYr,][1]
-
 
   if (doWorms)
   {
@@ -255,6 +253,7 @@ plotOMruns2 <- function(om.dt,
         theme_bw() +
         ylab(ylab) +
         xlab("") +
+        ggtitle(title) +
         geom_ribbon(aes(ymin = `10%`, ymax = `90%`), fill = ribCol, alpha = 0.4) +
         geom_ribbon(aes(ymin = `25%`, ymax = `75%`), fill = ribCol, alpha = 0.8) +
         geom_line(aes(y = `50%`))
@@ -316,18 +315,14 @@ plotOMruns2 <- function(om.dt,
 
   print(p1, vp = vplayout(1, 1:2))
   print(p2, vp = vplayout(2:4, 1:2))
-  invisible()
+
+  grid::popViewport()
 }
-
-
-
-
 
 
 #DK Kobe stacked column time series:
 plotKobeCols <- function (om, runs, ylab="", lastHistYr=2015, firstMPYr = 2019)
 {
-
    om   <- om[om$qname %in% c("PrGreen","PrOrange","PrYellow","PrRed"),]
    om   <- om[,as.list(mean(as.numeric(data))),keyby=list(year,qname),]
    om$qname <- factor(om$qname, levels=c("PrGreen","PrYellow","PrOrange","PrRed"))
@@ -375,7 +370,5 @@ plotKobeCols <- function (om, runs, ylab="", lastHistYr=2015, firstMPYr = 2019)
 
     print(p2, vp = vplayout(2:4, 1:2))
 
-
-
-    invisible()
+    grid::popViewport()
 }
