@@ -614,6 +614,26 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
                 }
       )
 
+    statHandlers[["TAC"]] <- list(
+      addFn = function(HistoricVars, RefVars, context)
+              {
+                #Catch
+                if (bHistoric)
+                {
+                  return (addRows(context, HistoricVars@TAC, "TAC"))
+
+                } else
+                {
+                  return (addRows(context, HistoricVars@TAC, "TAC"))
+                }
+              },
+
+      countFn = function(HistoricVars)
+                {
+                  return (HistoricVars@nyears * HistoricVars@nsim)
+                }
+      )
+
     statHandlers[["PrGreen"]] <- list(
       addFn = function(HistoricVars, RefVars, context)
               {
@@ -1314,7 +1334,7 @@ setMethod("performanceStatistics", c("MseFramework"),
           for (cn in 1:nparts)
           {
             cnames     <- if (nparts > 1) (paste(Statistic, cn, ".", sep="") %&% c("mean", percentiles)) else (Statistic %&% c("mean", percentiles))
-            SourceData <- karray(NA, ntotal_sims)
+            SourceData <- karray(as.double(NA), ntotal_sims)
             nsim       <- 1
 
             for (stockSynthesisModel in .Object@StockSynthesisModels)
