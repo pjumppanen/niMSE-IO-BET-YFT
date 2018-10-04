@@ -462,3 +462,41 @@ plotKobeCols <- function (om, runs, ylab="", lastHistYr=2015, firstMPYr = 2019)
 
     grid::popViewport()
 }
+
+
+plotCbyTAC <- function(runs.dt, firstMPYr = 2019)
+{
+  MPs   <- levels(factor(runs.dt$mp))
+  nrows <- floor(length(MPs)^0.5)
+  ncols <- ceiling(length(MPs) / nrows)
+  nrow  <- 1
+  ncol  <- 1
+
+  grid::pushViewport(grid::viewport(layout = grid::grid.layout(nrow = nrows, ncol = ncols)))
+
+  for (MP in MPs)
+  {
+    C         <- runs.dt[(mp==MP) & (qname=="C") & (year >= firstMPYr),][,data]
+    TAC       <- runs.dt[(mp==MP) & (qname=="TAC") & (year >= firstMPYr),][,data]
+    data      <- data.table(TAC=TAC, C=C)
+    xmax      <- max(C, TAC)
+    line_data <- data.table(x=c(0,xmax), y=c(0,xmax))
+
+    pl <- ggplot(data, aes(x = TAC, xmin=0, y = C, ymin=0)) +
+          geom_point(, alpha = 0.1) +
+          ggtitle(MP) +
+          geom_line(data=line_data, aes(x = x, y = y), colour='blue', alpha = 0.4, size=1)
+
+    print(pl, vp = grid::viewport(layout.pos.row = nrow, layout.pos.col = ncol))
+
+    ncol <- ncol + 1
+
+    if (ncol > ncols)
+    {
+      ncol <- 1
+      nrow <- nrow + 1
+    }
+  }
+
+  grid::popViewport()
+}
