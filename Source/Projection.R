@@ -149,18 +149,18 @@ setMethod("initialize", "Projection",
     .Object@nsubyears <- nsubyears
     .Object@which     <- sim
 
-    .Object@F             <- karray(NA, dim=c(allyears))
-    .Object@SSB           <- karray(NA, dim=c(npop, allyears))
-    .Object@B             <- karray(NA, dim=c(npop, allyears))
-    .Object@CM            <- karray(NA, dim=c(npop, allyears))
-    .Object@CMbyF         <- karray(NA, dim=c(npop, allyears, nfleets))
-    .Object@Rec           <- karray(NA, dim=c(allyears))
-    .Object@RecYrQtr      <- karray(NA, dim=c(allyears * nsubyears))
-    .Object@IobsArchive   <- karray(NA, dim=c(allyears))
-    .Object@IobsRArchive  <- karray(NA, dim=c(allyears, nareas))
-    .Object@CPUEobsY      <- karray(NA, dim=c(allyears))
-    .Object@TAC           <- karray(NA, dim=c(allyears))
-    .Object@TAEbyF        <- karray(NA, dim=c(allyears, nfleets))
+    .Object@F             <- karray(as.double(NA), dim=c(allyears))
+    .Object@SSB           <- karray(as.double(NA), dim=c(npop, allyears))
+    .Object@B             <- karray(as.double(NA), dim=c(npop, allyears))
+    .Object@CM            <- karray(as.double(NA), dim=c(npop, allyears))
+    .Object@CMbyF         <- karray(as.double(NA), dim=c(npop, allyears, nfleets))
+    .Object@Rec           <- karray(as.double(NA), dim=c(allyears))
+    .Object@RecYrQtr      <- karray(as.double(NA), dim=c(allyears * nsubyears))
+    .Object@IobsArchive   <- karray(as.double(NA), dim=c(allyears))
+    .Object@IobsRArchive  <- karray(as.double(NA), dim=c(allyears, nareas))
+    .Object@CPUEobsY      <- karray(as.double(NA), dim=c(allyears))
+    .Object@TAC           <- karray(as.double(NA), dim=c(allyears))
+    .Object@TAEbyF        <- karray(as.double(NA), dim=c(allyears, nfleets))
 
     NMass     <- karray(as.double(NA),c(npop,nages,allyears+1,nsubyears,nareas))  # N in mass
     Z         <- karray(as.double(NA),c(npop,nages,allyears+1,nsubyears,nareas))  # Z aggregated over fleets
