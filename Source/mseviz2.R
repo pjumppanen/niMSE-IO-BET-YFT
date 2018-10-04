@@ -190,7 +190,8 @@ plotOMruns2 <- function(om.dt,
                         firstMPYr = 2019,
                         doWorms = TRUE,
                         CScale=0.001,
-                        title = "")
+                        title = "",
+                        combined = FALSE)
 {
   om.dt$data[om.dt$qname == "F/FMSY" & om.dt$data > 3] <- 3
   runs.dt$data[runs.dt$qname == "F/FMSY" & runs.dt$data > 3] <- 3
@@ -199,12 +200,10 @@ plotOMruns2 <- function(om.dt,
   om.dt$data[om.dt$qname == "C"] <-  om.dt$data[om.dt$qname == "C"]*CScale
   runs.dt$data[runs.dt$qname == "C"] <-  runs.dt$data[runs.dt$qname == "C"]*CScale
 
-  om    <- om.dt[qname==indicator,]
-  runs  <- runs.dt[qname==indicator,]
-  worms <- NULL
-
-  # make this automatic when BET off by 1 year problem resolved
-  #if(!missing(Cref) & indicator=="C") Cref <- om[om$year==lastHistYr,][1]
+  om            <- om.dt[qname==indicator,]
+  runs          <- runs.dt[qname==indicator,]
+  worms         <- NULL
+  wormsHistoric <- NULL
 
   if (doWorms)
   {
@@ -215,28 +214,51 @@ plotOMruns2 <- function(om.dt,
     {
       quants   <- quantile(tmp$data, probs = c(0.25,0.5,0.75), type=1)
       wormNums <- as.integer(unlist(tmp[tmp$data %in% quants, 'iter']))
+
       worm1    <- runs[iter == wormNums[1]]
       worm1    <- worm1[,c(1,5,2)]
 
       colnames(worm1)[3] <- "worm.1"
+
+      wormHistoric1 <- om[iter == wormNums[1]]
+      wormHistoric1 <- wormHistoric1[,c(1,2)]
+
+      colnames(wormHistoric1)[2] <- "worm.1"
 
       worm2   <- runs[iter == wormNums[2]]
       worm2   <- worm2[,c(1,5,2)]
 
       colnames(worm2)[3] <- "worm.2"
 
+      wormHistoric2 <- om[iter == wormNums[2]]
+      wormHistoric2 <- wormHistoric2[,c(1,2)]
+
+      colnames(wormHistoric2)[2] <- "worm.2"
+
       worm3   <- runs[iter == wormNums[3]]
       worm3   <- worm3[,c(1,5,2)]
 
       colnames(worm3)[3] <- "worm.3"
 
+      wormHistoric3 <- om[iter == wormNums[3]]
+      wormHistoric3 <- wormHistoric3[,c(1,2)]
+
+      colnames(wormHistoric3)[2] <- "worm.3"
+
       worms <- worm1[worm2[worm3, on=.(year,mp)],on=.(year,mp)]
+
+      wormsHistoric <- wormHistoric1[wormHistoric2[wormHistoric3, on=.(year)],on=.(year)]
     }
   }
 
   if (om$qname[1] == "F/FMSY")
   {
     runs$data[runs$data>3] <- 3
+  }
+
+  if (combined && (max(om$iter) != max(runs$iter)))
+  {
+    stop("ERROR: om.dt and runs.dt must have the same iter numbers for a combined plot")
   }
 
   if ("iter" %in% colnames(om) && length(unique(om$iter)) > 1)
@@ -248,26 +270,6 @@ plotOMruns2 <- function(om.dt,
     om[, `:=`(`50%`, data)]
   }
 
-  p1 <- ggplot(om, aes(x = year, y = `50%`, ymin=0)) +
-        geom_vline(aes(xintercept = lastHistYr)) +
-        theme_bw() +
-        ylab(ylab) +
-        xlab("") +
-        ggtitle(title) +
-        geom_ribbon(aes(ymin = `10%`, ymax = `90%`), fill = ribCol, alpha = 0.4) +
-        geom_ribbon(aes(ymin = `25%`, ymax = `75%`), fill = ribCol, alpha = 0.8) +
-        geom_line(aes(y = `50%`))
-
-  if (!missing(limit))
-  {
-    p1 <- p1 + geom_hline(aes(yintercept = limit), colour = "red", linetype = 2)
-  }
-
-  if (!missing(target))
-  {
-    p1 <- p1 + geom_hline(aes(yintercept = target), colour = "green", linetype = 2)
-  }
-
   runs <- runs[, as.list(quantile(data, probs = probs, na.rm = TRUE)), keyby = list(year, mp)]
 
   if (!is.null(worms))
@@ -275,48 +277,136 @@ plotOMruns2 <- function(om.dt,
     runs <- runs[worms, on=.(year,mp)]
   }
 
-  p2 <- ggplot(runs, aes(x = year, ymin=0)) +
-        geom_vline(aes(xintercept = lastHistYr)) +
-        geom_vline(aes(xintercept = firstMPYr), linetype=2) +
-        ylab(ylab) +
-        theme_bw() +
-        geom_ribbon(aes(ymin = `10%`, ymax = `90%`), fill = ribCol, alpha = 0.4) +
-        geom_ribbon(aes(ymin = `25%`, ymax = `75%`), fill = ribCol, alpha = 0.8) +
-        geom_line(aes(y = `50%`), size=1)
-        facet_wrap(~mp, ncol = 2)
-
-  if (!is.null(worms))
+  if (combined)
   {
-    p2 <- p2 + geom_line(aes(y = worm.1), colour = 'blue') +
-               geom_line(aes(y = worm.2), colour = 'red') +
-               geom_line(aes(y = worm.3), colour = 'purple')
+    if (!is.null(wormsHistoric))
+    {
+      om <- om[wormsHistoric, on=.(year)]
+    }
+
+    MPs           <- levels(factor(runs.dt$mp))
+    selected.cols <- which((names(runs) != "mp") == TRUE)
+    nrows         <- floor(length(MPs)^0.5)
+    ncols         <- ceiling(length(MPs) / nrows)
+    nrow          <- 1
+    ncol          <- 1
+
+    grid::pushViewport(grid::viewport(layout = grid::grid.layout(nrow = nrows, ncol = ncols)))
+
+    for (MP in MPs)
+    {
+      data <- rbind(om, runs[mp==MP, selected.cols, with=FALSE])
+
+      pl <- ggplot(data, aes(x = year, ymin=0)) +
+            geom_vline(aes(xintercept = lastHistYr)) +
+            geom_vline(aes(xintercept = firstMPYr), linetype=2) +
+            ylab(ylab) +
+            theme_bw() +
+            ggtitle(MP) +
+            geom_ribbon(aes(ymin = `10%`, ymax = `90%`), fill = ribCol, alpha = 0.4) +
+            geom_ribbon(aes(ymin = `25%`, ymax = `75%`), fill = ribCol, alpha = 0.8) +
+            geom_line(aes(y = `50%`), size=1)
+
+      if (!is.null(worms))
+      {
+        pl <- pl + geom_line(aes(y = worm.1), colour = 'blue') +
+                   geom_line(aes(y = worm.2), colour = 'red') +
+                   geom_line(aes(y = worm.3), colour = 'purple')
+      }
+
+      if (!missing(Cref))
+      {
+        pl <- pl + geom_hline(aes(yintercept = Cref*CScale), colour = "black", linetype = 2)
+      }
+
+      if (!missing(limit))
+      {
+        pl <- pl + geom_hline(aes(yintercept = limit), colour = "red", linetype = 2)
+      }
+
+      if (!missing(target))
+      {
+        pl <- pl + geom_hline(aes(yintercept = target), colour = "green", linetype = 2)
+      }
+
+      print(pl, vp = grid::viewport(layout.pos.row = nrow, layout.pos.col = ncol))
+
+      ncol <- ncol + 1
+
+      if (ncol > ncols)
+      {
+        ncol <- 1
+        nrow <- nrow + 1
+      }
+    }
+
+    grid::popViewport()
   }
-
-  p2 <- p2 + facet_wrap(~mp, ncol = 2)
-
-  if (!missing(Cref))
+  else
   {
-    p2 <- p2 + geom_hline(aes(yintercept = Cref*CScale), colour = "black", linetype = 2)
+    p1 <- ggplot(om, aes(x = year, y = `50%`, ymin=0)) +
+          geom_vline(aes(xintercept = lastHistYr)) +
+          theme_bw() +
+          ylab(ylab) +
+          xlab("") +
+          ggtitle(title) +
+          geom_ribbon(aes(ymin = `10%`, ymax = `90%`), fill = ribCol, alpha = 0.4) +
+          geom_ribbon(aes(ymin = `25%`, ymax = `75%`), fill = ribCol, alpha = 0.8) +
+          geom_line(aes(y = `50%`))
+
+    if (!missing(limit))
+    {
+      p1 <- p1 + geom_hline(aes(yintercept = limit), colour = "red", linetype = 2)
+    }
+
+    if (!missing(target))
+    {
+      p1 <- p1 + geom_hline(aes(yintercept = target), colour = "green", linetype = 2)
+    }
+
+    p2 <- ggplot(runs, aes(x = year, ymin=0)) +
+          geom_vline(aes(xintercept = lastHistYr)) +
+          geom_vline(aes(xintercept = firstMPYr), linetype=2) +
+          ylab(ylab) +
+          theme_bw() +
+          geom_ribbon(aes(ymin = `10%`, ymax = `90%`), fill = ribCol, alpha = 0.4) +
+          geom_ribbon(aes(ymin = `25%`, ymax = `75%`), fill = ribCol, alpha = 0.8) +
+          geom_line(aes(y = `50%`), size=1)
+          facet_wrap(~mp, ncol = 2)
+
+    if (!is.null(worms))
+    {
+      p2 <- p2 + geom_line(aes(y = worm.1), colour = 'blue') +
+                 geom_line(aes(y = worm.2), colour = 'red') +
+                 geom_line(aes(y = worm.3), colour = 'purple')
+    }
+
+    p2 <- p2 + facet_wrap(~mp, ncol = 2)
+
+    if (!missing(Cref))
+    {
+      p2 <- p2 + geom_hline(aes(yintercept = Cref*CScale), colour = "black", linetype = 2)
+    }
+
+    if (!missing(limit))
+    {
+      p2 <- p2 + geom_hline(aes(yintercept = limit), colour = "red", linetype = 2)
+    }
+
+    if (!missing(target))
+    {
+      p2 <- p2 + geom_hline(aes(yintercept = target), colour = "green", linetype = 2)
+    }
+
+    grid::pushViewport(grid::viewport(layout = grid::grid.layout(4, 2)))
+
+    vplayout <- function(x, y) grid::viewport(layout.pos.row = x, layout.pos.col = y)
+
+    print(p1, vp = vplayout(1, 1:2))
+    print(p2, vp = vplayout(2:4, 1:2))
+
+    grid::popViewport()
   }
-
-  if (!missing(limit))
-  {
-    p2 <- p2 + geom_hline(aes(yintercept = limit), colour = "red", linetype = 2)
-  }
-
-  if (!missing(target))
-  {
-    p2 <- p2 + geom_hline(aes(yintercept = target), colour = "green", linetype = 2)
-  }
-
-  grid::pushViewport(grid::viewport(layout = grid::grid.layout(4, 2)))
-
-  vplayout <- function(x, y) grid::viewport(layout.pos.row = x, layout.pos.col = y)
-
-  print(p1, vp = vplayout(1, 1:2))
-  print(p2, vp = vplayout(2:4, 1:2))
-
-  grid::popViewport()
 }
 
 
