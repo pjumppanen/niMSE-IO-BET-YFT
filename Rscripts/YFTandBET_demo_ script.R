@@ -106,6 +106,9 @@ plotOMruns2(histd, projd, "CPUE(aggregate)")
 plotOMruns2(histd, projd, "C")
 plotOMruns2(histd, projd, "F/FMSY")
 
+# check TAC realisation
+plotCbyTAC(projd, firstMPYr = 2019)
+
 AllPerformanceMeasures <- c("SBoSB0","minSBoSB0","SBoSBMSY","FoFMSY","FoFtarg","GK","RK","PrSBgtSBMSY","PrSBgt0.2SB0","PrSBgtSBlim","Y","relCPUE","YoMSY","APCY","YcvPct","PrYlt0.1MSY")
 YearsAveraged          <- 20
 
@@ -150,6 +153,9 @@ plotOMruns2(histd, projd, "SSB/SSBMSY")
 plotOMruns2(histd, projd, "CPUE(aggregate)")
 plotOMruns2(histd, projd, "C")
 plotOMruns2(histd, projd, "F/FMSY")
+
+# check TAC realisation
+plotCbyTAC(projd, firstMPYr = 2019)
 
 # Do various performance plots
 perfd <- msevizPerformanceData(OMyft2r108, YearsAveraged)
