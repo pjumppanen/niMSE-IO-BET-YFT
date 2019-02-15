@@ -236,6 +236,13 @@ findTable2_Data <- function(years, results, MPs)
 #                 mseOMrefB18.2.304.TB4)
 #
 # createTable1(20, results, MPs=finalMPList, MPs_short=finalMPList_short)
+#
+# IMPORTANT
+# ---------
+# If the model projections in results were already run with short MP name
+# substitutions then the MPs argument should contain the short names for the
+# MPs. If this isn't the case then the call to findTable1_Data() will return
+# no data and no table will be created.
 #------------------------------------------------------------------------------
 createTable1 <- function(years, results, MPs, MPs_short, prefix="")
 {
@@ -329,6 +336,13 @@ createTable1 <- function(years, results, MPs, MPs_short, prefix="")
 #                 mseOMrefB18.2.304.TB4)
 #
 # createTable2(20, results, MPs=finalMPList, MPs_short=finalMPList_short)
+#
+# IMPORTANT
+# ---------
+# If the model projections in results were already run with short MP name
+# substitutions then the MPs argument should contain the short names for the
+# MPs. If this isn't the case then the call to findTable2_Data() will return
+# no data and no table will be created.
 #------------------------------------------------------------------------------
 createTable2 <- function(years, results, MPs, MPs_short, prefix="")
 {
