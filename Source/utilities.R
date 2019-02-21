@@ -586,7 +586,7 @@ indicatorSensitivityBPs <- function(mseObj,
 
     if (!is.na(outputPath))
     {
-      emf(file=outputPath %&% prefix %&% "BPs" %&% gsub("[^0-9A-Za-z.]", "_", indicator_name) %&% ".emf", width=6, height=3)
+      emf(file=outputPath %&% prefix %&% "BPs" %&% gsub("[^0-9A-Za-z.]", "_", indicator_name) %&% ".emf", width=6, height=2.25, pointsize = 8)
       pars <- c(pars, outlwd=0)
     }
 
