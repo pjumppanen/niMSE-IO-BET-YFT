@@ -1,2 +1,4 @@
 # ignore R binary files
 #*.RDA
+*.emf
+*.xml

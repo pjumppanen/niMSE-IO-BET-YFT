@@ -462,9 +462,12 @@ setMethod("msevizPerformanceData", c("MseFramework"),
       AvgYears    <- (AvgFirstYr - .Object@MseDef@lastCalendarYr):(AvgLastYr - .Object@MseDef@lastCalendarYr)
     }
 
-    for (om in .Object@StockSynthesisModels)
+    for (cn in 1:length(.Object@StockSynthesisModels))
     {
-      df <- msevizPerformanceData(om, .Object, df, AvgYears, prefix)
+      om         <- .Object@StockSynthesisModels[[cn]]
+      model_name <- .Object@MseDef@OMList[[cn]]
+
+      df <- msevizPerformanceData(om, .Object, df, AvgYears, prefix=prefix, model_name=model_name)
     }
 
     return (as.data.table(df))

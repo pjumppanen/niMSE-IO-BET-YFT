@@ -800,7 +800,7 @@ setMethod("changeMP_Names", c("StockSynthesisModel"),
 # -----------------------------------------------------------------------------
 
 setMethod("msevizPerformanceData", c("StockSynthesisModel"),
-  function(.Object, mseFramework, df, AvgYears, prefix = "")
+  function(.Object, mseFramework, df, AvgYears, prefix = "", model_name=NA)
   {
     if (class(mseFramework) != "MseFramework")
     {
@@ -816,15 +816,32 @@ setMethod("msevizPerformanceData", c("StockSynthesisModel"),
       C6   <- rep(paste(prefix, ManagementVars@MP@MP_Name, sep=""), times=ManagementVars@nsim)
       df   <- NULL
 
-      addRows <- function(df, data, indicator, name)
+      if (is.na(model_name))
       {
-        C1 <- rep(indicator, times=ManagementVars@nsim)
-        C3 <- data
-        C5 <- rep(name, times=ManagementVars@nsim)
+        addRows <- function(df, data, indicator, name)
+        {
+          C1 <- rep(indicator, times=ManagementVars@nsim)
+          C3 <- data
+          C5 <- rep(name, times=ManagementVars@nsim)
 
-        df <- rbind(data.frame(df), data.frame(indicator=C1, year=C2, data=C3, iter=C4, name=C5, mp=C6))
+          df <- rbind(data.frame(df), data.frame(indicator=C1, year=C2, data=C3, iter=C4, name=C5, mp=C6))
 
-        return (df)
+          return (df)
+        }
+      }
+      else
+      {
+        addRows <- function(df, data, indicator, name)
+        {
+          C1 <- rep(indicator, times=ManagementVars@nsim)
+          C3 <- data
+          C5 <- rep(name, times=ManagementVars@nsim)
+          C7 <- rep(model_name, times=ManagementVars@nsim)
+
+          df <- rbind(data.frame(df), data.frame(indicator=C1, year=C2, data=C3, iter=C4, name=C5, mp=C6, model=C7))
+
+          return (df)
+        }
       }
 
       AvgYearsm1 <- AvgYears - 1
