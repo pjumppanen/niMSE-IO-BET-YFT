@@ -424,3 +424,178 @@ createTable2 <- function(years, results, MPs, MPs_short, prefix="")
   writeLines(xml, con=Xmlfile)
   close(Xmlfile)
 }
+
+
+#------------------------------------------------------------------------------
+# Helper function for standard BET plots
+#------------------------------------------------------------------------------
+betPlots.f <- function(mseObj,
+                       SBLim,
+                       SBTarg,
+                       FLim,
+                       FTarg,
+                       Cref=missing,
+                       YearsAveraged=20,
+                       outputPath=NA,
+                       prefix="")
+{
+  require(devEMF)
+
+  if (!is.missing(Cref))
+  {
+    names(Cref) <- "S10"
+  }
+
+  BETTargs <- c(SBTarg, FTarg)
+  BETLims  <- c(SBLim, FLim)
+
+  names(BETTargs) <- c("S3", "S4")
+  names(BETLims)  <- c("S3", "S4")
+
+  beginDraw <- function(filename, width=6, height=6, outputPath=NA)
+  {
+    if (is.na(outputPath))
+    {
+      windows()
+    }
+    else
+    {
+      emf(file=outputPath %&% filename %&% ".emf", width=width, height=height)
+    }
+  }
+
+  endDraw <- function(outputPath=NA)
+  {
+    if (!is.na(outputPath))
+    {
+      dev.off()
+    }
+  }
+
+  histd <- msevizHistoricTimeSeriesData(mseObj)
+  projd <- msevizProjectedTimeSeriesData(mseObj)
+
+  beginDraw(prefix %&% "Recruitment", width=6, height=6, outputPath=outputPath)
+  plotOMruns2(histd, projd, "Recruitment", ylab= "Recruitment")
+  endDraw(outputPath=outputPath)
+
+  beginDraw(prefix %&% "SSB_SSBMSY", width=6, height=6, outputPath=outputPath)
+  plotOMruns2(histd, projd, "SSB/SSBMSY", limit=SBLim, target=SBTarg, ylab= "SSB/SSBMSY")
+  endDraw(outputPath=outputPath)
+
+  beginDraw(prefix %&% "F_FMSY", width=6, height=6, outputPath=outputPath)
+  plotOMruns2(histd, projd, "F/FMSY", limit=FLim, target=FTarg, ylab= "F/FMSY")
+  endDraw(outputPath=outputPath)
+
+  beginDraw(prefix %&% "C", width=6, height=6, outputPath=outputPath)
+  plotOMruns2(histd, projd, "C", Cref=Cref, ylab= "Catch (1000t)")
+  endDraw(outputPath=outputPath)
+
+  beginDraw(prefix %&% "CPUE", width=6, height=6, outputPath=outputPath)
+  plotOMruns2(histd, projd, "CPUE(aggregate)", Cref=Cref, ylab= "CPUE(aggregate)")
+  endDraw(outputPath=outputPath)
+
+  beginDraw(prefix %&% "KobeCols", width=6, height=6, outputPath=outputPath)
+  plotKobeCols(om=histd[histd$qname %in% c("PrGreen","PrOrange","PrYellow","PrRed"),], runs=projd[projd$qname%in% c("PrGreen","PrOrange","PrYellow","PrRed"),])
+  endDraw(outputPath=outputPath)
+
+  perfd <- msevizPerformanceData(mseObj, YearsAveraged)
+
+  beginDraw(prefix %&% "BPs", width=6, height=3.375, outputPath=outputPath)
+  grid::pushViewport(grid::viewport(layout = grid::grid.layout(nrow = 1, ncol = 1)))
+  print(plotBPs2(perfd, limit=BETLims, target=BETTargs, indicators = c("S3", "S9", "S6", "S10", "S14")), vp = grid::viewport(layout.pos.row = 1, layout.pos.col = 1))
+  grid::popViewport()
+  endDraw(outputPath=outputPath)
+
+  beginDraw(prefix %&% "TOs", width=6, height=3.375, outputPath=outputPath)
+  grid::pushViewport(grid::viewport(layout = grid::grid.layout(nrow = 1, ncol = 1)))
+  print(plotTOs2(perfd, limit=BETLims, target=BETTargs, indicators = c("S9", "S3", "S6", "S14")), vp = grid::viewport(layout.pos.row = 1, layout.pos.col = 1))
+  grid::popViewport()
+  endDraw(outputPath=outputPath)
+
+  beginDraw(prefix %&% "KobeMP", width=6, height=6, outputPath=outputPath)
+  grid::pushViewport(grid::viewport(layout = grid::grid.layout(nrow = 1, ncol = 1)))
+  print(kobeMPs2(perfd, xlim=SBLim, ylim=FLim, ymax=3), vp = grid::viewport(layout.pos.row = 1, layout.pos.col = 1))
+  grid::popViewport()
+  endDraw(outputPath=outputPath)
+}
+
+
+#------------------------------------------------------------------------------
+# Helper function for box plotting indicator parameter sensitivty
+#------------------------------------------------------------------------------
+indicatorSensitivityBPs <- function(mseObj,
+                                    AvgFirstYr,
+                                    AvgLastYr=NA,
+                                    colourPalette=missing,
+                                    outputPath=NA,
+                                    prefix="")
+{
+  require(devEMF)
+
+  dt        <- msevizPerformanceData(mseObj, AvgFirstYr, AvgLastYr=AvgLastYr)
+  no_params <- length(unlist(strsplit(mseObj@MseDef@OMList[[1]], "[_]")))
+
+  if (!missing(colourPalette))
+  {
+    group_colours <- colourPalette
+  }
+  else
+  {
+    group_colours <- terrain.colors(n=no_params, alpha = 1)
+  }
+
+  indicator_names <- levels(dt$name)
+
+  for (indicator_name in indicator_names)
+  {
+    dt_indicator  <- dt[name==indicator_name][,.(data,model)]
+    dt_boxplot    <- NULL
+    param_count   <- 1
+    param_colours <- list()
+    param_map     <- list()
+    display_names <- c()
+
+    for (param in 1:no_params)
+    {
+      param_names <- unlist(lapply(strsplit(as.character(dt_indicator$model),"_"), FUN=function(x){x[param]}))
+
+      for (param_name in levels(factor(param_names)))
+      {
+        filtered_param_name                  <- sprintf("%04d", param_count)
+        param_colours[[filtered_param_name]] <- group_colours[param]
+        param_map[[param_name]]              <- filtered_param_name
+        display_names                        <- c(display_names, param_name)
+        param_count                          <- param_count + 1
+      }
+
+      filtered_param_names <- sapply(param_names, FUN=function(x){param_map[[x]]})
+
+      if (is.null(dt_boxplot))
+      {
+        dt_boxplot <- data.table(param=filtered_param_names, data=dt_indicator$data, stringsAsFactors=TRUE)
+      }
+      else
+      {
+        dt_boxplot <- data.table(param=c(as.character(dt_boxplot$param), filtered_param_names), data=c(dt_boxplot$data, dt_indicator$data), stringsAsFactors=TRUE)
+      }
+    }
+
+    colours <- sapply(levels(dt_boxplot$param), FUN=function(x){param_colours[[x]]})
+    pars    <- list(boxwex=0.8, staplewex=0.5, outwex=0.5)
+
+    if (!is.na(outputPath))
+    {
+      emf(file=outputPath %&% prefix %&% "BPs" %&% gsub("[^0-9A-Za-z.]", "_", indicator_name) %&% ".emf", width=6, height=3)
+      pars <- c(pars, outlwd=0)
+    }
+
+    boxplot(data ~ param, data=dt_boxplot, col=colours, names=display_names, pars=pars)
+    title(indicator_name)
+
+    if (!is.na(outputPath))
+    {
+      dev.off()
+    }
+  }
+}
