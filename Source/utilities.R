@@ -529,7 +529,10 @@ indicatorSensitivityBPs <- function(mseObj,
                                     AvgLastYr=NA,
                                     colourPalette=missing,
                                     outputPath=NA,
-                                    prefix="")
+                                    prefix="",
+                                    print.width=6,
+                                    print.height=2.25,
+                                    print.fontscale=1)
 {
   require(devEMF)
 
@@ -586,7 +589,7 @@ indicatorSensitivityBPs <- function(mseObj,
 
     if (!is.na(outputPath))
     {
-      emf(file=outputPath %&% prefix %&% "BPs" %&% gsub("[^0-9A-Za-z.]", "_", indicator_name) %&% ".emf", width=6, height=2.25, pointsize = 8)
+      emf(file=outputPath %&% prefix %&% "BPs" %&% gsub("[^0-9A-Za-z.]", "_", indicator_name) %&% ".emf", width=print.width, height=print.height, pointsize = print.fontscale * 7)
       pars <- c(pars, outlwd=0)
     }
 
