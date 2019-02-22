@@ -530,7 +530,7 @@ indicatorSensitivityBPs <- function(mseObj,
                                     colourPalette=missing,
                                     outputPath=NA,
                                     prefix="",
-                                    print.width=6,
+                                    print.width=6.25,
                                     print.height=2.25,
                                     print.fontscale=1)
 {
@@ -545,7 +545,7 @@ indicatorSensitivityBPs <- function(mseObj,
   }
   else
   {
-    group_colours <- terrain.colors(n=no_params, alpha = 1)
+    group_colours <- terrain.colors(n=no_params + 1, alpha = 1)
   }
 
   indicator_names <- levels(dt$name)
@@ -555,9 +555,9 @@ indicatorSensitivityBPs <- function(mseObj,
     dt_indicator  <- dt[name==indicator_name][,.(data,model)]
     dt_boxplot    <- NULL
     param_count   <- 1
-    param_colours <- list()
-    param_map     <- list()
-    display_names <- c()
+    param_colours <- list("0000"=group_colours[1])
+    param_map     <- list(All="0000")
+    display_names <- c("All")
 
     for (param in 1:no_params)
     {
@@ -566,7 +566,7 @@ indicatorSensitivityBPs <- function(mseObj,
       for (param_name in levels(factor(param_names)))
       {
         filtered_param_name                  <- sprintf("%04d", param_count)
-        param_colours[[filtered_param_name]] <- group_colours[param]
+        param_colours[[filtered_param_name]] <- group_colours[param + 1]
         param_map[[param_name]]              <- filtered_param_name
         display_names                        <- c(display_names, param_name)
         param_count                          <- param_count + 1
@@ -584,12 +584,14 @@ indicatorSensitivityBPs <- function(mseObj,
       }
     }
 
+    dt_boxplot <- data.table(param=c(as.character(dt_boxplot$param), rep("0000", times=length(dt_boxplot$param))), data=c(dt_boxplot$data, dt_boxplot$data), stringsAsFactors=TRUE)
+
     colours <- sapply(levels(dt_boxplot$param), FUN=function(x){param_colours[[x]]})
-    pars    <- list(boxwex=0.8, staplewex=0.5, outwex=0.5)
+    pars    <- list(boxwex=0.8, staplewex=0.5, outwex=0.5, las=2)
 
     if (!is.na(outputPath))
     {
-      emf(file=outputPath %&% prefix %&% "BPs" %&% gsub("[^0-9A-Za-z.]", "_", indicator_name) %&% ".emf", width=print.width, height=print.height, pointsize = print.fontscale * 7)
+      emf(file=outputPath %&% prefix %&% "BPs_" %&% gsub("[^0-9A-Za-z.]", "_", indicator_name) %&% ".emf", width=print.width, height=print.height, pointsize = print.fontscale * 7)
       pars <- c(pars, outlwd=0)
     }
 
