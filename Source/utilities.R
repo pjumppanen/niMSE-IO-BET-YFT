@@ -524,9 +524,21 @@ betPlots.f <- function(mseObj,
 #------------------------------------------------------------------------------
 # Helper function for box plotting indicator parameter sensitivty
 #------------------------------------------------------------------------------
-indicatorSensitivityBPs <- function(mseObj,
-                                    AvgFirstYr,
-                                    AvgLastYr=NA,
+# This function creates box plot sensitivities broken down by model parameter.
+# It requires as input, the data.table extracted from the mse object by call
+# to the msevizPerformanceData() function. For example,
+#
+# dt <- msevizPerformanceData(mseObj, 20)
+# indicatorSensitivityBPs(dt, colourPalette=rainbow(10, s=0.6))
+#
+# Specifying an output path will force the creation of .emf windows metafile
+# output instead of outputting to the screen. The print.* arguments allow some
+# control over how that output will appear.
+#
+# Keeping the data.table creation outside of this function adds flexibility as
+# the data.table output can be pre-filtered using data.table functionality.
+#------------------------------------------------------------------------------
+indicatorSensitivityBPs <- function(dt,
                                     colourPalette=missing,
                                     outputPath=NA,
                                     prefix="",
@@ -536,8 +548,7 @@ indicatorSensitivityBPs <- function(mseObj,
 {
   require(devEMF)
 
-  dt        <- msevizPerformanceData(mseObj, AvgFirstYr, AvgLastYr=AvgLastYr)
-  no_params <- length(unlist(strsplit(mseObj@MseDef@OMList[[1]], "[_]")))
+  no_params <- length(unlist(strsplit(as.character(dt$model[1]), "[_]")))
 
   if (!missing(colourPalette))
   {
