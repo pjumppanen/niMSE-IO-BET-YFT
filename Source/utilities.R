@@ -441,7 +441,7 @@ betPlots.f <- function(mseObj,
 {
   require(devEMF)
 
-  if (!is.missing(Cref))
+  if (!missing(Cref))
   {
     names(Cref) <- "S10"
   }
