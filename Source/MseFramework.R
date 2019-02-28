@@ -845,10 +845,26 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
     row_count <- row_count - 1
 
     # create result data.table
-    dt <- data.table(year=as.integer(rep(0, times=row_count)),
-                     data=as.double(rep(0, times=row_count)),
-                     iter=as.integer(rep(0, times=row_count)),
-                     qname=rep("", times=row_count))
+    if (bHistoric)
+    {
+      dt <- data.table(year=as.integer(rep(0, times=row_count)),
+                       data=as.double(rep(0, times=row_count)),
+                       iter=as.integer(rep(0, times=row_count)),
+                       qname=rep("", times=row_count),
+                       model=rep("", times=row_count),
+                       stringsAsFactors=TRUE)
+
+    } else
+    {
+      dt <- data.table(mp=rep("", times=row_count),
+                       year=as.integer(rep(0, times=row_count)),
+                       data=as.double(rep(0, times=row_count)),
+                       iter=as.integer(rep(0, times=row_count)),
+                       qname=rep("", times=row_count),
+                       model=rep("", times=row_count),
+                       stringsAsFactors=TRUE)
+    }
+
 
     # fill result data.table with data
     res <- list(dt=dt, origin=0, iter=0)
@@ -860,8 +876,11 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
         handler  <- statHandlers[[Indicator]]
         res$iter <- 0
 
-        for (om in .Object@StockSynthesisModels)
+        for (cn in 1:length(.Object@StockSynthesisModels))
         {
+          om         <- .Object@StockSynthesisModels[[cn]]
+          model_name <- .Object@MseDef@OMList[[cn]]
+
           if (bHistoric)
           {
             SY  <- as.matrix(expand.grid(nsims=1:om@ModelData@nsim, nyrs=1:om@HistoricVars@nyears))
@@ -876,11 +895,13 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
               C2          <- data[SY[,2]]
               C3          <- as.integer(context$iter + SY[,1])
               C4          <- rep(name, times=length(SY[,2]))
+              C5          <- rep(model_name, times=length(SY[,2]))
 
               set(context$dt, rows, "year",  C1)
               set(context$dt, rows, "data",  C2)
               set(context$dt, rows, "iter",  C3)
               set(context$dt, rows, "qname", C4)
+              set(context$dt, rows, "model", C5)
 
               context$origin <- next_origin
 
@@ -908,12 +929,14 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
                 C3          <- data[SY]
                 C4          <- as.integer(context$iter + SY[,1])
                 C5          <- rep(name, times=length(SY[,1]))
+                C6          <- rep(model_name, times=length(SY[,1]))
 
                 set(context$dt, rows, "mp",    C1)
                 set(context$dt, rows, "year",  C2)
                 set(context$dt, rows, "data",  C3)
                 set(context$dt, rows, "iter",  C4)
                 set(context$dt, rows, "qname", C5)
+                set(context$dt, rows, "model", C6)
 
                 context$origin <- next_origin
 
@@ -1305,7 +1328,7 @@ setMethod("performanceStatistics", c("MseFramework"),
                                      return (paste(name, "=as.double(rep(NA, times=nMPs))", sep=""))
                                    })
 
-    codeExpr <- paste(codeExpr, paste(extraColumns, collapse=","), ")", sep="")
+    codeExpr <- paste(codeExpr, paste(extraColumns, collapse=","), ", stringsAsFactors=TRUE)", sep="")
     dt       <- eval(parse(text=codeExpr))
     nrow     <- 1
     LUT      <- list()

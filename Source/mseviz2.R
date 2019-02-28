@@ -191,8 +191,38 @@ plotOMruns2 <- function(om.dt,
                         doWorms = TRUE,
                         CScale=0.001,
                         title = "",
-                        combined = FALSE)
+                        combined = FALSE,
+                        OrList = c(),
+                        AndList = c())
 {
+  # subset data based on model parameters
+  if (length(OrList > 0) || length(AndList > 0))
+  {
+    Use.om   <- TRUE
+    Use.runs <- TRUE
+
+    for (filter in OrList)
+    {
+      Use.om   <- grepl(filter, om.dt$model) | Use.om
+      Use.runs <- grepl(filter, runs.dt$model) | Use.runs
+    }
+
+    if (length(OrList) == 0)
+    {
+      Use.om   <- TRUE
+      Use.runs <- TRUE
+    }
+
+    for (filter in AndList)
+    {
+      Use.om   <- grepl(filter, om.dt$model) & Use.om
+      Use.runs <- grepl(filter, runs.dt$model) & Use.runs
+    }
+
+    om.dt   <- om.dt[Use.om,]
+    runs.dt <- runs.dt[Use.runs,]
+  }
+
   om.dt$data[om.dt$qname == "F/FMSY" & om.dt$data > 3] <- 3
   runs.dt$data[runs.dt$qname == "F/FMSY" & runs.dt$data > 3] <- 3
 
@@ -216,32 +246,32 @@ plotOMruns2 <- function(om.dt,
       wormNums <- as.integer(unlist(tmp[tmp$data %in% quants, 'iter']))
 
       worm1    <- runs[iter == wormNums[1]]
-      worm1    <- worm1[,c(1,5,2)]
+      worm1    <- worm1[,c("year","mp","data")]
 
       colnames(worm1)[3] <- "worm.1"
 
       wormHistoric1 <- om[iter == wormNums[1]]
-      wormHistoric1 <- wormHistoric1[,c(1,2)]
+      wormHistoric1 <- wormHistoric1[,c("year","data")]
 
       colnames(wormHistoric1)[2] <- "worm.1"
 
       worm2   <- runs[iter == wormNums[2]]
-      worm2   <- worm2[,c(1,5,2)]
+      worm2   <- worm2[,c("year","mp","data")]
 
       colnames(worm2)[3] <- "worm.2"
 
       wormHistoric2 <- om[iter == wormNums[2]]
-      wormHistoric2 <- wormHistoric2[,c(1,2)]
+      wormHistoric2 <- wormHistoric2[,c("year","data")]
 
       colnames(wormHistoric2)[2] <- "worm.2"
 
       worm3   <- runs[iter == wormNums[3]]
-      worm3   <- worm3[,c(1,5,2)]
+      worm3   <- worm3[,c("year","mp","data")]
 
       colnames(worm3)[3] <- "worm.3"
 
       wormHistoric3 <- om[iter == wormNums[3]]
-      wormHistoric3 <- wormHistoric3[,c(1,2)]
+      wormHistoric3 <- wormHistoric3[,c("year","data")]
 
       colnames(wormHistoric3)[2] <- "worm.3"
 
