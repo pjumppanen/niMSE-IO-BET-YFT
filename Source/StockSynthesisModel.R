@@ -207,7 +207,6 @@ setMethod("initialize", "StockSynthesisModel",
 
     .Object@ModelData@ReccvR    <- karray(MseDef@ReccvRin, dim=c(.Object@ModelData@npop, .Object@ModelData@nareas))
     .Object@ModelData@RecACT    <- MseDef@RecACTin  #input value; could extract from each OM file
-    .Object@ModelData@IAC       <- MseDef@IACin     #input value; could extract from each OM file
 
     # Trend in CPUE observation error (Multiplier)
     if (MseDef@ITrendin < 0)
@@ -677,6 +676,9 @@ setMethod("runMse", c("StockSynthesisModel"),
       print(paste("ERROR: Could not create StockSynthesisModel.",deparse(substitute(MseDef)),"not of class MseDefinition"))
       stop()
     }
+
+    # CPUE auto-correlation
+    .Object@ModelData@IAC <- MseDef@IACin     #input value; could extract from each OM file
 
     # Trend in CPUE observation error (Multiplier)
     if (MseDef@ITrendin >= 0)

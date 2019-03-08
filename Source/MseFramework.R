@@ -1420,6 +1420,7 @@ setMethod("getParameters", c("MseFramework"),
                        Ccv            = .Object@MseDef@Ccv,
                        Cbcv           = .Object@MseDef@Cbcv,
                        Icv            = .Object@MseDef@Icv,
+                       IACin          = .Object@MseDef@IACin,
                        Ibeta          = .Object@MseDef@Ibeta,
                        Btcv           = .Object@MseDef@Btcv,
                        Btbcv          = .Object@MseDef@Btbcv,
@@ -1523,6 +1524,11 @@ setMethod("setParameters", c("MseFramework"),
                                   stop()
                                 }
 
+                                return (param)
+                              },
+
+                              IACin = function(param)
+                              {
                                 return (param)
                               },
 
