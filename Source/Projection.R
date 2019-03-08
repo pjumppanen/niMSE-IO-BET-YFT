@@ -214,6 +214,15 @@ setMethod("initialize", "Projection",
     aR      <- exp(bR * SSB0) / SSBpR
 
 
+    # Determine autocorrelated rec dev quarterly parameters based on annual specification
+    # --------------------------------------------
+    if (ssModelData@RecACT < 0.0)
+    {
+      warning("For negatively correlated recruitment deviation the parameter RecACT is assumed a quarterly figure rather than annual")
+    }
+
+    recruitment_params <- findWindowedAR_params(ssModelData@RecACT)
+
     # Autocorrelated rec devs for projection years
     # --------------------------------------------
     rndDevs <- karray(rep(ssModelData@ReccvT, times=ssModelData@npop * allyears * length(ssModelData@Recsubyr)) * rnorm(ssModelData@npop * allyears * length(ssModelData@Recsubyr)),
@@ -221,7 +230,7 @@ setMethod("initialize", "Projection",
 
     for (t in (ssModelData@nyears * length(ssModelData@Recsubyr) + 1):(allyears * length(ssModelData@Recsubyr)))
     {
-      rndDevs[,t] <- ssModelData@RecACT * rndDevs[,t - 1] + rndDevs[,t] * sqrt(1 - ssModelData@RecACT ^ 2)
+      rndDevs[,t] <- recruitment_params$Alpha * rndDevs[,t - 1] + rndDevs[,t] * recruitment_params$Beta
     }
 
     # We attach any recruitment scaling (recuitment shock implementation) to the recruitment deviates.
@@ -517,31 +526,7 @@ setMethod("initialize", "Projection",
       IrndDevs[t] <- ssModelData@IAC * IrndDevs[t - 1] + IrndDevs[t] * sqrt(1.0 - ssModelData@IAC ^ 2)
     }
 
-    #season X area CPUE indices - autocorrelated error structure only properly implemented for aggregate
-    CPUErndDevs <- karray(rnorm(allyears * nsubyears, 0, rep(Iimp, allyears * nsubyears)), c(allyears, nsubyears))
-
-    #xxx Initial deviate not correlated to historical obs
-    for (iYr in (nyears + 1):allyears)
-    {
-      for (iSeas in 1:nsubyears)
-      {
-        if (iSeas == 1)
-        {
-          iLastYrIndex    <- iYr - 1
-          iLastSeasIndex  <- nsubyears
-        }
-        else
-        {
-          iLastYrIndex    <- iYr
-          iLastSeasIndex  <- iSeas - 1
-        }
-
-        CPUErndDevs[iYr, iSeas] <- ssModelData@IAC * CPUErndDevs[iLastYrIndex, iLastSeasIndex] + CPUErndDevs[iYr, iSeas] * sqrt(1.0 - ssModelData@IAC ^ 2)
-      }
-    }
-
     Ierr      <- exp(IrndDevs) * ssModelData@ITrend
-    CPUEerr   <- exp(CPUErndDevs)
     Ibeta     <- exp(runif(1, log(MseDef@Ibeta[1]), log(MseDef@Ibeta[2])))
 
     Btimp     <- runif(1, MseDef@Btcv[1], MseDef@Btcv[2])
@@ -1102,3 +1087,62 @@ setMethod("initialize", "Projection",
     return (.Object)
   }
 )
+
+# -----------------------------------------------------------------------------
+# Helper function to determine parameters for correlated random deviations
+# -----------------------------------------------------------------------------
+findWindowedAR_params <- function(Alpha)
+{
+  if (Alpha > 0.0)
+  {
+    WindowedAR_Params <- function(Alpha)
+    {
+      # Auto-regressive filter impulse response estimate
+      limit <- 1e-12
+      Count <- max(floor(log(limit) / log(abs(Alpha) + 0.001)), 20)
+      IR    <- array(0.0, dim=c(Count))
+      IR[1] <- 1.0
+
+      for (t in 2:Count)
+      {
+        IR[t] <- Alpha * IR[t - 1] + IR[t]
+      }
+
+      # convolve with 4 point summing window (ie. effect of summing over quarters)
+      IR2in <- c(0,0,0,IR,0,0,0,0)
+      IR2   <- array(0.0, dim=c(Count))
+
+      for (t in 1:Count)
+      {
+        IR2[t] <- sum(IR2in[t:(t+3)])
+      }
+
+      # Variance gain for AR filter plus 4 point summing window
+      Gain <- sum(IR2 * IR2)
+      Beta <- 1.0 / sqrt(Gain)
+
+      # normalise Impulse response and find quarterly correlation
+      IR2 <- IR2 * Beta
+      Cor <- sum(IR2[1:(Count - 4)] * IR2[5:Count])
+
+      return (list(Beta=Beta, Cor=Cor))
+    }
+
+    res <- optim(Alpha,
+                 function(x)
+                 {
+                   (Alpha - WindowedAR_Params(x)$Cor) ^ 2
+                 },
+                 method = "L-BFGS-B")
+
+    params <- WindowedAR_Params(res$par)
+
+    return (list(Alpha=res$par, Beta=params$Beta, Cor=params$Cor))
+  }
+  else
+  {
+    # negative correlation can't be re-scaled according to annual so
+    # leave as is.
+    return (list(Alpha=Alpha, Beta=(1 - Alpha ^ 2) ^ 0.5, Cor=Alpha))
+  }
+}
