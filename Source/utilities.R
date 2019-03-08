@@ -513,7 +513,7 @@ betPlots.f <- function(mseObj,
   grid::popViewport()
   endDraw(outputPath=outputPath)
 
-  beginDraw(prefix %&% "KobeMP", width=6, height=6, outputPath=outputPath)
+  beginDraw(prefix %&% "KobeMP", width=6, height=3.375, outputPath=outputPath)
   grid::pushViewport(grid::viewport(layout = grid::grid.layout(nrow = 1, ncol = 1)))
   print(kobeMPs2(perfd, xlim=SBLim, ylim=FLim, ymax=3), vp = grid::viewport(layout.pos.row = 1, layout.pos.col = 1))
   grid::popViewport()
