@@ -436,6 +436,7 @@ betPlots.f <- function(mseObj,
                        FTarg,
                        Cref=missing,
                        YearsAveraged=20,
+                       rename=NA,
                        outputPath=NA,
                        prefix="")
 {
@@ -475,6 +476,16 @@ betPlots.f <- function(mseObj,
   histd <- msevizHistoricTimeSeriesData(mseObj)
   projd <- msevizProjectedTimeSeriesData(mseObj)
 
+  if (!is.na(rename))
+  {
+    substitute <- function(names)
+    {
+      return (sapply(as.vector(names), FUN=function(name){rename[[name]]}))
+    }
+
+    projd[,"mp"] <- projd[,substitute(mp)]
+  }
+
   beginDraw(prefix %&% "Recruitment", width=6, height=6, outputPath=outputPath)
   plotOMruns2(histd, projd, "Recruitment", ylab= "Recruitment")
   endDraw(outputPath=outputPath)
@@ -500,6 +511,16 @@ betPlots.f <- function(mseObj,
   endDraw(outputPath=outputPath)
 
   perfd <- msevizPerformanceData(mseObj, YearsAveraged)
+
+  if (!is.na(rename))
+  {
+    substitute <- function(names)
+    {
+      return (sapply(as.vector(names), FUN=function(name){rename[[name]]}))
+    }
+
+    perfd[,"mp"] <- perfd[,substitute(mp)]
+  }
 
   beginDraw(prefix %&% "BPs", width=6, height=3.375, outputPath=outputPath)
   grid::pushViewport(grid::viewport(layout = grid::grid.layout(nrow = 1, ncol = 1)))
