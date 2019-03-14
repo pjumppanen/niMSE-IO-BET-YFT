@@ -514,7 +514,7 @@ setMethod("initialize", "Projection",
 
     # Initialise observation model errors
     Cimp <- runif(1, MseDef@Ccv[1], MseDef@Ccv[2])
-    Cb   <- trlnorm(1, 1, MseDef@Cbcv)
+    Cb   <- trlnorm(1, MseDef@Cbmean, MseDef@Cbcv)
     Cerr <- karray(trlnorm(allyears, rep(Cb, allyears), rep(Cimp, allyears)), c(allyears))
     Iimp <- runif(1, MseDef@Icv[1], MseDef@Icv[2])
 

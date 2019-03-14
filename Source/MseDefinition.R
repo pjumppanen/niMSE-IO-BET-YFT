@@ -55,7 +55,8 @@ setClass("MseDefinition",
                                     # Observation errors (original ABT code had a separate observation class)
     TACEcv           = "karray",    # fleet-specific lognormal errors on TAC/TAE (independent among fleets and seasons)
     Ccv              = "numeric",   # Observation error
-    Cbcv             = "numeric",   # bias in total annual catches
+    Cbcv             = "numeric",   # cv of bias in total annual catches
+    Cbmean           = "numeric",   # mean of bias in total annual catches
     nCAAobs          = "numeric",   # Number of annual catch at age (CAA) observations
     nCALobs          = "numeric",   # Number of annual catch-at-length (CAL) observations
     Lcv              = "numeric",
@@ -97,6 +98,8 @@ setMethod("initialize", "MseDefinition",
     .Object@modelWeight   = karray(c(1))
     .Object@totalSims     = 0 # default of 0 means simulations are based only on nsimPerOMFile.
                               # non 0 totalSims and the nsimPerOMFile is calculated based on modelWeight and totalSims.
+    .Object@Cbmean        = 1
+
     return (.Object)
   }
 )
@@ -115,5 +118,28 @@ setMethod("createMseFramework", "MseDefinition",
     }
 
     return (new("MseFramework", .Object, Report, UseCluster, UseMSYss))
+  }
+)
+
+# -----------------------------------------------------------------------------
+
+setGeneric("upgrade", function(.Object, ...) standardGeneric("upgrade"))
+
+setMethod("upgrade", "MseDefinition",
+  function(.Object)
+  {
+    MseDef = new("MseDefinition")
+
+    names <- slotNames(MseDef)
+
+    for (name in names)
+    {
+      if (.hasSlot(.Object, name))
+      {
+        slot(MseDef, name) <- slot(.Object, name)
+      }
+    }
+
+    return (MseDef)
   }
 )

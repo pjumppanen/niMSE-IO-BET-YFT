@@ -1419,6 +1419,7 @@ setMethod("getParameters", c("MseFramework"),
                        indexFisheries = .Object@MseDef@indexFisheries,
                        Ccv            = .Object@MseDef@Ccv,
                        Cbcv           = .Object@MseDef@Cbcv,
+                       Cbmean         = .Object@MseDef@Cbmean,
                        Icv            = .Object@MseDef@Icv,
                        IACin          = .Object@MseDef@IACin,
                        Ibeta          = .Object@MseDef@Ibeta,
@@ -1512,6 +1513,11 @@ setMethod("setParameters", c("MseFramework"),
                               },
 
                               Cbcv = function(param)
+                              {
+                                return (param)
+                              },
+
+                              Cbmean = function(param)
                               {
                                 return (param)
                               },
