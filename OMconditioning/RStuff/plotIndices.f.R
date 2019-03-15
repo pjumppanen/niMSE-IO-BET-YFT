@@ -210,6 +210,8 @@ plotIndices.f <- function(modList = gridZList,
   boundFailHIList2  <- list()
   PSFS5ParMax       <- -999
   PSFS5ParMaxMod    <- NA
+  crashPen          <- NULL
+  catchLLH          <- NULL
 
   for (i in 1:length(modList))
   {
@@ -340,16 +342,18 @@ plotIndices.f <- function(modList = gridZList,
         #if("AgeSel_11P_3_BB1" %in% boundFailHIListLab) browser()
       }
 
-      LLHall <- c(LLHall, m$likelihoods_used$values[1])
+      LLHall   <- c(LLHall, m$likelihoods_used$values[1])
 
-      tmp    <- m$likelihoods_raw_by_fleet[m$likelihoods_raw_by_fleet[,1]=="Tag_comp_Like" | m$likelihoods_raw_by_fleet[,1]=="Tag_negbin_Like",]
-      tagFit <- c(tagFit, sum(as.numeric(tmp[1,3:length(tmp)])) + sum(as.numeric(tmp[2,3:length(tmp)])))
-      recFit <- c(recFit, m$likelihoods_used['Recruitment','values'])
+      tmp      <- m$likelihoods_raw_by_fleet[m$likelihoods_raw_by_fleet[,1]=="Tag_comp_Like" | m$likelihoods_raw_by_fleet[,1]=="Tag_negbin_Like",]
+      tagFit   <- c(tagFit, sum(as.numeric(tmp[1,3:length(tmp)])) + sum(as.numeric(tmp[2,3:length(tmp)])))
+      recFit   <- c(recFit, m$likelihoods_used['Recruitment','values'])
+      crashPen <- c(crashPen, m$likelihoods_used['Crash_Pen','values'])
+      catchLLH <- c(catchLLH, m$likelihoods_used['Catch','values'])
 
-      rdev   <- m$recruit$dev[m$recruit$era == "Main"]
-      nrdev  <- length(rdev)
-      rSlope <- unname(coefficients(lm(rdev ~ c(1:nrdev)))[2])
-      #rTrend <- length(m$recruit$dev[m$recruit$era == "Main"]) * rSlope * 100
+      rdev     <- m$recruit$dev[m$recruit$era == "Main"]
+      nrdev    <- length(rdev)
+      rSlope   <- unname(coefficients(lm(rdev ~ c(1:nrdev)))[2])
+      #rTrend   <- length(m$recruit$dev[m$recruit$era == "Main"]) * rSlope * 100
 
       #seasAsYrToDecYr.f(seasAsYr=101, endSeasAsYr=272, numSeas=4, endYr=2014, endSeas=4)
 
@@ -386,662 +390,707 @@ plotIndices.f <- function(modList = gridZList,
       recFit2               <- c(recFit2, NA)
       recFit2ByYr           <- c(recFit2ByYr, NA)
       rTrendall             <- c(rTrendall, NA)
+      crashPen              <- c(crashPen, NA)
+      catchLLH              <- c(catchLLH, NA)
     }
   }   # modList i
 
   print("pre-plots done")
-  print(sum(stdExistsall))
-  print(length(stdExistsall))
-  par(mfrow=c(2,1))
-  hist(log10(gradall)[stdExistsall==T], main = "max(gradient) - Hessian OK", breaks=-10:20)
-  hist(log10(gradall)[stdExistsall==F], main = "max(gradient) - Hessian not pos def - ", breaks=-10:20)
 
-  par(mfrow=c(3,1))
-  hist(boundCheckall, main = "Par bounds exceptions - all", breaks=-10:20)
-  hist(boundCheckall[stdExistsall==T], main = "Par bounds exceptions - Hessian OK", breaks=-10:20)
-  plot(log10(gradall), boundCheckall, main = "Par bounds exceptions")
-
-  table(unlist(boundFailLOList))
-  table(unlist(boundFailHIList))
-
-  print(LLHall)
-  LLHall <- LLHall - min(LLHall, na.rm = T)
-  fList  <- NULL
-
-  for (i in 1:ncol(factorList))
+  if (doPlots)
   {
-    if (length(unique(factorList[, i])) > 1)
-      fList <- cbind(fList, factorList[, i])
-  }
+    print(sum(stdExistsall))
+    print(length(stdExistsall))
+    par(mfrow=c(2,1))
+    hist(log10(gradall)[stdExistsall==T], main = "max(gradient) - Hessian OK", breaks=-10:20)
+    hist(log10(gradall)[stdExistsall==F], main = "max(gradient) - Hessian not pos def - ", breaks=-10:20)
 
-  print(LLHall)
-  print(dim(fList))
-  par(mfrow = mfrowLayout)
-  boxplot(LLHall, ylab = "Likelihood units")
+    par(mfrow=c(3,1))
+    hist(boundCheckall, main = "Par bounds exceptions - all", breaks=-10:20)
+    hist(boundCheckall[stdExistsall==T], main = "Par bounds exceptions - Hessian OK", breaks=-10:20)
+    plot(log10(gradall), boundCheckall, main = "Par bounds exceptions")
 
-  if (!is.null(fList))
-  {
-    for (i in 1:ncol(fList))
+    table(unlist(boundFailLOList))
+    table(unlist(boundFailHIList))
+
+    print(LLHall)
+    LLHall <- LLHall - min(LLHall, na.rm = T)
+    fList  <- NULL
+
+    for (i in 1:ncol(factorList))
     {
-      boxplot(LLHall ~ fList[, i], ylab = "Likelihood units")
-    }
-  }
-
-  par(mfrow = c(1, 1))
-  boxplot(LLHall ~ fList[, 1]:fList[, 2], ylab = "Likelihood units")
-
-  if (ncol(fList) > 2)
-    boxplot(LLHall ~ fList[, 1]:fList[, 3], ylab = "Likelihood units")
-
-  #par(mfrow = c(1,1))
-  #boxplot(tagFit ~ fList[,], ylab = "Tag likelihood (no lambda)", col=8)
-  #first <- length(unique(fList[,1]))+1
-  #
-  #for (i in 2:ncol(fList)) {
-  #  last <- first + length(unique(fList[,i]))-1
-  #  boxplot(tagFit ~ fList[,i], col=i, add=T, at=first:last)
-  #  first <- last+1
-  #}
-
-  par(mfrow = c(1,1))
-  spacer <- array(NA, dim=c(dim(fList)[1], length(unique(as.vector(fList)))))
-
-  boxplot(cbind(tagFit,spacer), ylab = "Tag likelihood (no lambda)", names=c("all",rep(" ",length(unique(as.vector(fList))))))
-
-  first <- 2
-  colList=c(8,2:100)
-
-  for (i in 1:ncol(fList))
-  {
-    last <- first + length(unique(fList[,i]))-1
-
-    boxplot(tagFit ~ fList[,i], col=colList[i], add=T, at=first:last)
-
-    first <- last+1
-  }
-
-  #tagLLHs for full mixing, t10 only - one off code not robust
-  tagPartition <- F
-
-  if (tagPartition)
-  {
-    # partition by x3 and x8
-    par(mfrow = c(1,1))
-
-    dropCol <- which.max(colSums(fList[] == "x3"))
-    tagFit2 <- tagFit[fList[,dropCol]=="x3"]
-    fList2  <- fList[fList[,dropCol]=="x3",]
-    fList2  <- fList2[,fList2[1,] != "x3"]
-
-    boxplot(tagFit2 ~ fList2[,], ylab = "Tag likelihood (no lambda)", main="x3 - 3 qtr tag mixing", names=rep(" ",length(unique(as.vector(fList2)))))
-
-    first   <- 1
-    colList <-c(8,2,3,4,5,6,7,8,9)
-
-    for (i in 1:ncol(fList2))
-    {
-      last <- first + length(unique(fList2[,i]))-1
-
-      boxplot(tagFit2 ~ fList2[,i], col=colList[i], add=T, at=first:last)
-
-      first <- last+1
+      if (length(unique(factorList[, i])) > 1)
+        fList <- cbind(fList, factorList[, i])
     }
 
-    dropCol <- which.max(colSums(fList[] == "x8"))
-    tagFit2 <- tagFit[fList[,dropCol]=="x8"]
-    fList2  <- fList[fList[,dropCol]=="x8",]
-    fList2  <- fList2[,fList2[1,] != "x8"]
+    print(LLHall)
+    print(dim(fList))
+    par(mfrow = mfrowLayout)
+    boxplot(LLHall, ylab = "Likelihood units")
 
-    boxplot(tagFit2 ~ fList2[,], ylab = "Tag likelihood (no lambda)", main="x8 - 8 qtr tag mixing", names=rep(" ",length(unique(as.vector(fList2)))))
-
-    first   <- 1
-
-    for (i in 1:ncol(fList2))
+    if (!is.null(fList))
     {
-      last <- first + length(unique(fList2[,i]))-1
-
-      boxplot(tagFit2 ~ fList2[,i], col=colList[i], add=T, at=first:last)
-
-      first <- last+1
+      for (i in 1:ncol(fList))
+      {
+        boxplot(LLHall ~ fList[, i], ylab = "Likelihood units")
+      }
     }
+
+    par(mfrow = c(1, 1))
+    boxplot(LLHall ~ fList[, 1]:fList[, 2], ylab = "Likelihood units")
+
+    if (ncol(fList) > 2)
+      boxplot(LLHall ~ fList[, 1]:fList[, 3], ylab = "Likelihood units")
+
+    #par(mfrow = c(1,1))
+    #boxplot(tagFit ~ fList[,], ylab = "Tag likelihood (no lambda)", col=8)
+    #first <- length(unique(fList[,1]))+1
+    #
+    #for (i in 2:ncol(fList)) {
+    #  last <- first + length(unique(fList[,i]))-1
+    #  boxplot(tagFit ~ fList[,i], col=i, add=T, at=first:last)
+    #  first <- last+1
+    #}
 
     par(mfrow = c(1,1))
+    spacer <- array(NA, dim=c(dim(fList)[1], length(unique(as.vector(fList)))))
 
-    dropCol <- which.max(colSums(fList[] == c("x3")))
-    tagFit2 <- tagFit[fList[,dropCol]=="x3"]
-    fList2  <- fList[fList[,dropCol]=="x3",]
-    fList2  <- fList2[,fList2[1,] != "x3"]
+    boxplot(cbind(tagFit,spacer), ylab = "Tag likelihood (no lambda)", names=c("all",rep(" ",length(unique(as.vector(fList))))))
 
-    dropCol <- which.max(colSums(fList2[] == c("t10")))
-    tagFit3 <- tagFit2[fList2[,dropCol]=="t10"]
-    fList3  <- fList2[fList2[,dropCol]=="t10",]
-    fList3  <- fList3[,fList3[1,] != "t10"]
+    first <- 2
+    colList=c(8,2:100)
 
-    boxplot(tagFit3 ~ fList3[,], ylab = "Tag likelihood (no lambda)", main="(x3, t10) 3 qtr tag mixing and lambda=1.0", names=rep(" ",length(unique(as.vector(fList3)))))
-
-    first   <- 1
-    colList <-c(8,2,3,4,5,6,7,8,9)
-
-    for (i in 1:ncol(fList3))
+    for (i in 1:ncol(fList))
     {
-      last <- first + length(unique(fList3[,i]))-1
+      last <- first + length(unique(fList[,i]))-1
 
-      boxplot(tagFit3 ~ fList3[,i], col=colList[i], add=T, at=first:last)
+      boxplot(tagFit ~ fList[,i], col=colList[i], add=T, at=first:last)
 
       first <- last+1
     }
-  } #tagPartiion
 
-  par(mfrow = mfrowLayout)
-  boxplot(gradall, ylab = "max. gradient")
+    #tagLLHs for full mixing, t10 only - one off code not robust
+    tagPartition <- F
 
-  if (!is.null(fList))
-  {
-    for (i in 1:ncol(fList))
+    if (tagPartition)
     {
-      boxplot(gradall ~ fList[, i], ylab = "max. gradient xxx")
-    }
-  }
+      # partition by x3 and x8
+      par(mfrow = c(1,1))
 
-  par(mfrow = mfrowLayout)
+      dropCol <- which.max(colSums(fList[] == "x3"))
+      tagFit2 <- tagFit[fList[,dropCol]=="x3"]
+      fList2  <- fList[fList[,dropCol]=="x3",]
+      fList2  <- fList2[,fList2[1,] != "x3"]
 
-  boxplot(log10(gradall), ylab = "max. gradient")
+      boxplot(tagFit2 ~ fList2[,], ylab = "Tag likelihood (no lambda)", main="x3 - 3 qtr tag mixing", names=rep(" ",length(unique(as.vector(fList2)))))
 
-  if (!is.null(fList))
-  {
-    for (i in 1:ncol(fList))
+      first   <- 1
+      colList <- c(8,2:ncol(fList2))
+
+      for (i in 1:ncol(fList2))
+      {
+        last <- first + length(unique(fList2[,i]))-1
+
+        boxplot(tagFit2 ~ fList2[,i], col=colList[i], add=T, at=first:last)
+
+        first <- last+1
+      }
+
+      dropCol <- which.max(colSums(fList[] == "x8"))
+      tagFit2 <- tagFit[fList[,dropCol]=="x8"]
+      fList2  <- fList[fList[,dropCol]=="x8",]
+      fList2  <- fList2[,fList2[1,] != "x8"]
+
+      boxplot(tagFit2 ~ fList2[,], ylab = "Tag likelihood (no lambda)", main="x8 - 8 qtr tag mixing", names=rep(" ",length(unique(as.vector(fList2)))))
+
+      first   <- 1
+
+      for (i in 1:ncol(fList2))
+      {
+        last <- first + length(unique(fList2[,i]))-1
+
+        boxplot(tagFit2 ~ fList2[,i], col=colList[i], add=T, at=first:last)
+
+        first <- last+1
+      }
+
+      par(mfrow = c(1,1))
+
+      dropCol <- which.max(colSums(fList[] == c("x3")))
+      tagFit2 <- tagFit[fList[,dropCol]=="x3"]
+      fList2  <- fList[fList[,dropCol]=="x3",]
+      fList2  <- fList2[,fList2[1,] != "x3"]
+
+      dropCol <- which.max(colSums(fList2[] == c("t10")))
+      tagFit3 <- tagFit2[fList2[,dropCol]=="t10"]
+      fList3  <- fList2[fList2[,dropCol]=="t10",]
+      fList3  <- fList3[,fList3[1,] != "t10"]
+
+      boxplot(tagFit3 ~ fList3[,], ylab = "Tag likelihood (no lambda)", main="(x3, t10) 3 qtr tag mixing and lambda=1.0", names=rep(" ",length(unique(as.vector(fList3)))))
+
+      first   <- 1
+      colList <- c(8,2:ncol(fList3))
+
+      for (i in 1:ncol(fList3))
+      {
+        last <- first + length(unique(fList3[,i]))-1
+
+        boxplot(tagFit3 ~ fList3[,i], col=colList[i], add=T, at=first:last)
+
+        first <- last+1
+      }
+    } #tagPartiion
+
+    par(mfrow = mfrowLayout)
+    boxplot(gradall, ylab = "max. gradient")
+
+    if (!is.null(fList))
     {
-        boxplot(log10(gradall) ~ fList[, i], ylab = "log10(max Grad)")
+      for (i in 1:ncol(fList))
+      {
+        boxplot(gradall ~ fList[, i], ylab = "max. gradient xxx")
+      }
     }
-  }
 
-  #par(mfrow = c(1,1))
-  #boxplot(gradall ~ fList[,], ylab = "log10(max. gradient)", col=8)
-  #3first <- length(unique(fList[,1]))+1
-  #
-  #for (i in 2:ncol(fList)) {
-  #  last <- first + length(unique(fList[,i]))-1
-  #  boxplot(log10(gradall) ~ fList[,i], col=i, add=T, at=first:last)
-  #      first <- last+1
-  #}
-
-  par(mfrow = c(1,1))
-
-  spacer <- array(NA, dim=c(dim(fList)[1], length(unique(as.vector(fList)))))
-
-  boxplot(cbind(log10(gradall),spacer), ylab = "log10(max. gradient)", names=c("all",rep(" ",length(unique(as.vector(fList))))))
-
-  first <- 2
-
-  #boxplot(log10(gradall) ~ fList[,], ylab = "log10(max. gradient)", names=rep(" ",length(unique(as.vector(fList)))))
-  #
-  #first   <- 1
-  colList <-c(8,2,3,4,5,6,7,8,9)
-
-  for (i in 1:ncol(fList))
-  {
-    last <- first + length(unique(fList[,i]))-1
-
-    boxplot(log10(gradall) ~ fList[,i], col=colList[i], add=T, at=first:last, outcol=colList[i])
-
-    first <- last+1
-  }
-
-  #check status on bounds - relies on r4ss definition of close to bounds Status = HI or LO(soft limit presumably)
-  par(mfrow = c(1,1))
-
-  spacer <- array(NA, dim=c(dim(fList)[1], length(unique(as.vector(fList)))))
-
-  boxplot(cbind(boundCheckall,spacer), ylab = "Par bounds issues", names=c("all",rep(" ",length(unique(as.vector(fList))))))
-
-  first <- 2
-
-  #boxplot(boundCheckall ~ fList[,], ylab = "Par bounds issues", names=rep(" ",length(unique(as.vector(fList)))))
-  #
-  #first   <- 1
-  colList <-c(8,2,3,4,5,6,7,8,9)
-
-  for (i in 1:ncol(fList))
-  {
-    last <- first + length(unique(fList[,i]))-1
-
-    boxplot(boundCheckall ~ fList[,i], col=colList[i], add=T, at=first:last, outcol=colList[i])
-
-    first <- last+1
-  }
-
-  #par(mfrow = mfrowLayout)
-  #
-  #boxplot(pBoundall, ylab = "N par near bounds")
-  #
-  #for (i in 1:ncol(fList)) {
-  #    boxplot(pBoundall ~ fList[, i], ylab = "N par near bounds")
-  #}
-  #
-  #par(mfrow = mfrowLayout)
-  #boxplot(BMinall, ylab = "Minimum depletion at high F (B/B0)",
-  #    ylim = c(0, 0.25))
-  #for (i in 1:ncol(fList)) {
-  #    boxplot(BMinall ~ fList[, i], ylab = "B/B0 (at high F)", ylim = c(0, 0.25))
-  #}
-  #par(mfrow = mfrowLayout)
-  #boxplot(BMinoSSBMSYall, ylab = "BMin/BMSY)", ylim = c(0,
-  #    1))
-  #for (i in 1:ncol(fList)) {
-  #    boxplot((BMinoSSBMSYall) ~ fList[, i], ylab = "BMin/BMSY ", ylim = c(0, 1))
-  #}
-
-  for (f in 1:numFleets)
-  {
     par(mfrow = mfrowLayout)
 
-    boxplot(essall[, f], ylab = "mean ESS", main = "ESS " %&% colnames(essall)[f])
+    boxplot(log10(gradall), ylab = "max. gradient")
+
+    if (!is.null(fList))
+    {
+      for (i in 1:ncol(fList))
+      {
+          boxplot(log10(gradall) ~ fList[, i], ylab = "log10(max Grad)")
+      }
+    }
+
+    #par(mfrow = c(1,1))
+    #boxplot(gradall ~ fList[,], ylab = "log10(max. gradient)", col=8)
+    #3first <- length(unique(fList[,1]))+1
+    #
+    #for (i in 2:ncol(fList)) {
+    #  last <- first + length(unique(fList[,i]))-1
+    #  boxplot(log10(gradall) ~ fList[,i], col=i, add=T, at=first:last)
+    #      first <- last+1
+    #}
+
+    par(mfrow = c(1,1))
+
+    spacer <- array(NA, dim=c(dim(fList)[1], length(unique(as.vector(fList)))))
+
+    boxplot(cbind(log10(gradall),spacer), ylab = "log10(max. gradient)", names=c("all",rep(" ",length(unique(as.vector(fList))))))
+
+    first <- 2
+
+    #boxplot(log10(gradall) ~ fList[,], ylab = "log10(max. gradient)", names=rep(" ",length(unique(as.vector(fList)))))
+    #
+    #first   <- 1
+    colList <- c(8,2:ncol(fList))
+
+    for (i in 1:ncol(fList))
+    {
+      last <- first + length(unique(fList[,i]))-1
+
+      boxplot(log10(gradall) ~ fList[,i], col=colList[i], add=T, at=first:last, outcol=colList[i])
+
+      first <- last+1
+    }
+
+    #check status on bounds - relies on r4ss definition of close to bounds Status = HI or LO(soft limit presumably)
+    par(mfrow = c(1,1))
+
+    spacer <- array(NA, dim=c(dim(fList)[1], length(unique(as.vector(fList)))))
+
+    boxplot(cbind(boundCheckall,spacer), ylab = "Par bounds issues", names=c("all",rep(" ",length(unique(as.vector(fList))))))
+
+    first <- 2
+
+    #boxplot(boundCheckall ~ fList[,], ylab = "Par bounds issues", names=rep(" ",length(unique(as.vector(fList)))))
+    #
+    #first   <- 1
+    colList <- c(8,2:ncol(fList))
+
+    for (i in 1:ncol(fList))
+    {
+      last <- first + length(unique(fList[,i]))-1
+
+      boxplot(boundCheckall ~ fList[,i], col=colList[i], add=T, at=first:last, outcol=colList[i])
+
+      first <- last+1
+    }
+
+    #par(mfrow = mfrowLayout)
+    #
+    #boxplot(pBoundall, ylab = "N par near bounds")
+    #
+    #for (i in 1:ncol(fList)) {
+    #    boxplot(pBoundall ~ fList[, i], ylab = "N par near bounds")
+    #}
+    #
+    #par(mfrow = mfrowLayout)
+    #boxplot(BMinall, ylab = "Minimum depletion at high F (B/B0)",
+    #    ylim = c(0, 0.25))
+    #for (i in 1:ncol(fList)) {
+    #    boxplot(BMinall ~ fList[, i], ylab = "B/B0 (at high F)", ylim = c(0, 0.25))
+    #}
+    #par(mfrow = mfrowLayout)
+    #boxplot(BMinoSSBMSYall, ylab = "BMin/BMSY)", ylim = c(0,
+    #    1))
+    #for (i in 1:ncol(fList)) {
+    #    boxplot((BMinoSSBMSYall) ~ fList[, i], ylab = "BMin/BMSY ", ylim = c(0, 1))
+    #}
+
+    for (f in 1:numFleets)
+    {
+      par(mfrow = mfrowLayout)
+
+      boxplot(essall[, f], ylab = "mean ESS", main = "ESS " %&% colnames(essall)[f])
+
+      if (!is.null(fList))for (i in 1:ncol(fList))
+      {
+        boxplot(essall[, f] ~ fList[, i], ylab = "mean ESS", main = "ESS " %&% colnames(essall)[f])
+      }
+    }
+
+    par(mfrow = c(1,1))
+
+    boxplot(essall[,],ylim=c(0,150),xlab="Fishery", ylab="ESS")
+    abline(h=5)
+    boxplot(essall[,],ylim=c(0,600),xlab="Fishery", ylab="ESS")
+    abline(h=5)
+    boxplot(log(essall[,]),ylim=c(0,7),xlab="Fishery", ylab="log(ESS)")
+    abline(h=log(5))
+
+    par(mfrow = mfrowLayout)
+
+    boxplot(4*MSYall/1000, ylab = "MSY (1000 t) (X4)", ylim=MSYyLim)
+    abline(h=refMSY,col=3)
 
     if (!is.null(fList))for (i in 1:ncol(fList))
     {
-      boxplot(essall[, f] ~ fList[, i], ylab = "mean ESS", main = "ESS " %&% colnames(essall)[f])
+      boxplot(4*MSYall/1000 ~ fList[, i], ylab = "MSY (1000 t) (X4)", ylim=MSYyLim)
+      abline(h=refMSY,col=3)
     }
-  }
 
-  par(mfrow = c(1,1))
+    par(mfrow = c(1,1))
 
-  boxplot(essall[,],ylim=c(0,150),xlab="Fishery", ylab="ESS")
-  abline(h=5)
-  boxplot(essall[,],ylim=c(0,600),xlab="Fishery", ylab="ESS")
-  abline(h=5)
-  boxplot(log(essall[,]),ylim=c(0,7),xlab="Fishery", ylab="log(ESS)")
-  abline(h=log(5))
+    spacer  <- array(NA, dim=c(dim(fList)[1], length(unique(as.vector(fList)))))
+    plotDat <- cbind(crashPen,spacer)
 
-  par(mfrow = mfrowLayout)
+    boxplot(plotDat, ylab = "LLH units", main="SS3 Crash Penalty", names=c("all",rep(" ",length(unique(as.vector(fList))))))
 
-  boxplot(4*MSYall/1000, ylab = "MSY (1000 t) (X4)", ylim=MSYyLim)
-  abline(h=refMSY,col=3)
+    first <- 2
 
-  if (!is.null(fList))for (i in 1:ncol(fList))
-  {
-    boxplot(4*MSYall/1000 ~ fList[, i], ylab = "MSY (1000 t) (X4)", ylim=MSYyLim)
-    abline(h=refMSY,col=3)
-  }
+    for (i in 1:ncol(fList))
+    {
+      last  <- first + length(unique(fList[,i])) - 1
 
-  #par(mfrow = c(1,1))
-  #
-  #boxplot(4*MSYall/1000 ~ fList[,], ylab = "MSY", col=8, ylim=c(0,1000))
-  #
-  #first <- length(unique(fList[,1]))+1
-  #
-  #for (i in 2:ncol(fList)) {
-  #  last <- first + length(unique(fList[,i]))-1
-  #  boxplot(4*MSYall/1000 ~ fList[,i], col=i, add=T, at=first:last)
-  #  first <- last+1
-  #}
-  #
-  #abline(h=refMSY,col=1)
+      boxplot(crashPen ~ fList[,i], col=colList[i], add=T, at=first:last)
 
-  par(mfrow = c(1,1))
+      first <- last+1
+    }
 
-  hist(4*MSYall/1000, breaks=20, main = "MSY (1000 t)",xlab="")
-  spacer  <- array(NA, dim=c(dim(fList)[1], length(unique(as.vector(fList)))))
-  plotDat <- cbind(4*MSYall/1000,spacer)
+    par(mfrow = c(1,1))
+    spacer <- array(NA, dim=c(dim(fList)[1], length(unique(as.vector(fList)))))
+    plotDat <- cbind(catchLLH,spacer)
+    boxplot(plotDat, ylab = "LLH units", main="SS3 Catch LLH", names=c("all",rep(" ",length(unique(as.vector(fList))))))
+    first <- 2
+    #boxplot(4*MSYall/1000 ~ fList[,], ylab = "MSY (1000 t)", names=rep(" ",length(unique(as.vector(fList)))), ylim=c(0,1000))
+    #first <- 1
+    for (i in 1:ncol(fList)) {
+      last <- first + length(unique(fList[,i]))-1
+      boxplot(catchLLH ~ fList[,i], col=colList[i], add=T, at=first:last)
+      text((first:last),1.01*max(catchLLH), round(table(fList[,i])/sum(table(fList[,i])),2))
+      first <- last+1
+    }
 
-  boxplot(plotDat, ylab = "MSY (1000 t)", names=c("all",rep(" ",length(unique(as.vector(fList))))))
+    hist(log10(catchLLH), breaks=100, main='SS3 Catch likelihood')
 
-  first <- 2
+    #par(mfrow = c(1,1))
+    #
+    #boxplot(4*MSYall/1000 ~ fList[,], ylab = "MSY", col=8, ylim=c(0,1000))
+    #
+    #first <- length(unique(fList[,1]))+1
+    #
+    #for (i in 2:ncol(fList)) {
+    #  last <- first + length(unique(fList[,i]))-1
+    #  boxplot(4*MSYall/1000 ~ fList[,i], col=i, add=T, at=first:last)
+    #  first <- last+1
+    #}
+    #
+    #abline(h=refMSY,col=1)
 
-  #boxplot(4*MSYall/1000 ~ fList[,], ylab = "MSY (1000 t)", names=rep(" ",length(unique(as.vector(fList)))), ylim=c(0,1000))
-  #
-  #first   <- 1
-  colList <-c(8,2,3,4,5,6,7,8,9)
+    par(mfrow = c(1,1))
 
-  for (i in 1:ncol(fList))
-  {
-    last <- first + length(unique(fList[,i]))-1
+    hist(4*MSYall/1000, breaks=20, main = "MSY (1000 t)",xlab="")
+    spacer  <- array(NA, dim=c(dim(fList)[1], length(unique(as.vector(fList)))))
+    plotDat <- cbind(4*MSYall/1000,spacer)
 
-    boxplot(4*MSYall/1000 ~ fList[,i], col=colList[i], add=T, at=first:last)
+    boxplot(plotDat, ylab = "MSY (1000 t)", names=c("all",rep(" ",length(unique(as.vector(fList))))))
 
-    first <- last+1
-  }
+    first <- 2
 
-  abline(h=refMSY,col=1)
+    #boxplot(4*MSYall/1000 ~ fList[,], ylab = "MSY (1000 t)", names=rep(" ",length(unique(as.vector(fList)))), ylim=c(0,1000))
+    #
+    #first   <- 1
+    colList <- c(8,2:ncol(fList))
 
-  par(mfrow = mfrowLayout)
+    for (i in 1:ncol(fList))
+    {
+      last <- first + length(unique(fList[,i]))-1
 
-  boxplot(SSBYall/1000, ylab = "SSBY (1000 t)", ylim = c(0, 2500))
-  abline(h=refSSBY,col=3)
+      boxplot(4*MSYall/1000 ~ fList[,i], col=colList[i], add=T, at=first:last)
+      text((first:last),1.01 * max(4 * MSYall / 1000), round(table(fList[,i]) / sum(table(fList[,i])), 2))
 
-  if (!is.null(fList))for (i in 1:ncol(fList))
-  {
-    boxplot(SSBYall/1000 ~ fList[, i], ylab = "SSBY (1000 t)", ylim = c(0, 2500))
+      first <- last+1
+    }
+
+    abline(h=refMSY,col=1)
+
+    par(mfrow = mfrowLayout)
+
+    boxplot(SSBYall/1000, ylab = "SSBY (1000 t)", ylim = c(0, 2500))
     abline(h=refSSBY,col=3)
-  }
 
-  par(mfrow = mfrowLayout)
-
-  boxplot(SSBMSYall/1000, ylab = "SSBMSY (1000 t)", ylim = c(0, 3000))
-  abline(h=refSSBMSY,col=3)
-
-  if (!is.null(fList))for (i in 1:ncol(fList))
-  {
-    boxplot(SSBMSYall/1000 ~ fList[, i], ylab = "SSBMSY (1000 t)", ylim = c(0, 3000))
-    abline(h=refSSBMSY,col=3)
-  }
-
-  par(mfrow = mfrowLayout)
-  boxplot(SSBYoSSBMSYall, ylab = "SSBY / SSBMSY", ylim=c(0,3.5))
-  abline(h=refSSBYoSSBMSY,col=3)
-  lines(c(0, 10000), c(1, 1), lty = 2, col = 2)
-
-  if (!is.null(fList))for (i in 1:ncol(fList))
-  {
-    boxplot(SSBYoSSBMSYall ~ fList[, i], ylab = "SSBY / SSBMSY", ylim=c(0,3.5))
-    lines(c(0, 10000), c(1, 1), lty = 2, col = 2)
-    abline(h=refSSBYoSSBMSY,col=3)
-  }
-
-  #par(mfrow = c(1,1))
-  #boxplot(SSBYoSSBMSYall ~ fList[,], ylab = "SSB(2014)/SSBMSY", col=8, ylim=c(0,1.5))
-  #first <- length(unique(fList[,1]))+1
-  #for (i in 2:ncol(fList)) {
-  #  last <- first + length(unique(fList[,i]))-1
-  #  boxplot(SSBYoSSBMSYall ~ fList[,i], col=i, add=T, at=first:last)
-  #  first <- last+1
-  #}
-  #abline(h=refSSBYoSSBMSY,col=1)
-
-  par(mfrow = c(1,1))
-  hist(SSBYoSSBMSYall, breaks=20, main = "SSB(Current) / SSBMSY",xlab="")
-
-  spacer  <- array(NA, dim=c(dim(fList)[1], length(unique(as.vector(fList)))))
-  plotDat <- cbind(SSBYoSSBMSYall,spacer)
-
-  boxplot(plotDat, ylab = "SSB(2015)/SSBMSY", names=c("all",rep(" ",length(unique(as.vector(fList))))))
-
-  first   <- 2
-
-  #boxplot(SSBYoSSBMSYall ~ fList[,], ylab = "SSB(2014)/SSBMSY", names=rep(" ",length(unique(as.vector(fList)))), ylim=c(0,1.5))
-  #first   <- 1
-  colList <-c(8,2,3,4,5,6,7,8,9)
-
-  for (i in 1:ncol(fList))
-  {
-    last <- first + length(unique(fList[,i]))-1
-
-    boxplot(SSBYoSSBMSYall ~ fList[,i], col=colList[i], add=T, at=first:last)
-
-    first <- last+1
-  }
-
-  abline(h=refSSBYoSSBMSY,col=1)
-
-  par(mfrow = mfrowLayout)
-
-  boxplot(SSBMSYoSSB0all, ylab = "SSBMSY / SSB0", ylim = c(0, 1))
-  lines(c(0, 10000), c(1, 1), lty = 2, col = 2)
-
-  if (!is.null(fList))for (i in 1:ncol(fList))
-  {
-    boxplot(SSBMSYoSSB0all ~ fList[, i], ylab = "SSBMSY / SSB0", ylim = c(0, 1))
-    lines(c(0, 10000), c(1, 1), lty = 2, col = 2)
-  }
-
-  par(mfrow = mfrowLayout)
-
-  boxplot(SSBYoSSB0all, ylab = "SSBY / SSB0", ylim = c(0, 1))
-  abline(h=refSSBYoSSB0,col=3)
-  lines(c(0, 10000), c(0.2, 0.2), lty = 2, col = 2)
-  lines(c(0, 10000), c(0.4, 0.4), lty = 2, col = 2)
-
-  if (!is.null(fList))
-  {
-    for (i in 1:ncol(fList))
+    if (!is.null(fList))for (i in 1:ncol(fList))
     {
-      boxplot(SSBYoSSB0all ~ fList[, i], ylab = "SSBY / SSB0", ylim = c(0, 1))
-      lines(c(0, 10000), c(0.2, 0.2), lty = 2, col = 2)
-      lines(c(0, 10000), c(0.4, 0.4), lty = 2, col = 2)
-      abline(h=refSSBYoSSB0,col=3)
+      boxplot(SSBYall/1000 ~ fList[, i], ylab = "SSBY (1000 t)", ylim = c(0, 2500))
+      abline(h=refSSBY,col=3)
     }
-  }
 
-  #par(mfrow = c(1,1))
-  #boxplot(SSBYoSSB0all ~ fList[,], ylab = "SSB(2014)/SSB0", col=8, ylim=c(0,1))
-  #first <- length(unique(fList[,1]))+1
-  #for (i in 2:ncol(fList)) {
-  #  last <- first + length(unique(fList[,i]))-1
-  #  boxplot(SSBYoSSB0all ~ fList[,i], col=i, add=T, at=first:last)
-  #  first <- last+1
-  #}
-  #abline(h=refSSBYoSSB0,col=1)
+    par(mfrow = mfrowLayout)
 
-  par(mfrow = c(1,1))
+    boxplot(SSBMSYall/1000, ylab = "SSBMSY (1000 t)", ylim = c(0, 3000))
+    abline(h=refSSBMSY,col=3)
 
-  hist(SSBYoSSB0all, breaks=20, main = "SSB(current) / SSB0",xlab="")
+    if (!is.null(fList))for (i in 1:ncol(fList))
+    {
+      boxplot(SSBMSYall/1000 ~ fList[, i], ylab = "SSBMSY (1000 t)", ylim = c(0, 3000))
+      abline(h=refSSBMSY,col=3)
+    }
 
-  spacer  <- array(NA, dim=c(dim(fList)[1], length(unique(as.vector(fList)))))
-  plotDat <- cbind(SSBYoSSB0all,spacer)
-
-  boxplot(plotDat, ylab = "SSB(current)/SSB0", names=c("all",rep(" ",length(unique(as.vector(fList))))))
-
-  first   <- 2
-
-  #boxplot(SSBYoSSB0all ~ fList[,], ylab = "SSB(current)/SSB0", names=rep(" ",length(unique(as.vector(fList)))), ylim=c(0,1))
-  #
-  #first   <- 1
-  colList <-c(8,2,3,4,5,6,7,8,9)
-
-  for (i in 1:ncol(fList))
-  {
-    last <- first + length(unique(fList[,i]))-1
-
-    boxplot(SSBYoSSB0all ~ fList[,i], col=colList[i], add=T, at=first:last)
-
-    first <- last+1
-  }
-
-  abline(h=refSSBYoSSB0,col=1)
-
-  #par(mfrow = mfrowLayout)
-  #boxplot(CYoMSYall, ylab = "C(2009) / MSY")
-  #lines(c(0, 10000), c(1, 1), lty = 2, col = 2)
-  #for (i in 1:ncol(fList)) {
-  #    boxplot(CYoMSYall ~ fList[, i], ylab = "C(2009) / MSY")
-  #    lines(c(0, 10000), c(1, 1), lty = 2, col = 2)
-  #}
-
-  par(mfrow = mfrowLayout)
-
-  boxplot(recFit2ByYr, ylab = "Observed Annual Rec RMSE ", ylim = c(0, 1))
-
-  lines(c(0, 10000), c(1, 1), lty = 2, col = 2)
-
-  if (!is.null(fList))for (i in 1:ncol(fList))
-  {
-    boxplot(recFit2ByYr ~ fList[, i], ylab = "Rec RMSE", ylim = c(0, 0.8))
+    par(mfrow = mfrowLayout)
+    boxplot(SSBYoSSBMSYall, ylab = "SSBY / SSBMSY", ylim=c(0,3.5))
+    abline(h=refSSBYoSSBMSY,col=3)
     lines(c(0, 10000), c(1, 1), lty = 2, col = 2)
-  }
 
-  par(mfrow = mfrowLayout)
+    if (!is.null(fList))for (i in 1:ncol(fList))
+    {
+      boxplot(SSBYoSSBMSYall ~ fList[, i], ylab = "SSBY / SSBMSY", ylim=c(0,3.5))
+      lines(c(0, 10000), c(1, 1), lty = 2, col = 2)
+      abline(h=refSSBYoSSBMSY,col=3)
+    }
 
-  boxplot(cpueRMSEall, ylab = "CPUE RMSE All", ylim = c(0, 0.8))
-  lines(c(0, 10000), c(1, 1), lty = 2, col = 2)
+    #par(mfrow = c(1,1))
+    #boxplot(SSBYoSSBMSYall ~ fList[,], ylab = "SSB(2014)/SSBMSY", col=8, ylim=c(0,1.5))
+    #first <- length(unique(fList[,1]))+1
+    #for (i in 2:ncol(fList)) {
+    #  last <- first + length(unique(fList[,i]))-1
+    #  boxplot(SSBYoSSBMSYall ~ fList[,i], col=i, add=T, at=first:last)
+    #  first <- last+1
+    #}
+    #abline(h=refSSBYoSSBMSY,col=1)
 
-  if (!is.null(fList))
-  {
+    par(mfrow = c(1,1))
+    hist(SSBYoSSBMSYall, breaks=20, main = "SSB(Current) / SSBMSY",xlab="")
+
+    spacer  <- array(NA, dim=c(dim(fList)[1], length(unique(as.vector(fList)))))
+    plotDat <- cbind(SSBYoSSBMSYall,spacer)
+
+    boxplot(plotDat, ylab = "SSB(2015)/SSBMSY", names=c("all",rep(" ",length(unique(as.vector(fList))))))
+
+    first   <- 2
+
+    #boxplot(SSBYoSSBMSYall ~ fList[,], ylab = "SSB(2014)/SSBMSY", names=rep(" ",length(unique(as.vector(fList)))), ylim=c(0,1.5))
+    #first   <- 1
+    colList <- c(8,2:ncol(fList))
+
     for (i in 1:ncol(fList))
     {
-      boxplot(cpueRMSEall ~ fList[, i], ylab = "CPUE RMSE All", ylim = c(0, 0.8))
+      last <- first + length(unique(fList[,i]))-1
+
+      boxplot(SSBYoSSBMSYall ~ fList[,i], col=colList[i], add=T, at=first:last)
+      text((first:last), 1.01 * max(SSBYoSSBMSYall), round(table(fList[,i]) / sum(table(fList[,i])), 2))
+
+      first <- last+1
+    }
+
+    abline(h=refSSBYoSSBMSY,col=1)
+
+    par(mfrow = mfrowLayout)
+
+    boxplot(SSBMSYoSSB0all, ylab = "SSBMSY / SSB0", ylim = c(0, 1))
+    lines(c(0, 10000), c(1, 1), lty = 2, col = 2)
+
+    if (!is.null(fList))for (i in 1:ncol(fList))
+    {
+      boxplot(SSBMSYoSSB0all ~ fList[, i], ylab = "SSBMSY / SSB0", ylim = c(0, 1))
+      text((first:last), 1.01 * max(SSBMSYoSSB0all), round(table(fList[,i]) / sum(table(fList[,i])), 2))
       lines(c(0, 10000), c(1, 1), lty = 2, col = 2)
     }
-  }
 
-  par(mfrow = c(2,1))
+    par(mfrow = mfrowLayout)
 
-  for (r in 1:4)
-  {  #region
-    boxplot(cpueRMSEall[,r] ~ fList[,], ylab = "CPUE RMSE", main="Region " %&% r, col=8)
+    boxplot(SSBYoSSB0all, ylab = "SSBY / SSB0", ylim = c(0, 1))
+    abline(h=refSSBYoSSB0,col=3)
+    lines(c(0, 10000), c(0.2, 0.2), lty = 2, col = 2)
+    lines(c(0, 10000), c(0.4, 0.4), lty = 2, col = 2)
 
-    first <- length(unique(fList[,1]))+1
+    if (!is.null(fList))
+    {
+      for (i in 1:ncol(fList))
+      {
+        boxplot(SSBYoSSB0all ~ fList[, i], ylab = "SSBY / SSB0", ylim = c(0, 1))
+        text((first:last), 1.01 * max(SSBYoSSB0all), round(table(fList[,i]) / sum(table(fList[,i])), 2))
+        lines(c(0, 10000), c(0.2, 0.2), lty = 2, col = 2)
+        lines(c(0, 10000), c(0.4, 0.4), lty = 2, col = 2)
+        abline(h=refSSBYoSSB0,col=3)
+      }
+    }
 
-    for (i in 2:ncol(fList))
+    #par(mfrow = c(1,1))
+    #boxplot(SSBYoSSB0all ~ fList[,], ylab = "SSB(2014)/SSB0", col=8, ylim=c(0,1))
+    #first <- length(unique(fList[,1]))+1
+    #for (i in 2:ncol(fList)) {
+    #  last <- first + length(unique(fList[,i]))-1
+    #  boxplot(SSBYoSSB0all ~ fList[,i], col=i, add=T, at=first:last)
+    #  first <- last+1
+    #}
+    #abline(h=refSSBYoSSB0,col=1)
+
+    par(mfrow = c(1,1))
+
+    hist(SSBYoSSB0all, breaks=20, main = "SSB(current) / SSB0",xlab="")
+
+    spacer  <- array(NA, dim=c(dim(fList)[1], length(unique(as.vector(fList)))))
+    plotDat <- cbind(SSBYoSSB0all,spacer)
+
+    boxplot(plotDat, ylab = "SSB(current)/SSB0", names=c("all",rep(" ",length(unique(as.vector(fList))))))
+
+    first   <- 2
+
+    #boxplot(SSBYoSSB0all ~ fList[,], ylab = "SSB(current)/SSB0", names=rep(" ",length(unique(as.vector(fList)))), ylim=c(0,1))
+    #
+    #first   <- 1
+    colList <- c(8,2:ncol(fList))
+
+    for (i in 1:ncol(fList))
     {
       last <- first + length(unique(fList[,i]))-1
 
-      boxplot(cpueRMSEall[,r] ~ fList[,i], col=i, add=T, at=first:last)
+      boxplot(SSBYoSSB0all ~ fList[,i], col=colList[i], add=T, at=first:last)
+      text((first:last), 1.01 * max(SSBYoSSB0all), round(table(fList[,i]) / sum(table(fList[,i])), 2))
 
       first <- last+1
     }
-  }
 
-  par(mfrow = c(1,1))
+    abline(h=refSSBYoSSB0,col=1)
 
-  spacer  <- array(NA, dim=c(dim(fList)[1], length(unique(as.vector(fList)))))
-  plotDat <- cbind(recFit2ByYr,spacer)
+    #par(mfrow = mfrowLayout)
+    #boxplot(CYoMSYall, ylab = "C(2009) / MSY")
+    #lines(c(0, 10000), c(1, 1), lty = 2, col = 2)
+    #for (i in 1:ncol(fList)) {
+    #    boxplot(CYoMSYall ~ fList[, i], ylab = "C(2009) / MSY")
+    #    lines(c(0, 10000), c(1, 1), lty = 2, col = 2)
+    #}
 
-  boxplot(plotDat, ylab = "Rec RMSE", ylim=c(0,0.9), main="Obs Recruitment RMSE (annual)", names=c("all",rep(" ",length(unique(as.vector(fList))))))
+    par(mfrow = mfrowLayout)
 
-  first   <- 2
-  colList <-c(8,2,3,4,5,6,7,8,9)
+    boxplot(recFit2ByYr, ylab = "Observed Annual Rec RMSE ", ylim = c(0, 1))
 
-  for (i in 1:ncol(fList))
-  {
-    last <- first + length(unique(fList[,i]))-1
+    lines(c(0, 10000), c(1, 1), lty = 2, col = 2)
 
-    boxplot(recFit2ByYr ~ fList[,i], col=colList[i], add=T, at=first:last)
+    if (!is.null(fList))for (i in 1:ncol(fList))
+    {
+      boxplot(recFit2ByYr ~ fList[, i], ylab = "Rec RMSE", ylim = c(0, 0.8))
+      lines(c(0, 10000), c(1, 1), lty = 2, col = 2)
+    }
 
-    first <- last+1
-  }
+    par(mfrow = mfrowLayout)
 
-  par(mfrow = c(1,1))
+    boxplot(cpueRMSEall, ylab = "CPUE RMSE All", ylim = c(0, 0.8))
+    lines(c(0, 10000), c(1, 1), lty = 2, col = 2)
 
-  spacer  <- array(NA, dim=c(dim(fList)[1], length(unique(as.vector(fList)))))
-  plotDat <- cbind(rowMeans(cpueRMSEall),spacer)
+    if (!is.null(fList))
+    {
+      for (i in 1:ncol(fList))
+      {
+        boxplot(cpueRMSEall ~ fList[, i], ylab = "CPUE RMSE All", ylim = c(0, 0.8))
+        lines(c(0, 10000), c(1, 1), lty = 2, col = 2)
+      }
+    }
 
-  boxplot(plotDat, ylab = "CPUE RMSE", main="mean(all regions) ", names=c("all",rep(" ",length(unique(as.vector(fList))))))
+    par(mfrow = c(2,1))
 
-  first <- 2
+    for (r in 1:4)
+    {  #region
+      boxplot(cpueRMSEall[,r] ~ fList[,], ylab = "CPUE RMSE", main="Region " %&% r, col=8)
 
-  #boxplot(cpueRMSEall[,r] ~ fList[,], ylab = "CPUE RMSE", main="Region " %&% r, names=rep(" ",length(unique(as.vector(fList)))))
-  #
-  #first   <- 1
-  colList <-c(8,2,3,4,5,6,7,8,9)
+      first <- length(unique(fList[,1]))+1
 
-  for (i in 1:ncol(fList))
-  {
-    last <- first + length(unique(fList[,i]))-1
+      for (i in 2:ncol(fList))
+      {
+        last <- first + length(unique(fList[,i]))-1
 
-    boxplot(rowMeans(cpueRMSEall) ~ fList[,i], col=colList[i], add=T, at=first:last)
-    text((first:last),1.01*max(rowMeans(cpueRMSEall)), round(table(fList[,i])/sum(table(fList[,i])),2))
+        boxplot(cpueRMSEall[,r] ~ fList[,i], col=i, add=T, at=first:last)
 
-    first <- last+1
-  }
+        first <- last+1
+      }
+    }
 
-  par(mfrow = c(1,1))
+    par(mfrow = c(1,1))
 
-  for(r in 1:4)
-  {  #region
     spacer  <- array(NA, dim=c(dim(fList)[1], length(unique(as.vector(fList)))))
-    plotDat <- cbind(cpueRMSEall[,r],spacer)
+    plotDat <- cbind(recFit2ByYr,spacer)
 
-    boxplot(plotDat, ylab = "CPUE RMSE", main="Region " %&% r, names=c("all",rep(" ",length(unique(as.vector(fList))))))
+    boxplot(plotDat, ylab = "Rec RMSE", ylim=c(0,0.9), main="Obs Recruitment RMSE (annual)", names=c("all",rep(" ",length(unique(as.vector(fList))))))
+
+    first   <- 2
+    colList <- c(8,2:ncol(fList))
+
+    for (i in 1:ncol(fList))
+    {
+      last <- first + length(unique(fList[,i]))-1
+
+      boxplot(recFit2ByYr ~ fList[,i], col=colList[i], add=T, at=first:last)
+
+      first <- last+1
+    }
+
+    par(mfrow = c(1,1))
+
+    spacer  <- array(NA, dim=c(dim(fList)[1], length(unique(as.vector(fList)))))
+    plotDat <- cbind(rowMeans(cpueRMSEall),spacer)
+
+    boxplot(plotDat, ylab = "CPUE RMSE", main="mean(all regions) ", names=c("all",rep(" ",length(unique(as.vector(fList))))))
 
     first <- 2
 
     #boxplot(cpueRMSEall[,r] ~ fList[,], ylab = "CPUE RMSE", main="Region " %&% r, names=rep(" ",length(unique(as.vector(fList)))))
     #
     #first   <- 1
-    colList <-c(8,2,3,4,5,6,7,8,9)
+    colList <- c(8,2:ncol(fList))
 
     for (i in 1:ncol(fList))
     {
       last <- first + length(unique(fList[,i]))-1
 
-      boxplot(cpueRMSEall[,r] ~ fList[,i], col=colList[i], add=T, at=first:last)
+      boxplot(rowMeans(cpueRMSEall) ~ fList[,i], col=colList[i], add=T, at=first:last)
+      text((first:last),1.01*max(rowMeans(cpueRMSEall)), round(table(fList[,i])/sum(table(fList[,i])),2))
 
       first <- last+1
     }
-  }
 
-  par(mfrow = c(1,1))
+    par(mfrow = c(1,1))
 
-  spacer  <- array(NA, dim=c(dim(fList)[1], length(unique(as.vector(fList)))))
-  plotDat <- cbind(rowMeans(cpueRMSEByYrall),spacer)
+    for(r in 1:4)
+    {  #region
+      spacer  <- array(NA, dim=c(dim(fList)[1], length(unique(as.vector(fList)))))
+      plotDat <- cbind(cpueRMSEall[,r],spacer)
 
-  boxplot(plotDat, ylab = "CPUE RMSE (annualized) ", main="mean(all regions) ", names=c("all",rep(" ",length(unique(as.vector(fList))))))
+      boxplot(plotDat, ylab = "CPUE RMSE", main="Region " %&% r, names=c("all",rep(" ",length(unique(as.vector(fList))))))
 
-  first <- 2
+      first <- 2
 
-  #boxplot(cpueRMSEall[,r] ~ fList[,], ylab = "CPUE RMSE", main="Region " %&% r, names=rep(" ",length(unique(as.vector(fList)))))
-  #
-  #first   <- 1
-  colList <-c(8,2,3,4,5,6,7,8,9)
+      #boxplot(cpueRMSEall[,r] ~ fList[,], ylab = "CPUE RMSE", main="Region " %&% r, names=rep(" ",length(unique(as.vector(fList)))))
+      #
+      #first   <- 1
+      colList <- c(8,2:ncol(fList))
 
-  for (i in 1:ncol(fList))
-  {
-    last <- first + length(unique(fList[,i]))-1
+      for (i in 1:ncol(fList))
+      {
+        last <- first + length(unique(fList[,i]))-1
 
-    boxplot(rowMeans(cpueRMSEByYrall) ~ fList[,i], col=colList[i], add=T, at=first:last)
-    text((first:last),1.01*max(rowMeans(cpueRMSEByYrall)), round(table(fList[,i])/sum(table(fList[,i])),2))
+        boxplot(cpueRMSEall[,r] ~ fList[,i], col=colList[i], add=T, at=first:last)
 
-    first <- last+1
-  }
+        first <- last+1
+      }
+    }
 
-  par(mfrow = c(1,1))
+    par(mfrow = c(1,1))
 
-  for(r in 1:4)
-  {  #region
     spacer  <- array(NA, dim=c(dim(fList)[1], length(unique(as.vector(fList)))))
-    plotDat <- cbind(cpueRMSEByYrall[,r],spacer)
+    plotDat <- cbind(rowMeans(cpueRMSEByYrall),spacer)
 
-    boxplot(plotDat, ylab = "CPUE RMSE (annualized)", main="Region " %&% r, names=c("all",rep(" ",length(unique(as.vector(fList))))))
+    boxplot(plotDat, ylab = "CPUE RMSE (annualized) ", main="mean(all regions) ", names=c("all",rep(" ",length(unique(as.vector(fList))))))
 
     first <- 2
 
     #boxplot(cpueRMSEall[,r] ~ fList[,], ylab = "CPUE RMSE", main="Region " %&% r, names=rep(" ",length(unique(as.vector(fList)))))
     #
     #first   <- 1
-    colList <-c(8,2,3,4,5,6,7,8,9)
+    colList <- c(8,2:ncol(fList))
 
     for (i in 1:ncol(fList))
     {
       last <- first + length(unique(fList[,i]))-1
 
-      boxplot(cpueRMSEByYrall[,r] ~ fList[,i], col=colList[i], add=T, at=first:last)
+      boxplot(rowMeans(cpueRMSEByYrall) ~ fList[,i], col=colList[i], add=T, at=first:last)
+      text((first:last),1.01*max(rowMeans(cpueRMSEByYrall)), round(table(fList[,i])/sum(table(fList[,i])),2))
 
       first <- last+1
     }
-  }
 
-  #par(mfrow = mfrowLayout)
-  #for (c in 1:numCPUE) {
-  #    boxplot(cpueRMSEall[, c], ylab = "CPUE RMSE", ylim = c(0,
-  #        0.8))
-  #    lines(c(0, 10000), c(1, 1), lty = 2, col = 2)
-  #    for (i in 1:ncol(fList)) {
-  #        boxplot(cpueRMSEall[, c] ~ fList[, i], ylab = "CPUE RMSE",
-  #            ylim = c(0, 0.8), main = "CPUE RMSE " %&% names(cpueRMSE)[c])
-  #        lines(c(0, 10000), c(1, 1), lty = 2, col = 2)
-  #    }
-  #}
-  #par(mfrow = c(4, 2))
-  #for (f in 1:numFleets) {
-  #    boxplot(essall[, f] ~ fList[, 5], ylab = "mean ESS",
-  #        main = "ESS " %&% colnames(essall)[f])
-  #}
-  #par(mfrow = c(4, 2)) #what's this?
-  #for (f in 1:numFleets) {
-  #    boxplot(essall[, f] ~ fList[, 2], ylab = "mean ESS",
-  #        main = "ESS " %&% colnames(essall)[f])
-  #}
+    par(mfrow = c(1,1))
 
-  par(mfrow = mfrowLayout)
+    for(r in 1:4)
+    {  #region
+      spacer  <- array(NA, dim=c(dim(fList)[1], length(unique(as.vector(fList)))))
+      plotDat <- cbind(cpueRMSEByYrall[,r],spacer)
 
-  boxplot(rTrendall, ylab = " Slope in rec devs (per qtr)")
+      boxplot(plotDat, ylab = "CPUE RMSE (annualized)", main="Region " %&% r, names=c("all",rep(" ",length(unique(as.vector(fList))))))
 
-  if (!is.null(fList))for (i in 1:ncol(fList))
-  {
-    boxplot(rTrendall ~ fList[, i], ylab = " Slope in rec devs (per qtr)")
-    lines(c(0, 10000), c(0, 0), lty = 2, col = 2)
-  }
+      first <- 2
 
-  par(mar = c(5, 4, 4, 2) + 0.1)
+      #boxplot(cpueRMSEall[,r] ~ fList[,], ylab = "CPUE RMSE", main="Region " %&% r, names=rep(" ",length(unique(as.vector(fList)))))
+      #
+      #first   <- 1
+      colList <- c(8,2:ncol(fList))
+
+      for (i in 1:ncol(fList))
+      {
+        last <- first + length(unique(fList[,i]))-1
+
+        boxplot(cpueRMSEByYrall[,r] ~ fList[,i], col=colList[i], add=T, at=first:last)
+
+        first <- last+1
+      }
+    }
+
+    #par(mfrow = mfrowLayout)
+    #for (c in 1:numCPUE) {
+    #    boxplot(cpueRMSEall[, c], ylab = "CPUE RMSE", ylim = c(0,
+    #        0.8))
+    #    lines(c(0, 10000), c(1, 1), lty = 2, col = 2)
+    #    for (i in 1:ncol(fList)) {
+    #        boxplot(cpueRMSEall[, c] ~ fList[, i], ylab = "CPUE RMSE",
+    #            ylim = c(0, 0.8), main = "CPUE RMSE " %&% names(cpueRMSE)[c])
+    #        lines(c(0, 10000), c(1, 1), lty = 2, col = 2)
+    #    }
+    #}
+    #par(mfrow = c(4, 2))
+    #for (f in 1:numFleets) {
+    #    boxplot(essall[, f] ~ fList[, 5], ylab = "mean ESS",
+    #        main = "ESS " %&% colnames(essall)[f])
+    #}
+    #par(mfrow = c(4, 2)) #what's this?
+    #for (f in 1:numFleets) {
+    #    boxplot(essall[, f] ~ fList[, 2], ylab = "mean ESS",
+    #        main = "ESS " %&% colnames(essall)[f])
+    #}
+
+    par(mfrow = mfrowLayout)
+
+    boxplot(rTrendall, ylab = " Slope in rec devs (per qtr)")
+
+    if (!is.null(fList))for (i in 1:ncol(fList))
+    {
+      boxplot(rTrendall ~ fList[, i], ylab = " Slope in rec devs (per qtr)")
+      lines(c(0, 10000), c(0, 0), lty = 2, col = 2)
+    }
+
+    par(mar = c(5, 4, 4, 2) + 0.1)
+  } #doPlots
 
   CPUE.fit      <- apply(cpueRMSEall[,], FUN=mean, MARGIN=1) # mean CPUE fit
   CL.Fit        <- apply(essall[,], FUN=mean, MARGIN=1)     # mean CL ESS
@@ -1058,80 +1107,104 @@ plotIndices.f <- function(modList = gridZList,
   B_B.MSY   <- SSBYoSSBMSYall
   B_B0      <- SSBYoSSB0all
   F_F.MSY   <- FYoFMSYall
-  corrDat   <- cbind(jitter(CPUE.fit, amount=diff(range(CPUE.fit, na.rm=T))/50),
-                     jitter(CL.Fit, amount=diff(range(CL.Fit, na.rm=T))/50),
-                     jitter(tag.Fit, amount=diff(range(tag.Fit, na.rm=T))/50),
-                     jitter(rec.Trend, amount=diff(range(rec.Trend, na.rm=T))/50),
-                     jitter(rec.Fit, amount=diff(range(rec.Fit, na.rm=T))/50),
-                     jitter(MSY, amount=diff(range(MSY, na.rm=T)/50)),
-                     jitter(B_B.MSY, amount=diff(range(B_B.MSY, na.rm=T))/50))
+  C_Pen     <- crashPen
+  C_LLH     <- catchLLH
 
-  colnames(corrDat) <- c('CPUE.fit', 'CL.Fit', 'tag.Fit', 'rec.Trend', 'rec.Fit', 'MSY', 'B_B.MSY')
-  rownames(corrDat) <- NULL
-
-  for (i in 1:ncol(fList))
+  if (doPlots)
   {
-    #dev.new() - need to do something to graphics pars here of legend layout screws up
+    corrDat   <- cbind(jitter(CPUE.fit, amount=diff(range(CPUE.fit, na.rm=T))/50),
+                       jitter(CL.Fit, amount=diff(range(CL.Fit, na.rm=T))/50),
+                       jitter(tag.Fit, amount=diff(range(tag.Fit, na.rm=T))/50),
+                       jitter(rec.Trend, amount=diff(range(rec.Trend, na.rm=T))/50),
+                       jitter(rec.Fit, amount=diff(range(rec.Fit, na.rm=T))/50),
+                       jitter(MSY, amount=diff(range(MSY, na.rm=T)/50)),
+                       jitter(B_B.MSY, amount=diff(range(B_B.MSY, na.rm=T))/50))
+
+    colnames(corrDat) <- c('CPUE.fit', 'CL.Fit', 'tag.Fit', 'rec.Trend', 'rec.Fit', 'MSY', 'B_B.MSY')
+    rownames(corrDat) <- NULL
+
+    for (i in 1:ncol(fList))
+    {
+      #dev.new() - need to do something to graphics pars here of legend layout screws up
+      reset_graphics_par()
+
+      f   <- fList[,i]
+      ff  <- as.factor(f)
+
+      chart.Correlation2(corrDat, pch=16, col=seq(1:length(levels(ff)))[ff])
+      par(xpd=T)
+      legend( .85,.95,sort(as.vector(unique(ff))), fill=seq(1:length(levels(ff))),bg='white')
+    }
+
+    corrDat           <- cbind(rec.Trend, rec.Fit, tag.Fit, MSY)
+    colnames(corrDat) <- c('rec.Trend', 'rec.Fit', 'tag.Fit','MSY')
+    rownames(corrDat) <- NULL
+
+    for (i in 1:ncol(fList))
+    {
+      #dev.new() - need to do something to graphics pars here of legend layout screws up
+      reset_graphics_par()
+
+      f   <- fList[,i]
+      ff  <- as.factor(f)
+      chart.Correlation2(corrDat,pch=16, col=seq(1:length(levels(ff)))[ff])
+      par(xpd=T)
+      legend( .85,.95,sort(as.vector(unique(ff))), fill=seq(1:length(levels(ff))),bg='white')
+    }
+
+    corrDat<- cbind(MSY, B_B.MSY, C_Pen, C_LLH)
+    colnames(corrDat) <- c('MSY', 'B_B.MSY', 'C_Pen', 'C_LLH')
+    rownames(corrDat) <- NULL
+
+    for (i in 1:ncol(fList))
+    {
+      reset_graphics_par()
+
+      f  <- fList[,i]
+      ff <- as.factor(f)
+
+      chart.Correlation2(corrDat,pch=16, col=seq(1:length(levels(ff)))[ff])
+
+      par(xpd=T)
+
+      legend( .85,.95,sort(as.vector(unique(ff))), fill=seq(1:length(levels(ff))), bg='white')
+    }
+
     reset_graphics_par()
 
-    f   <- fList[,i]
-    ff  <- as.factor(f)
+    #look at ESS by fishery vs MSY
+    #pairs(cbind(MSY, essall[,1:5]))
+    #pairs(cbind(MSY, essall[,6:10]))
+    #pairs(cbind(MSY, essall[,11:15]))
+    #pairs(cbind(MSY, essall[,16:20]))
+    #pairs(cbind(MSY, essall[,21:23]))
 
-    chart.Correlation2(corrDat, pch=16, col=seq(1:length(levels(ff)))[ff])
-    par(xpd=T)
-    legend( .85,.95,sort(as.vector(unique(ff))), fill=seq(1:length(levels(ff))),bg='white')
-  }
+    #look at CPUE by area vs MSY
+    #corrDat<- cbind(MSY, cpueRMSEall)
+    #pairs(corrDat)
 
-  corrDat           <- cbind(rec.Trend, rec.Fit, tag.Fit, MSY)
-  colnames(corrDat) <- c('rec.Trend', 'rec.Fit', 'tag.Fit','MSY')
-  rownames(corrDat) <- NULL
+    plot(MSY, rec.Trend, ylab='slope (dev/qtr)', main="Recruitment Deviation Trend" )
 
-  for (i in 1:ncol(fList))
-  {
-    #dev.new() - need to do something to graphics pars here of legend layout screws up
-    reset_graphics_par()
+    plot(x=jitter(MSY, amount=mean(MSY)/100),y=jitter(rec.Trend, amount=max(rec.Trend)/25+0.001), ylab='slope (dev/qtr)', main="Recruitment Deviation Trend", cex=0.1)
+    par(mfrow=c(2,2))
 
-    f   <- fList[,i]
-    ff  <- as.factor(f)
-    chart.Correlation2(corrDat,pch=16, col=seq(1:length(levels(ff)))[ff])
-    par(xpd=T)
-    legend( .85,.95,sort(as.vector(unique(ff))), fill=seq(1:length(levels(ff))),bg='white')
-  }
+    for (r in 1:4)
+    {
+      plot(MSY, cpueRMSEall[,r], ylab='RMSE', main="CPUE Region " %&% r)
+    }
 
-  reset_graphics_par()
+    par(mfrow=c(3,3))
 
-  #look at ESS by fishery vs MSY
-  #pairs(cbind(MSY, essall[,1:5]))
-  #pairs(cbind(MSY, essall[,6:10]))
-  #pairs(cbind(MSY, essall[,11:15]))
-  #pairs(cbind(MSY, essall[,16:20]))
-  #pairs(cbind(MSY, essall[,21:23]))
-
-  #look at CPUE by area vs MSY
-  #corrDat<- cbind(MSY, cpueRMSEall)
-  #pairs(corrDat)
-
-  plot(MSY, rec.Trend, ylab='slope (dev/qtr)', main="Recruitment Deviation Trend" )
-
-  plot(x=jitter(MSY, amount=mean(MSY)/100),y=jitter(rec.Trend, amount=max(rec.Trend)/25+0.001), ylab='slope (dev/qtr)', main="Recruitment Deviation Trend", cex=0.1)
-  par(mfrow=c(2,2))
-
-  for (r in 1:4)
-  {
-    plot(MSY, cpueRMSEall[,r], ylab='RMSE', main="CPUE Region " %&% r)
-  }
-
-  par(mfrow=c(3,3))
-
-  for (f in 1:numFleets)
-  {
-    plot(MSY, essall[,f], ylab='post-fit ESS', main="Fishery " %&% f)
-  }
+    for (f in 1:numFleets)
+    {
+      plot(MSY, essall[,f], ylab='post-fit ESS', main="Fishery " %&% f)
+    }
+  } #doPlots
 
   BY   <- SSBYall
   BMSY <- SSBMSYall
 
-  return(list(cbind(CPUE.fit, CL.Fit, tag.Fit, max.Grad, rec.Trend, rec.Fit, rec.RMSE,recByYr.RMSE, MSY, B_B.MSY, B_B0, BY, BMSY, modList, stdExistsall), boundFailLOList, boundFailHIList, boundFailHIList2))
+  return (list(cbind(CPUE.fit, CL.Fit, tag.Fit, max.Grad, rec.Trend, rec.Fit, rec.RMSE,recByYr.RMSE, MSY, B_B.MSY, B_B0, BY, BMSY, modList, stdExistsall, crashPen, catchLLH), boundFailLOList, boundFailHIList, boundFailHIList2))
 }
 
 # this fixes a par problem introduced by chart.Correlation
