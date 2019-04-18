@@ -41,6 +41,11 @@ PT41.t50<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1., deltaTACLimUp=0.5, d
 }
 class(PT41.t50)<-"IO_MP_tune"
 
+PT41.t90<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1., deltaTACLimUp=0.9, deltaTACLimDown=0.9){
+  return(PellaTomlinson4010(pset, BLower=BLower,BUpper=BUpper,CMaxProp=pset$tune * CMaxProp, deltaTACLimUp=deltaTACLimUp, deltaTACLimDown=deltaTACLimDown))
+}
+class(PT41.t90)<-"IO_MP_tune"
+
 PT41.t10<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1., deltaTACLimUp=0.1, deltaTACLimDown=0.1){
   return(PellaTomlinson4010(pset, BLower=BLower,BUpper=BUpper,CMaxProp=pset$tune * CMaxProp, deltaTACLimUp=deltaTACLimUp, deltaTACLimDown=deltaTACLimDown))
 }
@@ -197,6 +202,10 @@ IT5.t50 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2, deltaTACLimUp=0.5, deltaTAC
   return(CPUETarget(pset, ITargPars=c(pset$tune *1.0,deltaTACLimUp,deltaTACLimDown,0.2,0.1,0.1,0.1,0.1), yrsmth=yrsmth,lambda=lambda,xx=xx))
 }
 class(IT5.t50) <- "IO_MP_tune"
+IT5.t90 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2, deltaTACLimUp=0.9, deltaTACLimDown=0.9){
+  return(CPUETarget(pset, ITargPars=c(pset$tune *1.0,deltaTACLimUp,deltaTACLimDown,0.2,0.1,0.1,0.1,0.1), yrsmth=yrsmth,lambda=lambda,xx=xx))
+}
+class(IT5.t90) <- "IO_MP_tune"
 
 
 
@@ -813,7 +822,6 @@ CC50CE1.0bet <- function(pset)
 }
 
 class(CC50CE1.0bet) <- "IO_MP"
-
 
 
 
