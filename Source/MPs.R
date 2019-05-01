@@ -31,6 +31,35 @@ PT41.t15<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1., deltaTACLimUp=0.15, 
 }
 class(PT41.t15)<-"IO_MP_tune"
 
+#delayed TAC change implemntation until 2024
+PT41.td15<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1., deltaTACLimUp=0.15, deltaTACLimDown=0.15){
+  if(pset$y<73){ #for BET 67 = 2021
+    deltaTACLimUp <- 0.01 
+    deltaTACLimDown <- 0.01
+  }
+  return(PellaTomlinson4010(pset, BLower=BLower,BUpper=BUpper,CMaxProp=pset$tune * CMaxProp, deltaTACLimUp=deltaTACLimUp, deltaTACLimDown=deltaTACLimDown))
+}
+class(PT41.td15)<-"IO_MP_tune"
+
+# relaxed change constraint for first 2 MP applications only
+PT41.x60t25<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1., deltaTACLimUp=0.25, deltaTACLimDown=0.25){
+  if(pset$y<73){ # for YFT 69 = 2021
+    # PT return (list(TAEbyF=TAEbyF,TAC=newTAC))
+    #x[[2]] <- pset$prevTACE$TAC*0.4   
+    deltaTACLimDown <- 0.6
+  }
+  #print(c("WTF",pset$y,deltaTACLimUp, deltaTACLimDown))
+  x <- PellaTomlinson4010(pset, BLower=BLower,BUpper=BUpper,CMaxProp=pset$tune * CMaxProp, deltaTACLimUp=deltaTACLimUp, deltaTACLimDown=deltaTACLimDown)
+  return(x)
+}
+class(PT41.x60t25)<-"IO_MP_tune"
+
+
+
+
+
+
+
 PT41.t25<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1., deltaTACLimUp=0.25, deltaTACLimDown=0.25){
   return(PellaTomlinson4010(pset, BLower=BLower,BUpper=BUpper,CMaxProp=pset$tune * CMaxProp, deltaTACLimUp=deltaTACLimUp, deltaTACLimDown=deltaTACLimDown))
 }
@@ -55,6 +84,11 @@ PT80.t15<-function(pset, BLower=0.0,BUpper=0.8,CMaxProp=1., deltaTACLimUp=0.15, 
   return(PellaTomlinson4010(pset, BLower=BLower,BUpper=BUpper,CMaxProp=pset$tune * CMaxProp, deltaTACLimUp=deltaTACLimUp, deltaTACLimDown=deltaTACLimDown))
 }
 class(PT80.t15)<-"IO_MP_tune"
+
+PT80.t50<-function(pset, BLower=0.0,BUpper=0.8,CMaxProp=1., deltaTACLimUp=0.50, deltaTACLimDown=0.50){
+  return(PellaTomlinson4010(pset, BLower=BLower,BUpper=BUpper,CMaxProp=pset$tune * CMaxProp, deltaTACLimUp=deltaTACLimUp, deltaTACLimDown=deltaTACLimDown))
+}
+class(PT80.t50)<-"IO_MP_tune"
 
 
 PT41.tune.05<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, deltaTACLimUp=0.05, deltaTACLimDown=0.05){
@@ -181,6 +215,37 @@ IT5.t15 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2, deltaTACLimUp=0.15, deltaTA
 }
 class(IT5.t15) <- "IO_MP_tune"
 
+# delay TAC change for initial stability
+IT5.td15 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2, deltaTACLimUp=0.15, deltaTACLimDown=0.15){
+  if(pset$y<73){ #for BET 67 = 2021
+      deltaTACLimUp <- 0.01 
+    deltaTACLimDown <- 0.01
+  }
+  return(CPUETarget(pset, ITargPars=c(pset$tune *1.0,deltaTACLimUp,deltaTACLimDown,0.2,0.1,0.1,0.1,0.1), yrsmth=yrsmth,lambda=lambda,xx=xx))
+}
+class(IT5.td15) <- "IO_MP_tune"
+
+
+# relaxed TAC change constraint for first 2 applications only
+IT5.x60t15 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2, deltaTACLimUp=0.15, deltaTACLimDown=0.15){
+  if(pset$y<73){ # for YFT 69 = 2021
+    deltaTACLimDown <- 0.6
+  }
+  return(CPUETarget(pset, ITargPars=c(pset$tune *1.0,deltaTACLimUp,deltaTACLimDown,0.2,0.1,0.1,0.1,0.1), yrsmth=yrsmth,lambda=lambda,xx=xx))
+}
+class(IT5.x60t15) <- "IO_MP_tune"
+
+# relaxed TAC change constraint for first 2 applications only
+IT5.x60t25 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2, deltaTACLimUp=0.25, deltaTACLimDown=0.25){
+  if(pset$y<73){ # for YFT 69 = 2021
+    deltaTACLimDown <- 0.6
+  }
+  return(CPUETarget(pset, ITargPars=c(pset$tune *1.0,deltaTACLimUp,deltaTACLimDown,0.2,0.1,0.1,0.1,0.1), yrsmth=yrsmth,lambda=lambda,xx=xx))
+}
+class(IT5.x60t25) <- "IO_MP_tune"
+
+
+
 IT5.t15.l1 <- function(pset,yrsmth=5,lambda=0.1,xx=0.2, deltaTACLimUp=0.15, deltaTACLimDown=0.15){
   return(CPUETarget(pset, ITargPars=c(pset$tune *1.0,deltaTACLimUp,deltaTACLimDown,0.2,0.1,0.1,0.1,0.1), yrsmth=yrsmth,lambda=lambda,xx=xx))
 }
@@ -202,6 +267,68 @@ IT5.t50 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2, deltaTACLimUp=0.5, deltaTAC
   return(CPUETarget(pset, ITargPars=c(pset$tune *1.0,deltaTACLimUp,deltaTACLimDown,0.2,0.1,0.1,0.1,0.1), yrsmth=yrsmth,lambda=lambda,xx=xx))
 }
 class(IT5.t50) <- "IO_MP_tune"
+
+# all gain parameters = .1
+IT5.t50g1 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2, deltaTACLimUp=0.5, deltaTACLimDown=0.5){
+  return(CPUETarget(pset, ITargPars=c(pset$tune *1.0,deltaTACLimUp,deltaTACLimDown,0.1,0.1,0.1,0.1,0.1), yrsmth=yrsmth,lambda=lambda,xx=xx))
+}
+class(IT5.t50g1) <- "IO_MP_tune"
+
+# all gain parameters = .2
+IT5.t50g2 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2, deltaTACLimUp=0.5, deltaTACLimDown=0.5){
+  return(CPUETarget(pset, ITargPars=c(pset$tune *1.0,deltaTACLimUp,deltaTACLimDown,0.2,0.2,0.2,0.2,0.2), yrsmth=yrsmth,lambda=lambda,xx=xx))
+}
+class(IT5.t50g2) <- "IO_MP_tune"
+
+# all gain parameters = .3
+IT5.t50g3 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2, deltaTACLimUp=0.5, deltaTACLimDown=0.5){
+  return(CPUETarget(pset, ITargPars=c(pset$tune *1.0,deltaTACLimUp,deltaTACLimDown,0.3,0.3,0.3,0.3,0.3), yrsmth=yrsmth,lambda=lambda,xx=xx))
+}
+class(IT5.t50g3) <- "IO_MP_tune"
+
+# gain parameters = .3 and .1
+IT5.t50g3311 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2, deltaTACLimUp=0.5, deltaTACLimDown=0.5){
+  return(CPUETarget(pset, ITargPars=c(pset$tune *1.0,deltaTACLimUp,deltaTACLimDown,0.3,0.3,0.1,0.1,0.1), yrsmth=yrsmth,lambda=lambda,xx=xx))
+}
+class(IT5.t50g3311) <- "IO_MP_tune"
+
+# gain parameters = .1 and .3
+IT5.t50g1133 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2, deltaTACLimUp=0.5, deltaTACLimDown=0.5){
+  return(CPUETarget(pset, ITargPars=c(pset$tune *1.0,deltaTACLimUp,deltaTACLimDown,0.1,0.1,0.3,0.3,0.3), yrsmth=yrsmth,lambda=lambda,xx=xx))
+}
+class(IT5.t50g1133) <- "IO_MP_tune"
+
+# gain parameters = .1 and .3
+IT5.t50g1313 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2, deltaTACLimUp=0.5, deltaTACLimDown=0.5){
+  return(CPUETarget(pset, ITargPars=c(pset$tune *1.0,deltaTACLimUp,deltaTACLimDown,0.1,0.3,0.1,0.3,0.3), yrsmth=yrsmth,lambda=lambda,xx=xx))
+}
+class(IT5.t50g1313) <- "IO_MP_tune"
+
+# gain parameters = .1 and .3
+IT5.t50g3131 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2, deltaTACLimUp=0.5, deltaTACLimDown=0.5){
+  return(CPUETarget(pset, ITargPars=c(pset$tune *1.0,deltaTACLimUp,deltaTACLimDown,0.3,0.1,0.3,0.1,0.3), yrsmth=yrsmth,lambda=lambda,xx=xx))
+}
+class(IT5.t50g3131) <- "IO_MP_tune"
+
+# gain parameters = .1 and .3
+IT5.t15g1313 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2, deltaTACLimUp=0.15, deltaTACLimDown=0.15){
+  return(CPUETarget(pset, ITargPars=c(pset$tune *1.0,deltaTACLimUp,deltaTACLimDown,0.1,0.3,0.1,0.3,0.3), yrsmth=yrsmth,lambda=lambda,xx=xx))
+}
+class(IT5.t15g1313) <- "IO_MP_tune"
+
+# gain parameters = .1 and .3
+IT5.t15g3131 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2, deltaTACLimUp=0.15, deltaTACLimDown=0.15){
+  return(CPUETarget(pset, ITargPars=c(pset$tune *1.0,deltaTACLimUp,deltaTACLimDown,0.3,0.1,0.3,0.1,0.3), yrsmth=yrsmth,lambda=lambda,xx=xx))
+}
+class(IT5.t15g3131) <- "IO_MP_tune"
+
+
+
+IT3.t50 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2, deltaTACLimUp=0.5, deltaTACLimDown=0.5){
+  return(CPUETarget(pset, ITargPars=c(pset$tune *1.0,deltaTACLimUp,deltaTACLimDown,0.2,0.1,0.1,0.1,0.1), yrsmth=yrsmth,lambda=lambda,xx=xx))
+}
+class(IT3.t50) <- "IO_MP_tune"
+
 IT5.t90 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2, deltaTACLimUp=0.9, deltaTACLimDown=0.9){
   return(CPUETarget(pset, ITargPars=c(pset$tune *1.0,deltaTACLimUp,deltaTACLimDown,0.2,0.1,0.1,0.1,0.1), yrsmth=yrsmth,lambda=lambda,xx=xx))
 }
@@ -397,9 +524,9 @@ PT.f <- function(params, C_hist,I_hist, CMCsum, p, doPlot=F, returnOpt=1){
 #  print(C)
 #  PT.f(params=log(c(.1,100)), C_hist=rep(C,10000), I_hist=rep(1,10000), CMCsum=1,p=-0.16,doPlot=F)
 #}
-for(p in c(-100:200)/100){
-  print(c("p, BMSY/K: ", p,1/((p+1)^(1/p))) )    #p=-0.16   BMSY/K~0.33
-}
+#for(p in c(-100:200)/100){
+#  print(c("p, BMSY/K: ", p,1/((p+1)^(1/p))) )    #p=-0.16   BMSY/K~0.33
+#}
 
 
 
@@ -414,7 +541,7 @@ MP_FunctionExports <- c(MP_FunctionExports, "CPUETarget")
 # Raise or lower TAC proportional to (recent weighted average) Index
 # difference from a target
 #------------------------------------------------------------------------------
-CPUETarget <- function(pset, ITargPars=c(2.5,0.2,0.2,0.1,0.1,0.1,0.1), yrsmth=5,lambda=0.4,xx=0.2)
+CPUETarget <- function(pset, ITargPars=c(2.5, 0.2, 0.2, 0.1, 0.1, 0.1, 0.1), yrsmth=5,lambda=0.4,xx=0.2)
 {
   ny     <- length(pset$Cobs) #number years of data
   ind    <- (ny - (yrsmth - 1)):ny

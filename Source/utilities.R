@@ -438,7 +438,8 @@ betPlots.f <- function(mseObj,
                        YearsAveraged=20,
                        rename=NA,
                        outputPath=NA,
-                       prefix="")
+                       prefix="",
+                       outFileType="emf") # or "png" which does not scale well
 {
   require(devEMF)
 
@@ -453,7 +454,17 @@ betPlots.f <- function(mseObj,
   names(BETTargs) <- c("S3", "S4")
   names(BETLims)  <- c("S3", "S4")
 
-  beginDraw <- function(filename, width=6, height=6, outputPath=NA)
+  scaleAll=1.0
+  plotWidth=scaleAll*6
+  plotHeight=scaleAll*6
+  plotHeight2=scaleAll*3.375
+  if(outFileType=="png"){
+    plotWidth=scaleAll*588
+    plotHeight=scaleAll*588  
+    plotHeight2=scaleAll*3.375/6*588
+  }
+    
+  beginDraw <- function(filename, width=plotWidth, height=plotHeight, outputPath=NA)
   {
     if (is.na(outputPath))
     {
@@ -461,7 +472,13 @@ betPlots.f <- function(mseObj,
     }
     else
     {
-      emf(file=outputPath %&% filename %&% ".emf", width=width, height=height)
+      if(outFileType=="png")
+      {
+        png(file=outputPath %&% filename %&% ".png", width=width, height=height)
+      }
+      else{
+        emf(file=outputPath %&% filename %&% ".emf", width=width, height=height)
+      }
     }
   }
 
@@ -475,6 +492,8 @@ betPlots.f <- function(mseObj,
 
   histd <- msevizHistoricTimeSeriesData(mseObj)
   projd <- msevizProjectedTimeSeriesData(mseObj)
+  
+  projd <- projd[year <= 2040,]
 
   if (!is.na(rename))
   {
@@ -486,28 +505,28 @@ betPlots.f <- function(mseObj,
     projd[,"mp"] <- projd[,substitute(mp)]
   }
 
-  beginDraw(prefix %&% "Recruitment", width=6, height=6, outputPath=outputPath)
-  plotOMruns2(histd, projd, "Recruitment", ylab= "Recruitment")
+  beginDraw(prefix %&% "Recruitment", width=plotWidth, height=plotHeight, outputPath=outputPath)
+  plotOMruns2(histd, projd, "Recruitment", ylab= "Recruitment", lastHistYr = 2015, firstMPYr = 2021)
   endDraw(outputPath=outputPath)
 
-  beginDraw(prefix %&% "SSB_SSBMSY", width=6, height=6, outputPath=outputPath)
-  plotOMruns2(histd, projd, "SSB/SSBMSY", limit=SBLim, target=SBTarg, ylab= "SSB/SSBMSY")
+  beginDraw(prefix %&% "SSB_SSBMSY", width=plotWidth, height=plotHeight, outputPath=outputPath)
+  plotOMruns2(histd, projd, "SSB/SSBMSY", limit=SBLim, target=SBTarg, ylab= "SSB/SSBMSY", lastHistYr = 2015, firstMPYr = 2021)
   endDraw(outputPath=outputPath)
 
-  beginDraw(prefix %&% "F_FMSY", width=6, height=6, outputPath=outputPath)
-  plotOMruns2(histd, projd, "F/FMSY", limit=FLim, target=FTarg, ylab= "F/FMSY")
+  beginDraw(prefix %&% "F_FMSY", width=plotWidth, height=plotHeight, outputPath=outputPath)
+  plotOMruns2(histd, projd, "F/FMSY", limit=FLim, target=FTarg, ylab= "F/FMSY", lastHistYr = 2015, firstMPYr = 2021)
   endDraw(outputPath=outputPath)
 
-  beginDraw(prefix %&% "C", width=6, height=6, outputPath=outputPath)
-  plotOMruns2(histd, projd, "C", Cref=Cref, ylab= "Catch (1000t)")
+  beginDraw(prefix %&% "C", width=plotWidth, height=plotHeight, outputPath=outputPath)
+  plotOMruns2(histd, projd, "C", Cref=Cref*1000, CScale=0.001, ylab= "Catch (1000t)", lastHistYr = 2015, firstMPYr = 2021)
   endDraw(outputPath=outputPath)
 
-  beginDraw(prefix %&% "CPUE", width=6, height=6, outputPath=outputPath)
-  plotOMruns2(histd, projd, "CPUE(aggregate)", Cref=Cref, ylab= "CPUE(aggregate)")
+  beginDraw(prefix %&% "CPUE", width=plotWidth, height=plotHeight, outputPath=outputPath)
+  plotOMruns2(histd, projd, "CPUE(aggregate)", Cref=Cref, ylab= "CPUE(aggregate)", lastHistYr = 2015, firstMPYr = 2021)
   endDraw(outputPath=outputPath)
 
-  beginDraw(prefix %&% "KobeCols", width=6, height=6, outputPath=outputPath)
-  plotKobeCols(om=histd[histd$qname %in% c("PrGreen","PrOrange","PrYellow","PrRed"),], runs=projd[projd$qname%in% c("PrGreen","PrOrange","PrYellow","PrRed"),])
+  beginDraw(prefix %&% "KobeCols", width=plotWidth, height=plotHeight, outputPath=outputPath)
+  plotKobeCols(om=histd[histd$qname %in% c("PrGreen","PrOrange","PrYellow","PrRed"),], runs=projd[projd$qname%in% c("PrGreen","PrOrange","PrYellow","PrRed"),], lastHistYr = 2015, firstMPYr = 2021)
   endDraw(outputPath=outputPath)
 
   perfd <- msevizPerformanceData(mseObj, YearsAveraged)
@@ -521,20 +540,20 @@ betPlots.f <- function(mseObj,
 
     perfd[,"mp"] <- perfd[,substitute(mp)]
   }
-
-  beginDraw(prefix %&% "BPs", width=6, height=3.375, outputPath=outputPath)
+  
+  beginDraw(prefix %&% "BPs", width=plotWidth, height=plotHeight2, outputPath=outputPath)
   grid::pushViewport(grid::viewport(layout = grid::grid.layout(nrow = 1, ncol = 1)))
-  print(plotBPs2(perfd, limit=BETLims, target=BETTargs, indicators = c("S3", "S9", "S6", "S10", "S14")), vp = grid::viewport(layout.pos.row = 1, layout.pos.col = 1))
+  print(plotBPs2(perfd, limit=BETLims, target=BETTargs, blackRef=Cref, indicators = c("S3", "S9", "S6", "S10", "S14")), vp = grid::viewport(layout.pos.row = 1, layout.pos.col = 1))
   grid::popViewport()
   endDraw(outputPath=outputPath)
 
-  beginDraw(prefix %&% "TOs", width=6, height=3.375, outputPath=outputPath)
+  beginDraw(prefix %&% "TOs", width=plotWidth, height=plotHeight2, outputPath=outputPath)
   grid::pushViewport(grid::viewport(layout = grid::grid.layout(nrow = 1, ncol = 1)))
-  print(plotTOs2(perfd, limit=BETLims, target=BETTargs, indicators = c("S9", "S3", "S6", "S14")), vp = grid::viewport(layout.pos.row = 1, layout.pos.col = 1))
+  print(plotTOs2(perfd, limit=BETLims, target=BETTargs, blackRef=Cref, indicators = c("S9", "S3", "S6", "S14")), vp = grid::viewport(layout.pos.row = 1, layout.pos.col = 1))
   grid::popViewport()
   endDraw(outputPath=outputPath)
 
-  beginDraw(prefix %&% "KobeMP", width=6, height=3.375, outputPath=outputPath)
+  beginDraw(prefix %&% "KobeMP", width=plotWidth, height=plotHeight2, outputPath=outputPath)
   grid::pushViewport(grid::viewport(layout = grid::grid.layout(nrow = 1, ncol = 1)))
   print(kobeMPs2(perfd, xlim=SBLim, ylim=FLim, ymax=3), vp = grid::viewport(layout.pos.row = 1, layout.pos.col = 1))
   grid::popViewport()
