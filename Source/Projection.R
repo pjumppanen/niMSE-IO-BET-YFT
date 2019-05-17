@@ -572,6 +572,8 @@ setMethod("initialize", "Projection",
       Om.nt.beginProjection(Obj, as.double(rep(log(0.001), nfleets)))
     }
 
+    MP_environment <- new.env()
+
     for (y in (nyears+1):(nyears + proyears))     # redo initl year for reporting; test implications
     {
       PAYMRF[,3] <- y
@@ -721,7 +723,9 @@ setMethod("initialize", "Projection",
                    "CAL_bins" = CAL_bins,
                    "prevTACE" = TACE,
                    "y"        = y - MseDef@MPDataLag,
-                   "tune"     = tune)
+                   "tune"     = tune,
+                   "interval" = interval,
+                   "env"      = MP_environment) # env provides historic data storage for MP implementations
 
         # run the MP
         TACE <- get(MP)(pset)
@@ -1065,6 +1069,11 @@ setMethod("initialize", "Projection",
       # End of annual projection
 
     } # projection year loop
+
+    # call the MP as a hook to plot diagnostics at the end of a run.
+    # "complete" key will be defined.
+    pset$complete <- TRUE
+    get(MP)(pset)
 
     # Store results ...
     # archive timing may not be entirely consistent with SS for all quantitities,
