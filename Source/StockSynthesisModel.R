@@ -38,7 +38,7 @@ setMethod("initialize", "StockSynthesisModel",
     }
 
     # ssoutput.f no longer req'd, r4ss fixed
-    ssMod <- SS_output(dir=MseDef@SSRootDir %&% MseDef@OMList[which], covar=FALSE, ncols=213,forecast=FALSE)
+    ssMod <- SS_output2(dir=MseDef@SSRootDir %&% MseDef@OMList[which], covar=FALSE, ncols=213,forecast=FALSE)
 
     # P nfleets excluding surveys (and some fleets are misleading - should be re-configured as time blocks in selectivity)
     .Object@ModelData@nsim      <- as.integer(MseDef@nsimPerOMFile[which])
