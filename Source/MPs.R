@@ -34,7 +34,7 @@ class(PT41.t15)<-"IO_MP_tune"
 #delayed TAC change implemntation until 2024
 PT41.td15<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1., deltaTACLimUp=0.15, deltaTACLimDown=0.15){
   if(pset$y<73){ #for BET 67 = 2021
-    deltaTACLimUp <- 0.01 
+    deltaTACLimUp <- 0.01
     deltaTACLimDown <- 0.01
   }
   return(PellaTomlinson4010(pset, BLower=BLower,BUpper=BUpper,CMaxProp=pset$tune * CMaxProp, deltaTACLimUp=deltaTACLimUp, deltaTACLimDown=deltaTACLimDown))
@@ -45,7 +45,7 @@ class(PT41.td15)<-"IO_MP_tune"
 PT41.x60t25<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1., deltaTACLimUp=0.25, deltaTACLimDown=0.25){
   if(pset$y<73){ # for YFT 69 = 2021
     # PT return (list(TAEbyF=TAEbyF,TAC=newTAC))
-    #x[[2]] <- pset$prevTACE$TAC*0.4   
+    #x[[2]] <- pset$prevTACE$TAC*0.4
     deltaTACLimDown <- 0.6
   }
   #print(c("WTF",pset$y,deltaTACLimUp, deltaTACLimDown))
@@ -218,7 +218,7 @@ class(IT5.t15) <- "IO_MP_tune"
 # delay TAC change for initial stability
 IT5.td15 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2, deltaTACLimUp=0.15, deltaTACLimDown=0.15){
   if(pset$y<73){ #for BET 67 = 2021
-      deltaTACLimUp <- 0.01 
+      deltaTACLimUp <- 0.01
     deltaTACLimDown <- 0.01
   }
   return(CPUETarget(pset, ITargPars=c(pset$tune *1.0,deltaTACLimUp,deltaTACLimDown,0.2,0.1,0.1,0.1,0.1), yrsmth=yrsmth,lambda=lambda,xx=xx))
@@ -951,5 +951,174 @@ CC50CE1.0bet <- function(pset)
 class(CC50CE1.0bet) <- "IO_MP"
 
 
+
+#------------------------------------------------------------------------------
+MP_FunctionExports <- c(MP_FunctionExports, "CPUE_setpoint_control")
+
+#------------------------------------------------------------------------------
+# MP using CPUE setpoint to control TAC along with simple model estimation
+# of MSY and CPUE at MSY
+#------------------------------------------------------------------------------
+CPUE_setpoint_control <- function(pset, target_CPUE_scale=1.25, resume_MSY_scale=0.5, close_CPUE_scale = 0.3, open_CPUE_scale = 0.3, TAC_gain=0.05)
+{
+  require(splines)
+
+  # check for completion of MP
+  if (!is.null(pset$complete) && (pset$complete ==TRUE))
+  {
+    # Use this as a oportunity to plot diagnostic stuff
+  }
+
+  catch_model <- function(a, b, effort)
+  {
+    C <- a * effort * (b - effort)
+
+    return (C)
+  }
+
+  CPUE_model <- function(a, b, effort)
+  {
+    CPUE <- a * (b - effort)
+
+    return (CPUE)
+  }
+
+  fitCatchEffortModel <- function(catch_series, CPUE_series)
+  {
+    objective <- function(par)
+    {
+      a <- par[1]
+      b <- par[2]
+
+      squareError <- sum(((catch_model(a, b, effort_series) - catch_series) ^ 2), na.rm=TRUE)
+
+      return (squareError)
+    }
+
+    # filter out point with large changes in CPUE as these will bias estimate because the
+    # data is running far from steady state conditions
+    relative_change <- c(1.0, CPUE_series[2:length(CPUE_series)] / CPUE_series[1:(length(CPUE_series) - 1)])
+    ix              <- which(!((relative_change < 0.707) | (relative_change > 2)))
+    catch_series    <- catch_series[ix]
+    CPUE_series     <- CPUE_series[ix]
+
+    effort_series <- catch_series / CPUE_series
+    start         <- c(4 * max(catch_series, na.rm=TRUE) / (max(effort_series, na.rm=TRUE) ^ 2), max(effort_series, na.rm=TRUE))
+    fit           <- nlminb(start, objective)
+    a             <- fit$par[1]
+    b             <- fit$par[2]
+
+#    par(mfrow=c(1,1))
+#    plot(effort_series, catch_series)
+#    points(effort_series, catch_model(a, b, effort_series), col="red")
+#
+#    readline(prompt="Press [enter] to continue")
+#
+#    plot(effort_series, CPUE_series)
+#    points(effort_series, CPUE_model(a, b, effort_series), col="red")
+#
+#    readline(prompt="Press [enter] to continue")
+
+    results <- list(MSY      = (a * b * b / 4),
+                    CPUE_MSY = (a * b / 2),
+                    a        = a,
+                    b        = b)
+
+    return (results)
+  }
+
+  #check for first run
+  if (is.null(pset$env$closed))
+  {
+    pset$env$closed <- FALSE
+  }
+
+  # years between MP evaluation
+  count <- pset$interval
+  ny    <- length(pset$Cobs) #number years of data
+  model <- fitCatchEffortModel(pset$Cobs, pset$Iobs)
+
+  if (count > ny)
+  {
+    count <- ny
+  }
+
+  years   <- ny:(ny - count + 1)
+  Catches <- pset$Cobs[years]
+  lastTAC <- pset$prevTACE$TAC
+  CPUE    <- pset$Iobs[years]
+  Ey      <- Catches / CPUE
+  Catch   <- (1 / 2) * Catches[1] + (1 / 3) * Catches[2] + (1 / 6) * Catches[3]
+  E       <- (1 / 2) * Ey[1] + (1 / 3) * Ey[2] + (1 / 6) * Ey[3]
+  CPUEest <- (Catch / E)
+
+  measuredCPUE <- CPUE[1]
+#  measuredCPUE <- CPUEest
+
+  predicted_catch <- catch_model(model$a, model$b, E)
+  predicted_CPUE  <- CPUE_model(model$a, model$b, E)
+  refCPUE         <- target_CPUE_scale * model$CPUE_MSY
+  closeCPUE       <- close_CPUE_scale * refCPUE
+  openCPUE        <- open_CPUE_scale * refCPUE
+  prediction      <- spline(years,CPUE, xmax=years[1] + 3)
+  newCPUE         <- prediction$y[length(prediction$y)]
+
+  if (pset$env$closed)
+  {
+    if (newCPUE > openCPUE)
+    {
+      newTAC          <- resume_MSY_scale * model$MSY
+      pset$env$closed <- FALSE
+    }
+    else
+    {
+      newTAC          <- 9
+    }
+  }
+  else
+  {
+    if (measuredCPUE < closeCPUE)
+    {
+      newTAC          <- 9
+      pset$env$closed <- TRUE
+    }
+    else
+    {
+      if (lastTAC == 9)
+      {
+        error         <- newCPUE - refCPUE
+      }
+      else
+      {
+        error         <- measuredCPUE - refCPUE
+      }
+
+      gain            <- TAC_gain * model$b
+      deltaC          <- error * gain
+      newTAC          <- lastTAC + deltaC
+    }
+  }
+
+  print("----------")
+  print(paste("last TAC : ", lastTAC))
+  print(paste("new TAC : ", newTAC))
+  print(paste("CPUE : ", CPUE))
+  print(paste("ref CPUE : ", refCPUE))
+  print(paste("model MSY : ", model$MSY))
+
+  if (newTAC < 9) newTAC <- 9 #shut the fishery down, except collect some data
+
+  TAEbyF <- 0.*pset$prevTACE$TAEbyF #TAE by fishery
+
+  return (list(TAEbyF=TAEbyF,TAC=newTAC))
+}
+
+
+ISP_0.4_0.3_0.3_0.05 <- function(pset)
+{
+  return (CPUE_setpoint_control(pset, target_CPUE_scale=pset$tune * 1.0, resume_MSY_scale=0.5, close_CPUE_scale = 0.3, open_CPUE_scale = 0.3, TAC_gain=0.05))
+}
+
+class(ISP_0.4_0.3_0.3_0.05) <- "IO_MP_tune"
 
 
