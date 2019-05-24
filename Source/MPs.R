@@ -1,19 +1,20 @@
-
-# ===============================================================================================================
-# === Management Procedures for Indian Ocean MSE==========================================================================
-#
-# MP must provide an aggregate TAC and disaggregated TAE by fishery (if TAE>0, that fishery is given 0 TAC)
-# seasonal (and fishery in the case of TAC) disaggregations are currently based on the "recent" historical means
-# the R-based projection code assumes that TAC catch proportions remain constant among seasons within years
-# the Cpp-based projections assume that the TAC Effort proportions remain constant among seasons within years
-# ===============================================================================================================
+#------------------------------------------------------------------------------
+# Management Procedures for Indian Ocean MSE
+#------------------------------------------------------------------------------
+# MP must provide an aggregate TAC and disaggregated TAE by fishery
+# (if TAE>0, that fishery is given 0 TAC) seasonal (and fishery in the case of TAC)
+# disaggregations are currently based on the "recent" historical means the
+# R-based projection code assumes that TAC catch proportions remain constant
+# among seasons within years the Cpp-based projections assume that the TAC
+# Effort proportions remain constant among seasons within years
+#------------------------------------------------------------------------------
 
 
 MP_FunctionExports <- c()
 
 
 #Pella-Tomlinson 40:10-type MPs (details implemented below)
-#===============================================================================
+#------------------------------------------------------------------------------
 
 #tuning
 PT41.tune.9<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0){
@@ -202,7 +203,7 @@ PT82.100.5<-function(pset, BLower=0.2,BUpper=0.8,CMaxProp=1.0){
 class(PT82.100.5)<-"IO_MP"
 
 # Aim fot CPUE target MPs
-#===============================================================================
+#------------------------------------------------------------------------------
 
 #tuning
 IT5.tune.15 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2, deltaTACLimUp=0.15, deltaTACLimDown=0.15){
@@ -400,63 +401,81 @@ IT3.50 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2){
 class(IT3.50)<-"IO_MP"
 
 
+#------------------------------------------------------------------------------
 
 MP_FunctionExports <- c(MP_FunctionExports, "PellaTomlinson4010")
 
-# Pella Tomlinson Production model with generic 40-10 type rule - MPs are defined with tuning parameters above
-# useF option uses the 40:10 rule for F rather than C, in which case FMax = FMSY*CMaxProp
-PellaTomlinson4010<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, deltaTACLimUp=0.9, deltaTACLimDown=0.9, useF=F){
+# -----------------------------------------------------------------------------
+# Pella Tomlinson Production model with generic 40-10 type rule - MPs are
+# defined with tuning parameters above useF option uses the 40:10 rule for F
+# rather than C, in which case FMax = FMSY*CMaxProp
+# -----------------------------------------------------------------------------
+PellaTomlinson4010 <- function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, deltaTACLimUp=0.9, deltaTACLimDown=0.9, useF=FALSE)
+{
   C_hist <- pset$Cobs
   I_hist <- pset$Iobs
   CMCsum <- pset$CMCsum  # "recent" annual catch in mass
 
   #Initial Model parameters
-  rInit <- 0.1
-  KInit <- 20.*CMCsum
-  p     <- -0.16  # don't bother trying to estimate p; for p = -0.16, BMSY/K ~0.33
+  rInit  <- 0.1
+  KInit  <- 20.0 * CMCsum
+  p      <- 1.0
 
-  params<-log(c(rInit,KInit))
-#print("PT4010 1")
-#browser()
-  #par(mfrow=c(3,3))
-  opt<-optim(par=params,fn=PT.f, returnOpt=1,
-             C_hist=C_hist,I_hist=I_hist, CMCsum=CMCsum, p=p,
-             method="L-BFGS-B",
-             lower=log(exp(params)/20),upper=log(exp(params)*20),
-             hessian=F, doPlot=F)
+  params <-log(c(rInit, KInit, p))
 
-  #get the biomass/BMSY estimate
-  d <- PT.f(params=opt$par, returnOpt=2, C_hist=C_hist, I_hist=I_hist, CMCsum=CMCsum, p=p, doPlot=F)
+  ix     <- which(!is.na(I_hist))
+  C_hist <- C_hist[ix]
+  I_hist <- I_hist[ix]
+
+  ix     <- which(!is.na(C_hist))
+  C_hist <- C_hist[ix]
+  I_hist <- I_hist[ix]
+
+  opt    <- optim(par=params, fn=PT.model, gr=PT.model.gradient, returnOpt=1, C_hist=C_hist, I_hist=I_hist, CMCsum=CMCsum, method="BFGS", hessian=F, doPlot=F)
+
+  # get the biomass/BMSY estimate
+  d       <- PT.model(params=opt$par, returnOpt=2, C_hist=C_hist, I_hist=I_hist, CMCsum=CMCsum, doPlot=FALSE)
   lastTAC <- pset$prevTACE$TAC
 
-  #Apply something like a 40-10 rule for catch relative to MSY
-  if(useF==F){
-    if(d["BY"]/d["K"] <= BLower)                        newTAC <- 1.    #i.e. shutdown fishery
-    if(d["BY"]/d["K"] >  BLower & d["BY"]/d["K"] <= BUpper) newTAC <- CMaxProp*d["MSY"]*(d["BY"]/d["K"])/(BUpper-BLower) + CMaxProp*d["MSY"]*( 1 - (BUpper/(BUpper-BLower)))
-    if(d["BY"]/d["K"] >  BUpper)                         newTAC <- CMaxProp*d["MSY"]
-  }
-  #Apply the 40:10 rule to F rather than catch...
-  if(useF){
+  if (useF)
+  {
+    #Apply the 40:10 rule to F rather than catch...
     FMSY = -log(1-d["MSY"]/d["K"])
     FMult = CMaxProp # maximum F relative to FMSY
-    if(d["BY"]/d["K"] <= BLower)   TACF <- 0.0001    #i.e. shutdown fishery
-    if(d["BY"]/d["K"] >  BLower & d["BY"]/d["K"] <= BUpper) TACF <- FMult*FMSY*(d["BY"]/d["K"])/(BUpper-BLower) + FMult*FMSY*( 1 - (BUpper/(BUpper-BLower)))
-    if(d["BY"]/d["K"] >  BUpper)   TACF <- FMult*FMSY
-    newTAC <-  d["BY"]*(1-exp(-TACF))
+    if ( d["BY"] / d["K"] <= BLower)                                  TACF <- 0.0001    #i.e. shutdown fishery
+    if ((d["BY"] / d["K"] >  BLower) && (d["BY"] / d["K"] <= BUpper)) TACF <- FMult * FMSY * (d["BY"] / d["K"]) / (BUpper - BLower) + FMult * FMSY * (1 - (BUpper / (BUpper - BLower)))
+    if ( d["BY"] / d["K"] >  BUpper)                                  TACF <- FMult * FMSY
+
+    newTAC <- d["BY"] * (1.0 - exp(-TACF))
+  }
+  else
+  {
+    #Apply something like a 40-10 rule for catch relative to MSY
+    if ( d["BY"] / d["K"] <= BLower)                                  newTAC <- 1.0    #i.e. shutdown fishery
+    if ((d["BY"] / d["K"] >  BLower) && (d["BY"] / d["K"] <= BUpper)) newTAC <- CMaxProp * d["MSY"] * (d["BY"] / d["K"]) / (BUpper - BLower) + CMaxProp * d["MSY"] * (1 - (BUpper / (BUpper - BLower)))
+    if ( d["BY"] / d["K"] >  BUpper)                                  newTAC <- CMaxProp * d["MSY"]
   }
 
-
-
-
   names(newTAC) <- "TAC"
+  deltaTAC      <- newTAC / lastTAC - 1
 
-  deltaTAC <- newTAC/lastTAC - 1
+  if (deltaTAC > deltaTACLimUp)
+  {
+    deltaTAC = deltaTACLimUp
+  }
 
-#print(deltaTAC)
-  if(deltaTAC >  deltaTACLimUp)   deltaTAC =  deltaTACLimUp
-  if(deltaTAC < -deltaTACLimDown) deltaTAC = -deltaTACLimDown
-  newTAC <- lastTAC*(1+deltaTAC)
-  if(newTAC<9) newTAC <- 9 #shut the fishery down, except collect some data
+  if (deltaTAC < -deltaTACLimDown)
+  {
+    deltaTAC = -deltaTACLimDown
+  }
+
+  newTAC <- lastTAC * (1 + deltaTAC)
+
+  if (newTAC < 9)
+  {
+    newTAC <- 9 #shut the fishery down, except collect some data
+  }
+
   TAEbyF <- 0.0 * pset$prevTACE$TAEbyF #TAE by fishery
 
   if (min(TAEbyF) < 0)
@@ -471,69 +490,262 @@ PellaTomlinson4010<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, deltaTACL
     browser()
   }
 
-  return (list(TAEbyF=TAEbyF,TAC=newTAC))
+  return (list(TAEbyF=TAEbyF, TAC=newTAC))
 }
 
 
-MP_FunctionExports <- c(MP_FunctionExports, "PT.f")
+MP_FunctionExports <- c(MP_FunctionExports, "PT.model")
 
-#Pella-Tomlinson Model function
-PT.f <- function(params, C_hist,I_hist, CMCsum, p, doPlot=F, returnOpt=1){
-
-  #Model parameters
-  #B(t+1)=B(t) + (r/p)B(1-(B/K)^p) - C    ; MSY = rK/4 ?
-  Y <- length(C_hist)
-  r <- exp(params[1])
-  K <- exp(params[2])
-
-  B <- array(NA,dim=Y)
-
+# -----------------------------------------------------------------------------
+# Pella-Tomlinson Model function
+# -----------------------------------------------------------------------------
+PT.model <- function(params, C_hist, I_hist, CMCsum, returnOpt=1, doPlot=FALSE)
+{
+  # Model parameters
+  # B(t+1)=B(t) + (r/p)B(1-(B/K)^p) - C    ; MSY = rK/((p+1)^(1+(1/p)))
+  #
+  Y    <- length(C_hist)
+  r    <- exp(params[1])
+  K    <- exp(params[2])
+  p    <- exp(params[3])
+  B    <- array(NA,dim=Y)
   B[1] <- K
-  for(y in 2:Y){
-    B[y] <- B[y-1] + ((p+1)/p)*r*B[y-1]*(1-(B[y-1]/K)^p) - C_hist[y-1]
-    if(B[y]<1e-5) B[y] <- 1e-5
+
+  for(y in 2:Y)
+  {
+    # Note that we square B / K to force a positive number so that then
+    # raising to the power of p / 2 exists. When B > 0 it is the same as
+    # (B / K) ^ p but still exists when B is negative. This is just an
+    # aid for fitting purposes.
+    B[y] <- B[y-1] + (r * B[y-1] / p) * (1.0 - ((B[y-1] / K) ^ 2) ^ (p/2)) - C_hist[y-1]
   }
-  q <- sum(I_hist[!is.na(I_hist)])/sum(B[!is.na(I_hist)])
-  LLH <- sum((q*B[!is.na(I_hist)]-I_hist[!is.na(I_hist)])^2)
 
-  MSY <- r*K/((p+1)^(1/p))
+  q   <- sum(I_hist) / sum(B)
+  LLH <- sum((q * B - I_hist) ^ 2)
+  MSY <- r * K / ((p + 1.0) ^ (1.0 + 1.0 / p))
 
-  # quick and dirty plausibility constraints - no claim that this is a good approach for constraining the PT model
-  if(MSY < 0.2*CMCsum) LLH <- LLH + (MSY - 0.2*CMCsum)^2
-  if(MSY > 5.0*CMCsum)  LLH <- LLH + (MSY - 5.0*CMCsum)^2
-
-#print(c("PT.f",r,K,B[Y],MSY, B[Y]/K))
-#browser()
-
-  if(doPlot){
-    plot(I_hist/q, main="MSY: " %&% MSY %&% " C(Y)/MSY: " %&% as.character(CMCsum/MSY), ylim=c(0,max(I_hist/q, na.rm=T)))
+  if (doPlot)
+  {
+    plot(I_hist / q, main="MSY: " %&% MSY %&% " C(Y)/MSY: " %&% as.character(CMCsum / MSY), ylim=c(0,max(I_hist / q, na.rm=T)))
     lines(B)
-    lines(C_hist,col=2)
+    lines(C_hist, col=2)
   }
 
-  if(returnOpt == 1){ # return objective function
+  if (returnOpt == 1)
+  {
+    # return objective function
     return(LLH)
-  } else {         # return MSY-related stuff
-    BMSY <- K/((p+1)^(1/p))
-    outList <- c(B[Y], K, MSY, BMSY)
+  }
+  else
+  {
+    # return MSY-related stuff
+    BMSY           <- MSY / r
+    outList        <- c(B[Y], K, MSY, BMSY)
     names(outList) <- c("BY","K","MSY","BMSY")
+
     return(outList)
   }
 }
-#for(C in c(1:100)/100){
-#  print(C)
-#  PT.f(params=log(c(.1,100)), C_hist=rep(C,10000), I_hist=rep(1,10000), CMCsum=1,p=-0.16,doPlot=F)
-#}
-#for(p in c(-100:200)/100){
-#  print(c("p, BMSY/K: ", p,1/((p+1)^(1/p))) )    #p=-0.16   BMSY/K~0.33
-#}
 
 
+MP_FunctionExports <- c(MP_FunctionExports, "PT.model.gradient")
 
-MP_FunctionExports <- c(MP_FunctionExports, "CPUETarget")
+# -----------------------------------------------------------------------------
+# AD adjoint of PT-model obtained by Tapenade AD of code,
+#
+# MODULE COMMON
+#
+#  INTEGER, PARAMETER :: dim_stack
+#
+#  INTEGER Y
+#  REAL C_hist(Y), I_hist(Y)
+#
+# END
+#
+#
+# REAL FUNCTION PT(params)
+#
+#   USE COMMON
+#
+#   REAL, INTENT (IN) :: params(3), C_hist(Y), I_hist(Y), Y
+#
+#   REAL B(Y), q, r, K, p
+#   INTEGER yi
+#
+#   r = EXP(params(1))
+#   K = EXP(params(2))
+#   p = EXP(params(3))
+#
+#   B(1) = K
+#
+#   DO yi=2,Y
+#     ! Note that we square B/K to force a positive number so that then
+#     ! raising to the power of p/2 exists. When B > 0 it is the same as
+#     ! (B/K)**p but still exists when B is negative. This is just an
+#     ! aid for fitting purposes.
+#     B(yi) = B(yi-1) + (r * B(yi-1) / p) * (1.0 - ((B(yi-1) / K)**2)**(p/2)) - C_hist(yi-1)
+#   END DO
+#
+#   q  = sum(I_hist) / sum(B)
+#   PT = sum((q * B - I_hist)**2)
+#
+#   RETURN
+#
+# END
+#
+# to obtain the code,
+#
+# SUBROUTINE PT_B(params, paramsb, ptb)
+#   USE COMMON_B
+#   IMPLICIT NONE
+#   REAL, INTENT(IN) :: params(3), c_hist(y), i_hist(y), y
+#   REAL :: paramsb(3)
+#   REAL :: b(y), q, r, k, p
+#   REAL :: bb(y), qb, rb, kb, pb
+#   INTEGER :: yi
+#   INTRINSIC EXP
+#   INTRINSIC SUM
+#   REAL :: ptb
+#   REAL :: pt
+#   REAL :: temp3
+#   REAL :: temp2
+#   REAL :: temp1
+#   REAL :: temp0
+#   REAL :: tempb2(y)
+#   REAL :: tempb1
+#   REAL :: tempb0
+#   REAL :: tempb
+#   REAL :: temp
+#   REAL :: temp4
+#   r = EXP(params(1))
+#   k = EXP(params(2))
+#   p = EXP(params(3))
+#   b(1) = k
+#   DO yi=2,y
+# ! Note that we square B/K to force a positive number so that then
+# ! raising to the power of p/2 exists. When B > 0 it is the same as
+# ! (B/K)**p but still exists when B is negative. This is just an
+# ! aid for fitting purposes.
+#     CALL PUSHREAL4(b(yi))
+#     b(yi) = b(yi-1) + r*b(yi-1)/p*(1.0-((b(yi-1)/k)**2)**(p/2)) - c_hist(yi-1)
+#   END DO
+#   q = SUM(i_hist)/SUM(b)
+#   temp4 = SUM(b)
+#   bb = 0.0
+#   tempb2 = 2*(q*b-i_hist)*ptb
+#   qb = SUM(b*tempb2)
+#   bb = q*tempb2 - SUM(i_hist)*qb/temp4**2
+#   kb = 0.0
+#   pb = 0.0
+#   rb = 0.0
+#   DO yi=y,2,-1
+#     CALL POPREAL4(b(yi))
+#     temp0 = r/p
+#     tempb = b(yi-1)*temp0*bb(yi)
+#     temp = b(yi-1)/k
+#     temp3 = temp**2
+#     temp2 = p/2
+#     IF (temp3 .LE. 0.0 .AND. (temp2 .EQ. 0.0 .OR. temp2 .NE. INT(temp2))) THEN
+#       tempb0 = 0.0
+#     ELSE
+#       tempb0 = -(2*temp*temp2*temp3**(temp2-1)*tempb/k)
+#     END IF
+#     temp1 = temp3**temp2
+#     tempb1 = b(yi-1)*(1.0-temp1)*bb(yi)/p
+#     bb(yi-1) = bb(yi-1) + tempb0 + ((1.0-temp1)*temp0+1.0)*bb(yi)
+#     kb = kb - temp*tempb0
+#     IF (temp3 .LE. 0.0) THEN
+#       pb = pb - temp0*tempb1
+#     ELSE
+#       pb = pb - temp0*tempb1 - temp1*LOG(temp3)*tempb/2
+#     END IF
+#     rb = rb + tempb1
+#     bb(yi) = 0.0
+#   END DO
+#   kb = kb + bb(1)
+#   paramsb(3) = paramsb(3) + EXP(params(3))*pb
+#   paramsb(2) = paramsb(2) + EXP(params(2))*kb
+#   paramsb(1) = paramsb(1) + EXP(params(1))*rb
+# END SUBROUTINE PT_B
+#
+# and translated back to R code below. paramsb is set to zero and ptb set to one
+#
+# -----------------------------------------------------------------------------
+PT.model.gradient <- function(params, C_hist, I_hist, CMCsum, returnOpt=1, doPlot=FALSE)
+{
+  Y       <- length(C_hist)
+  paramsb <- array(as.double(NA), dim=c(3))
+  b       <- array(as.double(NA), dim=c(Y))
+  stackr  <- array(as.double(NA), dim=c(Y))
+  sr      <- 1
+  r       <- exp(params[1])
+  k       <- exp(params[2])
+  p       <- exp(params[3])
+  b[1]    <- k
 
-#MP resembling first level of ETBF Harvest Strategy (CPUE slope to target)
-#Raise or lower TAC proportional to (recent weighted average) Index difference from a target
+  for (yi in 2:Y)
+  {
+    stackr[sr] <- b[yi]
+    sr         <- sr + 1
+    b[yi]      <- b[yi - 1] + (r * b[yi - 1] / p) * (1.0 - ((b[yi - 1] / k) ** 2) ** (p / 2)) - C_hist[yi - 1]
+  }
+
+  q       <- sum(I_hist) / sum(b)
+  temp4   <- sum(b)
+  bb      <- 0.0
+  tempb2  <- 2.0 * (q * b - I_hist)
+  qb      <- sum(b * tempb2)
+  bb      <- q * tempb2 - sum(I_hist) * qb / temp4 ^ 2
+  kb      <- 0.0
+  pb      <- 0.0
+  rb      <- 0.0
+
+  for (yi in Y:2)
+  {
+    sr    <- sr - 1
+    b[yi] <- stackr[sr]
+    temp0 <- r / p
+    tempb <- b[yi - 1] * temp0 * bb[yi]
+    temp  <- b[yi - 1] / k
+    temp3 <- temp ^ 2
+    temp2 <- p / 2
+
+    if ((temp3 <= 0.0) && ((temp2 == 0.0) || (temp2 != trunc(temp2))))
+    {
+      tempb0 <- 0.0
+    }
+    else
+    {
+      tempb0 <- -(2 * temp * temp2 * temp3 ^ (temp2 - 1.0) * tempb / k)
+    }
+
+    temp1      <- temp3 ^ temp2
+    tempb1     <- b[yi - 1] * (1.0 - temp1) * bb[yi] / p
+    bb[yi - 1] <- bb[yi - 1] + tempb0 + ((1.0 - temp1) * temp0 + 1.0) * bb[yi]
+    kb         <- kb - temp * tempb0
+
+    if (temp3 <= 0.0)
+    {
+      pb <- pb - temp0 * tempb1
+    }
+    else
+    {
+      pb <- pb - temp0 * tempb1 - temp1 * log(temp3) * tempb / 2
+    }
+
+    rb      <- rb + tempb1
+    bb[yi]  <- 0.0
+  }
+
+  kb         <- kb + bb[1]
+  paramsb[3] <- exp(params[3]) * pb
+  paramsb[2] <- exp(params[2]) * kb
+  paramsb[1] <- exp(params[1]) * rb
+
+  return (paramsb)
+}
+
+
 MP_FunctionExports <- c(MP_FunctionExports, "CPUETarget")
 
 #------------------------------------------------------------------------------
@@ -548,7 +760,7 @@ CPUETarget <- function(pset, ITargPars=c(2.5, 0.2, 0.2, 0.1, 0.1, 0.1, 0.1), yrs
   I_hist <- pset$Iobs[ind] #historical Abundance index
   yind   <- 1:yrsmth
   slppar <- summary(lm(I_hist ~ yind))$coefficients[2,1:2] #slope of recent index
-  Islp   <-slppar[1]
+  Islp   <- slppar[1]
 
   #MP Control Parameters
   ITarg <- ITargPars[1] # arbitrary CPUE Target, (conceptually at least) should correspond to time when stock perceived to be okay
@@ -584,15 +796,15 @@ CPUETarget <- function(pset, ITargPars=c(2.5, 0.2, 0.2, 0.1, 0.1, 0.1, 0.1), yrs
 
   if (newTAC < 9) newTAC <- 9 #shut the fishery down, except collect some data
 
-  TAEbyF <- 0.*pset$prevTACE$TAEbyF #TAE by fishery
+  TAEbyF <- 0.0 * pset$prevTACE$TAEbyF #TAE by fishery
 
-  return (list(TAEbyF=TAEbyF,TAC=newTAC))
+  return (list(TAEbyF=TAEbyF, TAC=newTAC))
 }
 
 
 
 # constant catch projections
-#===============================================================================
+#------------------------------------------------------------------------------
 #for tuning
 CCt <- function(pset,Cinit=400000)
 {
@@ -1099,12 +1311,12 @@ CPUE_setpoint_control <- function(pset, target_CPUE_scale=1.25, resume_MSY_scale
     }
   }
 
-  print("----------")
-  print(paste("last TAC : ", lastTAC))
-  print(paste("new TAC : ", newTAC))
-  print(paste("CPUE : ", CPUE))
-  print(paste("ref CPUE : ", refCPUE))
-  print(paste("model MSY : ", model$MSY))
+#  print("----------")
+#  print(paste("last TAC : ", lastTAC))
+#  print(paste("new TAC : ", newTAC))
+#  print(paste("CPUE : ", CPUE))
+#  print(paste("ref CPUE : ", refCPUE))
+#  print(paste("model MSY : ", model$MSY))
 
   if (newTAC < 9) newTAC <- 9 #shut the fishery down, except collect some data
 
@@ -1120,5 +1332,3 @@ ISP_0.4_0.3_0.3_0.05 <- function(pset)
 }
 
 class(ISP_0.4_0.3_0.3_0.05) <- "IO_MP_tune"
-
-
