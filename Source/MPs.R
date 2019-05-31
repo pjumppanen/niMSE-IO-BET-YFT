@@ -57,7 +57,63 @@ class(PT41.x60t25)<-"IO_MP_tune"
 
 
 
+PT41AL.t15<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1., deltaTACLimUp=0.15, deltaTACLimDown=0.15)
+{
+  return(PellaTomlinsonAbsoluteLimits(pset, BLower=BLower,BUpper=BUpper,CMaxProp=pset$tune * CMaxProp, deltaTACLimUp=deltaTACLimUp, deltaTACLimDown=deltaTACLimDown))
+}
 
+class(PT41AL.t15)<-"IO_MP_tune"
+
+PT41AL.t25<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1., deltaTACLimUp=0.25, deltaTACLimDown=0.25)
+{
+  return(PellaTomlinsonAbsoluteLimits(pset, BLower=BLower,BUpper=BUpper,CMaxProp=pset$tune * CMaxProp, deltaTACLimUp=deltaTACLimUp, deltaTACLimDown=deltaTACLimDown))
+}
+
+class(PT41AL.t25)<-"IO_MP_tune"
+
+PT41AL.t50<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1., deltaTACLimUp=0.5, deltaTACLimDown=0.5)
+{
+  return(PellaTomlinsonAbsoluteLimits(pset, BLower=BLower,BUpper=BUpper,CMaxProp=pset$tune * CMaxProp, deltaTACLimUp=deltaTACLimUp, deltaTACLimDown=deltaTACLimDown))
+}
+
+class(PT41AL.t50)<-"IO_MP_tune"
+
+PT41AL.t90<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1., deltaTACLimUp=0.9, deltaTACLimDown=0.9)
+{
+  return(PellaTomlinsonAbsoluteLimits(pset, BLower=BLower,BUpper=BUpper,CMaxProp=pset$tune * CMaxProp, deltaTACLimUp=deltaTACLimUp, deltaTACLimDown=deltaTACLimDown))
+}
+
+class(PT41AL.t90)<-"IO_MP_tune"
+
+
+
+PT41A.t15<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1., deltaTACLimUp=0.15, deltaTACLimDown=0.15)
+{
+  return(PellaTomlinsonAlternative(pset, BLower=BLower,BUpper=BUpper,CMaxProp=pset$tune * CMaxProp, deltaTACLimUp=deltaTACLimUp, deltaTACLimDown=deltaTACLimDown))
+}
+
+class(PT41A.t15)<-"IO_MP_tune"
+
+PT41A.t25<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1., deltaTACLimUp=0.25, deltaTACLimDown=0.25)
+{
+  return(PellaTomlinsonAlternative(pset, BLower=BLower,BUpper=BUpper,CMaxProp=pset$tune * CMaxProp, deltaTACLimUp=deltaTACLimUp, deltaTACLimDown=deltaTACLimDown))
+}
+
+class(PT41A.t25)<-"IO_MP_tune"
+
+PT41A.t50<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1., deltaTACLimUp=0.5, deltaTACLimDown=0.5)
+{
+  return(PellaTomlinsonAlternative(pset, BLower=BLower,BUpper=BUpper,CMaxProp=pset$tune * CMaxProp, deltaTACLimUp=deltaTACLimUp, deltaTACLimDown=deltaTACLimDown))
+}
+
+class(PT41A.t50)<-"IO_MP_tune"
+
+PT41A.t90<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1., deltaTACLimUp=0.9, deltaTACLimDown=0.9)
+{
+  return(PellaTomlinsonAlternative(pset, BLower=BLower,BUpper=BUpper,CMaxProp=pset$tune * CMaxProp, deltaTACLimUp=deltaTACLimUp, deltaTACLimDown=deltaTACLimDown))
+}
+
+class(PT41A.t90)<-"IO_MP_tune"
 
 
 
@@ -405,12 +461,144 @@ class(IT3.50)<-"IO_MP"
 
 MP_FunctionExports <- c(MP_FunctionExports, "PellaTomlinson4010")
 
+#------------------------------------------------------------------------------
+
+# Pella Tomlinson Production model with generic 40-10 type rule - MPs are defined with tuning parameters above
+# useF option uses the 40:10 rule for F rather than C, in which case FMax = FMSY*CMaxProp
+PellaTomlinson4010<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, deltaTACLimUp=0.9, deltaTACLimDown=0.9, useF=F){
+  C_hist <- pset$Cobs
+  I_hist <- pset$Iobs
+  CMCsum <- pset$CMCsum  # "recent" annual catch in mass
+
+  #Initial Model parameters
+  rInit <- 0.1
+  KInit <- 20.*CMCsum
+  p     <- -0.16  # don't bother trying to estimate p; for p = -0.16, BMSY/K ~0.33
+
+  params<-log(c(rInit,KInit))
+#print("PT4010 1")
+#browser()
+  #par(mfrow=c(3,3))
+  opt<-optim(par=params,fn=PT.f, returnOpt=1,
+             C_hist=C_hist,I_hist=I_hist, CMCsum=CMCsum, p=p,
+             method="L-BFGS-B",
+             lower=log(exp(params)/20),upper=log(exp(params)*20),
+             hessian=F, doPlot=F)
+
+  #get the biomass/BMSY estimate
+  d <- PT.f(params=opt$par, returnOpt=2, C_hist=C_hist, I_hist=I_hist, CMCsum=CMCsum, p=p, doPlot=F)
+  lastTAC <- pset$prevTACE$TAC
+
+  #Apply something like a 40-10 rule for catch relative to MSY
+  if(useF==F){
+    if(d["BY"]/d["K"] <= BLower)                        newTAC <- 1.    #i.e. shutdown fishery
+    if(d["BY"]/d["K"] >  BLower & d["BY"]/d["K"] <= BUpper) newTAC <- CMaxProp*d["MSY"]*(d["BY"]/d["K"])/(BUpper-BLower) + CMaxProp*d["MSY"]*( 1 - (BUpper/(BUpper-BLower)))
+    if(d["BY"]/d["K"] >  BUpper)                         newTAC <- CMaxProp*d["MSY"]
+  }
+  #Apply the 40:10 rule to F rather than catch...
+  if(useF){
+    FMSY = -log(1-d["MSY"]/d["K"])
+    FMult = CMaxProp # maximum F relative to FMSY
+    if(d["BY"]/d["K"] <= BLower)   TACF <- 0.0001    #i.e. shutdown fishery
+    if(d["BY"]/d["K"] >  BLower & d["BY"]/d["K"] <= BUpper) TACF <- FMult*FMSY*(d["BY"]/d["K"])/(BUpper-BLower) + FMult*FMSY*( 1 - (BUpper/(BUpper-BLower)))
+    if(d["BY"]/d["K"] >  BUpper)   TACF <- FMult*FMSY
+    newTAC <-  d["BY"]*(1-exp(-TACF))
+  }
+
+  names(newTAC) <- "TAC"
+
+  deltaTAC <- newTAC/lastTAC - 1
+
+#print(deltaTAC)
+  if(deltaTAC >  deltaTACLimUp)   deltaTAC =  deltaTACLimUp
+  if(deltaTAC < -deltaTACLimDown) deltaTAC = -deltaTACLimDown
+  newTAC <- lastTAC*(1+deltaTAC)
+  if(newTAC<9) newTAC <- 9 #shut the fishery down, except collect some data
+  TAEbyF <- 0.0 * pset$prevTACE$TAEbyF #TAE by fishery
+
+  if (min(TAEbyF) < 0)
+  {
+    print("MP TAEbyF < 0")
+    browser()
+  }
+
+  if (min(newTAC) < 0)
+  {
+    print("MP TAC < 0")
+    browser()
+  }
+
+  return (list(TAEbyF=TAEbyF,TAC=newTAC))
+}
+
+
+# -----------------------------------------------------------------------------
+
+MP_FunctionExports <- c(MP_FunctionExports, "PT.f")
+
+# -----------------------------------------------------------------------------
+#Pella-Tomlinson Model function
+PT.f <- function(params, C_hist,I_hist, CMCsum, p, doPlot=F, returnOpt=1){
+
+  #Model parameters
+  #B(t+1)=B(t) + (r/p)B(1-(B/K)^p) - C    ; MSY = rK/4 ?
+  Y <- length(C_hist)
+  r <- exp(params[1])
+  K <- exp(params[2])
+
+  B <- array(NA,dim=Y)
+
+  B[1] <- K
+  for(y in 2:Y){
+    B[y] <- B[y-1] + ((p+1)/p)*r*B[y-1]*(1-(B[y-1]/K)^p) - C_hist[y-1]
+    if(B[y]<1e-5) B[y] <- 1e-5
+  }
+  q <- sum(I_hist[!is.na(I_hist)])/sum(B[!is.na(I_hist)])
+  LLH <- sum((q*B[!is.na(I_hist)]-I_hist[!is.na(I_hist)])^2)
+
+  MSY <- r*K/((p+1)^(1/p))
+
+  # quick and dirty plausibility constraints - no claim that this is a good approach for constraining the PT model
+  if(MSY < 0.2*CMCsum) LLH <- LLH + (MSY - 0.2*CMCsum)^2
+  if(MSY > 5.0*CMCsum)  LLH <- LLH + (MSY - 5.0*CMCsum)^2
+
+#print(c("PT.f",r,K,B[Y],MSY, B[Y]/K))
+#browser()
+
+  if(doPlot){
+    plot(I_hist/q, main="MSY: " %&% MSY %&% " C(Y)/MSY: " %&% as.character(CMCsum/MSY), ylim=c(0,max(I_hist/q, na.rm=T)))
+    lines(B)
+    lines(C_hist,col=2)
+  }
+
+  if(returnOpt == 1){ # return objective function
+    return(LLH)
+  } else {         # return MSY-related stuff
+    BMSY <- K/((p+1)^(1/p))
+    outList <- c(B[Y], K, MSY, BMSY)
+    names(outList) <- c("BY","K","MSY","BMSY")
+    return(outList)
+  }
+}
+#for(C in c(1:100)/100){
+#  print(C)
+#  PT.f(params=log(c(.1,100)), C_hist=rep(C,10000), I_hist=rep(1,10000), CMCsum=1,p=-0.16,doPlot=F)
+#}
+#for(p in c(-100:200)/100){
+#  print(c("p, BMSY/K: ", p,1/((p+1)^(1/p))) )    #p=-0.16   BMSY/K~0.33
+#}
+
+
+# -----------------------------------------------------------------------------
+
+MP_FunctionExports <- c(MP_FunctionExports, "PellaTomlinsonAlternative")
+
 # -----------------------------------------------------------------------------
 # Pella Tomlinson Production model with generic 40-10 type rule - MPs are
 # defined with tuning parameters above useF option uses the 40:10 rule for F
 # rather than C, in which case FMax = FMSY*CMaxProp
 # -----------------------------------------------------------------------------
-PellaTomlinson4010 <- function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, deltaTACLimUp=0.9, deltaTACLimDown=0.9, useF=FALSE)
+PellaTomlinsonAlternative <- function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, deltaTACLimUp=0.9, deltaTACLimDown=0.9, useF=FALSE)
 {
   C_hist <- pset$Cobs
   I_hist <- pset$Iobs
@@ -493,6 +681,128 @@ PellaTomlinson4010 <- function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, deltaTA
   return (list(TAEbyF=TAEbyF, TAC=newTAC))
 }
 
+
+#------------------------------------------------------------------------------
+
+MP_FunctionExports <- c(MP_FunctionExports, "PellaTomlinsonAbsoluteLimits")
+
+# -----------------------------------------------------------------------------
+# Pella Tomlinson Production model based MP with TAC chnage limits based on
+# modelled MSY. This MP also respects fishery closure and does not attempt to
+# limit the TAC change because of such action.
+# -----------------------------------------------------------------------------
+PellaTomlinsonAbsoluteLimits <- function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, deltaTACLimUp=0.9, deltaTACLimDown=0.9, useF=FALSE)
+{
+  C_hist <- pset$Cobs
+  I_hist <- pset$Iobs
+  CMCsum <- pset$CMCsum  # "recent" annual catch in mass
+
+  #Initial Model parameters
+  rInit  <- 0.1
+  KInit  <- 20.0 * CMCsum
+  p      <- 1.0
+
+  params <-log(c(rInit, KInit, p))
+
+  ix     <- which(!is.na(I_hist))
+  C_hist <- C_hist[ix]
+  I_hist <- I_hist[ix]
+
+  ix     <- which(!is.na(C_hist))
+  C_hist <- C_hist[ix]
+  I_hist <- I_hist[ix]
+
+  opt    <- optim(par=params, fn=PT.model, gr=PT.model.gradient, returnOpt=1, C_hist=C_hist, I_hist=I_hist, CMCsum=CMCsum, method="BFGS", hessian=F, doPlot=F)
+
+  # get the biomass/BMSY estimate
+  d       <- PT.model(params=opt$par, returnOpt=2, C_hist=C_hist, I_hist=I_hist, CMCsum=CMCsum, doPlot=FALSE)
+  lastTAC <- pset$prevTACE$TAC
+  closure <- FALSE
+
+  if (useF)
+  {
+    #Apply the 40:10 rule to F rather than catch...
+    FMSY  = -log(1-d["MSY"]/d["K"])
+    FMult = CMaxProp # maximum F relative to FMSY
+
+    if (d["BY"] / d["K"] <= BLower)
+    {
+      TACF    <- 0.0001    #i.e. shutdown fishery
+      closure <- TRUE
+    }
+    else if ((d["BY"] / d["K"] >  BLower) && (d["BY"] / d["K"] <= BUpper))
+    {
+      TACF <- FMult * FMSY * (d["BY"] / d["K"]) / (BUpper - BLower) + FMult * FMSY * (1 - (BUpper / (BUpper - BLower)))
+    }
+    else if (d["BY"] / d["K"] >  BUpper)
+    {
+      TACF <- FMult * FMSY
+    }
+
+    newTAC <- d["BY"] * (1.0 - exp(-TACF))
+  }
+  else
+  {
+    #Apply something like a 40-10 rule for catch relative to MSY
+    if (d["BY"] / d["K"] <= BLower)
+    {
+      newTAC  <- 1.0    #i.e. shutdown fishery
+      closure <- TRUE
+    }
+    else if ((d["BY"] / d["K"] >  BLower) && (d["BY"] / d["K"] <= BUpper))
+    {
+      newTAC <- CMaxProp * d["MSY"] * (d["BY"] / d["K"]) / (BUpper - BLower) + CMaxProp * d["MSY"] * (1 - (BUpper / (BUpper - BLower)))
+    }
+    else if (d["BY"] / d["K"] >  BUpper)
+    {
+      newTAC <- CMaxProp * d["MSY"]
+    }
+  }
+
+  names(newTAC) <- "TAC"
+
+  if (!closure)
+  {
+    deltaTAC  <- newTAC - lastTAC
+    upLimit   <- deltaTACLimUp * d["MSY"]
+    downLimit <- -deltaTACLimDown * d["MSY"]
+
+    if (deltaTAC > upLimit)
+    {
+      deltaTAC <- upLimit
+    }
+    else if (deltaTAC < downLimit)
+    {
+      deltaTAC <- downLimit
+    }
+
+    newTAC <- lastTAC + deltaTAC
+  }
+
+  if (newTAC < 9)
+  {
+    newTAC <- 9 #shut the fishery down, except collect some data
+  }
+
+  TAEbyF <- 0.0 * pset$prevTACE$TAEbyF #TAE by fishery
+
+  if (min(TAEbyF) < 0)
+  {
+    print("MP TAEbyF < 0")
+    browser()
+  }
+
+  if (min(newTAC) < 0)
+  {
+    print("MP TAC < 0")
+    browser()
+  }
+
+  return (list(TAEbyF=TAEbyF, TAC=newTAC))
+}
+
+
+# -----------------------------------------------------------------------------
 
 MP_FunctionExports <- c(MP_FunctionExports, "PT.model")
 
