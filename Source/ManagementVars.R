@@ -3,22 +3,26 @@
 # -----------------------------------------------------------------------------
 setClass("MP_Spec",
   slots = c(
-    MP        = "character", # MP to run
-    MP_Name   = "character", # name given to MP run
-    tune      = "numeric",   # Tuning parameter for MP run
-    tuneError = "numeric"    # Tuning error parameter for MP run
+    MP            = "character", # MP to run
+    MP_Name       = "character", # name given to MP run
+    tune          = "numeric",   # Tuning parameter for MP run
+    tuneError     = "numeric",   # Tuning error parameter for MP run
+    errorMessage  = "character", # Tuning error message
+    bisectMethod  = "logical"
   )
 )
 
 # -----------------------------------------------------------------------------
 
 setMethod("initialize", "MP_Spec",
-  function(.Object, MP, MP_Name=NA, tune=1.0, tune_error=0.0)
+  function(.Object, MP, MP_Name=NA, tune=1.0, tune_error=0.0, errorMessage = "", bisectMethod = TRUE)
   {
-    .Object@MP        = MP
-    .Object@MP_Name   = if (is.na(MP_Name)) MP else MP_Name
-    .Object@tune      = tune
-    .Object@tuneError = tune_error
+    .Object@MP           = MP
+    .Object@MP_Name      = if (is.null(MP_Name) || is.na(MP_Name)) MP else MP_Name
+    .Object@tune         = tune
+    .Object@tuneError    = tune_error
+    .Object@errorMessage = errorMessage
+    .Object@bisectMethod = bisectMethod
 
     return (.Object)
   }
@@ -226,7 +230,7 @@ setMethod("b_b0", c("ManagementVars", "ReferenceVars"),
 setGeneric("runProjection", function(.Object, RefVars, ssModelData, MseDef, ...) standardGeneric("runProjection"))
 
 setMethod("runProjection", c("ManagementVars", "ReferenceVars", "StockSynthesisModelData", "MseDefinition"),
-  function(.Object, RefVars, ssModelData, MseDef, MP, MP_Name, tune, tune_error, interval, Report, CppMethod, cluster, EffortCeiling, TACTime, rULim)
+  function(.Object, RefVars, ssModelData, MseDef, MP, tune, interval, Report, CppMethod, cluster, EffortCeiling, TACTime, rULim)
   {
     runJob <- function(sim, ssModelData, RefVars, MseDef, MP, interval, Report, CppMethod, EffortCeiling, TACTime, rULim, seed, tune, UseCluster)
     {
@@ -256,53 +260,64 @@ setMethod("runProjection", c("ManagementVars", "ReferenceVars", "StockSynthesisM
       return (Proj)
     }
 
+    DoProjection <- TRUE
+
+    if (class(MP) == "MP_Spec")
+    {
+      .Object@MP   <- MP
+      DoProjection <- !(is.null(MP@tune) || is.na(MP@tune))   # Don't run projection if this a tuned MP and tuning failed
+      MP           <- MP@MP
+    }
+
     sims       <- 1:length(.Object@seed)
     UseCluster <- !is.na(cluster)
+    results    <- c()
 
-    if (UseCluster)
+    if (DoProjection)
     {
-      results <- parSapply(cluster,
-                           sims,
-                           FUN=runJob,
-                           ssModelData,
-                           RefVars,
-                           MseDef,
-                           MP,
-                           interval,
-                           Report,
-                           CppMethod,
-                           EffortCeiling,
-                           TACTime,
-                           rULim,
-                           .Object@seed,
-                           tune,
-                           UseCluster)
+      if (UseCluster)
+      {
+        results <- parSapply(cluster,
+                             sims,
+                             FUN=runJob,
+                             ssModelData,
+                             RefVars,
+                             MseDef,
+                             MP,
+                             interval,
+                             Report,
+                             CppMethod,
+                             EffortCeiling,
+                             TACTime,
+                             rULim,
+                             .Object@seed,
+                             tune,
+                             UseCluster)
 
-      sapply(sims, FUN=function(nsim) {printLog(nsim)})
-    }
-    else
-    {
-      results <- sapply(sims,
-                        FUN=runJob,
-                        ssModelData,
-                        RefVars,
-                        MseDef,
-                        MP,
-                        interval,
-                        Report,
-                        CppMethod,
-                        EffortCeiling,
-                        TACTime,
-                        rULim,
-                        .Object@seed,
-                        tune,
-                        FALSE)
+        sapply(sims, FUN=function(nsim) {printLog(nsim)})
+      }
+      else
+      {
+        results <- sapply(sims,
+                          FUN=runJob,
+                          ssModelData,
+                          RefVars,
+                          MseDef,
+                          MP,
+                          interval,
+                          Report,
+                          CppMethod,
+                          EffortCeiling,
+                          TACTime,
+                          rULim,
+                          .Object@seed,
+                          tune,
+                          FALSE)
+      }
     }
 
     years   <- (ssModelData@nyears + 1):(ssModelData@nyears + ssModelData@proyears)
     months  <- ((ssModelData@nyears) * ssModelData@nsubyears + 1):((ssModelData@nyears + ssModelData@proyears) * ssModelData@nsubyears)
-
-    .Object@MP <- new("MP_Spec", MP, MP_Name, tune, tune_error)
 
     for (res in results)
     {

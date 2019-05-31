@@ -176,7 +176,7 @@ setMethod("runMse", c("MseFramework"),
       clusterEvalQ(cluster, eval(parse("Source/MseMain.R")))
     }
 
-    runModels <- function(StockSynthesisModels, MPs, tune, tune_error, interval, Report, CppMethod, EffortCeiling, TACTime, rULim)
+    runModels <- function(StockSynthesisModels, MPs, tune, interval, Report, CppMethod, EffortCeiling, TACTime, rULim)
     {
       if (UseCluster)
       {
@@ -184,7 +184,7 @@ setMethod("runMse", c("MseFramework"),
         {
           beginLog(om@ModelData@which)
 
-          om <- runMse(om, .Object@MseDef, MPs, tune, tune_error, interval, Report, CppMethod, cluster=NA, EffortCeiling, TACTime, rULim)
+          om <- runMse(om, .Object@MseDef, MPs, tune, interval, Report, CppMethod, cluster=NA, EffortCeiling, TACTime, rULim)
 
           print("\n")
 
@@ -198,7 +198,7 @@ setMethod("runMse", c("MseFramework"),
       }
       else
       {
-        StockSynthesisModels <- lapply(StockSynthesisModels, FUN=function(om) {return(runMse(om, .Object@MseDef, MPs, tune, tune_error, interval, Report, CppMethod, cluster=NA, EffortCeiling, TACTime, rULim))})
+        StockSynthesisModels <- lapply(StockSynthesisModels, FUN=function(om) {return(runMse(om, .Object@MseDef, MPs, tune, interval, Report, CppMethod, cluster=NA, EffortCeiling, TACTime, rULim))})
       }
 
       return (StockSynthesisModels)
@@ -216,6 +216,7 @@ setMethod("runMse", c("MseFramework"),
       {
         TunedMPs <- c()
         tuneIdx  <- list()
+        MP_Names <- names(MPs)
         idx      <- 1
 
         for (MP in MPs)
@@ -270,7 +271,7 @@ setMethod("runMse", c("MseFramework"),
         optimiseObjFn <- function(tuneLog10, MP)
         {
           tune                         <- 10 ^ tuneLog10
-          .Object@StockSynthesisModels <- runModels(.Object@StockSynthesisModels, MP, tune, NA, interval, Report, CppMethod, EffortCeiling, TACTime, rULim)
+          .Object@StockSynthesisModels <- runModels(.Object@StockSynthesisModels, MP, tune, interval, Report, CppMethod, EffortCeiling, TACTime, rULim)
 
           tuneValue <- getPerformanceMeasure(.Object, MP)
           tuneError <- abs((TuningPars@tuningTarget - tuneValue) / TuningPars@tuningTarget)
@@ -288,7 +289,7 @@ setMethod("runMse", c("MseFramework"),
         bisectObjFn <- function(tuneLog10, MP)
         {
           tune                         <- 10 ^ tuneLog10
-          .Object@StockSynthesisModels <- runModels(.Object@StockSynthesisModels, MP, tune, NA, interval, Report, CppMethod, EffortCeiling, TACTime, rULim)
+          .Object@StockSynthesisModels <- runModels(.Object@StockSynthesisModels, MP, tune, interval, Report, CppMethod, EffortCeiling, TACTime, rULim)
 
           tuneValue <- getPerformanceMeasure(.Object, MP)
           tuneError <- abs((TuningPars@tuningTarget - tuneValue) / TuningPars@tuningTarget)
@@ -298,8 +299,13 @@ setMethod("runMse", c("MseFramework"),
           return (tuneValue)
         }
 
+        idx      <- 1
+        MP_Names <- names(TunedMPs)
+
         for (MP in TunedMPs)
         {
+          ErrorMessage <- ""
+
           print(paste("tuning ", MP))
 
           if (TuningPars@bisectMethod)
@@ -333,9 +339,11 @@ setMethod("runMse", c("MseFramework"),
             if ((loVal < TuningPars@tuningTarget & hiVal < TuningPars@tuningTarget & tmpVal < TuningPars@tuningTarget) ||
                 (loVal > TuningPars@tuningTarget & hiVal > TuningPars@tuningTarget & tmpVal > TuningPars@tuningTarget))
             {
-              print("Aborting tuning because Par values do not bracket the target")
-              print("This could be because the par bounds are too narrow, tuning objective is not attainable, or function is non-monotonic")
-              .Object@tune[tuneIdx[[MP]]] <- NaN
+              ErrorMessage <- "Aborting tuning because Par values do not bracket the target. This could be because the par bounds are too narrow, tuning objective is not attainable, or function is non-monotonic"
+
+              print(ErrorMessage)
+
+              .Object@tune[tuneIdx[[MP]]] <- NA
 
             } else
             {
@@ -372,10 +380,11 @@ setMethod("runMse", c("MseFramework"),
                 nFnEval   <- nFnEval + 1
                 tuneError <- abs((tmpVal - TuningPars@tuningTarget) / TuningPars@tuningTarget)
 
-                if(tuneError < bestTuneError){
+                if (tuneError < bestTuneError)
+                {
                   bestTuneError <- tuneError
-                  bestPar <- tmpPar
-                  bestVal <- tmpVal
+                  bestPar       <- tmpPar
+                  bestVal       <- tmpVal
                 }
 
                 print("Bisection minimization")
@@ -386,7 +395,6 @@ setMethod("runMse", c("MseFramework"),
                 print("bestPar  " %&%  round(bestPar, digits=4) %&%  "   bestVal " %&%  round(bestVal, digits=4) %&%   "  bestError " %&%  round(bestTuneError, digits=4))
 
               }
-               #tuneError <- abs((bestVal - TuningPars@tuningTarget) / TuningPars@tuningTarget)
 
               .Object@tune[tuneIdx[[MP]]]      <- 10 ^ bestPar
               .Object@tuneError[tuneIdx[[MP]]] <- bestTuneError
@@ -401,12 +409,29 @@ setMethod("runMse", c("MseFramework"),
             .Object@tune[tuneIdx[[MP]]]      <- 10 ^ res$minimum
             .Object@tuneError[tuneIdx[[MP]]] <- res$objective
           }
+
+          MP_idx     <- tuneIdx[[MP]]
+          MP_Name    <- if (is.null(MP_Names)) NULL else MP_Names[MP_idx]
+          tune_value <- .Object@tune[tuneIdx[[MP]]]
+          tune_error <- .Object@tuneError[tuneIdx[[MP]]]
+          tunedMP    <- new("MP_Spec", MP, MP_Name=MP_Name, tune=tune_value, tune_error=tune_error, errorMessage=ErrorMessage, bisectMethod=TuningPars@bisectMethod)
+
+          if (class(MPs) == "list")
+          {
+            MPs[[MP_idx]] <- tunedMP
+          }
+          else
+          {
+            MPs[MP_idx] <- tunedMP
+          }
+
+          idx <- idx + 1
         }
       }
     }
 
     # re-run all models with final tuning
-    .Object@StockSynthesisModels <- runModels(.Object@StockSynthesisModels, MPs, .Object@tune, .Object@tuneError, interval, Report, CppMethod, EffortCeiling, TACTime, rULim)
+    .Object@StockSynthesisModels <- runModels(.Object@StockSynthesisModels, MPs, .Object@tune, interval, Report, CppMethod, EffortCeiling, TACTime, rULim)
 
     if (UseCluster)
     {
