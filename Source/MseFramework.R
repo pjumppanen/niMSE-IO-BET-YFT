@@ -637,6 +637,27 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
                 }
       )
 
+    statHandlers[["CoTAC"]] <- list(
+      addFn = function(HistoricVars, RefVars, context)
+      {
+        #Catch divded by TAC
+        if (bHistoric)
+        {
+          
+          return (addRows(context, HistoricVars@TAC, "CoTAC"))
+          
+        } else
+        {
+          return (addRows(context, HistoricVars@CM[,1,]/HistoricVars@TAC, "CoTAC"))
+        }
+      },
+      
+      countFn = function(HistoricVars)
+      {
+        return (HistoricVars@nyears * HistoricVars@nsim)
+      }
+    )
+    
     statHandlers[["PrGreen"]] <- list(
       addFn = function(HistoricVars, RefVars, context)
               {

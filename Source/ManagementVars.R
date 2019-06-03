@@ -51,6 +51,7 @@ setClass("ManagementVars",
     IobsArchive   = "karray",
     IobsRArchive  = "karray",
     TAC           = "karray",
+    CoTAC         = "karray",
     TAEbyF        = "karray"
   )
 )
@@ -108,6 +109,7 @@ setMethod("initialize", "ManagementVars",
       .Object@IobsArchive   <- karray(ssModelData@CPUEobsY[1:nyears], dim=c(nyears))
       .Object@IobsRArchive  <- karray(IobsR[1:nyears,], dim=c(nyears, nareas))
       .Object@TAC           <- karray(as.double(NA), dim=c(nyears))
+      .Object@CoTAC         <- karray(as.double(NA), dim=c(nyears))
       .Object@TAEbyF        <- karray(as.double(NA), dim=c(nyears, nfleets))
     }
     else
@@ -122,6 +124,7 @@ setMethod("initialize", "ManagementVars",
       .Object@IobsArchive   <- karray(as.double(NA), dim=c(nsim, nyears))
       .Object@IobsRArchive  <- karray(as.double(NA), dim=c(nsim, nyears, nareas))
       .Object@TAC           <- karray(as.double(NA), dim=c(nsim, nyears))
+      .Object@CoTAC         <- karray(as.double(NA), dim=c(nsim, nyears))
       .Object@TAEbyF        <- karray(as.double(NA), dim=c(nsim, nyears, nfleets))
     }
 
@@ -325,6 +328,7 @@ setMethod("runProjection", c("ManagementVars", "ReferenceVars", "StockSynthesisM
         .Object@IobsArchive[sim,]   <- res@IobsArchive[years]
         .Object@IobsRArchive[sim,,] <- res@IobsRArchive[years,]
         .Object@TAC[sim,]           <- res@TAC[years]
+        .Object@CoTAC[sim,]         <- res@CoTAC[years]
         .Object@TAEbyF[sim,,]       <- res@TAEbyF[years,]
       }
     }
