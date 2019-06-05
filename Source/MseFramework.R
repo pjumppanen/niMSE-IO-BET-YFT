@@ -662,6 +662,27 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
                 }
       )
 
+    statHandlers[["C/TAC"]] <- list(
+      addFn = function(HistoricVars, RefVars, context)
+              {
+
+                #Catch
+                if (bHistoric)
+                {
+                  return (addRows(context, apply(HistoricVars@CM, MARGIN=c(2), FUN=sum) / HistoricVars@TAC, "C/TAC"))
+
+                } else
+                {
+                  return (addRows(context, apply(HistoricVars@CM, MARGIN=c(1,3), FUN=sum) / HistoricVars@TAC, "C/TAC"))
+                }
+              },
+
+      countFn = function(HistoricVars)
+                {
+                  return (HistoricVars@nyears * HistoricVars@nsim)
+                }
+      )
+
     statHandlers[["PrGreen"]] <- list(
       addFn = function(HistoricVars, RefVars, context)
               {
