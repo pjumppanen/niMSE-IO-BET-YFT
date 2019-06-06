@@ -14,7 +14,6 @@ library(parallel)
 library(abind)
 library(stringr)
 library(data.table)
-library(mseviz)
 library(ggstance)
 
 # load niMseom module and R interface code
