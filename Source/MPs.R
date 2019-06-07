@@ -619,7 +619,7 @@ PellaTomlinsonAlternative <- function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, 
   C_hist <- C_hist[ix]
   I_hist <- I_hist[ix]
 
-  opt    <- optim(par=params, fn=PT.model, gr=PT.model.gradient, returnOpt=1, C_hist=C_hist, I_hist=I_hist, CMCsum=CMCsum, method="BFGS", hessian=F, doPlot=F)
+  opt    <- nlminb(start=params, objective=PT.model, gradient=PT.model.gradient, returnOpt=1, C_hist=C_hist, I_hist=I_hist, CMCsum=CMCsum, doPlot=F, control=list(rel.tol=1.0e-7))
 
   # get the biomass/BMSY estimate
   d       <- PT.model(params=opt$par, returnOpt=2, C_hist=C_hist, I_hist=I_hist, CMCsum=CMCsum, doPlot=FALSE)
@@ -712,22 +712,25 @@ PellaTomlinsonAbsoluteLimits <- function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.
   C_hist <- C_hist[ix]
   I_hist <- I_hist[ix]
 
-  opt    <- optim(par=params, fn=PT.model, gr=PT.model.gradient, returnOpt=1, C_hist=C_hist, I_hist=I_hist, CMCsum=CMCsum, method="BFGS", hessian=F, doPlot=F)
+  opt    <- nlminb(start=params, objective=PT.model, gradient=PT.model.gradient, returnOpt=1, C_hist=C_hist, I_hist=I_hist, CMCsum=CMCsum, doPlot=F, control=list(rel.tol=1.0e-7))
 
   # get the biomass/BMSY estimate
   d       <- PT.model(params=opt$par, returnOpt=2, C_hist=C_hist, I_hist=I_hist, CMCsum=CMCsum, doPlot=FALSE)
   lastTAC <- pset$prevTACE$TAC
   closure <- FALSE
 
+  closureTAC <- CMaxProp * d["MSY"] * 0.15
+
   if (useF)
   {
     #Apply the 40:10 rule to F rather than catch...
-    FMSY  = -log(1-d["MSY"]/d["K"])
-    FMult = CMaxProp # maximum F relative to FMSY
+    FMSY  <- -log(1-d["MSY"]/d["K"])
+    FMult <- CMaxProp # maximum F relative to FMSY
 
     if (d["BY"] / d["K"] <= BLower)
     {
-      TACF    <- 0.0001    #i.e. shutdown fishery
+      TACF    <- -log(1.0 - (closureTAC / d["BY"]))
+#      TACF    <- 0.0001    #i.e. shutdown fishery
       closure <- TRUE
     }
     else if ((d["BY"] / d["K"] >  BLower) && (d["BY"] / d["K"] <= BUpper))
@@ -746,7 +749,8 @@ PellaTomlinsonAbsoluteLimits <- function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.
     #Apply something like a 40-10 rule for catch relative to MSY
     if (d["BY"] / d["K"] <= BLower)
     {
-      newTAC  <- 1.0    #i.e. shutdown fishery
+      newTAC  <- closureTAC
+#      newTAC  <- 1.0    #i.e. shutdown fishery
       closure <- TRUE
     }
     else if ((d["BY"] / d["K"] >  BLower) && (d["BY"] / d["K"] <= BUpper))
@@ -827,7 +831,13 @@ PT.model <- function(params, C_hist, I_hist, CMCsum, returnOpt=1, doPlot=FALSE)
     # raising to the power of p / 2 exists. When B > 0 it is the same as
     # (B / K) ^ p but still exists when B is negative. This is just an
     # aid for fitting purposes.
-    B[y] <- B[y-1] + (r * B[y-1] / p) * (1.0 - ((B[y-1] / K) ^ 2) ^ (p/2)) - C_hist[y-1]
+    B[y] <- B[y-1] + (r * B[y-1] / p) * (1.0 - ((B[y-1] / K) ^ 2) ^ (p / 2)) - C_hist[y-1]
+
+    # need to limit the bounds of B[y] so it does not overflow the calculation
+    if (abs(B[y]) > 1.0e50)
+    {
+      B[y] <- 1.0e50 * sign(B[y])
+    }
   }
 
   q   <- sum(I_hist) / sum(B)
@@ -1552,7 +1562,8 @@ CPUE_setpoint_control <- function(pset, target_CPUE_scale=1.25, resume_MSY_scale
   #check for first run
   if (is.null(pset$env$closed))
   {
-    pset$env$closed <- FALSE
+    pset$env$closed    <- FALSE
+    pset$env$wasClosed <- FALSE
   }
 
   # years between MP evaluation
@@ -1569,66 +1580,58 @@ CPUE_setpoint_control <- function(pset, target_CPUE_scale=1.25, resume_MSY_scale
   Catches <- pset$Cobs[years]
   lastTAC <- pset$prevTACE$TAC
   CPUE    <- pset$Iobs[years]
-  Ey      <- Catches / CPUE
-  Catch   <- (1 / 2) * Catches[1] + (1 / 3) * Catches[2] + (1 / 6) * Catches[3]
-  E       <- (1 / 2) * Ey[1] + (1 / 3) * Ey[2] + (1 / 6) * Ey[3]
-  CPUEest <- (Catch / E)
 
   measuredCPUE <- CPUE[1]
-#  measuredCPUE <- CPUEest
 
-  predicted_catch <- catch_model(model$a, model$b, E)
-  predicted_CPUE  <- CPUE_model(model$a, model$b, E)
   refCPUE         <- target_CPUE_scale * model$CPUE_MSY
   closeCPUE       <- close_CPUE_scale * refCPUE
   openCPUE        <- open_CPUE_scale * refCPUE
   prediction      <- spline(years,CPUE, xmax=years[1] + 3)
   newCPUE         <- prediction$y[length(prediction$y)]
+  minTAC          <- 0.15 * model$MSY
 
   if (pset$env$closed)
   {
     if (newCPUE > openCPUE)
     {
-      newTAC          <- resume_MSY_scale * model$MSY
-      pset$env$closed <- FALSE
+      newTAC             <- resume_MSY_scale * model$MSY
+      pset$env$closed    <- FALSE
+      pset$env$wasClosed <- TRUE
     }
     else
     {
-      newTAC          <- 9
+      newTAC <- minTAC
     }
   }
   else
   {
     if (measuredCPUE < closeCPUE)
     {
-      newTAC          <- 9
+      newTAC          <- minTAC
       pset$env$closed <- TRUE
     }
     else
     {
-      if (lastTAC == 9)
+      if (pset$env$wasClosed)
       {
-        error         <- newCPUE - refCPUE
+        error              <- newCPUE - refCPUE
+        pset$env$wasClosed <- FALSE
       }
       else
       {
-        error         <- measuredCPUE - refCPUE
+        error <- measuredCPUE - refCPUE
       }
 
-      gain            <- TAC_gain * model$b
-      deltaC          <- error * gain
-      newTAC          <- lastTAC + deltaC
+      gain   <- TAC_gain * model$b
+      deltaC <- error * gain
+      newTAC <- lastTAC + deltaC
     }
   }
 
-#  print("----------")
-#  print(paste("last TAC : ", lastTAC))
-#  print(paste("new TAC : ", newTAC))
-#  print(paste("CPUE : ", CPUE))
-#  print(paste("ref CPUE : ", refCPUE))
-#  print(paste("model MSY : ", model$MSY))
-
-  if (newTAC < 9) newTAC <- 9 #shut the fishery down, except collect some data
+  if (newTAC < minTAC)
+  {
+    newTAC <- minTAC
+  }
 
   TAEbyF <- 0.*pset$prevTACE$TAEbyF #TAE by fishery
 
