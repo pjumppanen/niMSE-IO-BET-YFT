@@ -770,6 +770,192 @@ setMethod("runMse", c("StockSynthesisModel"),
 
 # -----------------------------------------------------------------------------
 
+setMethod("setProjectionYears", c("StockSynthesisModel"),
+  function(.Object, proyears)
+  {
+    seed <- .Object@ModelData@InitSeed
+
+    set.seed(.Object@ModelData@InitSeed)
+
+    .Object@ModelData@ProjectSeed <- as.integer(runif(1,0,.Machine$integer.max))
+    last_proyears                 <- .Object@ModelData@proyears
+    last_allyears                 <- .Object@ModelData@nyears + .Object@ModelData@proyears
+    .Object@ModelData@proyears    <- as.integer(proyears)
+    allyears                      <- .Object@ModelData@nyears + .Object@ModelData@proyears
+    newyears                      <- allyears - last_allyears
+    nsub                          <- .Object@ModelData@nsubyears
+
+    M           <- karray(as.double(NA), dim=c(.Object@ModelData@npop, .Object@ModelData@nages, allyears))
+    Len_age     <- karray(as.double(NA), dim=c(.Object@ModelData@npop, .Object@ModelData@nages, allyears))
+    Len_age_mid <- karray(as.double(NA), dim=c(.Object@ModelData@npop, .Object@ModelData@nages, allyears))
+    Wt_age      <- karray(as.double(NA), dim=c(.Object@ModelData@npop, .Object@ModelData@nages, allyears))
+    Wt_age_SB   <- karray(as.double(NA), dim=c(.Object@ModelData@npop, .Object@ModelData@nages, allyears))
+    Wt_age_mid  <- karray(as.double(NA), dim=c(.Object@ModelData@npop, .Object@ModelData@nages, allyears))
+    mat         <- karray(as.double(NA), dim=c(.Object@ModelData@npop, .Object@ModelData@nages, allyears))
+    SSBAss      <- karray(as.double(NA), dim=c(.Object@ModelData@npop, allyears))
+    CBss        <- karray(as.double(NA), dim=c(.Object@ModelData@npop, allyears))
+    Bss         <- karray(as.double(NA), dim=c(.Object@ModelData@npop, allyears))
+    Recss       <- karray(as.double(NA), dim=c(.Object@ModelData@npop, allyears))
+    RecYrQtrss  <- karray(as.double(NA), dim=c(.Object@ModelData@npop, allyears * .Object@ModelData@nsubyears))
+    NLLss       <- karray(as.double(NA), dim=c(allyears, .Object@ModelData@nsubyears, .Object@ModelData@nareas))
+    NLLIss      <- karray(as.double(NA), dim=c(allyears))
+    CPUEobsMR   <- karray(as.double(NA), dim=c(allyears, .Object@ModelData@nsubyears, .Object@ModelData@nCPUE))
+    CPUEobsY    <- karray(as.double(NA), dim=c(allyears))
+    F_FMSYss    <- karray(as.double(NA), dim=c(allyears))
+    Frepss      <- karray(as.double(NA), dim=c(allyears))
+    ITrend      <- karray(as.double(1.0), dim=c(allyears))
+    Css         <- karray(as.double(NA), dim=c(.Object@ModelData@npop, allyears,.Object@ModelData@nfleets))
+    CAAFss      <- karray(as.double(NA), dim=c(.Object@ModelData@nages, allyears,.Object@ModelData@nfleets))
+    CMbyFss     <- karray(as.double(NA), dim=c(.Object@ModelData@npop, allyears,.Object@ModelData@nfleets))
+
+    if (newyears > 0)
+    {
+      # grow arrays
+      M[,,1:last_allyears]                      <- .Object@ModelData@M[,,]
+      M[,,(last_allyears+1):allyears]           <- rep(.Object@ModelData@M[,,last_allyears], times=newyears)
+
+      Len_age[,,1:last_allyears]                <- .Object@ModelData@Len_age[,,]
+      Len_age[,,(last_allyears+1):allyears]     <- rep(.Object@ModelData@Len_age[,,last_allyears], times=newyears)
+
+      Len_age_mid[,,1:last_allyears]            <- .Object@ModelData@Len_age_mid[,,]
+      Len_age_mid[,,(last_allyears+1):allyears] <- rep(.Object@ModelData@Len_age_mid[,,last_allyears], times=newyears)
+
+      Wt_age[,,1:last_allyears]                 <- .Object@ModelData@Wt_age[,,]
+      Wt_age[,,(last_allyears+1):allyears]      <- rep(.Object@ModelData@Wt_age[,,last_allyears], times=newyears)
+
+      Wt_age_SB[,,1:last_allyears]              <- .Object@ModelData@Wt_age_SB[,,]
+      Wt_age_SB[,,(last_allyears+1):allyears]   <- rep(.Object@ModelData@Wt_age_SB[,,last_allyears], times=newyears)
+
+      Wt_age_mid[,,1:last_allyears]             <- .Object@ModelData@Wt_age_mid[,,]
+      Wt_age_mid[,,(last_allyears+1):allyears]  <- rep(.Object@ModelData@Wt_age_mid[,,last_allyears], times=newyears)
+
+      mat[,,1:last_allyears]                    <- .Object@ModelData@mat[,,]
+      mat[,,(last_allyears+1):allyears]         <- rep(.Object@ModelData@mat[,,last_allyears], times=newyears)
+
+      SSBAss[,1:last_allyears]                  <- .Object@ModelData@SSBAss[,]
+      SSBAss[,(last_allyears+1):allyears]       <- rep(.Object@ModelData@SSBAss[,last_allyears], times=newyears)
+
+      CBss[,1:last_allyears]                    <- .Object@ModelData@CBss[,]
+      CBss[,(last_allyears+1):allyears]         <- rep(.Object@ModelData@CBss[,last_allyears], times=newyears)
+
+      Bss[,1:last_allyears]                     <- .Object@ModelData@Bss[,]
+      Bss[,(last_allyears+1):allyears]          <- rep(.Object@ModelData@Bss[,last_allyears], times=newyears)
+
+      Recss[,1:last_allyears]                   <- .Object@ModelData@Recss[,]
+      Recss[,(last_allyears+1):allyears]        <- rep(.Object@ModelData@Recss[,last_allyears], times=newyears)
+
+      Qtrs_Range <- (last_allyears * nsub + 1):(allyears * nsub)
+
+      RecYrQtrss[,1:(last_allyears * nsub)]     <- .Object@ModelData@RecYrQtrss[,]
+      RecYrQtrss[,Qtrs_Range]                   <- rep(.Object@ModelData@RecYrQtrss[,(last_allyears * nsub - nsub + 1):(last_allyears * nsub)], times=newyears)
+
+      NLLss[1:last_allyears,,]                  <- .Object@ModelData@NLLss[,,]
+      NLLss[(last_allyears+1):allyears,,]       <- rep(.Object@ModelData@NLLss[last_allyears,,], each=newyears)
+
+      NLLIss[1:last_allyears]                   <- .Object@ModelData@NLLIss[]
+      NLLIss[(last_allyears+1):allyears]        <- rep(.Object@ModelData@NLLIss[last_allyears], each=newyears)
+
+      CPUEobsMR[1:last_allyears,,]              <- .Object@ModelData@CPUEobsMR[,,]
+      CPUEobsMR[(last_allyears+1):allyears,,]   <- rep(.Object@ModelData@CPUEobsMR[last_allyears,,], each=newyears)
+
+      CPUEobsY[1:last_allyears]                 <- .Object@ModelData@CPUEobsY[]
+      CPUEobsY[(last_allyears+1):allyears]      <- rep(.Object@ModelData@CPUEobsY[last_allyears], each=newyears)
+
+      F_FMSYss[1:last_allyears]                 <- .Object@ModelData@F_FMSYss[]
+      F_FMSYss[(last_allyears+1):allyears]      <- rep(.Object@ModelData@F_FMSYss[last_allyears], each=newyears)
+
+      Frepss[1:last_allyears]                   <- .Object@ModelData@Frepss[]
+      Frepss[(last_allyears+1):allyears]        <- rep(.Object@ModelData@Frepss[last_allyears], each=newyears)
+
+      ITrend[1:last_allyears]                   <- .Object@ModelData@ITrend[]
+      ITrend[(last_allyears+1):allyears]        <- rep(.Object@ModelData@ITrend[last_allyears], each=newyears)
+
+      Css[,1:last_allyears,]                    <- .Object@ModelData@Css[,,]
+      CAAFss[,1:last_allyears,]                 <- .Object@ModelData@CAAFss[,,]
+      CMbyFss[,1:last_allyears,]                <- .Object@ModelData@CMbyFss[,,]
+
+      for (yr in (last_allyears+1):allyears)
+      {
+        Css[,yr,]                               <- .Object@ModelData@Css[,last_allyears,]
+        CAAFss[,yr,]                            <- .Object@ModelData@CAAFss[,last_allyears,]
+        CMbyFss[,yr,]                           <- .Object@ModelData@CMbyFss[,last_allyears,]
+      }
+    }
+    else
+    {
+      # shrink arrays
+      M[,,]           <- .Object@ModelData@M[,,1:allyears]
+
+      Len_age[,,]     <- .Object@ModelData@Len_age[,,1:allyears]
+
+      Len_age_mid[,,] <- .Object@ModelData@Len_age_mid[,,1:allyears]
+
+      Wt_age[,,]      <- .Object@ModelData@Wt_age[,,1:allyears]
+
+      Wt_age_SB[,,]   <- .Object@ModelData@Wt_age_SB[,,1:allyears]
+
+      Wt_age_mid[,,]  <- .Object@ModelData@Wt_age_mid[,,1:allyears]
+
+      mat[,,]         <- .Object@ModelData@mat[,,1:allyears]
+
+      SSBAss[,]       <- .Object@ModelData@SSBAss[,1:allyears]
+
+      CBss[,]         <- .Object@ModelData@CBss[,1:allyears]
+
+      Bss[,]          <- .Object@ModelData@Bss[,1:allyears]
+
+      Recss[,]        <- .Object@ModelData@Recss[,1:allyears]
+
+      RecYrQtrss[,]   <- .Object@ModelData@RecYrQtrss[,1:(allyears * nsub)]
+
+      NLLss[,,]       <- .Object@ModelData@NLLss[1:allyears,]
+
+      NLLIss[,]       <- .Object@ModelData@NLLIss[1:allyears,]
+
+      CPUEobsMR[,,]   <- .Object@ModelData@CPUEobsMR[1:allyears,,]
+
+      CPUEobsY[]      <- .Object@ModelData@CPUEobsY[1:allyears]
+
+      Frepss[]        <- .Object@ModelData@Frepss[1:allyears]
+
+      ITrend[]        <- .Object@ModelData@ITrend[1:allyears]
+
+      Css[,,]         <- .Object@ModelData@Css[,1:allyears,]
+
+      CAAFss[,,]      <- .Object@ModelData@CAAFss[,1:allyears,]
+
+      CMbyFss[,,]     <- .Object@ModelData@CMbyFss[,1:allyears,]
+    }
+
+    .Object@ModelData@M           <- M
+    .Object@ModelData@Len_age     <- Len_age
+    .Object@ModelData@Len_age_mid <- Len_age_mid
+    .Object@ModelData@Wt_age      <- Wt_age
+    .Object@ModelData@Wt_age_SB   <- Wt_age_SB
+    .Object@ModelData@Wt_age_mid  <- Wt_age_mid
+    .Object@ModelData@mat         <- mat
+    .Object@ModelData@SSBAss      <- SSBAss
+    .Object@ModelData@CBss        <- CBss
+    .Object@ModelData@Bss         <- Bss
+    .Object@ModelData@Recss       <- Recss
+    .Object@ModelData@RecYrQtrss  <- RecYrQtrss
+    .Object@ModelData@NLLss       <- NLLss
+    .Object@ModelData@NLLIss      <- NLLIss
+    .Object@ModelData@CPUEobsMR   <- CPUEobsMR
+    .Object@ModelData@CPUEobsY    <- CPUEobsY
+    .Object@ModelData@F_FMSYss    <- F_FMSYss
+    .Object@ModelData@Frepss      <- Frepss
+    .Object@ModelData@ITrend      <- ITrend
+    .Object@ModelData@Css         <- Css
+    .Object@ModelData@CAAFss      <- CAAFss
+    .Object@ModelData@CMbyFss     <- CMbyFss
+
+    return (.Object)
+  }
+)
+
+# -----------------------------------------------------------------------------
+
 setMethod("getMPs", c("StockSynthesisModel"),
   function(.Object)
   {

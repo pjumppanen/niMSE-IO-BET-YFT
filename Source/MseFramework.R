@@ -444,6 +444,24 @@ setMethod("runMse", c("MseFramework"),
 
 # -----------------------------------------------------------------------------
 
+setGeneric("setProjectionYears", function(.Object, ...) standardGeneric("setProjectionYears"))
+
+setMethod("setProjectionYears", c("MseFramework"),
+  function(.Object, proyears)
+  {
+    .Object@MseDef@proyears <- as.integer(proyears)
+
+    for (cn in 1:length(.Object@StockSynthesisModels))
+    {
+      .Object@StockSynthesisModels[[cn]] <- setProjectionYears(.Object@StockSynthesisModels[[cn]], proyears)
+    }
+
+    return (.Object)
+  }
+)
+
+# -----------------------------------------------------------------------------
+
 setGeneric("getMPs", function(.Object, ...) standardGeneric("getMPs"))
 
 setMethod("getMPs", c("MseFramework"),
