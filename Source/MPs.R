@@ -628,20 +628,20 @@ PellaTomlinsonAlternative <- function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, 
   if (useF)
   {
     #Apply the 40:10 rule to F rather than catch...
-    FMSY = -log(1-d["MSY"]/d["K"])
+    FMSY = -log(1-d$MSY / d$K)
     FMult = CMaxProp # maximum F relative to FMSY
-    if ( d["BY"] / d["K"] <= BLower)                                  TACF <- 0.0001    #i.e. shutdown fishery
-    if ((d["BY"] / d["K"] >  BLower) && (d["BY"] / d["K"] <= BUpper)) TACF <- FMult * FMSY * (d["BY"] / d["K"]) / (BUpper - BLower) + FMult * FMSY * (1 - (BUpper / (BUpper - BLower)))
-    if ( d["BY"] / d["K"] >  BUpper)                                  TACF <- FMult * FMSY
+    if ( d$BY / d$K <= BLower)                            TACF <- 0.0001    #i.e. shutdown fishery
+    if ((d$BY / d$K >  BLower) && (d$BY / d$K <= BUpper)) TACF <- FMult * FMSY * (d$BY / d$K) / (BUpper - BLower) + FMult * FMSY * (1 - (BUpper / (BUpper - BLower)))
+    if ( d$BY / d$K >  BUpper)                            TACF <- FMult * FMSY
 
-    newTAC <- d["BY"] * (1.0 - exp(-TACF))
+    newTAC <- d$BY * (1.0 - exp(-TACF))
   }
   else
   {
     #Apply something like a 40-10 rule for catch relative to MSY
-    if ( d["BY"] / d["K"] <= BLower)                                  newTAC <- 1.0    #i.e. shutdown fishery
-    if ((d["BY"] / d["K"] >  BLower) && (d["BY"] / d["K"] <= BUpper)) newTAC <- CMaxProp * d["MSY"] * (d["BY"] / d["K"]) / (BUpper - BLower) + CMaxProp * d["MSY"] * (1 - (BUpper / (BUpper - BLower)))
-    if ( d["BY"] / d["K"] >  BUpper)                                  newTAC <- CMaxProp * d["MSY"]
+    if ( d$BY / d$K <= BLower)                            newTAC <- 1.0    #i.e. shutdown fishery
+    if ((d$BY / d$K >  BLower) && (d$BY / d$K <= BUpper)) newTAC <- CMaxProp * d$MSY * (d$BY / d$K) / (BUpper - BLower) + CMaxProp * d$MSY * (1 - (BUpper / (BUpper - BLower)))
+    if ( d$BY / d$K >  BUpper)                            newTAC <- CMaxProp * d$MSY
   }
 
   names(newTAC) <- "TAC"
@@ -702,7 +702,7 @@ PellaTomlinsonAbsoluteLimits <- function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.
   KInit  <- 20.0 * CMCsum
   p      <- 1.0
 
-  params <-log(c(rInit, KInit, p))
+  params <- log(c(rInit, KInit, p))
 
   ix     <- which(!is.na(I_hist))
   C_hist <- C_hist[ix]
@@ -719,47 +719,47 @@ PellaTomlinsonAbsoluteLimits <- function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.
   lastTAC <- pset$prevTACE$TAC
   closure <- FALSE
 
-  closureTAC <- CMaxProp * d["MSY"] * 0.15
+  closureTAC <- CMaxProp * d$MSY * 0.15
 
   if (useF)
   {
     #Apply the 40:10 rule to F rather than catch...
-    FMSY  <- -log(1-d["MSY"]/d["K"])
+    FMSY  <- -log(1.0 - d$MSY / d$K)
     FMult <- CMaxProp # maximum F relative to FMSY
 
-    if (d["BY"] / d["K"] <= BLower)
+    if (d$BY / d$K <= BLower)
     {
-      TACF    <- -log(1.0 - (closureTAC / d["BY"]))
+      TACF    <- -log(1.0 - (closureTAC / d$BY))
 #      TACF    <- 0.0001    #i.e. shutdown fishery
       closure <- TRUE
     }
-    else if ((d["BY"] / d["K"] >  BLower) && (d["BY"] / d["K"] <= BUpper))
+    else if ((d$BY / d$K >  BLower) && (d$BY / d$K <= BUpper))
     {
-      TACF <- FMult * FMSY * (d["BY"] / d["K"]) / (BUpper - BLower) + FMult * FMSY * (1 - (BUpper / (BUpper - BLower)))
+      TACF <- FMult * FMSY * (d$BY / d$K) / (BUpper - BLower) + FMult * FMSY * (1 - (BUpper / (BUpper - BLower)))
     }
-    else if (d["BY"] / d["K"] >  BUpper)
+    else if (d$BY / d$K >  BUpper)
     {
       TACF <- FMult * FMSY
     }
 
-    newTAC <- d["BY"] * (1.0 - exp(-TACF))
+    newTAC <- d$BY * (1.0 - exp(-TACF))
   }
   else
   {
     #Apply something like a 40-10 rule for catch relative to MSY
-    if (d["BY"] / d["K"] <= BLower)
+    if (d$BY / d$K <= BLower)
     {
       newTAC  <- closureTAC
 #      newTAC  <- 1.0    #i.e. shutdown fishery
       closure <- TRUE
     }
-    else if ((d["BY"] / d["K"] >  BLower) && (d["BY"] / d["K"] <= BUpper))
+    else if ((d$BY / d$K >  BLower) && (d$BY / d$K <= BUpper))
     {
-      newTAC <- CMaxProp * d["MSY"] * (d["BY"] / d["K"]) / (BUpper - BLower) + CMaxProp * d["MSY"] * (1 - (BUpper / (BUpper - BLower)))
+      newTAC <- CMaxProp * d$MSY * (d$BY / d$K) / (BUpper - BLower) + CMaxProp * d$MSY * (1 - (BUpper / (BUpper - BLower)))
     }
-    else if (d["BY"] / d["K"] >  BUpper)
+    else if (d$BY / d$K >  BUpper)
     {
-      newTAC <- CMaxProp * d["MSY"]
+      newTAC <- CMaxProp * d$MSY
     }
   }
 
@@ -768,8 +768,8 @@ PellaTomlinsonAbsoluteLimits <- function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.
   if (!closure)
   {
     deltaTAC  <- newTAC - lastTAC
-    upLimit   <- deltaTACLimUp * d["MSY"]
-    downLimit <- -deltaTACLimDown * d["MSY"]
+    upLimit   <- deltaTACLimUp * d$MSY
+    downLimit <- -deltaTACLimDown * d$MSY
 
     if (deltaTAC > upLimit)
     {
@@ -840,12 +840,13 @@ PT.model <- function(params, C_hist, I_hist, CMCsum, returnOpt=1, doPlot=FALSE)
     }
   }
 
-  q   <- sum(I_hist) / sum(B)
+  q   <- sum(I_hist) / sum(abs(B)) # abs(B) is same as (B*B)^0.5 which is more easily AD'ed
   LLH <- sum((q * B - I_hist) ^ 2)
-  MSY <- r * K / ((p + 1.0) ^ (1.0 + 1.0 / p))
 
   if (doPlot)
   {
+    MSY <- r * K / ((p + 1.0) ^ (1.0 + 1.0 / p))
+
     plot(I_hist / q, main="MSY: " %&% MSY %&% " C(Y)/MSY: " %&% as.character(CMCsum / MSY), ylim=c(0,max(I_hist / q, na.rm=T)))
     lines(B)
     lines(C_hist, col=2)
@@ -858,12 +859,14 @@ PT.model <- function(params, C_hist, I_hist, CMCsum, returnOpt=1, doPlot=FALSE)
   }
   else
   {
-    # return MSY-related stuff
-    BMSY           <- MSY / r
-    outList        <- c(B[Y], K, MSY, BMSY)
-    names(outList) <- c("BY","K","MSY","BMSY")
+    MSY      <- r * K / ((p + 1.0) ^ (1.0 + 1.0 / p))
+    E_MSY    <- r / (q * (p + 1.0))
+    CPUE_MSY <- MSY / E_MSY
 
-    return(outList)
+    # return MSY-related stuff
+    results <- list(BY=B[Y], MSY=MSY, BMSY=MSY / r, CPUE_MSY=CPUE_MSY, r=r, K=K, p=p, q=q)
+
+    return(results)
   }
 }
 
@@ -899,14 +902,10 @@ MP_FunctionExports <- c(MP_FunctionExports, "PT.model.gradient")
 #   B(1) = K
 #
 #   DO yi=2,Y
-#     ! Note that we square B/K to force a positive number so that then
-#     ! raising to the power of p/2 exists. When B > 0 it is the same as
-#     ! (B/K)**p but still exists when B is negative. This is just an
-#     ! aid for fitting purposes.
 #     B(yi) = B(yi-1) + (r * B(yi-1) / p) * (1.0 - ((B(yi-1) / K)**2)**(p/2)) - C_hist(yi-1)
 #   END DO
 #
-#   q  = sum(I_hist) / sum(B)
+#   q  = sum(I_hist) / sum((B*B)**0.5)
 #   PT = sum((q * B - I_hist)**2)
 #
 #   RETURN
@@ -915,8 +914,15 @@ MP_FunctionExports <- c(MP_FunctionExports, "PT.model.gradient")
 #
 # to obtain the code,
 #
+# !        Generated by TAPENADE     (INRIA, Ecuador team)
+# !  Tapenade 3.14 (r7260) - 18 Jan 2019 10:11
+# !
+# !  Differentiation of pt in reverse (adjoint) mode:
+# !   gradient     of useful results: pt
+# !   with respect to varying inputs: params
+# !   RW status of diff variables: params:out pt:in-killed
 # SUBROUTINE PT_B(params, paramsb, ptb)
-#   USE COMMON_B
+#   USE COMMON
 #   IMPLICIT NONE
 #   REAL, INTENT(IN) :: params(3), c_hist(y), i_hist(y), y
 #   REAL :: paramsb(3)
@@ -925,64 +931,61 @@ MP_FunctionExports <- c(MP_FunctionExports, "PT.model.gradient")
 #   INTEGER :: yi
 #   INTRINSIC EXP
 #   INTRINSIC SUM
+#   REAL :: temp
+#   REAL :: temp0
+#   REAL :: temp1
+#   REAL :: temp2
+#   REAL :: temp3
+#   REAL :: tempb
+#   REAL :: tempb0
+#   REAL :: tempb1
+#   REAL :: temp4
+#   REAL, DIMENSION(y) :: tempb2
 #   REAL :: ptb
 #   REAL :: pt
-#   REAL :: temp3
-#   REAL :: temp2
-#   REAL :: temp1
-#   REAL :: temp0
-#   REAL :: tempb2(y)
-#   REAL :: tempb1
-#   REAL :: tempb0
-#   REAL :: tempb
-#   REAL :: temp
-#   REAL :: temp4
 #   r = EXP(params(1))
 #   k = EXP(params(2))
 #   p = EXP(params(3))
 #   b(1) = k
 #   DO yi=2,y
-# ! Note that we square B/K to force a positive number so that then
-# ! raising to the power of p/2 exists. When B > 0 it is the same as
-# ! (B/K)**p but still exists when B is negative. This is just an
-# ! aid for fitting purposes.
 #     CALL PUSHREAL4(b(yi))
 #     b(yi) = b(yi-1) + r*b(yi-1)/p*(1.0-((b(yi-1)/k)**2)**(p/2)) - c_hist(yi-1)
 #   END DO
-#   q = SUM(i_hist)/SUM(b)
-#   temp4 = SUM(b)
+#   q = SUM(i_hist)/SUM((b*b)**0.5)
+#   temp4 = SUM((b**2)**0.5)
 #   bb = 0.0
 #   tempb2 = 2*(q*b-i_hist)*ptb
 #   qb = SUM(b*tempb2)
-#   bb = q*tempb2 - SUM(i_hist)*qb/temp4**2
+#   bb = q*tempb2 - 2*b*0.5*(b**2)**(-0.5)*SUM(i_hist)*qb/temp4**2
 #   kb = 0.0
 #   pb = 0.0
 #   rb = 0.0
 #   DO yi=y,2,-1
 #     CALL POPREAL4(b(yi))
-#     temp0 = r/p
-#     tempb = b(yi-1)*temp0*bb(yi)
-#     temp = b(yi-1)/k
-#     temp3 = temp**2
+#     temp = r/p
+#     tempb = b(yi-1)*temp*bb(yi)
+#     temp0 = b(yi-1)/k
+#     temp1 = temp0**2
 #     temp2 = p/2
-#     IF (temp3 .LE. 0.0 .AND. (temp2 .EQ. 0.0 .OR. temp2 .NE. INT(temp2))) THEN
+#     IF (temp1 .LE. 0.0 .AND. (temp2 .EQ. 0.0 .OR. temp2 .NE. INT(temp2))) THEN
 #       tempb0 = 0.0
 #     ELSE
-#       tempb0 = -(2*temp*temp2*temp3**(temp2-1)*tempb/k)
+#       tempb0 = -(2*temp0*temp2*temp1**(temp2-1)*tempb/k)
 #     END IF
-#     temp1 = temp3**temp2
-#     tempb1 = b(yi-1)*(1.0-temp1)*bb(yi)/p
-#     bb(yi-1) = bb(yi-1) + tempb0 + ((1.0-temp1)*temp0+1.0)*bb(yi)
-#     kb = kb - temp*tempb0
-#     IF (temp3 .LE. 0.0) THEN
-#       pb = pb - temp0*tempb1
+#     temp3 = temp1**temp2
+#     tempb1 = b(yi-1)*(1.0-temp3)*bb(yi)/p
+#     bb(yi-1) = bb(yi-1) + tempb0 + ((1.0-temp3)*temp+1.0)*bb(yi)
+#     kb = kb - temp0*tempb0
+#     IF (temp1 .LE. 0.0) THEN
+#       pb = pb - temp*tempb1
 #     ELSE
-#       pb = pb - temp0*tempb1 - temp1*LOG(temp3)*tempb/2
+#       pb = pb - temp*tempb1 - temp3*LOG(temp1)*tempb/2
 #     END IF
 #     rb = rb + tempb1
 #     bb(yi) = 0.0
 #   END DO
 #   kb = kb + bb(1)
+#   paramsb = 0.0
 #   paramsb(3) = paramsb(3) + EXP(params(3))*pb
 #   paramsb(2) = paramsb(2) + EXP(params(2))*kb
 #   paramsb(1) = paramsb(1) + EXP(params(1))*rb
@@ -996,6 +999,7 @@ PT.model.gradient <- function(params, C_hist, I_hist, CMCsum, returnOpt=1, doPlo
   Y       <- length(C_hist)
   paramsb <- array(as.double(NA), dim=c(3))
   b       <- array(as.double(NA), dim=c(Y))
+  bb      <- array(as.double(NA), dim=c(Y))
   stackr  <- array(as.double(NA), dim=c(Y))
   sr      <- 1
   r       <- exp(params[1])
@@ -1010,47 +1014,46 @@ PT.model.gradient <- function(params, C_hist, I_hist, CMCsum, returnOpt=1, doPlo
     b[yi]      <- b[yi - 1] + (r * b[yi - 1] / p) * (1.0 - ((b[yi - 1] / k) ** 2) ** (p / 2)) - C_hist[yi - 1]
   }
 
-  q       <- sum(I_hist) / sum(b)
-  temp4   <- sum(b)
-  bb      <- 0.0
-  tempb2  <- 2.0 * (q * b - I_hist)
-  qb      <- sum(b * tempb2)
-  bb      <- q * tempb2 - sum(I_hist) * qb / temp4 ^ 2
-  kb      <- 0.0
-  pb      <- 0.0
-  rb      <- 0.0
+  temp4     <- sum((b * b) ^ 0.5)
+  q         <- sum(I_hist) / temp4
+  tempb2    <- 2.0 * (q * b - I_hist)
+  qb        <- sum(b * tempb2)
+  bb        <- q * tempb2 - b * (b ^ 2) ^ (-0.5) * sum(I_hist) * qb / temp4 ^ 2
+  kb        <- 0.0
+  pb        <- 0.0
+  rb        <- 0.0
 
   for (yi in Y:2)
   {
     sr    <- sr - 1
     b[yi] <- stackr[sr]
-    temp0 <- r / p
-    tempb <- b[yi - 1] * temp0 * bb[yi]
-    temp  <- b[yi - 1] / k
-    temp3 <- temp ^ 2
+    temp  <- r / p
+    tempb <- b[yi - 1] * temp * bb[yi]
+    temp0 <- b[yi - 1] / k
+    temp1 <- temp0 ^ 2
     temp2 <- p / 2
 
-    if ((temp3 <= 0.0) && ((temp2 == 0.0) || (temp2 != trunc(temp2))))
+    if ((temp1 <= 0.0) && ((temp2 == 0.0) || (temp2 != trunc(temp2))))
     {
       tempb0 <- 0.0
     }
     else
     {
-      tempb0 <- -(2 * temp * temp2 * temp3 ^ (temp2 - 1.0) * tempb / k)
+      tempb0 <- -(2 * temp0 * temp2 * temp1 ^ (temp2 - 1.0) * tempb / k)
     }
 
-    temp1      <- temp3 ^ temp2
-    tempb1     <- b[yi - 1] * (1.0 - temp1) * bb[yi] / p
-    bb[yi - 1] <- bb[yi - 1] + tempb0 + ((1.0 - temp1) * temp0 + 1.0) * bb[yi]
-    kb         <- kb - temp * tempb0
+    temp3      <- temp1 ^ temp2
+    tempb1     <- b[yi - 1] * (1.0 - temp3) * bb[yi] / p
+    bb[yi - 1] <- bb[yi - 1] + tempb0 + ((1.0 - temp3) * temp + 1.0) * bb[yi]
+    kb         <- kb - temp0 * tempb0
 
-    if (temp3 <= 0.0)
+    if (temp1 <= 0.0)
     {
-      pb <- pb - temp0 * tempb1
+      pb <- pb - temp * tempb1
     }
     else
     {
-      pb <- pb - temp0 * tempb1 - temp1 * log(temp3) * tempb / 2
+      pb <- pb - temp * tempb1 - temp3 * log(temp1) * tempb / 2
     }
 
     rb      <- rb + tempb1
@@ -1488,76 +1491,34 @@ class(CC50CE1.0bet) <- "IO_MP"
 MP_FunctionExports <- c(MP_FunctionExports, "CPUE_setpoint_control")
 
 #------------------------------------------------------------------------------
-# MP using CPUE setpoint to control TAC along with simple model estimation
-# of MSY and CPUE at MSY
+# MP using CPUE setpoint to control TAC along with Pella-Tomlinson model to
+# estimate the CPUE setpoint for MSY
 #------------------------------------------------------------------------------
-CPUE_setpoint_control <- function(pset, target_CPUE_scale=1.25, resume_MSY_scale=0.5, close_CPUE_scale = 0.3, open_CPUE_scale = 0.3, TAC_gain=0.05)
+CPUE_setpoint_control <- function(pset, target_CPUE_scale=1.25, resume_MSY_scale=0.5, close_CPUE_scale = 0.2, open_CPUE_scale = 0.3, TAC_gain=0.05)
 {
-  require(splines)
+  C_hist <- pset$Cobs
+  I_hist <- pset$Iobs
+  CMCsum <- pset$CMCsum  # "recent" annual catch in mass
 
-  # check for completion of MP
-  if (!is.null(pset$complete) && (pset$complete ==TRUE))
-  {
-    # Use this as a oportunity to plot diagnostic stuff
-  }
+  #Initial Model parameters
+  rInit  <- 0.1
+  KInit  <- 20.0 * CMCsum
+  p      <- 1.0
 
-  catch_model <- function(a, b, effort)
-  {
-    C <- a * effort * (b - effort)
+  params <- log(c(rInit, KInit, p))
 
-    return (C)
-  }
+  ix     <- which(!is.na(I_hist))
+  C_hist <- C_hist[ix]
+  I_hist <- I_hist[ix]
 
-  CPUE_model <- function(a, b, effort)
-  {
-    CPUE <- a * (b - effort)
+  ix     <- which(!is.na(C_hist))
+  C_hist <- C_hist[ix]
+  I_hist <- I_hist[ix]
 
-    return (CPUE)
-  }
+  opt    <- nlminb(start=params, objective=PT.model, gradient=PT.model.gradient, returnOpt=1, C_hist=C_hist, I_hist=I_hist, CMCsum=CMCsum, doPlot=F, control=list(rel.tol=1.0e-7))
 
-  fitCatchEffortModel <- function(catch_series, CPUE_series)
-  {
-    objective <- function(par)
-    {
-      a <- par[1]
-      b <- par[2]
-
-      squareError <- sum(((catch_model(a, b, effort_series) - catch_series) ^ 2), na.rm=TRUE)
-
-      return (squareError)
-    }
-
-    # filter out point with large changes in CPUE as these will bias estimate because the
-    # data is running far from steady state conditions
-    relative_change <- c(1.0, CPUE_series[2:length(CPUE_series)] / CPUE_series[1:(length(CPUE_series) - 1)])
-    ix              <- which(!((relative_change < 0.707) | (relative_change > 2)))
-    catch_series    <- catch_series[ix]
-    CPUE_series     <- CPUE_series[ix]
-
-    effort_series <- catch_series / CPUE_series
-    start         <- c(4 * max(catch_series, na.rm=TRUE) / (max(effort_series, na.rm=TRUE) ^ 2), max(effort_series, na.rm=TRUE))
-    fit           <- nlminb(start, objective)
-    a             <- fit$par[1]
-    b             <- fit$par[2]
-
-#    par(mfrow=c(1,1))
-#    plot(effort_series, catch_series)
-#    points(effort_series, catch_model(a, b, effort_series), col="red")
-#
-#    readline(prompt="Press [enter] to continue")
-#
-#    plot(effort_series, CPUE_series)
-#    points(effort_series, CPUE_model(a, b, effort_series), col="red")
-#
-#    readline(prompt="Press [enter] to continue")
-
-    results <- list(MSY      = (a * b * b / 4),
-                    CPUE_MSY = (a * b / 2),
-                    a        = a,
-                    b        = b)
-
-    return (results)
-  }
+  # get the biomass/BMSY estimate
+  model  <- PT.model(params=opt$par, returnOpt=2, C_hist=C_hist, I_hist=I_hist, CMCsum=CMCsum, doPlot=FALSE)
 
   #check for first run
   if (is.null(pset$env$closed))
@@ -1569,7 +1530,6 @@ CPUE_setpoint_control <- function(pset, target_CPUE_scale=1.25, resume_MSY_scale
   # years between MP evaluation
   count <- pset$interval
   ny    <- length(pset$Cobs) #number years of data
-  model <- fitCatchEffortModel(pset$Cobs, pset$Iobs)
 
   if (count > ny)
   {
@@ -1622,10 +1582,15 @@ CPUE_setpoint_control <- function(pset, target_CPUE_scale=1.25, resume_MSY_scale
         error <- measuredCPUE - refCPUE
       }
 
-      gain   <- TAC_gain * model$b
+      gain   <- TAC_gain * (model$r / (model$p * (model$q ^ model$r)))
       deltaC <- error * gain
       newTAC <- lastTAC + deltaC
     }
+  }
+
+  if (is.na(newTAC))
+  {
+    browser()
   }
 
   if (newTAC < minTAC)
