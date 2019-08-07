@@ -612,11 +612,10 @@ PellaTomlinsonAlternative <- function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, 
   CMCsum <- pset$CMCsum  # "recent" annual catch in mass
 
   #Initial Model parameters
-  rInit  <- 0.1
-  KInit  <- 20.0 * CMCsum
-  p      <- 1.0
-
-  params <-log(c(rInit, KInit, p))
+  C2Init <- (CMCsum * 1000)
+  maxp   <- c(log(CMCsum * 100000), log(CMCsum * 1000), log(4.0), log(1.0))
+  minp   <- c(log(CMCsum / 10), log(CMCsum / 1000), log(0.25), log(0.1))
+  params <- log(c(C2Init, CMCsum, 1, 0.9))
 
   ix     <- which(!is.na(I_hist))
   C_hist <- C_hist[ix]
@@ -626,10 +625,11 @@ PellaTomlinsonAlternative <- function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, 
   C_hist <- C_hist[ix]
   I_hist <- I_hist[ix]
 
-  opt    <- nlminb(start=params, objective=PT.model, gradient=PT.model.gradient, returnOpt=1, C_hist=C_hist, I_hist=I_hist, CMCsum=CMCsum, doPlot=F, control=list(rel.tol=1.0e-7))
+  opt    <- nlminb(start=params, objective=PT.model, Type=0, C_hist=C_hist, I_hist=I_hist, lower=minp, upper=maxp)
+#  opt    <- nlminb(start=params, objective=PT.model, gradient=PT.model.gradient, Type=0, C_hist=C_hist, I_hist=I_hist, lower=minp, upper=maxp)
 
   # get the biomass/BMSY estimate
-  d       <- PT.model(params=opt$par, returnOpt=2, C_hist=C_hist, I_hist=I_hist, CMCsum=CMCsum, doPlot=FALSE)
+  d       <- PT.model(params=opt$par, Type=1, C_hist=C_hist, I_hist=I_hist)
   lastTAC <- pset$prevTACE$TAC
 
   if (useF)
@@ -705,11 +705,10 @@ PellaTomlinsonAbsoluteLimits <- function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.
   CMCsum <- pset$CMCsum  # "recent" annual catch in mass
 
   #Initial Model parameters
-  rInit  <- 0.1
-  KInit  <- 20.0 * CMCsum
-  p      <- 1.0
-
-  params <- log(c(rInit, KInit, p))
+  C2Init <- (CMCsum * 1000)
+  maxp   <- c(log(CMCsum * 100000), log(CMCsum * 1000), log(4.0), log(1.0))
+  minp   <- c(log(CMCsum / 10), log(CMCsum / 1000), log(0.25), log(0.1))
+  params <- log(c(C2Init, CMCsum, 1, 0.9))
 
   ix     <- which(!is.na(I_hist))
   C_hist <- C_hist[ix]
@@ -719,10 +718,11 @@ PellaTomlinsonAbsoluteLimits <- function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.
   C_hist <- C_hist[ix]
   I_hist <- I_hist[ix]
 
-  opt    <- nlminb(start=params, objective=PT.model, gradient=PT.model.gradient, returnOpt=1, C_hist=C_hist, I_hist=I_hist, CMCsum=CMCsum, doPlot=F, control=list(rel.tol=1.0e-7))
+  opt    <- nlminb(start=params, objective=PT.model, Type=0, C_hist=C_hist, I_hist=I_hist, lower=minp, upper=maxp)
+#  opt    <- nlminb(start=params, objective=PT.model, gradient=PT.model.gradient, Type=0, C_hist=C_hist, I_hist=I_hist, lower=minp, upper=maxp)
 
   # get the biomass/BMSY estimate
-  d       <- PT.model(params=opt$par, returnOpt=2, C_hist=C_hist, I_hist=I_hist, CMCsum=CMCsum, doPlot=FALSE)
+  d       <- PT.model(params=opt$par, Type=1, C_hist=C_hist, I_hist=I_hist)
   lastTAC <- pset$prevTACE$TAC
   closure <- FALSE
 
@@ -821,45 +821,183 @@ MP_FunctionExports <- c(MP_FunctionExports, "PellaTomlinsonProjection")
 # Fit Pella Tomlinson Production model and use it to determine a TAC to drive
 # yield to the desired target without crashing the stock.
 # -----------------------------------------------------------------------------
-PellaTomlinsonProjection <- function(pset, CMaxProp=1.0)
+PellaTomlinsonProjection <- function(pset, CMaxProp=1.0, Gain=0.15, MinCatchProp=0.15, debug=FALSE)
 {
   C_hist <- pset$Cobs
   I_hist <- pset$Iobs
   CMCsum <- pset$CMCsum  # "recent" annual catch in mass
+  C2Init <- (CMCsum * 1000)
+  maxp <- c(log(CMCsum * 100000), log(CMCsum * 1000), log(1.0))
+  minp <- c(log(CMCsum / 10), log(CMCsum / 1000), log(0.1))
 
   #check for first run
-  if (is.null(pset$env$r))
+  if (is.null(pset$env$params))
   {
     #Initial Model parameters
-    p     <- 1.0
-    r     <- 0.1
-    K     <- 20.0 * CMCsum
-    B0onK <- 1.0
+    params <- log(c(C2Init, CMCsum, 0.9))
 
+    pset$env$params   <- params
     pset$env$MSY      <- c()
     pset$env$BMSY     <- c()
-    pset$env$ar       <- c()
-    pset$env$aK       <- c()
-    pset$env$aq       <- c()
-    pset$env$ap       <- c()
-    pset$env$aB0      <- c()
+    pset$env$r        <- c()
+    pset$env$K        <- c()
+    pset$env$q        <- c()
+    pset$env$p        <- c()
+    pset$env$B0       <- c()
     pset$env$obj      <- c()
     pset$env$message  <- c()
+    pset$env$y        <- c(pset$y)
+    pset$env$count    <- 0
   }
   else
   {
-    r     <- pset$env$r
-    K     <- pset$env$K
-    p     <- pset$env$p
-    B0onK <- pset$env$B0 / pset$env$K
+    tol <- exp(-pset$env$count / 10)
+
+    pset$env$y <- c(pset$env$y, pset$y)
+    params     <- pset$env$params
+    maxp[1]    <- params[1] + tol * log(1.25)
+    minp[1]    <- params[1] - tol * log(1.25)
+    maxp[2]    <- params[2] + tol * log(1.25)
+    minp[2]    <- params[2] - tol * log(1.25)
+    maxp[3]    <- min(log(1.0), params[3] + tol * log(1.25))
+    minp[3]    <- min(log(0.1), params[3] + tol * log(1.25))
   }
 
-  params <- log(c(r, K, p, B0onK))
+  # filter the catch and cpue data
+  data   <- stripNAs(C_hist, I_hist)
+  first  <- which(C_hist == data$C_hist[1])
+  last   <- length(C_hist)
+  C_hist <- data$C_hist
+  I_hist <- data$I_hist
+  weight <- rep(1, times=length(C_hist))
 
-  # time constant for exponential weighting of objective function data and is
-  # in years.
-  Tau <- 25.0
+  start_ix <- min(20, length(C_hist))
+  end_ix   <- max(length(C_hist) - 20, 1)
 
+  if (start_ix < end_ix)
+  {
+    weight[start_ix:end_ix] <- 0.5
+  }
+
+  opt    <- nlminb(start=params, objective=PT.model.fixed.p, C_hist=C_hist, I_hist=I_hist, Type=0, weight=weight, p=0.42, lower=minp, upper=maxp)
+  Fit    <- PT.model.fixed.p(opt$par, C_hist, I_hist, Type=1, p=0.42)
+  params <- opt$par
+
+#  spline_I <- smooth.spline(1:length(I_hist), I_hist, nknots=floor(length(I_hist) / 7))
+#  I0       <- spline_I$y[1]
+
+# browser()
+
+  if (length(pset$env$K) > 0)
+  {
+    span <- Fit$K / mean(pset$env$K)
+
+    if ((span > 10) || (span < 0.1))
+    {
+      # poor fit so discard and use previous good fit
+      Fit               <- pset$env$lastFit
+    }
+    else
+    {
+      # save starting point for next time
+      pset$env$lastFit  <- Fit
+      pset$env$params   <- params
+    }
+  }
+  else
+  {
+    # save starting point for next time
+    pset$env$lastFit  <- Fit
+    pset$env$params   <- params
+  }
+
+  MinCatch          <- MinCatchProp * Fit$MSY
+
+  pset$env$MSY      <- c(pset$env$MSY,     Fit$MSY)
+  pset$env$BMSY     <- c(pset$env$BMSY,    Fit$BMSY)
+  pset$env$r        <- c(pset$env$r,       Fit$r)
+  pset$env$K        <- c(pset$env$K,       Fit$K)
+  pset$env$q        <- c(pset$env$q,       Fit$q)
+  pset$env$p        <- c(pset$env$p,       Fit$p)
+  pset$env$B0       <- c(pset$env$B0,      Fit$B0)
+  pset$env$obj      <- c(pset$env$obj,     opt$objective)
+  pset$env$message  <- c(pset$env$message, opt$message)
+
+  if (debug)
+  {
+    # diagnostic plot
+    plot(I_hist / Fit$q, ylim=c(0,max(max(I_hist / Fit$q, na.rm=T), max(pset$B[first:last], na.rm=T))))
+    lines(Fit$B, col=2)
+    lines(pset$B[first:last], col=3)
+  }
+
+  # our recommendations are scaled according to CMaxProp
+  lastTAC <- pset$prevTACE$TAC / CMaxProp
+
+  if (debug && !is.null(pset$complete) && pset$complete)
+  {
+    plot(pset$env$BMSY, type="l", col="red")
+    plot(pset$env$MSY,  type="l", col="red")
+    plot(pset$env$r,    type="l", col="red")
+    plot(pset$env$K,    type="l", col="red")
+    plot(pset$env$q,    type="l", col="red")
+    plot(pset$env$p,    type="l", col="red")
+    plot(pset$env$B0,   type="l", col="red")
+    plot(pset$env$obj,  type="l", col="red")
+    print(pset$env$message)
+    browser()
+  }
+
+  # R some value less than 1.0 that controls the speed which the MP aims for
+  # the target stock depletion
+  R       <- Gain
+  endTime <- pset$interval + 1
+
+  # Need to account for depletion from last "interval" years of operating
+  # under lastTAC because reporting of TAC is "interval" years behind
+  # the present and the fishery has been operating for "interval" years at a
+  # TAC of lastTAC
+  BStart  <- PT.project(Fit, rep(lastTAC, times=endTime), Fit$BY)[endTime]
+  Btarget <- BStart + ((Fit$BMSY - Fit$BY) * R)
+
+  projection.objective <- function(TAC)
+  {
+     obj <- (Btarget - (PT.project(Fit, rep(TAC, times=endTime), BStart)[endTime])) ^ 2
+
+    return (obj)
+  }
+
+  # if F is unrealistically high the catch limiting can cause a local maximum
+  # at high F so we make sure we have a low F as as a starting point
+  TAC_opt <- nlminb(start=lastTAC / 50, objective=projection.objective, lower=0.0, upper=Inf)
+  newTAC  <- CMaxProp * TAC_opt$par
+
+  pset$env$count <- pset$env$count + 1
+
+  if (debug)
+  {
+    print(paste("r=", Fit$r, "K=", Fit$K, "p=", Fit$p, "q=", Fit$q, "n=", Fit$n, "MSY=", Fit$MSY, "BMSY=",Fit$BMSY, "BStart=", BStart, "BTarget=", Btarget, "TAC=", newTAC, "lastTAC=", lastTAC))
+  }
+
+  if (newTAC < MinCatch)
+  {
+    newTAC <- MinCatch
+  }
+
+  TAEbyF <- 0.0 * pset$prevTACE$TAEbyF #TAE by fishery
+
+  return (list(TAEbyF=TAEbyF, TAC=newTAC))
+}
+
+# -----------------------------------------------------------------------------
+
+
+MP_FunctionExports <- c(MP_FunctionExports, "stripNAs")
+
+# -----------------------------------------------------------------------------
+
+stripNAs <- function(C_hist, I_hist)
+{
   # sub-set C and I data. Eliminate leading NA's and replace any other NA's
   # with zero. Also limit horizon to time for which C is greater than 1 for
   # a period of time the same length as Tau or a substantial fraction thereof.
@@ -884,6 +1022,18 @@ PellaTomlinsonProjection <- function(pset, CMaxProp=1.0)
   ixs         <- which(is.na(I_hist))
   I_hist[ixs] <- 0.0
 
+  return (list(C_hist=C_hist, I_hist=I_hist))
+}
+
+# -----------------------------------------------------------------------------
+
+
+MP_FunctionExports <- c(MP_FunctionExports, "limitExtent")
+
+# -----------------------------------------------------------------------------
+
+limitExtent <- function(C_hist, I_hist, Tau, crash_limit=100.0)
+{
   # find useable limit of data (ie. does the stock crash)
   years   <- length(C_hist)
   endyear <- 1
@@ -891,7 +1041,7 @@ PellaTomlinsonProjection <- function(pset, CMaxProp=1.0)
 
   for (ix in years:1)
   {
-    if (C_hist[ix] > 100)
+    if (C_hist[ix] > crash_limit)
     {
       if (count == 0)
       {
@@ -918,67 +1068,64 @@ PellaTomlinsonProjection <- function(pset, CMaxProp=1.0)
   C_hist <- C_hist[1:endyear]
   I_hist <- I_hist[1:endyear]
 
-  weight <- exp((-(length(C_hist) - 1):0) / Tau)
+  return (list(C_hist=C_hist, I_hist=I_hist))
+}
 
-  maxp <- c(log(1.0), Inf, log(1.1), log(1.0))
-  minp <- c(log(1e-6), -Inf, log(0.1), log(0.01))
+# -----------------------------------------------------------------------------
 
-  opt     <- nlminb(start=params, objective=PT.model, gradient=PT.model.gradient, returnOpt=1, C_hist=C_hist, I_hist=I_hist, CMCsum=CMCsum, doPlot=FALSE, control=list(rel.tol=1.0e-8), lower=minp, upper=maxp)
 
-  # get the biomass/BMSY estimate
-  d       <- PT.model(params=opt$par, returnOpt=2, C_hist=C_hist, I_hist=I_hist, CMCsum=CMCsum, doPlot=FALSE, weight=weight)
-  lastTAC <- pset$prevTACE$TAC
+MP_FunctionExports <- c(MP_FunctionExports, "PT.project")
 
-  replacement <- if (d$BY > 0) (d$r * d$BY / d$p) * (1.0 - ((d$BY / d$K) ^ 2) ^ (d$p / 2)) * CMaxProp else 0.0
-  targetCatch <- d$MSY * CMaxProp
+# -----------------------------------------------------------------------------
 
-  # save starting point for next time
-  pset$env$r  <- d$r
-  pset$env$K  <- d$K
-  pset$env$p  <- d$p
-  pset$env$B0 <- d$B0
+PT.project <- function(model, C, B0)
+{
+  Y     <- length(C)
+  r     <- model$r
+  K     <- model$K
+  p     <- model$p
+  q     <- model$q
+  B     <- array(NA, dim=Y)
+  B[1]  <- B0
 
-  pset$env$MSY  <- c(pset$env$MSY, d$MSY)
-  pset$env$BMSY <- c(pset$env$BMSY, d$BMSY)
-  pset$env$ar   <- c(pset$env$ar, d$r)
-  pset$env$aK   <- c(pset$env$aK, d$K)
-  pset$env$aq   <- c(pset$env$aq, d$q)
-  pset$env$ap   <- c(pset$env$ap, d$p)
-  pset$env$aB0  <- c(pset$env$aB0, d$B0)
-  pset$env$obj  <- c(pset$env$obj, opt$objective)
-  pset$env$message <- c(pset$env$message, opt$message)
-
-  if (FALSE && !is.null(pset$complete) && pset$complete)
+  for(y in 2:Y)
   {
-    plot(pset$env$BMSY, type="l", col="red")
-    plot(pset$env$MSY, type="l", col="red")
-    plot(pset$env$ar, type="l", col="red")
-    plot(pset$env$aK, type="l", col="red")
-    plot(pset$env$aq, type="l", col="red")
-    plot(pset$env$ap, type="l", col="red")
-    plot(pset$env$aB0, type="l", col="red")
-    plot(pset$env$obj, type="l", col="red")
-    print(pset$env$message)
-    print(pset$env$MSY)
-    browser()
+    Bsurvive <- B[y-1] + (r / p) * B[y-1]
+    Bdie     <- (r / p) * B[y-1] * ((B[y-1] / K) ^ p) + C[y-1]
+    dlim     <- 2.0 / (1 + exp((Bdie / Bsurvive)^5)) # saturation mechanism that forces B to always be positive
+    B[y]     <- Bsurvive - dlim * Bdie
   }
 
-  if (d$BY > d$BMSY)
-  {
-    # under-fished
-    newTAC <- targetCatch
-  }
-  else
-  {
-    # over-fished
-    newTAC <- replacement * CMaxProp * d$BY / d$BMSY
-  }
+  return (B)
+}
 
-#  print(paste(replacement, d$BY, targetCatch, lastTAC, newTAC))
+# -----------------------------------------------------------------------------
 
-  TAEbyF <- 0.0 * pset$prevTACE$TAEbyF #TAE by fishery
 
-  return (list(TAEbyF=TAEbyF, TAC=newTAC))
+MP_FunctionExports <- c(MP_FunctionExports, "PT.model.fit.depletion")
+
+# -----------------------------------------------------------------------------
+
+PT.model.fit.depletion <- function(params, C_hist, I_hist, Type, weight=NULL, r, K, p)
+{
+  C1 <- (r/p)
+  C2 <- 1.0 / (K^p)
+
+  return (PT.model(c(log(C1), log(C2), log(p), params), C_hist, I_hist, Type, weight))
+}
+
+
+# -----------------------------------------------------------------------------
+
+MP_FunctionExports <- c(MP_FunctionExports, "PT.model.fixed.p")
+
+
+# -----------------------------------------------------------------------------
+# Pella-Tomlinson Model function
+# -----------------------------------------------------------------------------
+PT.model.fixed.p <- function(params, C_hist, I_hist, Type, p, weight=NULL)
+{
+  return (PT.model(c(params[1], params[2], log(p), params[3]), C_hist, I_hist, Type, weight))
 }
 
 
@@ -986,67 +1133,97 @@ PellaTomlinsonProjection <- function(pset, CMaxProp=1.0)
 
 MP_FunctionExports <- c(MP_FunctionExports, "PT.model")
 
+
 # -----------------------------------------------------------------------------
 # Pella-Tomlinson Model function
 # -----------------------------------------------------------------------------
-PT.model <- function(params, C_hist, I_hist, CMCsum, returnOpt=1, doPlot=FALSE, weight=rep(1.0, length(C_hist)))
+PT.model <- function(params, C_hist, I_hist, Type, weight=NULL)
 {
-  # Model parameters
-  # B(t+1)=B(t) + (r/p)B(1-(B/K)^p) - C    ; MSY = rK/((p+1)^(1+(1/p)))
+  # Model formulation is,
+  # B(t+1)=B(t) + (r/p)B(t)(1-(B(t)/K)^p) - C(t)
+  #
+  # In an attempt to help the optimizer fit the model we re-arrange things into
+  # the form,
+  #
+  # B(t+1)=((r / p) + 1) * B(t) - (B(t) * (r / p) * ((B(t) * r / L) ^ p) - C(t)
+  #
+  # Where,
+  #
+  # L = K * r
+  #
+  # Translated back we have,
+  #
+  # r = L / K
+  #
+  # Does this help at all? I don't know exactly.
   #
   Y     <- length(C_hist)
-  r     <- exp(params[1])
-  K     <- exp(params[2])
+  K     <- exp(params[1])
+  MSY   <- exp(params[2])
   p     <- exp(params[3])
-  B0onK <- exp(params[4])
+  n     <- exp(params[4])
   B     <- array(NA,dim=Y)
-  B[1]  <- B0onK * K
+  L     <- MSY * ((p + 1.0) ^ (1.0 + (1.0 / p)))
+  r     <- L / K
+  B[1]  <- n * K
 
   for(y in 2:Y)
   {
-    # Note that we square B / K to force a positive number so that then
-    # raising to the power of p / 2 exists. When B > 0 it is the same as
-    # (B / K) ^ p but still exists when B is negative. This is just an
-    # aid for fitting purposes.
-    B[y] <- B[y-1] + ((r / p) * B[y-1]) * (1.0 - ((B[y-1] / K) ^ 2) ^ (p / 2)) - C_hist[y-1]
+    Bsurvive <- B[y-1] + (r / p) * B[y-1]
+    Bdie     <- (r / p) * B[y-1] * ((B[y-1] / K) ^ p) + C_hist[y-1]
+    dlim     <- 2.0 / (1 + exp((Bdie / Bsurvive)^5)) # saturation mechanism that forces B to always be positive
+    B[y]     <- Bsurvive - dlim * Bdie
 
-    # numerical means of limiting bounds on B
-    Lim  <- 1.0e20
-    B[y] <- B[y] * (Lim / (abs(B[y]) + Lim))
+    if (is.na(B[y]) || B[y] <= 0.0)
+    {
+      browser()
+    }
   }
 
-  q    <- sum(I_hist) / sum(abs(B))
-  cost <- sum((((q * B - I_hist) / (I_hist + 0.1)) * weight) ^ 2)
-
-  if (doPlot)
+  if (Type == 0)
   {
-    MSY <- r * K / ((p + 1.0) ^ (1.0 + 1.0 / p))
+    # B and I_hist differ only by the scaling factor q. Taking the log, the
+    # scaling factor comes out as an additive constant and the effect of
+    # subtracting the mean will be to remove that point of difference between
+    # the two series. Building the cost function this way ensures that the model
+    # fits the shape shape in log space for both, even though they differ by a
+    # scaling factor which can be determine in a secondary process and is q.
+    LB      <- log(B)
+    LI_hist <- log(I_hist)
+    devs    <- LI_hist - LB
+    devs    <- devs - mean(devs)
 
-    plot(I_hist / q, main="MSY: " %&% MSY %&% " C(Y)/MSY: " %&% as.character(CMCsum / MSY), ylim=c(0,max(I_hist / q, na.rm=T)))
-    lines(B)
-    lines(C_hist, col=2)
-  }
+    if (is.null(weight))
+    {
+      cost  <- sum(devs ^ 2)
+    }
+    else
+    {
+      cost  <- sum((weight * devs) ^ 2)
+    }
 
-  if (returnOpt == 1)
-  {
-    # return objective function
     return (cost)
   }
-  else
+  else if (Type == 1)
   {
-    B0       <- B0onK * K
-    MSY      <- r * K / ((p + 1.0) ^ (1.0 + 1.0 / p))
+    LB       <- log(B)
+    LI_hist  <- log(I_hist)
+    q        <- exp(mean(LI_hist - LB))
+    LB       <- LB - mean(LB)
+    LI_hist  <- LI_hist - mean(LI_hist)
+    B0       <- B[1]
+    BY       <- B[Y]
     E_MSY    <- r / (q * (p + 1.0))
     CPUE_MSY <- MSY / E_MSY
 
-    # return MSY-related stuff
-    results <- list(BY=B[Y], MSY=MSY, BMSY=CPUE_MSY / q, CPUE_MSY=CPUE_MSY, r=r, K=K, p=p, q=q, B0=B0)
+    Fit <- list(LB=LB, LI_hist=LI_hist, p=p, q=q, r=r, K=K, n=n, MSY=MSY, BMSY=CPUE_MSY / q, CPUE_MSY=CPUE_MSY, B0=B0, BY=BY, B=B)
 
-    return(results)
+    return (Fit)
   }
 }
 
 
+# This is now wrong...
 MP_FunctionExports <- c(MP_FunctionExports, "PT.model.gradient")
 
 # -----------------------------------------------------------------------------
@@ -1212,30 +1389,30 @@ PT.model.gradient <- function(params, C_hist, I_hist, CMCsum, returnOpt=1, doPlo
     b[yi]      <- b[yi] * (lim / ((b[yi] * b[yi]) ^ 0.5 + lim))
   }
 
-  temp5     <- sum((b * b) ^ 0.5)
-  q         <- sum(I_hist) / temp5
-  tempb3    <- weight * weight * 2.0 * (q * b - I_hist) / ((I_hist + 0.1) ^ 2)
-  qb        <- sum(b * tempb3)
-  bb        <- q * tempb3 - b * (b ^ 2) ^ (-0.5) * sum(I_hist) * qb / (temp5 ^ 2)
-  kb        <- 0.0
-  pb        <- 0.0
-  rb        <- 0.0
+  temp5  <- sum((b * b) ^ 0.5)
+  q      <- sum(I_hist) / temp5
+  tempb3 <- weight * weight * 2.0 * (q * b - I_hist) / ((I_hist + 0.1) ^ 2)
+  qb     <- sum(b * tempb3)
+  bb     <- q * tempb3 - b * (b ^ 2) ^ (-0.5) * sum(I_hist) * qb / (temp5 ^ 2)
+  kb     <- 0.0
+  pb     <- 0.0
+  rb     <- 0.0
 
   for (yi in Y:2)
   {
-    lim   <- 1.0e20
-    sr    <- sr - 1
-    b[yi] <- stackr[sr]
-    temp4 <- lim + (b[yi] ^ 2) ^ 0.5
-    tempb <- lim * bb[yi] / temp4
+    lim    <- 1.0e20
+    sr     <- sr - 1
+    b[yi]  <- stackr[sr]
+    temp4  <- lim + (b[yi] ^ 2) ^ 0.5
+    tempb  <- lim * bb[yi] / temp4
     bb[yi] <- (1.0 - 0.5 * (b[yi] ^ 2) ^ (-0.5) * b[yi] ^ 2 * 2 / temp4) * tempb
-    sr    <- sr - 1
-    b[yi] <- stackr[sr]
-    temp  <- r / p
+    sr     <- sr - 1
+    b[yi]  <- stackr[sr]
+    temp   <- r / p
     tempb0 <- b[yi - 1] * temp * bb[yi]
-    temp0 <- b[yi - 1] / k
-    temp1 <- temp0 ^ 2
-    temp2 <- p / 2
+    temp0  <- b[yi - 1] / k
+    temp1  <- temp0 ^ 2
+    temp2  <- p / 2
 
     if ((temp1 <= 0.0) && ((temp2 == 0.0) || (temp2 != trunc(temp2))))
     {
@@ -1260,8 +1437,8 @@ PT.model.gradient <- function(params, C_hist, I_hist, CMCsum, returnOpt=1, doPlo
       pb <- pb - temp * tempb2 - temp3 * log(temp1) * tempb0 / 2
     }
 
-    rb      <- rb + tempb2
-    bb[yi]  <- 0.0
+    rb     <- rb + tempb2
+    bb[yi] <- 0.0
   }
 
   b0onkb     <- k * bb[1]
@@ -1707,11 +1884,10 @@ CPUE_setpoint_control <- function(pset, target_CPUE_scale=1.25, resume_MSY_scale
   CMCsum <- pset$CMCsum  # "recent" annual catch in mass
 
   #Initial Model parameters
-  rInit  <- 0.1
-  KInit  <- 20.0 * CMCsum
-  p      <- 1.0
-
-  params <- log(c(rInit, KInit, p))
+  C2Init <- (CMCsum * 1000)
+  maxp   <- c(log(CMCsum * 100000), log(CMCsum * 1000), log(4.0), log(1.0))
+  minp   <- c(log(CMCsum / 10), log(CMCsum / 1000), log(0.25), log(0.1))
+  params <- log(c(C2Init, CMCsum, 1, 0.9))
 
   ix     <- which(!is.na(I_hist))
   C_hist <- C_hist[ix]
@@ -1721,10 +1897,11 @@ CPUE_setpoint_control <- function(pset, target_CPUE_scale=1.25, resume_MSY_scale
   C_hist <- C_hist[ix]
   I_hist <- I_hist[ix]
 
-  opt    <- nlminb(start=params, objective=PT.model, gradient=PT.model.gradient, returnOpt=1, C_hist=C_hist, I_hist=I_hist, CMCsum=CMCsum, doPlot=F, control=list(rel.tol=1.0e-7))
+  opt    <- nlminb(start=params, objective=PT.model, Type=0, C_hist=C_hist, I_hist=I_hist, lower=minp, upper=maxp)
+#  opt    <- nlminb(start=params, objective=PT.model, gradient=PT.model.gradient, Type=0, C_hist=C_hist, I_hist=I_hist, lower=minp, upper=maxp)
 
   # get the biomass/BMSY estimate
-  model  <- PT.model(params=opt$par, returnOpt=2, C_hist=C_hist, I_hist=I_hist, CMCsum=CMCsum, doPlot=FALSE)
+  model  <- PT.model(params=opt$par, Type=1, C_hist=C_hist, I_hist=I_hist)
 
   #check for first run
   if (is.null(pset$env$closed))
