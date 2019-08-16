@@ -56,28 +56,28 @@ PT41.x60t25<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1., deltaTACLimUp=0.2
 class(PT41.x60t25)<-"IO_MP_tune"
 
 
-PTproj.15 <- function(pset, CMaxProp=1.0)
+PTproj.15 <- function(pset)
 {
-  return(PellaTomlinsonProjection(pset, CMaxProp=pset$tune * CMaxProp, Gain=0.15))
+  return(PellaTomlinsonProjection(pset, BMSY_Prop=pset$tune * BMSY_Prop, Gain=0.15))
 }
 
 class(PTproj.15)<-"IO_MP_tune"
 
 
-PTproj.25 <- function(pset, CMaxProp=1.0)
+PTproj.25 <- function(pset)
 {
-  return(PellaTomlinsonProjection(pset, CMaxProp=pset$tune * CMaxProp, Gain=0.25))
+  return(PellaTomlinsonProjection(pset, BMSY_Prop=pset$tune * BMSY_Prop, Gain=0.25))
 }
 
 class(PTproj.25)<-"IO_MP_tune"
 
 
-PTproj.80.25 <- function(pset)
+PTproj.1.35bmsy.25 <- function(pset)
 {
-  return(PellaTomlinsonProjection(pset, CMaxProp=0.80, Gain=0.25, MinCatchProp=0.20 * pset$tune))
+  return(PellaTomlinsonProjection(pset, BMSY_Prop=1.35, Gain=0.25, MinCatchProp=0.20 * pset$tune))
 }
 
-class(PTproj.80.25)<-"IO_MP_tune"
+class(PTproj.1.35bmsy.25)<-"IO_MP_tune"
 
 
 PT41AL.t15<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1., deltaTACLimUp=0.15, deltaTACLimDown=0.15)
@@ -859,7 +859,7 @@ MP_FunctionExports <- c(MP_FunctionExports, "PellaTomlinsonProjection")
 # Fit Pella Tomlinson Production model and use it to determine a TAC to drive
 # yield to the desired target without crashing the stock.
 # -----------------------------------------------------------------------------
-PellaTomlinsonProjection <- function(pset, CMaxProp=1.0, Gain=0.15, MinCatchProp=0.15, debug=FALSE)
+PellaTomlinsonProjection <- function(pset, BMSY_Prop=1.0, Gain=0.15, MinCatchProp=0.15, debug=FALSE)
 {
   C_hist <- pset$Cobs
   I_hist <- pset$Iobs
@@ -965,8 +965,7 @@ PellaTomlinsonProjection <- function(pset, CMaxProp=1.0, Gain=0.15, MinCatchProp
     lines(pset$B[first:last], col=3)
   }
 
-  # our recommendations are scaled according to CMaxProp
-  lastTAC <- pset$prevTACE$TAC / CMaxProp
+  lastTAC <- pset$prevTACE$TAC
 
   if (debug && !is.null(pset$complete) && pset$complete)
   {
@@ -992,7 +991,7 @@ PellaTomlinsonProjection <- function(pset, CMaxProp=1.0, Gain=0.15, MinCatchProp
   # the present and the fishery has been operating for "interval" years at a
   # TAC of lastTAC
   BStart  <- PT.project(Fit, rep(lastTAC, times=endTime), Fit$BY)[endTime]
-  Btarget <- BStart + ((Fit$BMSY - Fit$BY) * R)
+  Btarget <- BStart + ((Fit$BMSY * BMSY_Prop - BStart) * R)
 
   projection.objective <- function(TAC)
   {
@@ -1004,7 +1003,7 @@ PellaTomlinsonProjection <- function(pset, CMaxProp=1.0, Gain=0.15, MinCatchProp
   # if F is unrealistically high the catch limiting can cause a local maximum
   # at high F so we make sure we have a low F as as a starting point
   TAC_opt <- nlminb(start=lastTAC / 50, objective=projection.objective, lower=0.0, upper=Inf)
-  newTAC  <- CMaxProp * TAC_opt$par
+  newTAC  <- TAC_opt$par
 
   if (debug)
   {
