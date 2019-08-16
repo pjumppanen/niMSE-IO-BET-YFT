@@ -657,7 +657,8 @@ PellaTomlinsonAlternative <- function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, 
   I_hist <- I_hist[ix]
 
   # get the biomass/BMSY estimate
-  opt    <- nlminb(start=params, objective=PT.model.fixed.p, gradient=PT.model.fixed.p.gradient, C_hist=C_hist, I_hist=I_hist, Type=0, weight=NULL, p=0.42, lower=minp, upper=maxp)
+#  opt    <- nlminb(start=params, objective=PT.model.fixed.p, gradient=PT.model.fixed.p.gradient, C_hist=C_hist, I_hist=I_hist, Type=0, weight=NULL, p=0.42, lower=minp, upper=maxp)
+  opt    <- nlminb(start=params, objective=PT.model.fixed.p, C_hist=C_hist, I_hist=I_hist, Type=0, weight=NULL, p=0.42, lower=minp, upper=maxp)
   d      <- PT.model.fixed.p(opt$par, C_hist, I_hist, Type=1, p=0.42)
 
   pset$env$params <- opt$par
@@ -765,7 +766,8 @@ PellaTomlinsonAbsoluteLimits <- function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.
   I_hist <- I_hist[ix]
 
   # get the biomass/BMSY estimate
-  opt    <- nlminb(start=params, objective=PT.model.fixed.p, gradient=PT.model.fixed.p.gradient, C_hist=C_hist, I_hist=I_hist, Type=0, weight=NULL, p=0.42, lower=minp, upper=maxp)
+#  opt    <- nlminb(start=params, objective=PT.model.fixed.p, gradient=PT.model.fixed.p.gradient, C_hist=C_hist, I_hist=I_hist, Type=0, weight=NULL, p=0.42, lower=minp, upper=maxp)
+  opt    <- nlminb(start=params, objective=PT.model.fixed.p, C_hist=C_hist, I_hist=I_hist, Type=0, weight=NULL, p=0.42, lower=minp, upper=maxp)
   d      <- PT.model.fixed.p(opt$par, C_hist, I_hist, Type=1, p=0.42)
 
   pset$env$params <- opt$par
@@ -918,7 +920,8 @@ PellaTomlinsonProjection <- function(pset, BMSY_Prop=1.0, Gain=0.15, MinCatchPro
     weight[start_ix:end_ix] <- 0.5
   }
 
-  opt    <- nlminb(start=params, objective=PT.model.fixed.p, gradient=PT.model.fixed.p.gradient, C_hist=C_hist, I_hist=I_hist, Type=0, weight=weight, p=0.42, lower=minp, upper=maxp)
+#  opt    <- nlminb(start=params, objective=PT.model.fixed.p, gradient=PT.model.fixed.p.gradient, C_hist=C_hist, I_hist=I_hist, Type=0, weight=weight, p=0.42, lower=minp, upper=maxp)
+  opt    <- nlminb(start=params, objective=PT.model.fixed.p, C_hist=C_hist, I_hist=I_hist, Type=0, weight=weight, p=0.42, lower=minp, upper=maxp)
   Fit    <- PT.model.fixed.p(opt$par, C_hist, I_hist, Type=1, p=0.42)
   params <- opt$par
 
