@@ -56,12 +56,28 @@ PT41.x60t25<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1., deltaTACLimUp=0.2
 class(PT41.x60t25)<-"IO_MP_tune"
 
 
-PTproj <- function(pset, CMaxProp=1.0)
+PTproj.15 <- function(pset, CMaxProp=1.0)
 {
-  return(PellaTomlinsonProjection(pset, CMaxProp=pset$tune * CMaxProp))
+  return(PellaTomlinsonProjection(pset, CMaxProp=pset$tune * CMaxProp, Gain=0.15))
 }
 
-class(PTproj)<-"IO_MP_tune"
+class(PTproj.15)<-"IO_MP_tune"
+
+
+PTproj.25 <- function(pset, CMaxProp=1.0)
+{
+  return(PellaTomlinsonProjection(pset, CMaxProp=pset$tune * CMaxProp, Gain=0.25))
+}
+
+class(PTproj.25)<-"IO_MP_tune"
+
+
+PTproj.80.25 <- function(pset)
+{
+  return(PellaTomlinsonProjection(pset, CMaxProp=0.80, Gain=0.25, MinCatchProp=0.20 * pset$tune))
+}
+
+class(PTproj.80.25)<-"IO_MP_tune"
 
 
 PT41AL.t15<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1., deltaTACLimUp=0.15, deltaTACLimDown=0.15)
@@ -613,9 +629,24 @@ PellaTomlinsonAlternative <- function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, 
 
   #Initial Model parameters
   C2Init <- (CMCsum * 1000)
-  maxp   <- c(log(CMCsum * 100000), log(CMCsum * 1000), log(4.0), log(1.0))
-  minp   <- c(log(CMCsum / 10), log(CMCsum / 1000), log(0.25), log(0.1))
-  params <- log(c(C2Init, CMCsum, 1, 0.9))
+  maxp   <- c(log(CMCsum * 100000), log(CMCsum * 1000), log(1.0))
+  minp   <- c(log(CMCsum / 10), log(CMCsum / 1000), log(0.1))
+
+  #check for first run
+  if (is.null(pset$env$params))
+  {
+    params  <- log(c(C2Init, CMCsum, 0.9))
+
+    pset$env$params <- params
+  }
+  else
+  {
+    params  <- pset$env$params
+    maxp[1] <- params[1] + log(50)
+    minp[1] <- params[1] - log(50)
+    maxp[2] <- params[2] + log(50)
+    minp[2] <- params[2] - log(50)
+  }
 
   ix     <- which(!is.na(I_hist))
   C_hist <- C_hist[ix]
@@ -625,12 +656,12 @@ PellaTomlinsonAlternative <- function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, 
   C_hist <- C_hist[ix]
   I_hist <- I_hist[ix]
 
-  opt    <- nlminb(start=params, objective=PT.model, Type=0, C_hist=C_hist, I_hist=I_hist, lower=minp, upper=maxp)
-#  opt    <- nlminb(start=params, objective=PT.model, gradient=PT.model.gradient, Type=0, C_hist=C_hist, I_hist=I_hist, lower=minp, upper=maxp)
-
   # get the biomass/BMSY estimate
-  d       <- PT.model(params=opt$par, Type=1, C_hist=C_hist, I_hist=I_hist)
-  lastTAC <- pset$prevTACE$TAC
+  opt    <- nlminb(start=params, objective=PT.model.fixed.p, gradient=PT.model.fixed.p.gradient, C_hist=C_hist, I_hist=I_hist, Type=0, weight=NULL, p=0.42, lower=minp, upper=maxp)
+  d      <- PT.model.fixed.p(opt$par, C_hist, I_hist, Type=1, p=0.42)
+
+  pset$env$params <- opt$par
+  lastTAC         <- pset$prevTACE$TAC
 
   if (useF)
   {
@@ -706,9 +737,24 @@ PellaTomlinsonAbsoluteLimits <- function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.
 
   #Initial Model parameters
   C2Init <- (CMCsum * 1000)
-  maxp   <- c(log(CMCsum * 100000), log(CMCsum * 1000), log(4.0), log(1.0))
-  minp   <- c(log(CMCsum / 10), log(CMCsum / 1000), log(0.25), log(0.1))
-  params <- log(c(C2Init, CMCsum, 1, 0.9))
+  maxp   <- c(log(CMCsum * 100000), log(CMCsum * 1000), log(1.0))
+  minp   <- c(log(CMCsum / 10), log(CMCsum / 1000), log(0.1))
+
+  #check for first run
+  if (is.null(pset$env$params))
+  {
+    params  <- log(c(C2Init, CMCsum, 0.9))
+
+    pset$env$params <- params
+  }
+  else
+  {
+    params  <- pset$env$params
+    maxp[1] <- params[1] + log(50)
+    minp[1] <- params[1] - log(50)
+    maxp[2] <- params[2] + log(50)
+    minp[2] <- params[2] - log(50)
+  }
 
   ix     <- which(!is.na(I_hist))
   C_hist <- C_hist[ix]
@@ -718,14 +764,13 @@ PellaTomlinsonAbsoluteLimits <- function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.
   C_hist <- C_hist[ix]
   I_hist <- I_hist[ix]
 
-  opt    <- nlminb(start=params, objective=PT.model, Type=0, C_hist=C_hist, I_hist=I_hist, lower=minp, upper=maxp)
-#  opt    <- nlminb(start=params, objective=PT.model, gradient=PT.model.gradient, Type=0, C_hist=C_hist, I_hist=I_hist, lower=minp, upper=maxp)
-
   # get the biomass/BMSY estimate
-  d       <- PT.model(params=opt$par, Type=1, C_hist=C_hist, I_hist=I_hist)
-  lastTAC <- pset$prevTACE$TAC
-  closure <- FALSE
+  opt    <- nlminb(start=params, objective=PT.model.fixed.p, gradient=PT.model.fixed.p.gradient, C_hist=C_hist, I_hist=I_hist, Type=0, weight=NULL, p=0.42, lower=minp, upper=maxp)
+  d      <- PT.model.fixed.p(opt$par, C_hist, I_hist, Type=1, p=0.42)
 
+  pset$env$params <- opt$par
+
+  lastTAC    <- pset$prevTACE$TAC
   closureTAC <- CMaxProp * d$MSY * 0.15
 
   if (useF)
@@ -736,9 +781,7 @@ PellaTomlinsonAbsoluteLimits <- function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.
 
     if (d$BY / d$K <= BLower)
     {
-      TACF    <- -log(1.0 - (closureTAC / d$BY))
-#      TACF    <- 0.0001    #i.e. shutdown fishery
-      closure <- TRUE
+      TACF <- -log(1.0 - (closureTAC / d$BY))
     }
     else if ((d$BY / d$K >  BLower) && (d$BY / d$K <= BUpper))
     {
@@ -756,9 +799,7 @@ PellaTomlinsonAbsoluteLimits <- function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.
     #Apply something like a 40-10 rule for catch relative to MSY
     if (d$BY / d$K <= BLower)
     {
-      newTAC  <- closureTAC
-#      newTAC  <- 1.0    #i.e. shutdown fishery
-      closure <- TRUE
+      newTAC <- closureTAC
     }
     else if ((d$BY / d$K >  BLower) && (d$BY / d$K <= BUpper))
     {
@@ -772,23 +813,20 @@ PellaTomlinsonAbsoluteLimits <- function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.
 
   names(newTAC) <- "TAC"
 
-  if (!closure)
+  deltaTAC  <- newTAC - lastTAC
+  upLimit   <- deltaTACLimUp * d$MSY
+  downLimit <- -deltaTACLimDown * d$MSY
+
+  if (deltaTAC > upLimit)
   {
-    deltaTAC  <- newTAC - lastTAC
-    upLimit   <- deltaTACLimUp * d$MSY
-    downLimit <- -deltaTACLimDown * d$MSY
-
-    if (deltaTAC > upLimit)
-    {
-      deltaTAC <- upLimit
-    }
-    else if (deltaTAC < downLimit)
-    {
-      deltaTAC <- downLimit
-    }
-
-    newTAC <- lastTAC + deltaTAC
+    deltaTAC <- upLimit
   }
+  else if (deltaTAC < downLimit)
+  {
+    deltaTAC <- downLimit
+  }
+
+  newTAC <- lastTAC + deltaTAC
 
   if (newTAC < 9)
   {
@@ -812,8 +850,8 @@ PellaTomlinsonAbsoluteLimits <- function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.
   return (list(TAEbyF=TAEbyF, TAC=newTAC))
 }
 
-
 # -----------------------------------------------------------------------------
+
 
 MP_FunctionExports <- c(MP_FunctionExports, "PellaTomlinsonProjection")
 
@@ -847,28 +885,29 @@ PellaTomlinsonProjection <- function(pset, CMaxProp=1.0, Gain=0.15, MinCatchProp
     pset$env$obj      <- c()
     pset$env$message  <- c()
     pset$env$y        <- c(pset$y)
-    pset$env$count    <- 0
   }
   else
   {
-    tol <- exp(-pset$env$count / 10)
-
     pset$env$y <- c(pset$env$y, pset$y)
     params     <- pset$env$params
-    maxp[1]    <- params[1] + tol * log(1.25)
-    minp[1]    <- params[1] - tol * log(1.25)
-    maxp[2]    <- params[2] + tol * log(1.25)
-    minp[2]    <- params[2] - tol * log(1.25)
-    maxp[3]    <- min(log(1.0), params[3] + tol * log(1.25))
-    minp[3]    <- min(log(0.1), params[3] + tol * log(1.25))
+    maxp[1]    <- params[1] + log(50)
+    minp[1]    <- params[1] - log(50)
+    maxp[2]    <- params[2] + log(50)
+    minp[2]    <- params[2] - log(50)
   }
 
-  # filter the catch and cpue data
-  data   <- stripNAs(C_hist, I_hist)
-  first  <- which(C_hist == data$C_hist[1])
-  last   <- length(C_hist)
-  C_hist <- data$C_hist
-  I_hist <- data$I_hist
+  # filter leading NA's from the catch and cpue data
+  ix     <- which(!is.na(I_hist))
+  first  <- min(ix)
+  last   <- max(ix)
+  C_hist <- C_hist[ix]
+  I_hist <- I_hist[ix]
+
+  ix     <- which(!is.na(C_hist))
+  first  <- max(c(first, min(ix)))
+  last   <- min(c(last, max(ix)))
+  C_hist <- C_hist[ix]
+  I_hist <- I_hist[ix]
   weight <- rep(1, times=length(C_hist))
 
   start_ix <- min(20, length(C_hist))
@@ -879,14 +918,9 @@ PellaTomlinsonProjection <- function(pset, CMaxProp=1.0, Gain=0.15, MinCatchProp
     weight[start_ix:end_ix] <- 0.5
   }
 
-  opt    <- nlminb(start=params, objective=PT.model.fixed.p, C_hist=C_hist, I_hist=I_hist, Type=0, weight=weight, p=0.42, lower=minp, upper=maxp)
+  opt    <- nlminb(start=params, objective=PT.model.fixed.p, gradient=PT.model.fixed.p.gradient, C_hist=C_hist, I_hist=I_hist, Type=0, weight=weight, p=0.42, lower=minp, upper=maxp)
   Fit    <- PT.model.fixed.p(opt$par, C_hist, I_hist, Type=1, p=0.42)
   params <- opt$par
-
-#  spline_I <- smooth.spline(1:length(I_hist), I_hist, nknots=floor(length(I_hist) / 7))
-#  I0       <- spline_I$y[1]
-
-# browser()
 
   if (length(pset$env$K) > 0)
   {
@@ -972,8 +1006,6 @@ PellaTomlinsonProjection <- function(pset, CMaxProp=1.0, Gain=0.15, MinCatchProp
   TAC_opt <- nlminb(start=lastTAC / 50, objective=projection.objective, lower=0.0, upper=Inf)
   newTAC  <- CMaxProp * TAC_opt$par
 
-  pset$env$count <- pset$env$count + 1
-
   if (debug)
   {
     print(paste("r=", Fit$r, "K=", Fit$K, "p=", Fit$p, "q=", Fit$q, "n=", Fit$n, "MSY=", Fit$MSY, "BMSY=",Fit$BMSY, "BStart=", BStart, "BTarget=", Btarget, "TAC=", newTAC, "lastTAC=", lastTAC))
@@ -987,88 +1019,6 @@ PellaTomlinsonProjection <- function(pset, CMaxProp=1.0, Gain=0.15, MinCatchProp
   TAEbyF <- 0.0 * pset$prevTACE$TAEbyF #TAE by fishery
 
   return (list(TAEbyF=TAEbyF, TAC=newTAC))
-}
-
-# -----------------------------------------------------------------------------
-
-
-MP_FunctionExports <- c(MP_FunctionExports, "stripNAs")
-
-# -----------------------------------------------------------------------------
-
-stripNAs <- function(C_hist, I_hist)
-{
-  # sub-set C and I data. Eliminate leading NA's and replace any other NA's
-  # with zero. Also limit horizon to time for which C is greater than 1 for
-  # a period of time the same length as Tau or a substantial fraction thereof.
-  # -- to do --
-  # take out leading NA's
-  years = length(C_hist)
-
-  for (ix in 1:years)
-  {
-    if (!is.na(I_hist[ix]) && !is.na(C_hist[ix]))
-    {
-      C_hist <- C_hist[ix:years]
-      I_hist <- I_hist[ix:years]
-      break
-    }
-  }
-
-  # replace NA's with zero
-  ixs         <- which(is.na(C_hist))
-  C_hist[ixs] <- 0.0
-
-  ixs         <- which(is.na(I_hist))
-  I_hist[ixs] <- 0.0
-
-  return (list(C_hist=C_hist, I_hist=I_hist))
-}
-
-# -----------------------------------------------------------------------------
-
-
-MP_FunctionExports <- c(MP_FunctionExports, "limitExtent")
-
-# -----------------------------------------------------------------------------
-
-limitExtent <- function(C_hist, I_hist, Tau, crash_limit=100.0)
-{
-  # find useable limit of data (ie. does the stock crash)
-  years   <- length(C_hist)
-  endyear <- 1
-  count   <- 0
-
-  for (ix in years:1)
-  {
-    if (C_hist[ix] > crash_limit)
-    {
-      if (count == 0)
-      {
-        endyear <- ix
-        count   <- 1
-      }
-
-      if (count < Tau)
-      {
-        break
-      }
-      else
-      {
-        endyear <- ix
-        count   <- 1
-      }
-    }
-    else if (count != 0)
-    {
-      count <- count + 1
-    }
-  }
-
-  C_hist <- C_hist[1:endyear]
-  I_hist <- I_hist[1:endyear]
-
-  return (list(C_hist=C_hist, I_hist=I_hist))
 }
 
 # -----------------------------------------------------------------------------
@@ -1090,30 +1040,21 @@ PT.project <- function(model, C, B0)
 
   for(y in 2:Y)
   {
-    Bsurvive <- B[y-1] + (r / p) * B[y-1]
-    Bdie     <- (r / p) * B[y-1] * ((B[y-1] / K) ^ p) + C[y-1]
-    dlim     <- 2.0 / (1 + exp((Bdie / Bsurvive)^5)) # saturation mechanism that forces B to always be positive
-    B[y]     <- Bsurvive - dlim * Bdie
+    B[y] <- B[y-1] + (r / p) * B[y-1] - (r / p) * B[y-1] * ((B[y-1] / K) ^ p) - C[y-1]
+
+    # impose an asymptotic limit to 10000. We use an asymptotic limit rather
+    # than a hard limit (piecewise linear etc.) because it makes for a more
+    # minimizer friendly objective function.
+    limit <- 100.0
+
+    if (B[y] < 3 * limit)
+    {
+      B[y] <- limit * (1.0 + (4.0 / (1.0 + exp(-((B[y] / limit) - 3)))))
+    }
   }
 
   return (B)
 }
-
-# -----------------------------------------------------------------------------
-
-
-MP_FunctionExports <- c(MP_FunctionExports, "PT.model.fit.depletion")
-
-# -----------------------------------------------------------------------------
-
-PT.model.fit.depletion <- function(params, C_hist, I_hist, Type, weight=NULL, r, K, p)
-{
-  C1 <- (r/p)
-  C2 <- 1.0 / (K^p)
-
-  return (PT.model(c(log(C1), log(C2), log(p), params), C_hist, I_hist, Type, weight))
-}
-
 
 # -----------------------------------------------------------------------------
 
@@ -1126,6 +1067,22 @@ MP_FunctionExports <- c(MP_FunctionExports, "PT.model.fixed.p")
 PT.model.fixed.p <- function(params, C_hist, I_hist, Type, p, weight=NULL)
 {
   return (PT.model(c(params[1], params[2], log(p), params[3]), C_hist, I_hist, Type, weight))
+}
+
+
+# -----------------------------------------------------------------------------
+
+MP_FunctionExports <- c(MP_FunctionExports, "PT.model.fixed.p.gradient")
+
+
+# -----------------------------------------------------------------------------
+# Pella-Tomlinson Model gradient function
+# -----------------------------------------------------------------------------
+PT.model.fixed.p.gradient <- function(params, C_hist, I_hist, Type, p, weight=NULL)
+{
+  gradient <- PT.model.gradient(c(params[1], params[2], log(p), params[3]), C_hist, I_hist, Type, weight)
+
+  return (c(gradient[1], gradient[2], gradient[4]))
 }
 
 
@@ -1169,11 +1126,22 @@ PT.model <- function(params, C_hist, I_hist, Type, weight=NULL)
 
   for(y in 2:Y)
   {
+    # Despite this changing the PT model structure it seems critical to the
+    # useful functioning of the MP that relies on it. This is because although the
+    # PT model fit is no doubt biased, it still provides useful model parameter
+    # estimates under high fishing pressure. In the traditional model under
+    # high pressure such that B is driven to zero or close too zero, the model
+    # estimates start varying wildly and depart radically from the "true"
+    # model parameters. Why this is so I'm not entirely sure but it appears that
+    # the collapse of the stock alters the objective function surface such that
+    # it has many local minima to lock on to whereas this alteration seems to
+    # blur the minima into one.
     Bsurvive <- B[y-1] + (r / p) * B[y-1]
     Bdie     <- (r / p) * B[y-1] * ((B[y-1] / K) ^ p) + C_hist[y-1]
     dlim     <- 2.0 / (1 + exp((Bdie / Bsurvive)^5)) # saturation mechanism that forces B to always be positive
     B[y]     <- Bsurvive - dlim * Bdie
 
+    # sanity check. This should never be true
     if (is.na(B[y]) || B[y] <= 0.0)
     {
       browser()
@@ -1222,8 +1190,9 @@ PT.model <- function(params, C_hist, I_hist, Type, weight=NULL)
   }
 }
 
+# -----------------------------------------------------------------------------
 
-# This is now wrong...
+
 MP_FunctionExports <- c(MP_FunctionExports, "PT.model.gradient")
 
 # -----------------------------------------------------------------------------
@@ -1243,26 +1212,33 @@ MP_FunctionExports <- c(MP_FunctionExports, "PT.model.gradient")
 #
 #   USE COMMON
 #
-#   REAL, INTENT (IN) :: params(4), C_hist(Y), I_hist(Y), weight(Y), Y
+#   INTEGER, INTENT (IN) :: Y
+#   REAL, INTENT (IN) :: params(4), C_hist(Y), I_hist(Y), weight(Y)
 #
-#   REAL B(Y), q, r, K, p, lim
+#   REAL B(Y), q, r, K, p, lim, n, MSY, L, Bsurvive, Bdie, dlim, LB, LI_hist, devs
 #   INTEGER yi
 #
-#   r     = EXP(params(1))
-#   K     = EXP(params(2))
+#   K     = EXP(params(1))
+#   MSY   = EXP(params(2))
 #   p     = EXP(params(3))
-#   B0onK = EXP(params(4))
-#
-#   B(1) = B0onK * K
+#   n     = EXP(params(4))
+#   L     = MSY * ((p + 1.0) ** (1.0 + (1.0 / p)))
+#   r     = L / K
+#   B(1)  = n * K
 #
 #   DO yi=2,Y
-#     B(yi) = B(yi-1) + (r * B(yi-1) / p) * (1.0 - ((B(yi-1) / K)**2)**(p/2)) - C_hist(yi-1)
-#     Lim   = 1.0e20
-#     B(yi) = B(yi) * (Lim / ((B(yi) * B(yi))**0.5 + Lim))
+#     Bsurvive = B(yi-1) + (r / p) * B(yi-1)
+#     Bdie     = (r / p) * B(yi-1) * ((B(yi-1) / K) ** p) + C_hist(yi-1)
+#     dlim     = 2.0 / (1 + exp((Bdie / Bsurvive) ** 5))
+#     B(yi)    = Bsurvive - dlim * Bdie
 #   END DO
 #
-#   q  = sum(I_hist) / sum((B*B)**0.5)
-#   PT = sum((((q * B - I_hist) / (I_hist + 0.1)) * weight) ** 2)
+#   LB      = log(B)
+#   LI_hist = log(I_hist)
+#   devs    = LI_hist - LB
+#   devs    = devs - (sum(devs) / Y)
+#
+#   PT = sum((weight * devs) ** 2)
 #
 #   RETURN
 #
@@ -1270,23 +1246,26 @@ MP_FunctionExports <- c(MP_FunctionExports, "PT.model.gradient")
 #
 # to obtain the code,
 #
-# !  Tapenade 3.14 (r7260) - 18 Jan 2019 10:11
+#
+# !        Generated by TAPENADE     (INRIA, Ecuador team)
+# !  Tapenade 3.14 (r7259) - 18 Jan 2019 09:35
 # !
-# !  Differentiation of pt in reverse (adjoint) mode:
-# !   gradient     of useful results: pt
-# !   with respect to varying inputs: params
-# !   RW status of diff variables: params:out pt:in-killed
-# SUBROUTINE PT_B(params, paramsb, ptb)
+# !  Differentiation of pt in reverse (adjoint) mode (with options i4 dr8 r4):
+# !   gradient     of useful results: result
+# !   with respect to varying inputs: result params
+# !   RW status of diff variables: result:in-zero params:out
+# SUBROUTINE PT_B(params, paramsb, result, resultb)
 #   USE COMMON
 #   IMPLICIT NONE
-#   REAL, INTENT(IN) :: params(4), c_hist(y), i_hist(y), weight(y), y
+#   REAL, INTENT(IN) :: params(4)
 #   REAL :: paramsb(4)
-#   REAL :: b(y), q, r, k, p, lim
-#   REAL :: bb(y), qb, rb, kb, pb
+#   REAL :: result
+#   REAL :: resultb
+#   REAL :: b(y), q, r, k, p, lim, n, msy, l, bsurvive, bdie, dlim, devs(y)
+#   REAL :: bb(y), rb, kb, pb, nb, msyb, lb, bsurviveb, bdieb, dlimb, devsb(y)
 #   INTEGER :: yi
 #   INTRINSIC EXP
-#   REAL :: b0onk
-#   REAL :: b0onkb
+#   INTRINSIC LOG
 #   INTRINSIC SUM
 #   REAL :: temp
 #   REAL :: temp0
@@ -1294,159 +1273,210 @@ MP_FunctionExports <- c(MP_FunctionExports, "PT.model.gradient")
 #   REAL :: temp2
 #   REAL :: temp3
 #   REAL :: temp4
+#   REAL :: temp5
+#   REAL :: temp6
 #   REAL :: tempb
 #   REAL :: tempb0
 #   REAL :: tempb1
 #   REAL :: tempb2
-#   REAL :: temp5
-#   REAL, DIMENSION(y) :: tempb3
-#   REAL :: ptb
-#   REAL :: pt
-#   r = EXP(params(1))
-#   k = EXP(params(2))
+#   REAL :: tempb3
+#   k = EXP(params(1))
+#   msy = EXP(params(2))
 #   p = EXP(params(3))
-#   b0onk = EXP(params(4))
-#   b(1) = b0onk*k
+#   n = EXP(params(4))
+#   l = msy*(p+1.0)**(1.0+1.0/p)
+#   r = l/k
+#   b(1) = n*k
 #   DO yi=2,y
+#     CALL PUSHREAL4(bsurvive)
+#     bsurvive = b(yi-1) + r/p*b(yi-1)
+#     CALL PUSHREAL4(bdie)
+#     bdie = r/p*b(yi-1)*(b(yi-1)/k)**p + c_hist(yi-1)
+#     CALL PUSHREAL4(dlim)
+#     dlim = 2.0/(1+EXP((bdie/bsurvive)**5))
 #     CALL PUSHREAL4(b(yi))
-#     b(yi) = b(yi-1) + r*b(yi-1)/p*(1.0-((b(yi-1)/k)**2)**(p/2)) - c_hist(yi-1)
-#     lim = 1.0e20
-#     CALL PUSHREAL4(b(yi))
-#     b(yi) = b(yi)*(lim/((b(yi)*b(yi))**0.5+lim))
+#     b(yi) = bsurvive - dlim*bdie
 #   END DO
-#   q = SUM(i_hist)/SUM((b*b)**0.5)
-#   temp5 = SUM((b**2)**0.5)
+#   devs = LOG(i_hist) - LOG(b)
+#   devs = devs - SUM(devs)/y
+#   devsb = 0.0
+#   devsb = weight**2*2*devs*resultb
+#   devsb = devsb - SUM(devsb)/y
 #   bb = 0.0
-#   tempb3 = weight**2*2*(q*b-i_hist)*ptb/(i_hist+0.1)**2
-#   qb = SUM(b*tempb3)
-#   bb = q*tempb3 - 2*b*0.5*(b**2)**(-0.5)*SUM(i_hist)*qb/temp5**2
+#   bb = -(devsb/b)
 #   kb = 0.0
 #   pb = 0.0
 #   rb = 0.0
 #   DO yi=y,2,-1
-#     lim = 1.0e20
+#     dlimb = -(bdie*bb(yi))
+#     temp4 = bdie/bsurvive
+#     temp5 = temp4**5
+#     temp6 = EXP(temp5) + 1
+#     tempb = -(5*temp4**4*EXP(temp5)*2.0*dlimb/(temp6**2*bsurvive))
 #     CALL POPREAL4(b(yi))
-#     temp4 = lim + (b(yi)**2)**0.5
-#     tempb = lim*bb(yi)/temp4
-#     bb(yi) = (1.0-0.5*(b(yi)**2)**(-0.5)*b(yi)**2*2/temp4)*tempb
-#     CALL POPREAL4(b(yi))
-#     temp = r/p
-#     tempb0 = b(yi-1)*temp*bb(yi)
-#     temp0 = b(yi-1)/k
-#     temp1 = temp0**2
-#     temp2 = p/2
-#     IF (temp1 .LE. 0.0 .AND. (temp2 .EQ. 0.0 .OR. temp2 .NE. INT(temp2))) THEN
+#     bsurviveb = bb(yi) - temp4*tempb
+#     bdieb = tempb - dlim*bb(yi)
+#     bb(yi) = 0.0
+#     CALL POPREAL4(dlim)
+#     CALL POPREAL4(bdie)
+#     temp1 = r/p
+#     tempb0 = b(yi-1)*temp1*bdieb
+#     temp3 = b(yi-1)/k
+#     IF (temp3 .LE. 0.0 .AND. (p .EQ. 0.0 .OR. p .NE. INT(p))) THEN
 #       tempb1 = 0.0
 #     ELSE
-#       tempb1 = -(2*temp0*temp2*temp1**(temp2-1)*tempb0/k)
+#       tempb1 = p*temp3**(p-1)*tempb0/k
 #     END IF
-#     temp3 = temp1**temp2
-#     tempb2 = b(yi-1)*(1.0-temp3)*bb(yi)/p
-#     bb(yi-1) = bb(yi-1) + tempb1 + ((1.0-temp3)*temp+1.0)*bb(yi)
-#     kb = kb - temp0*tempb1
-#     IF (temp1 .LE. 0.0) THEN
-#       pb = pb - temp*tempb2
+#     temp2 = temp3**p
+#     tempb2 = b(yi-1)*temp2*bdieb/p
+#     bb(yi-1) = bb(yi-1) + (r/p+1.0)*bsurviveb + temp2*temp1*bdieb + tempb1
+#     kb = kb - temp3*tempb1
+#     CALL POPREAL4(bsurvive)
+#     tempb3 = b(yi-1)*bsurviveb/p
+#     IF (temp3 .LE. 0.0) THEN
+#       pb = pb - r*tempb3/p - temp1*tempb2
 #     ELSE
-#       pb = pb - temp*tempb2 - temp3*LOG(temp1)*tempb0/2
+#       pb = pb + temp2*LOG(temp3)*tempb0 - temp1*tempb2 - r*tempb3/p
 #     END IF
-#     rb = rb + tempb2
-#     bb(yi) = 0.0
+#     rb = rb + tempb3 + tempb2
 #   END DO
-#   b0onkb = k*bb(1)
-#   kb = kb + b0onk*bb(1)
+#   nb = k*bb(1)
+#   kb = kb + n*bb(1) - l*rb/k**2
+#   lb = rb/k
+#   temp = 1.0/p
+#   temp0 = (p+1.0)**(temp+1.0)
+#   msyb = temp0*lb
+#   IF (.NOT.(p + 1.0 .LE. 0.0 .AND. (temp + 1.0 .EQ. 0.0 .OR. temp + 1.0 .NE. INT(temp + 1.0))))
+#     pb = pb + (msy*(temp+1.0)*(p+1.0)**temp-temp0*LOG(p+1.0)*msy*temp/p)*lb
 #   paramsb = 0.0
-#   paramsb(4) = paramsb(4) + EXP(params(4))*b0onkb
+#   paramsb(4) = paramsb(4) + EXP(params(4))*nb
 #   paramsb(3) = paramsb(3) + EXP(params(3))*pb
-#   paramsb(2) = paramsb(2) + EXP(params(2))*kb
-#   paramsb(1) = paramsb(1) + EXP(params(1))*rb
+#   paramsb(2) = paramsb(2) + EXP(params(2))*msyb
+#   paramsb(1) = paramsb(1) + EXP(params(1))*kb
+#   resultb = 0.0
 # END SUBROUTINE PT_B
 #
 # and translated back to R code below. paramsb is set to zero and ptb set to one
 #
 # -----------------------------------------------------------------------------
-PT.model.gradient <- function(params, C_hist, I_hist, CMCsum, returnOpt=1, doPlot=FALSE, weight=rep(1.0, length(C_hist)))
+PT.model.gradient <- function(params, C_hist, I_hist, Type, weight=NULL)
 {
-  Y       <- length(C_hist)
-  paramsb <- array(as.double(NA), dim=c(4))
-  b       <- array(as.double(NA), dim=c(Y))
-  bb      <- array(as.double(NA), dim=c(Y))
-  stackr  <- array(as.double(NA), dim=c(Y))
-  sr      <- 1
-  r       <- exp(params[1])
-  k       <- exp(params[2])
-  p       <- exp(params[3])
-  b0onk   <- exp(params[4])
-  b[1]    <- b0onk * k
+  Y         <- length(C_hist)
+  paramsb   <- array(as.double(NA), dim=c(4))
+  b         <- array(as.double(NA), dim=c(Y))
+  bb        <- array(as.double(NA), dim=c(Y))
+  stackr    <- array(as.double(NA), dim=c(4 * Y))
+  sr        <- 1
+  k         <- exp(params[1])
+  msy       <- exp(params[2])
+  p         <- exp(params[3])
+  n         <- exp(params[4])
+  l         <- msy * (p + 1.0) ^ (1.0 + (1.0 / p))
+  r         <- l / k
+  b[1]      <- n * k
+  bsurvive  <- 0.0
+  bdie      <- 0.0
+  dlim      <- 0.0
 
   for (yi in 2:Y)
   {
+    stackr[sr] <- bsurvive
+    sr         <- sr + 1
+    bsurvive   <- b[yi-1] + (r / p) * b[yi-1]
+    stackr[sr] <- bdie
+    sr         <- sr + 1
+    bdie       <- (r / p) * b[yi-1] * ((b[yi-1] / k) ^ p) + C_hist[yi-1]
+    stackr[sr] <- dlim
+    sr         <- sr + 1
+    dlim       <- 2.0 / (1 + exp((bdie / bsurvive) ^ 5))
     stackr[sr] <- b[yi]
     sr         <- sr + 1
-    b[yi]      <- b[yi - 1] + (r * b[yi - 1] / p) * (1.0 - ((b[yi - 1] / k) ** 2) ** (p / 2)) - C_hist[yi - 1]
-    lim        <- 1.0e20
-    stackr[sr] <- b[yi]
-    sr         <- sr + 1
-    b[yi]      <- b[yi] * (lim / ((b[yi] * b[yi]) ^ 0.5 + lim))
+    b[yi]      <- bsurvive - dlim * bdie
   }
 
-  temp5  <- sum((b * b) ^ 0.5)
-  q      <- sum(I_hist) / temp5
-  tempb3 <- weight * weight * 2.0 * (q * b - I_hist) / ((I_hist + 0.1) ^ 2)
-  qb     <- sum(b * tempb3)
-  bb     <- q * tempb3 - b * (b ^ 2) ^ (-0.5) * sum(I_hist) * qb / (temp5 ^ 2)
-  kb     <- 0.0
-  pb     <- 0.0
-  rb     <- 0.0
+  devs  <- log(I_hist) - log(b)
+  devs  <- devs - sum(devs) / Y
+
+  if (is.null(weight))
+  {
+    devsb <- 2 * devs
+  }
+  else
+  {
+    devsb <- weight ^ 2 * 2 * devs
+  }
+
+  devsb <- devsb - sum(devsb) / Y
+  bb    <- -(devsb / b)
+  kb    <- 0.0
+  pb    <- 0.0
+  rb    <- 0.0
 
   for (yi in Y:2)
   {
-    lim    <- 1.0e20
-    sr     <- sr - 1
-    b[yi]  <- stackr[sr]
-    temp4  <- lim + (b[yi] ^ 2) ^ 0.5
-    tempb  <- lim * bb[yi] / temp4
-    bb[yi] <- (1.0 - 0.5 * (b[yi] ^ 2) ^ (-0.5) * b[yi] ^ 2 * 2 / temp4) * tempb
-    sr     <- sr - 1
-    b[yi]  <- stackr[sr]
-    temp   <- r / p
-    tempb0 <- b[yi - 1] * temp * bb[yi]
-    temp0  <- b[yi - 1] / k
-    temp1  <- temp0 ^ 2
-    temp2  <- p / 2
+    dlimb     <- -(bdie * bb[yi])
+    temp4     <- bdie / bsurvive
+    temp5     <- temp4 ^ 5
+    temp6     <- exp(temp5) + 1
+    tempb     <- -(5 * (temp4 ^ 4) * exp(temp5) * 2.0 * dlimb / ((temp6 ^ 2) * bsurvive))
+    sr        <- sr - 1
+    b[yi]     <- stackr[sr]
+    bsurviveb <- bb[yi] - temp4 * tempb
+    bdieb     <- tempb - dlim * bb[yi]
+    bb[yi]    <- 0.0
+    sr        <- sr - 1
+    dlim      <- stackr[sr]
+    sr        <- sr - 1
+    bdie      <- stackr[sr]
+    temp1     <- r / p
+    tempb0    <- b[yi-1] * temp1 * bdieb
+    temp3     <- b[yi-1] / k
 
-    if ((temp1 <= 0.0) && ((temp2 == 0.0) || (temp2 != trunc(temp2))))
+    if ((temp3 <= 0.0) && ((p == 0.0) || (p != as.integer(p))))
     {
       tempb1 <- 0.0
     }
     else
     {
-      tempb1 <- -(2 * temp0 * temp2 * temp1 ^ (temp2 - 1.0) * tempb0 / k)
+      tempb1 <- p * temp3 ^ (p-1) * tempb0 / k
     }
 
-    temp3      <- temp1 ^ temp2
-    tempb2     <- b[yi - 1] * (1.0 - temp3) * bb[yi] / p
-    bb[yi - 1] <- bb[yi - 1] + tempb1 + ((1.0 - temp3) * temp + 1.0) * bb[yi]
-    kb         <- kb - temp0 * tempb1
+    temp2     <- temp3 ^ p
+    tempb2    <- b[yi-1] * temp2 * bdieb / p
+    bb[yi-1]  <- bb[yi-1] + ((r / p) + 1.0) * bsurviveb + temp2 * temp1 * bdieb + tempb1
+    kb        <- kb - temp3 * tempb1
+    sr        <- sr - 1
+    bsurvive  <- stackr[sr]
+    tempb3    <- b[yi-1] * bsurviveb / p
 
-    if (temp1 <= 0.0)
+    if (temp3 <= 0.0)
     {
-      pb <- pb - temp * tempb2
+      pb <- pb - r * tempb3 / p - temp1 * tempb2
     }
     else
     {
-      pb <- pb - temp * tempb2 - temp3 * log(temp1) * tempb0 / 2
+      pb <- pb + temp2 * log(temp3) * tempb0 - temp1 * tempb2 - r * tempb3 / p
     }
 
-    rb     <- rb + tempb2
-    bb[yi] <- 0.0
+    rb <- rb + tempb3 + tempb2
   }
 
-  b0onkb     <- k * bb[1]
-  kb         <- kb + b0onk * bb[1]
-  paramsb[4] <- exp(params[4]) * b0onkb
+  nb    <- k * bb[1]
+  kb    <- kb + n * bb[1] - l * rb / k ^ 2
+  lb0   <- rb / k
+  temp  <- 1.0 / p
+  temp0 <- (p + 1.0) ^ (temp + 1.0)
+  msyb  <- temp0 * lb0
+
+  if (!((p + 1.0 <= 0.0) && ((temp + 1.0 == 0.0) || (temp + 1.0 != as.integer(temp + 1.0)))))
+  {
+    pb <- pb + (msy * (temp + 1.0) * (p + 1.0) ^ temp - temp0 * log(p + 1.0) * msy * temp / p) * lb0
+  }
+
+  paramsb[4] <- exp(params[4]) * nb
   paramsb[3] <- exp(params[3]) * pb
-  paramsb[2] <- exp(params[2]) * kb
-  paramsb[1] <- exp(params[1]) * rb
+  paramsb[2] <- exp(params[2]) * msyb
+  paramsb[1] <- exp(params[1]) * kb
 
   return (paramsb)
 }
