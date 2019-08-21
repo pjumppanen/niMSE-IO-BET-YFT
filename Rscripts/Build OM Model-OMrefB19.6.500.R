@@ -12,9 +12,9 @@ MseDef <- new('MseDefinition')
 # --- Description --------------------------------------------------------------
 MseDef@Name          <- "OMrefB19.6.500"
 MseDef@Label         <- "OMrefB19.6.500" #useful for changing graphics labels
-MseDef@Date          <- "Apr2019"
+MseDef@Date          <- "Aug2019"
 MseDef@Author        <- "D.Kolody"
-MseDef@Notes         <- "BET reference set OM from OMrefB19.6, factorial grid of 144, reduced to 90 because of catchLLH convergence"
+MseDef@Notes         <- "BET reference set OM from OMrefB19.6, factorial grid of 144, reduced to 93 mostly because of catchLLH convergence"
 MseDef@PrimarySource <- "uniform (expanded dimensions, expanded par bounds & filtered) grid derived from 2016 BET assessment"
 MseDef@CppMethod     <- 0 # 1 = Use C++ Baranov solution, 0 = Use R based Pope-like approximation
 MseDef@UseCluster    <- 0 # 1 = Use cluster of R processes, 0 = Use single R process
@@ -56,7 +56,7 @@ MseDef@firstCalendarYr<- as.integer(1952)   # used to convert to actual years
 MseDef@lastCalendarYr <- as.integer(2015)   # used to convert to actual years
 MseDef@firstMPYr      <- as.integer(2021)   #MP kicks in here (projections in the intervening period may require an observed catch input to handle data lags)
 #MseDef@firstMPYr      <- as.integer(2020)   #MP kicks in here (projections in the intervening period may require an observed catch input to handle data lags)
-MseDef@MPDataLag      <- as.integer(3)      # The lag in number of years between assessment data availability and the timing of the assessment/HCR calculation; +1 means data is one year behind
+MseDef@MPDataLag      <- as.integer(2)      # The lag in number of years between assessment data availability and the timing of the assessment/HCR calculation; +1 means data is one year behind
 MseDef@catchBridge    <- as.karray(c(86589, 90500)) # known catch history between last assessment year in OM and firstMPYr (length of min 0 to max firstMPYr-lastCalendarYr-1)  87K = value in 2016 WPTT report
 #MseDef@catchBridge    <- as.karray(c(100000.))    # known catch history between last assessment year in OM and firstMPYr (length of min 0 to max firstMPYr-lastCalendarYr-1)
 #MseDef@catchBridge    <- as.karray(c(-999))    # known catch history between last assessment year in OM and firstMPYr (length of min 0 to max firstMPYr-lastCalendarYr-1)
@@ -66,9 +66,9 @@ MseDef@catchBridgeCV  <- 0.01                #error to add onto catch for bridge
 MseDef@indexFisheries   <- as.integer(c(2,3,4,13))       # LL CPUE fleet areas ... xxx need to check that OM will not go strange given same popn area indexed by two fisheries
 
 #These are dimmed in the OM
-MseDef@ReccvTin <-array(rep(0.6,MseDef@npop), dim=MseDef@npop)       # Temporal variability in recruitment aggregate over regions
+MseDef@ReccvTin <-array(rep(0.42,MseDef@npop), dim=MseDef@npop)   # Temporal variability in recruitment aggregate over regions annual value - converted to independent quarterly internally 
 MseDef@ReccvRin <- 0.                                          # Spatial variability in recruitment for all pops, areas, sims (i.e. streamlined implemented, because its probably a low priority)
-MseDef@RecACTin <-array(rep(0.5,MseDef@npop), dim=MseDef@npop)       # Recruitment autocorrelation (for regional aggregate)
+MseDef@RecACTin <-array(rep(0.21,MseDef@npop), dim=MseDef@npop)   # Recruitment autocorrelation (for regional aggregate) annual value - converted to independent quarterly internally 
 MseDef@NInitCV      <- 0.6
 MseDef@NInitCVdecay <- 0.1
 MseDef@selExpRange  <- 0.     #0.6  0         # sel temporal variability exponent - oscillates with a sin wave rangeing between +/- exp(selExpRange)
@@ -79,7 +79,7 @@ MseDef@selWLRange   <- array(c(0.0625,0.5))   # sel temporal variability wavelen
 MseDef@TACEcv <-array(rep(0.001,MseDef@nfleets)) # fleet-specific lognormal errors on TAC/TAE (independent among fleets and seasons)
 MseDef@Ccv    <-c(0., 0.0001)
 #MseDef@Icv    <-c(0.2, 0.2001)  #c(0., 0.0001) # c(0.3, 0.3001)
-MseDef@Icv    <-c(0.46, 0.46001)  #corresponds to annual CV of 0.2 if quarterly series of 4 independent series are averaged
+MseDef@Icv    <-c(0.2, 0.2001)  #note these are annual  (quarterly series are not calculated)
 MseDef@Dcv    <-c(0., 0.0001)
 MseDef@Btcv   <-c(0., 0.0001)
 MseDef@Ftcv   <-c(0., 0.0001)
@@ -107,7 +107,7 @@ MseDef@nCALobs    <- 100
 MseDef@Lcv        <- c(0., 0.)
 MseDef@Ibeta      <- c(0.999, 1.0001) # hyperstability parm, cv # c(0.66,1.5) #exp(runif(nsim,log(0.75),log(1.25))) #check definition
 #MseDef@IACin      <- 0.5              # cpue autocorrelation
-MseDef@IACin      <- 0.76              # series-specific AC corresponds to annual aggregate AC = 0.5
+MseDef@IACin      <- 0.5              # this is annualized (quarterly series are not calculated)
 MseDef@ITrendin   <- -1               # cpue trend % per annum compounded, negative means the trend is extracted from the assessment model filname, i.e. q1 = 1%
 
 #tuning criteria
