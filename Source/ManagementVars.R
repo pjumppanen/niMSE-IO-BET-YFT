@@ -239,17 +239,9 @@ setMethod("runProjection", c("ManagementVars", "ReferenceVars", "StockSynthesisM
         beginLog(sim)
       }
 
-      Proj <- NA
-
-      tryCatch(
-      {
-        Proj <- new("Projection", ssModelData, RefVars, MseDef, sim, MP, interval, Report, CppMethod, EffortCeiling, TACTime, rULim, seed[sim], tune)
-      },
-      error=function(e)
-      {
-        print(e)
-        traceback()
-      })
+      Proj <- tryCatch(withCallingHandlers(new("Projection", ssModelData, RefVars, MseDef, sim, MP, interval, Report, CppMethod, EffortCeiling, TACTime, rULim, seed[sim], tune),
+                                           error=function(e) traceback()),
+                       error=function(e) print(e))
 
       if (UseCluster)
       {
