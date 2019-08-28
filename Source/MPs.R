@@ -72,7 +72,7 @@ PTproj.25 <- function(pset)
 class(PTproj.25)<-"IO_MP_tune"
 
 
-# imposes TAC change constraint on top of original MP PTproj.1.35bmsy.25 
+# imposes TAC change constraint on top of original MP PTproj.1.35bmsy.25
 PTproj.1.35bmsy.25.tc15 <- function(pset)
 {
   return(PellaTomlinsonProjection(pset, BMSY_Prop=1.35, Gain=0.25, MinCatchProp=0.20 * pset$tune, deltaTACLimUp=0.15, deltaTACLimDown=0.15))
@@ -502,7 +502,7 @@ PellaTomlinson4010<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, deltaTACL
 
   #Initial Model parameters
   rInit <- 0.1
-  KInit <- 20.*CMCsum #initial K defined relative to recent catches 
+  KInit <- 20.*CMCsum #initial K defined relative to recent catches
   p     <- -0.16  # don't bother trying to estimate p; for p = -0.16, BMSY/K ~0.33
 
   params      <- log(c(rInit,KInit))
@@ -510,7 +510,7 @@ PellaTomlinson4010<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, deltaTACL
   upperBounds <- log(exp(params)*20)
 
   par(mfrow=c(4,4))
-  
+
   if(gridSearch >= 0){ #not required if minimal grid search used
     bestOpt <- optim(par=params,fn=PT.f, returnOpt=1,
              C_hist=C_hist,I_hist=I_hist, CMCsum=CMCsum, p=p,
@@ -520,22 +520,22 @@ PellaTomlinson4010<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, deltaTACL
   # This is only for before and after gridSearch comparisons...otherwise get rid of it
   #PT.f(params=bestOpt$par, returnOpt=2, C_hist=C_hist, I_hist=I_hist, CMCsum=CMCsum, p=p, doPlot=T)
   }
-    
+
   #if using gridSearch, repeat the minimization for a grid of fixed K values, and find the corresponding r for each; then optimize both
   if(gridSearch>0){
     rInit   <- 0.1
     for(iGrid in 1:gridSearch){
-      Kgrid   <- 20.*CMCsum*(4*(iGrid/gridSearch)) 
+      Kgrid   <- 20.*CMCsum*(4*(iGrid/gridSearch))
       params  <- log(c(rInit))
       #find best r for fixed K from grid
       rOpt <- optim(par=params,fn=PT.f, returnOpt=1,        Kgrid=log(Kgrid),
-               C_hist=C_hist,I_hist=I_hist, CMCsum=CMCsum, p=p,            
+               C_hist=C_hist,I_hist=I_hist, CMCsum=CMCsum, p=p,
                method="L-BFGS-B",
                lower=lowerBounds[1],upper=upperBounds[1],
                hessian=F, doPlot=F)
       #PT.f(params=c(rOpt$par, log(Kgrid)), returnOpt=2, C_hist=C_hist, I_hist=I_hist, CMCsum=CMCsum, p=p, doPlot=T)
       #retain best solution for multi-variate minimization
-      if(rOpt$value < bestOpt$value){ 
+      if(rOpt$value < bestOpt$value){
         bestOpt <- rOpt
         KInit   <- Kgrid
         rInit   <- exp(rOpt$par)
@@ -553,7 +553,7 @@ PellaTomlinson4010<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, deltaTACL
   #speedy gridSearch only does a single func evaluation for grid of R and K then optimizes both from best point
   if(gridSearch<0){
     NgridK  <- abs(gridSearch)
-    Kgrid   <- 20.*CMCsum*(4*((1:NgridK)/NgridK)) 
+    Kgrid   <- 20.*CMCsum*(4*((1:NgridK)/NgridK))
     rGrid   <- c(0.075, 0.1, 0.125)
     bestLLH <- 9E+99
     for(iGridK in 1:NgridK){
@@ -561,7 +561,7 @@ PellaTomlinson4010<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, deltaTACL
         params  <- log(c(rInit))
         LLH <- PT.f(params=c(log(rGrid[iGridr]), log(Kgrid[iGridK])), returnOpt=1, C_hist=C_hist, I_hist=I_hist, CMCsum=CMCsum, p=p, doPlot=F)
         #retain best solution for multi-variate minimization
-        if(LLH < bestLLH){ 
+        if(LLH < bestLLH){
           bestLLH <- LLH
           KInit   <- Kgrid[iGridK]
           rInit   <- rGrid[iGridr]
@@ -576,11 +576,11 @@ PellaTomlinson4010<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, deltaTACL
                    lower=lowerBounds,upper=upperBounds,
                    hessian=F, doPlot=F)
   }
-  
-  
+
+
   #get the biomass/BMSY estimate - view final model fit if in doubt
   d <- PT.f(params=bestOpt$par, returnOpt=2, C_hist=C_hist, I_hist=I_hist, CMCsum=CMCsum, p=p, doPlot=F)
-  
+
   lastTAC <- pset$prevTACE$TAC
 
   #Apply something like a 40-10 rule for catch relative to MSY
@@ -636,16 +636,16 @@ MP_FunctionExports <- c(MP_FunctionExports, "PT.f")
 #
 PT.f <- function(params, C_hist, I_hist, CMCsum, p, doPlot=F, returnOpt=1, Kgrid=F){
 
-    
+
   #Model parameters
-  #B(t+1)=B(t) + (r/p)B(1-(B/K)^p) - C    
+  #B(t+1)=B(t) + (r/p)B(1-(B/K)^p) - C
   Y <- length(C_hist)
   B <- array(NA,dim=Y)
   r <- exp(params[1])
   if(Kgrid){
     #if(returnOpt==2) browser()
     K <- exp(Kgrid)
-  } else {  
+  } else {
     K <- exp(params[2])
   }
   CPen <- 0
@@ -657,22 +657,22 @@ PT.f <- function(params, C_hist, I_hist, CMCsum, p, doPlot=F, returnOpt=1, Kgrid
     if(is.na(B[y])) browser() # should not happen
     # There should be a negative biomass penalty in here...maybe maximum harvest rate would be better?
     if (B[y]<1e-5){
-      CPen <- CPen + ((B[y]/K)^2)  
+      CPen <- CPen + ((B[y]/K)^2)
       B[y] <- 1e-5
     }
   }
-  
+
   # This should probably be in log-space
   #q <- sum(I_hist[!is.na(I_hist)])/sum(B[!is.na(I_hist)])
   #LLH <- sum((q*B[!is.na(I_hist)]-I_hist[!is.na(I_hist)])^2)
   #Haddon's analytical soln for log-space q
   q <- exp(1/sum(!is.na(I_hist))*sum(log(I_hist[!is.na(I_hist)] / B[!is.na(I_hist)])))
-  LLH <- sum(log(q*B[!is.na(I_hist)]/I_hist[!is.na(I_hist)])^2) 
-  
+  LLH <- sum(log(q*B[!is.na(I_hist)]/I_hist[!is.na(I_hist)])^2)
+
   if(returnOpt==2 & LLH > 5){
     print("temporary (and not sufficient) check for PT.f minimization failure")
     browser()
-  } 
+  }
 
   LLH <- LLH + CPen
 
@@ -1119,7 +1119,7 @@ PellaTomlinsonProjection <- function(pset, BMSY_Prop=1.0, Gain=0.15, MinCatchPro
 
   #End of pipe TAC change constraint - might interact poorly with constraint above
   deltaTAC <- newTAC/lastTAC - 1
-  
+
   #print(deltaTAC)
   if(deltaTAC >  deltaTACLimUp)   deltaTAC =  deltaTACLimUp
   if(deltaTAC < -deltaTACLimDown) deltaTAC = -deltaTACLimDown
@@ -1732,7 +1732,7 @@ CC091 <- function(pset)
 {
   TAC     <- 91000.0 #aggregate TAC (annual) by fishery (BET reported in 2017)
   TAEbyF  <- 0.0 * pset$prevTACE$TAEbyF #TAE by fishery
-  
+
   return (list(TAEbyF=TAEbyF,TAC=TAC))
 }
 class(CC091) <- "IO_MP"
