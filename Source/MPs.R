@@ -509,7 +509,7 @@ PellaTomlinson4010<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, deltaTACL
   lowerBounds <- log(exp(params)/20)
   upperBounds <- log(exp(params)*20)
 
-  par(mfrow=c(2,2))
+  par(mfrow=c(4,4))
   
   if(gridSearch >= 0){ #not required if minimal grid search used
     bestOpt <- optim(par=params,fn=PT.f, returnOpt=1,
@@ -580,6 +580,7 @@ PellaTomlinson4010<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, deltaTACL
   
   #get the biomass/BMSY estimate - view final model fit if in doubt
   d <- PT.f(params=bestOpt$par, returnOpt=2, C_hist=C_hist, I_hist=I_hist, CMCsum=CMCsum, p=p, doPlot=F)
+  
   lastTAC <- pset$prevTACE$TAC
 
   #Apply something like a 40-10 rule for catch relative to MSY
@@ -656,8 +657,8 @@ PT.f <- function(params, C_hist, I_hist, CMCsum, p, doPlot=F, returnOpt=1, Kgrid
     if(is.na(B[y])) browser() # should not happen
     # There should be a negative biomass penalty in here...maybe maximum harvest rate would be better?
     if (B[y]<1e-5){
+      CPen <- CPen + ((B[y]/K)^2)  
       B[y] <- 1e-5
-      CPen <- CPen + ((B[y])^2)  
     }
   }
   
@@ -668,8 +669,13 @@ PT.f <- function(params, C_hist, I_hist, CMCsum, p, doPlot=F, returnOpt=1, Kgrid
   q <- exp(1/sum(!is.na(I_hist))*sum(log(I_hist[!is.na(I_hist)] / B[!is.na(I_hist)])))
   LLH <- sum(log(q*B[!is.na(I_hist)]/I_hist[!is.na(I_hist)])^2) 
   
+  if(returnOpt==2 & LLH > 5){
+    print("temporary (and not sufficient) check for PT.f minimization failure")
+    browser()
+  } 
+
   LLH <- LLH + CPen
-  
+
   MSY <- r*K/((p+1)^(1/p))
 
   # quick and dirty plausibility constraints - no claim that this is a good approach for constraining the PT model
