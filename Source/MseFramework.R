@@ -157,6 +157,34 @@ setMethod("initialize", "MseFramework",
 
 # -----------------------------------------------------------------------------
 
+setGeneric("initCPUE_SeriesFrom", function(.Object, ...) standardGeneric("initCPUE_SeriesFrom"))
+
+setMethod("initCPUE_SeriesFrom", c("MseFramework"),
+  function(.Object, RefModelName)
+  {
+    idx <- which(.Object@MseDef@OMList == RefModelName)
+
+    if (length(idx) == 0)
+    {
+      stop(paste("The model", RefModelName, "is not in the OMList"))
+    }
+
+    refModel <- .Object@StockSynthesisModels[[idx]]
+
+    for (cn in 1:length(.Object@StockSynthesisModels))
+    {
+      if (cn != idx)
+      {
+        .Object@StockSynthesisModels[[cn]] <- initCPUE_SeriesFrom(.Object@StockSynthesisModels[[cn]], refModel)
+      }
+    }
+
+    return (.Object)
+  }
+)
+
+# -----------------------------------------------------------------------------
+
 setGeneric("runMse", function(.Object, ...) standardGeneric("runMse"))
 
 setMethod("runMse", c("MseFramework"),
