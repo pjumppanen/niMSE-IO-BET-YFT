@@ -1813,6 +1813,7 @@ setMethod("printRunLogs", "MseFramework",
                                                                         {
                                                                           # print all the logged errors
                                                                           LogIdx <- which(!is.na(projVars@Log))
+                                                                          LogIdx <- which(sapply(projVars@Log[LogIdx], function(x) !is.null(x$error)))
 
                                                                           if (length(LogIdx) > 0)
                                                                           {

@@ -157,6 +157,8 @@ setMethod("initialize", "Projection",
     .Object@TAC           <- karray(as.double(NA), dim=c(allyears))
     .Object@TAEbyF        <- karray(as.double(NA), dim=c(allyears, nfleets))
 
+    MP_environment        <- new.env()
+
     initFn <- function(.Object)
     {
       # Repeat the same stochastic history for each MP to keep the comparison fair
@@ -576,8 +578,6 @@ setMethod("initialize", "Projection",
       {
         Om.nt.beginProjection(Obj, as.double(rep(log(0.001), nfleets)))
       }
-
-      MP_environment <- new.env()
 
       for (y in (nyears+1):(nyears + proyears))     # redo initl year for reporting; test implications
       {
@@ -1121,6 +1121,11 @@ setMethod("initialize", "Projection",
     if (!is.null(ErrorLog))
     {
       .Object@Log[["error"]] <- ErrorLog
+    }
+
+    if (!is.null(MP_environment$save))
+    {
+      .Object@Log[["env"]] <- MP_environment
     }
 
     return (.Object)
