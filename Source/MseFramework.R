@@ -44,111 +44,118 @@ setClass("MseFramework",
 # -----------------------------------------------------------------------------
 
 setMethod("initialize", "MseFramework",
-  function(.Object, MseDef, Report=FALSE, UseCluster=NA, UseMSYss=0)
+  function(.Object, MseDef=NULL, Report=FALSE, UseCluster=NA, UseMSYss=0)
   {
-    if (class(MseDef) != "MseDefinition")
+    if (is.null(MseDef))
     {
-      print(paste("ERROR: Could not create MseFramework.",deparse(substitute(MseDef)),"not of class MseDefinition"))
-      stop()
-    }
-
-    initialiseMseDef <- function(.Object)
-    {
-      # Check if we are using model plausibility weighting
-      if (length(.Object@modelWeight) == 1)
-      {
-        # do nothing. Default behaviour if modelWeight unspecified.
-      }
-      else if (length(.Object@modelWeight) == length(.Object@OMList))
-      {
-        if (.Object@totalSims < 1)
-        {
-          print("ERROR: MSE definition totalSims is too small. It must be at least 1")
-          stop()
-        }
-
-        # -1 totalSims to ensure there is always 1 in the first OM spec for CPUE data vector filling purposes
-        .Object@nsimPerOMFile     <- karray(as.vector(t(rmultinom(1, size=.Object@totalSims - 1, prob=.Object@modelWeight))))
-        .Object@nsimPerOMFile[1]  <- .Object@nsimPerOMFile[1] + 1
-
-        print("first model always included at least once, because it includes the correct CPUE data")
-        print(.Object@nsimPerOMFile)
-        hist(.Object@nsimPerOMFile)
-
-        # redefine some slots so as not to import or conduct MSY calcs for models with zero samples
-        .Object@OMList        <- .Object@OMList[.Object@nsimPerOMFile > 0]
-        .Object@nsimPerOMFile <- .Object@nsimPerOMFile[.Object@nsimPerOMFile > 0]
-
-        print(.Object@nsimPerOMFile)
-      }
-      else
-      {
-        print("ERROR: MSE definition modelWeight vector is wrong length. It must be length(OMList) in length")
-        stop()
-      }
-
-      return (.Object)
-    }
-
-    set.seed(MseDef@seed)
-
-    # Initialise MseDef via initialiseMseDef(). Note that this function will
-    # change the definition if a plausibility weighting specification is used.
-    .Object@MseDef <- initialiseMseDef(MseDef)
-
-    idx <- 0
-
-    makeJobList <- function(x)
-    {
-      idx <<- idx + 1;
-
-      return (list(file=x, which=idx, seed=runif(1,0,.Machine$integer.max)))
-    }
-
-    # Create a job list as a context for initialising the StockSynthesisModel
-    # instances. Once as a list it is then a simple matter to parallelise the
-    # initialisation process.
-    JobList <- lapply(.Object@MseDef@OMList, FUN=makeJobList)
-
-    runJob <- function(Job, MseDef, Report, UseMSYss, UseCluster)
-    {
-      if (UseCluster)
-      {
-        beginLog(Job$which)
-      }
-
-      StockSynthesisModel <- new("StockSynthesisModel", MseDef, Job$which, Job$seed, Report, UseMSYss)
-
-      if (UseCluster)
-      {
-        endLog()
-      }
-
-      return (StockSynthesisModel)
-    }
-
-    nJobs <- length(JobList)
-
-    if (is.na(UseCluster))
-    {
-      UseCluster <- .Object@MseDef@UseCluster
-    }
-
-    if (UseCluster && (nJobs > 1))
-    {
-      cl <- openCluster(nJobs)
-
-      clusterEvalQ(cl, eval(parse("Source/MseMain.R")))
-
-      .Object@StockSynthesisModels <- parLapply(cl, JobList, FUN=runJob, .Object@MseDef, Report, UseMSYss, UseCluster)
-
-      closeCluster()
-
-      lapply(JobList, FUN=function(Job) {printLog(Job$which)})
+      # do nothing. This is an empty constructor for object upgrading
     }
     else
     {
-      .Object@StockSynthesisModels <- lapply(JobList, FUN=runJob, .Object@MseDef, Report, UseMSYss, FALSE)
+      if (class(MseDef) != "MseDefinition")
+      {
+        print(paste("ERROR: Could not create MseFramework.",deparse(substitute(MseDef)),"not of class MseDefinition"))
+        stop()
+      }
+
+      initialiseMseDef <- function(.Object)
+      {
+        # Check if we are using model plausibility weighting
+        if (length(.Object@modelWeight) == 1)
+        {
+          # do nothing. Default behaviour if modelWeight unspecified.
+        }
+        else if (length(.Object@modelWeight) == length(.Object@OMList))
+        {
+          if (.Object@totalSims < 1)
+          {
+            print("ERROR: MSE definition totalSims is too small. It must be at least 1")
+            stop()
+          }
+
+          # -1 totalSims to ensure there is always 1 in the first OM spec for CPUE data vector filling purposes
+          .Object@nsimPerOMFile     <- karray(as.vector(t(rmultinom(1, size=.Object@totalSims - 1, prob=.Object@modelWeight))))
+          .Object@nsimPerOMFile[1]  <- .Object@nsimPerOMFile[1] + 1
+
+          print("first model always included at least once, because it includes the correct CPUE data")
+          print(.Object@nsimPerOMFile)
+          hist(.Object@nsimPerOMFile)
+
+          # redefine some slots so as not to import or conduct MSY calcs for models with zero samples
+          .Object@OMList        <- .Object@OMList[.Object@nsimPerOMFile > 0]
+          .Object@nsimPerOMFile <- .Object@nsimPerOMFile[.Object@nsimPerOMFile > 0]
+
+          print(.Object@nsimPerOMFile)
+        }
+        else
+        {
+          print("ERROR: MSE definition modelWeight vector is wrong length. It must be length(OMList) in length")
+          stop()
+        }
+
+        return (.Object)
+      }
+
+      set.seed(MseDef@seed)
+
+      # Initialise MseDef via initialiseMseDef(). Note that this function will
+      # change the definition if a plausibility weighting specification is used.
+      .Object@MseDef <- initialiseMseDef(MseDef)
+
+      idx <- 0
+
+      makeJobList <- function(x)
+      {
+        idx <<- idx + 1;
+
+        return (list(file=x, which=idx, seed=runif(1,0,.Machine$integer.max)))
+      }
+
+      # Create a job list as a context for initialising the StockSynthesisModel
+      # instances. Once as a list it is then a simple matter to parallelise the
+      # initialisation process.
+      JobList <- lapply(.Object@MseDef@OMList, FUN=makeJobList)
+
+      runJob <- function(Job, MseDef, Report, UseMSYss, UseCluster)
+      {
+        if (UseCluster)
+        {
+          beginLog(Job$which)
+        }
+
+        StockSynthesisModel <- new("StockSynthesisModel", MseDef, Job$which, Job$seed, Report, UseMSYss)
+
+        if (UseCluster)
+        {
+          endLog()
+        }
+
+        return (StockSynthesisModel)
+      }
+
+      nJobs <- length(JobList)
+
+      if (is.na(UseCluster))
+      {
+        UseCluster <- .Object@MseDef@UseCluster
+      }
+
+      if (UseCluster && (nJobs > 1))
+      {
+        cl <- openCluster(nJobs)
+
+        clusterEvalQ(cl, eval(parse("Source/MseMain.R")))
+
+        .Object@StockSynthesisModels <- parLapply(cl, JobList, FUN=runJob, .Object@MseDef, Report, UseMSYss, UseCluster)
+
+        closeCluster()
+
+        lapply(JobList, FUN=function(Job) {printLog(Job$which)})
+      }
+      else
+      {
+        .Object@StockSynthesisModels <- lapply(JobList, FUN=runJob, .Object@MseDef, Report, UseMSYss, FALSE)
+      }
     }
 
     return (.Object)
@@ -465,6 +472,8 @@ setMethod("runMse", c("MseFramework"),
     {
       closeCluster()
     }
+
+    printRunLogs(.Object)
 
     return (.Object)
   }
@@ -1788,5 +1797,38 @@ setMethod("setParameters", c("MseFramework"),
     }
 
     return (.Object)
+  }
+)
+
+# -----------------------------------------------------------------------------
+
+setGeneric("printRunLogs", function(.Object, ...) standardGeneric("printRunLogs"))
+
+setMethod("printRunLogs", "MseFramework",
+  function(.Object)
+  {
+    lapply(.Object@StockSynthesisModels,  function(model)
+                                          {
+                                            lapply(model@ProjectedVars, function(projVars)
+                                                                        {
+                                                                          # print all the logged errors
+                                                                          LogIdx <- which(!is.na(projVars@Log))
+
+                                                                          if (length(LogIdx) > 0)
+                                                                          {
+                                                                            cat(paste("\n\n\n\nLogs reported in projecting model", .Object@MseDef@OMList[projVars@which], "\n--------------------------------------------------------------------------------\n"))
+                                                                          }
+
+                                                                          sapply(LogIdx,  function(ix)
+                                                                                          {
+                                                                                            if (!is.null(projVars@Log[[ix]]) && !is.null(projVars@Log[[ix]]$error))
+                                                                                            {
+                                                                                              cat(paste(projVars@Log[[ix]]$error, "\n--------------------------------------------------------------------------------\n"))
+                                                                                            }
+                                                                                          })
+
+                                                                          cat("\n")
+                                                                       })
+                                          })
   }
 )

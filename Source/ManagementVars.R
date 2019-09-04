@@ -44,6 +44,7 @@ setClass("ManagementVars",
     FlastYr       = "numeric",
     MP            = "MP_Spec",
     which         = "integer",
+    Log           = "list",
 
     F             = "karray",
     SSB           = "karray",
@@ -62,71 +63,89 @@ setClass("ManagementVars",
 # -----------------------------------------------------------------------------
 
 setMethod("initialize", "ManagementVars",
-  function(.Object, ssModelData, bHistoric, which, seeds)
+  function(.Object, ssModelData=NULL, bHistoric=false, which=NULL, seeds=NULL)
   {
-    if (class(ssModelData) != "StockSynthesisModelData")
+    if (is.null(ssModelData))
     {
-      print(paste("ERROR: Could not create ManagementVars.",deparse(substitute(ssModelData)),"not of class StockSynthesisModelData"))
-      stop()
-    }
-
-    nsim      <- as.integer(if (bHistoric) 1 else ssModelData@nsim)
-    npop      <- ssModelData@npop
-    nfleets   <- ssModelData@nfleets
-    nareas    <- ssModelData@nareas
-    nyears    <- if (bHistoric) ssModelData@nyears else ssModelData@proyears
-    nsubyears <- ssModelData@nsubyears
-
-    .Object@nsim      <- nsim
-    .Object@npop      <- npop
-    .Object@nfleets   <- nfleets
-    .Object@nareas    <- nareas
-    .Object@nyears    <- nyears
-    .Object@nsubyears <- nsubyears
-
-    if (length(seeds) != ssModelData@nsim)
-    {
-      stop("ERROR: Too few random number seeds in ManagmentVars initialize() method")
-    }
-
-    .Object@seed      <- as.integer(seeds)
-    .Object@FlastYr   <- as.double(NA)
-
-    empty             <- NA
-    class(empty)      <-"MP_Spec"
-    .Object@MP        <- empty
-    .Object@which     <- as.integer(which)
-
-    if (bHistoric)
-    {
-      NLLR  <- apply(ssModelData@NLLss[1:nyears,,], sum, MARGIN=c(1,3))
-      IobsR <- ssModelData@qCPUE * NLLR # Is this correct? removed influence on Ibeta and Ierr for historic case.
-
-      .Object@F             <- karray(ssModelData@Frepss[1:nyears], dim=c(nyears))
-      .Object@SSB           <- karray(ssModelData@SSBAss[,1:nyears], dim=c(npop, nyears))
-      .Object@B             <- karray(ssModelData@Bss[,1:nyears], dim=c(npop, nyears))
-      .Object@CM            <- karray(ssModelData@CBss[,1:nyears], dim=c(npop, nyears))
-      .Object@CMbyF         <- karray(ssModelData@CMbyFss[,1:nyears,], dim=c(npop, nyears, nfleets))
-      .Object@Rec           <- karray(apply(ssModelData@Recss[,1:nyears], c(2), sum), dim=c(nyears))
-      .Object@RecYrQtr      <- karray(apply(ssModelData@RecYrQtrss[,1:(nyears * nsubyears)], c(2), sum), dim=c(nyears * nsubyears))
-      .Object@IobsArchive   <- karray(ssModelData@CPUEobsY[1:nyears], dim=c(nyears))
-      .Object@IobsRArchive  <- karray(IobsR[1:nyears,], dim=c(nyears, nareas))
-      .Object@TAC           <- karray(as.double(NA), dim=c(nyears))
-      .Object@TAEbyF        <- karray(as.double(NA), dim=c(nyears, nfleets))
+      # do nothing. This is an empty constructor for object upgrading
     }
     else
     {
-      .Object@F             <- karray(as.double(NA), dim=c(nsim, nyears))
-      .Object@SSB           <- karray(as.double(NA), dim=c(nsim, npop, nyears))
-      .Object@B             <- karray(as.double(NA), dim=c(nsim, npop, nyears))
-      .Object@CM            <- karray(as.double(NA), dim=c(nsim, npop, nyears))
-      .Object@CMbyF         <- karray(as.double(NA), dim=c(nsim, npop, nyears, nfleets))
-      .Object@Rec           <- karray(as.double(NA), dim=c(nsim, nyears))
-      .Object@RecYrQtr      <- karray(as.double(NA), dim=c(nsim, nyears * nsubyears))
-      .Object@IobsArchive   <- karray(as.double(NA), dim=c(nsim, nyears))
-      .Object@IobsRArchive  <- karray(as.double(NA), dim=c(nsim, nyears, nareas))
-      .Object@TAC           <- karray(as.double(NA), dim=c(nsim, nyears))
-      .Object@TAEbyF        <- karray(as.double(NA), dim=c(nsim, nyears, nfleets))
+      if (class(ssModelData) != "StockSynthesisModelData")
+      {
+        stop(paste("Could not create ManagementVars.",deparse(substitute(ssModelData)),"not of class StockSynthesisModelData"))
+      }
+
+      if (is.null(which))
+      {
+        stop("'which' not initialised")
+      }
+
+      if (is.null(seeds))
+      {
+        stop("'seeds' not initialised")
+      }
+
+      nsim      <- as.integer(if (bHistoric) 1 else ssModelData@nsim)
+      npop      <- ssModelData@npop
+      nfleets   <- ssModelData@nfleets
+      nareas    <- ssModelData@nareas
+      nyears    <- if (bHistoric) ssModelData@nyears else ssModelData@proyears
+      nsubyears <- ssModelData@nsubyears
+
+      .Object@nsim      <- nsim
+      .Object@npop      <- npop
+      .Object@nfleets   <- nfleets
+      .Object@nareas    <- nareas
+      .Object@nyears    <- nyears
+      .Object@nsubyears <- nsubyears
+
+      if (length(seeds) != ssModelData@nsim)
+      {
+        stop("ERROR: Too few random number seeds in ManagmentVars initialize() method")
+      }
+
+      .Object@seed      <- as.integer(seeds)
+      .Object@FlastYr   <- as.double(NA)
+
+      empty             <- NA
+      class(empty)      <-"MP_Spec"
+      .Object@MP        <- empty
+      .Object@which     <- as.integer(which)
+
+      if (bHistoric)
+      {
+        NLLR  <- apply(ssModelData@NLLss[1:nyears,,], sum, MARGIN=c(1,3))
+        IobsR <- ssModelData@qCPUE * NLLR # Is this correct? removed influence on Ibeta and Ierr for historic case.
+
+        .Object@Log           <- list()
+        .Object@F             <- karray(ssModelData@Frepss[1:nyears], dim=c(nyears))
+        .Object@SSB           <- karray(ssModelData@SSBAss[,1:nyears], dim=c(npop, nyears))
+        .Object@B             <- karray(ssModelData@Bss[,1:nyears], dim=c(npop, nyears))
+        .Object@CM            <- karray(ssModelData@CBss[,1:nyears], dim=c(npop, nyears))
+        .Object@CMbyF         <- karray(ssModelData@CMbyFss[,1:nyears,], dim=c(npop, nyears, nfleets))
+        .Object@Rec           <- karray(apply(ssModelData@Recss[,1:nyears], c(2), sum), dim=c(nyears))
+        .Object@RecYrQtr      <- karray(apply(ssModelData@RecYrQtrss[,1:(nyears * nsubyears)], c(2), sum), dim=c(nyears * nsubyears))
+        .Object@IobsArchive   <- karray(ssModelData@CPUEobsY[1:nyears], dim=c(nyears))
+        .Object@IobsRArchive  <- karray(IobsR[1:nyears,], dim=c(nyears, nareas))
+        .Object@TAC           <- karray(as.double(NA), dim=c(nyears))
+        .Object@TAEbyF        <- karray(as.double(NA), dim=c(nyears, nfleets))
+      }
+      else
+      {
+        .Object@Log           <- list()
+        .Object@F             <- karray(as.double(NA), dim=c(nsim, nyears))
+        .Object@SSB           <- karray(as.double(NA), dim=c(nsim, npop, nyears))
+        .Object@B             <- karray(as.double(NA), dim=c(nsim, npop, nyears))
+        .Object@CM            <- karray(as.double(NA), dim=c(nsim, npop, nyears))
+        .Object@CMbyF         <- karray(as.double(NA), dim=c(nsim, npop, nyears, nfleets))
+        .Object@Rec           <- karray(as.double(NA), dim=c(nsim, nyears))
+        .Object@RecYrQtr      <- karray(as.double(NA), dim=c(nsim, nyears * nsubyears))
+        .Object@IobsArchive   <- karray(as.double(NA), dim=c(nsim, nyears))
+        .Object@IobsRArchive  <- karray(as.double(NA), dim=c(nsim, nyears, nareas))
+        .Object@TAC           <- karray(as.double(NA), dim=c(nsim, nyears))
+        .Object@TAEbyF        <- karray(as.double(NA), dim=c(nsim, nyears, nfleets))
+      }
     }
 
     return (.Object)
@@ -239,9 +258,7 @@ setMethod("runProjection", c("ManagementVars", "ReferenceVars", "StockSynthesisM
         beginLog(sim)
       }
 
-      Proj <- tryCatch(withCallingHandlers(new("Projection", ssModelData, RefVars, MseDef, sim, MP, interval, Report, CppMethod, EffortCeiling, TACTime, rULim, seed[sim], tune),
-                                           error=function(e) traceback()),
-                       error=function(e) print(e))
+      Proj <- new("Projection", ssModelData, RefVars, MseDef, sim, MP, interval, Report, CppMethod, EffortCeiling, TACTime, rULim, seed[sim], tune)
 
       if (UseCluster)
       {
@@ -267,6 +284,8 @@ setMethod("runProjection", c("ManagementVars", "ReferenceVars", "StockSynthesisM
 
     if (DoProjection)
     {
+      .Object@Log <- list()
+
       if (UseCluster)
       {
         results <- parSapply(cluster,
@@ -317,22 +336,30 @@ setMethod("runProjection", c("ManagementVars", "ReferenceVars", "StockSynthesisM
       {
         sim <- res@which
 
-        if (sim == 1)
+        if (length(sim) > 0)
         {
-          .Object@FlastYr <- res@F[ssModelData@nyears]
+          if (sim == 1)
+          {
+            .Object@FlastYr <- res@F[ssModelData@nyears]
+          }
+
+          .Object@F[sim,]             <- res@F[years]
+          .Object@SSB[sim,,]          <- res@SSB[,years]
+          .Object@B[sim,,]            <- res@B[,years]
+          .Object@CM[sim,,]           <- res@CM[,years]
+          .Object@CMbyF[sim,,,]       <- res@CMbyF[,years,]
+          .Object@Rec[sim,]           <- res@Rec[years]
+          .Object@RecYrQtr[sim,]      <- res@RecYrQtr[months]
+          .Object@IobsArchive[sim,]   <- res@IobsArchive[years]
+          .Object@IobsRArchive[sim,,] <- res@IobsRArchive[years,]
+          .Object@TAC[sim,]           <- res@TAC[years]
+          .Object@TAEbyF[sim,,]       <- res@TAEbyF[years,]
         }
 
-        .Object@F[sim,]             <- res@F[years]
-        .Object@SSB[sim,,]          <- res@SSB[,years]
-        .Object@B[sim,,]            <- res@B[,years]
-        .Object@CM[sim,,]           <- res@CM[,years]
-        .Object@CMbyF[sim,,,]       <- res@CMbyF[,years,]
-        .Object@Rec[sim,]           <- res@Rec[years]
-        .Object@RecYrQtr[sim,]      <- res@RecYrQtr[months]
-        .Object@IobsArchive[sim,]   <- res@IobsArchive[years]
-        .Object@IobsRArchive[sim,,] <- res@IobsRArchive[years,]
-        .Object@TAC[sim,]           <- res@TAC[years]
-        .Object@TAEbyF[sim,,]       <- res@TAEbyF[years,]
+        if (length(res@Log) > 0)
+        {
+          .Object@Log[[sim]]          <- res@Log
+        }
       }
     }
 

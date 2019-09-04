@@ -18,7 +18,7 @@ setClass("ReferenceVars",
 # -----------------------------------------------------------------------------
 
 setMethod("initialize", "ReferenceVars",
-  function(.Object, ssModelData, MseDef, Report = FALSE)
+  function(.Object, ssModelData=NULL, MseDef=NULL, Report=FALSE)
   {
     getMSYrefs <- function(.Object, CppMethod, nyears=40, toly=1e-1)
     {
@@ -504,45 +504,52 @@ setMethod("initialize", "ReferenceVars",
     # -------------------------------------------------------------------------
     # start of constructor code
     # -------------------------------------------------------------------------
-    if (class(ssModelData) != "StockSynthesisModelData")
+    if (is.null(ssModelData))
     {
-      print(paste("ERROR: Could not create ReferenceVars.",deparse(substitute(ssModelData)),"not of class StockSynthesisModelData"))
-      stop()
-    }
-
-    if (class(MseDef) != "MseDefinition")
-    {
-      print(paste("ERROR: Could not create ReferenceVars.",deparse(substitute(MseDef)),"not of class MseDefinition"))
-      stop()
-    }
-
-    if (ssModelData@UseMSYss == 0)
-    {
-      # Do MSYref projections
-      MSYrefs <- getMSYrefs(ssModelData, MseDef@CppMethod != 0, nyears=70)
-
-      .Object@MSY         <- MSYrefs[1]
-      .Object@BMSY        <- MSYrefs[2]
-      .Object@VBMSY       <- MSYrefs[3]
-      .Object@SSBMSY      <- MSYrefs[4]
-      .Object@UMSY        <- MSYrefs[5]
-      .Object@FMSY1       <- MSYrefs[6]
-      .Object@SSBMSY_SSB0 <- MSYrefs[7]
-      .Object@SSB0        <- MSYrefs[8]
-      .Object@B0          <- MSYrefs[9]
-
+      # do nothing. This is an empty constructor for object upgrading
     }
     else
     {
-      .Object@MSY         <- ssModelData@MSYss
-      .Object@BMSY        <- NA #ssModelData@BMSYss
-      .Object@VBMSY       <- NA
-      .Object@SSBMSY      <- ssModelData@SSBMSYss
-      .Object@UMSY        <- NA
-      .Object@FMSY1       <- ssModelData@FMSYss
-      .Object@SSBMSY_SSB0 <- ssModelData@SSBMSYss / ssModelData@SSB0ss
-      .Object@SSB0        <- ssModelData@SSB0ss
-      .Object@B0          <- ssModelData@B0ss
+      if (class(ssModelData) != "StockSynthesisModelData")
+      {
+        print(paste("ERROR: Could not create ReferenceVars.",deparse(substitute(ssModelData)),"not of class StockSynthesisModelData"))
+        stop()
+      }
+
+      if (class(MseDef) != "MseDefinition")
+      {
+        print(paste("ERROR: Could not create ReferenceVars.",deparse(substitute(MseDef)),"not of class MseDefinition"))
+        stop()
+      }
+
+      if (ssModelData@UseMSYss == 0)
+      {
+        # Do MSYref projections
+        MSYrefs <- getMSYrefs(ssModelData, MseDef@CppMethod != 0, nyears=70)
+
+        .Object@MSY         <- MSYrefs[1]
+        .Object@BMSY        <- MSYrefs[2]
+        .Object@VBMSY       <- MSYrefs[3]
+        .Object@SSBMSY      <- MSYrefs[4]
+        .Object@UMSY        <- MSYrefs[5]
+        .Object@FMSY1       <- MSYrefs[6]
+        .Object@SSBMSY_SSB0 <- MSYrefs[7]
+        .Object@SSB0        <- MSYrefs[8]
+        .Object@B0          <- MSYrefs[9]
+
+      }
+      else
+      {
+        .Object@MSY         <- ssModelData@MSYss
+        .Object@BMSY        <- NA #ssModelData@BMSYss
+        .Object@VBMSY       <- NA
+        .Object@SSBMSY      <- ssModelData@SSBMSYss
+        .Object@UMSY        <- NA
+        .Object@FMSY1       <- ssModelData@FMSYss
+        .Object@SSBMSY_SSB0 <- ssModelData@SSBMSYss / ssModelData@SSB0ss
+        .Object@SSB0        <- ssModelData@SSB0ss
+        .Object@B0          <- ssModelData@B0ss
+      }
     }
 
     return (.Object)
