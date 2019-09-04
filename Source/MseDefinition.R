@@ -120,26 +120,3 @@ setMethod("createMseFramework", "MseDefinition",
     return (new("MseFramework", .Object, Report, UseCluster, UseMSYss))
   }
 )
-
-# -----------------------------------------------------------------------------
-
-setGeneric("upgrade", function(.Object, ...) standardGeneric("upgrade"))
-
-setMethod("upgrade", "MseDefinition",
-  function(.Object)
-  {
-    MseDef = new("MseDefinition")
-
-    names <- slotNames(MseDef)
-
-    for (name in names)
-    {
-      if (.hasSlot(.Object, name))
-      {
-        slot(MseDef, name) <- slot(.Object, name)
-      }
-    }
-
-    return (MseDef)
-  }
-)

@@ -51,6 +51,47 @@ if (is.na(match(LibName,  attr(getLoadedDLLs(), "names"))))
 }
 
 
+# -----------------------------------------------------------------------------
+
+# Generic function to upgrade S4 classes. This refers to the process of adding
+# missing slots and / or removing defunct slots from objects that has arisen
+# due to class definition changes
+
+upgradeObject <- function(.Object)
+{
+  UpgradedObject <- .Object
+
+  if (isS4(.Object))
+  {
+    ObjectClass    <- attributes(.Object)$class[1]
+    UpgradedObject <- new(ObjectClass)
+
+    names <- slotNames(UpgradedObject)
+
+    for (name in names)
+    {
+      if (.hasSlot(.Object, name))
+      {
+        slot(UpgradedObject, name) <- upgradeObject(slot(.Object, name))
+      }
+    }
+  }
+  else if (typeof(.Object) == "list")
+  {
+    # copy list with upgraded objects
+    ListNames      <- names(.Object)
+    UpgradedObject <- lapply(.Object, function(x) upgradeObject(x))
+
+    if (!is.null(ListNames))
+    {
+      names(UpgradedObject) <- ListNames
+    }
+  }
+
+  return (UpgradedObject)
+}
+
+
 source("./lib/OmB_R_interface.r")
 source("./lib/Om_R_interface.r")
 
