@@ -427,6 +427,11 @@ OMrefY19.3.500.test <- setProjectionYears(OMrefY19.3.500.test, 100)
 print(system.time(OMrefY19.3.500.test <- runMse(OMrefY19.3.500.test, MPs=MPL, TuningPars=TCMP.Y18.3b, CppMethod=1, interval=3, Report=F, UseCluster=1)))
 print(system.time(OMrefY19.3.500.test <- runMse(OMrefY19.3.500.test, MPs=MPL, CppMethod=1, interval=3, Report=F, UseCluster=0)))
 
+execRunCallback(OMrefY19.3.500.test, function(model, projVars, ix)
+                                     {
+                                       print(ls())
+                                       print(ls(envir=parent.env(as.environment(-1))))
+                                     })
 
 MPL <- list("PTproj.80.25")
 MPL <- list("PTproj.1.35bmsy.25")
