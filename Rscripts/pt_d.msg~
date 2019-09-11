@@ -1,0 +1,19 @@
+1 Command: Command-line option -vars is deprecated: please use -head instead
+2 File: cygwin warning:
+3 File:   MS-DOS style path detected: C:\Users\jum002\Documents\GitHub\niMSE-IO-BET-YFT\Rscripts\pt.f95
+4 File:   Preferred POSIX equivalent is: /cygdrive/c/Users/jum002/Documents/GitHub/niMSE-IO-BET-YFT/Rscripts/pt.f95
+5 pt: (TC16) Type mismatch in assignment: INTEGER receives REAL
+6 pt: File:   CYGWIN environment variable option "nodosfilewarning" turns off this warning.
+7 pt: File:   Consult the user's guide for more details about POSIX paths:
+8 pt: File:     http://cygwin.com/cygwin-ug-net/using.html#using-pathnames
+9 pt: (TC06) Loop index is expected to be integer, and is here REAL
+10 pt: (TC07) Loop bound is expected to be integer, and is here REAL
+11 pt: (TC12) Array index is expected to be integer, and is here REAL
+12 pt: (TC12) Array index is expected to be integer, and is here REAL
+13 pt: (TC12) Array index is expected to be integer, and is here REAL
+14 pt: (TC12) Array index is expected to be integer, and is here REAL
+15 pt: (TC12) Array index is expected to be integer, and is here REAL
+16 pt: (DF03) variable y is used before initialized
+17 pt: (DF03) variable y is used before initialized
+18 pt: (DF03) variable y is used before initialized
+19 pt: (DF03) variable y is used before initialized

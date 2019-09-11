@@ -13,7 +13,7 @@ load("objects/OMrefY19.3List.RDA")       #the weighted list of models
 
 # Create gridY19.3.500 model definition
 # source("Rscripts/Build OM Model-OMrefY19.3.500.R")
-# print(system.time(OMrefY19.3.500 <- createMseFramework(MseDef, UseCluster=0)))  #parallel processing fails with this function on DK laptop for some reason 
+# print(system.time(OMrefY19.3.500 <- createMseFramework(MseDef, UseCluster=0)))  #parallel processing fails with this function on DK laptop for some reason
 # save(OMrefY19.3.500, file="Objects/OMrefY19.3.500.RDA")
 load(file="Objects/OMrefY19.3.500.RDA")
 
@@ -80,7 +80,28 @@ TY18.1.MPs[[1]]@tuneError
 TY18.1.MPs[[2]]@tuneError
 TY18.1.MPs[[3]]@tuneError
 save(OMrefY19.3.500.TY18.1,file=paste(getwd(),"/Objects/OMrefY19.3.500.TY18.1.RDA",sep=""))
+save(OMrefY19.3.500.TY18.1,file=paste(getwd(),"/Objects/OMrefY19.3.500.TY18.1n.RDA",sep=""))
 load(file="Objects/OMrefY19.3.500.TY18.1.RDA")
+
+# --- delete when finished ---
+
+# Temporary testing of alternate MP implementations
+MPL <- list(M.Y18.1b = "PT41AL.t25", M.Y18.1c = "PT41AL.t50", M.Y18.1d = "PT41A.t90")
+#OMrefY19.3.500.TY18.1.test <- runMse(OMrefY19.3.500, TuningPars=TCMP.Y18.1, MPs=MPL[1], CppMethod=1, interval=3, Report=F, UseCluster=0)
+print(system.time(OMrefY19.3.500.TY18.1b  <- runMse(OMrefY19.3.500, TuningPars=TCMP.Y18.1, MPs=MPL, CppMethod=1, interval=3, Report=F, UseCluster=1)))
+TY18.1.MPs <- getMPs(OMrefY19.3.500.TY18.1b)
+TY18.1.MPs[[1]]@tuneError
+TY18.1.MPs[[2]]@tuneError
+TY18.1.MPs[[3]]@tuneError
+save(OMrefY19.3.500.TY18.1b,file=paste(getwd(),"/Objects/OMrefY19.3.500.TY18.1b.RDA",sep=""))
+load(file="Objects/OMrefY19.3.500.TY18.1b.RDA")
+
+perfd <- merge(perfd, msevizPerformanceData(OMrefY19.3.500.TY18.1b, YearsAveraged), all=TRUE)
+histd <- merge(histd,msevizHistoricTimeSeriesData(OMrefY19.3.500.TY18.1b), all=TRUE)
+projd <- merge(projd, msevizProjectedTimeSeriesData(OMrefY19.3.500.TY18.1b), all=TRUE)
+
+# --- delete when finished end ---
+
 
 # fails with TAC limit 0f 25%, ok with 50%
 MPL <- list(M.Y18.2 = MPList0[6], D.Y18.2 = MPList0[7], C.Y18.2 = MPList0[3])
@@ -133,7 +154,7 @@ plotBPs2(perfd, limit=YFTLims, target=YFTTargs, blackRef=Cref)
 
 rename <- list(M.Y18.1 ="MY1", D.Y18.1 ="DY1",
                M.Y18.2 ="MY2", D.Y18.2 ="DY2",
-               M.Y18.3 ="MY3", D.Y18.3 ="DY3") 
+               M.Y18.3 ="MY3", D.Y18.3 ="DY3")
 
 if (!is.na(rename))
 {
@@ -141,7 +162,7 @@ if (!is.na(rename))
   {
     return (sapply(as.vector(names), FUN=function(name){rename[[name]]}))
   }
-  
+
   perfd[,"mp"] <- factor(perfd[,substitute(mp)], levels=rename)
 }
 plotBPs2(perfd, limit=YFTLims, target=YFTTargs, blackRef=Cref)
@@ -205,7 +226,7 @@ projd <- projd[projd$mp %in% c("M.Y18.1","D.Y18.1","M.Y18.2","D.Y18.2","M.Y18.3"
 
 rename <- list(M.Y18.1 ="MY1", D.Y18.1 ="DY1",
                M.Y18.2 ="MY2", D.Y18.2 ="DY2",
-               M.Y18.3 ="MY3", D.Y18.3 ="DY3") 
+               M.Y18.3 ="MY3", D.Y18.3 ="DY3")
 
 if (!is.na(rename))
 {
@@ -213,7 +234,7 @@ if (!is.na(rename))
   {
     return (sapply(as.vector(names), FUN=function(name){rename[[name]]}))
   }
-  
+
   projd[,"mp"] <- factor(projd[,substitute(mp)], levels=rename)
 }
 
@@ -333,7 +354,6 @@ perfd <- perfd[perfd$mp %in% c("MY2a","MY2b","MY2d","DY2a","DY2b","DY2f" ),]
 plotBPs2(perfd, limit=YFTLims, target=YFTTargs, blackRef=Cref)
 plotTOs2(perfd, limit=YFTLims, target=YFTTargs, blackRef=Cref)
 kobeMPs2(perfd, xlim=SBLim, ylim=FLim, xmax=2,ymax=2)
-
 
 
 

@@ -28,13 +28,14 @@ MseDef@UseCluster    <- 0 # 1 = Use cluster of R processes, 0 = Use single R pro
 MseDef@npop          <- as.integer(1) #multiple stocks not supported at this time
 MseDef@nfleets       <- as.integer(25) #number of fisheries; needs to be consistent with SS input files
 #MseDef@SSRootDir     <- "M:\\C-offline\\MSE-IO-BET-YFT\\gitMirror\\phase1\\OMconditioning\\YFT\\gridY19.2\\"          # Root dir for SS results outputs
-MseDef@SSRootDir     <- "E:\\KOL018\\MSE-IO-BET-YFT\\OMconditioning\\YFT\\gridY19.3\\"          # Root dir for SS results outputs
+MseDef@SSRootDir     <- "Z:\\MSE-IO-BET-YFT\\OMconditioning\\YFT\\gridY19.3\\"
+#MseDef@SSRootDir     <- "E:\\KOL018\\MSE-IO-BET-YFT\\OMconditioning\\YFT\\gridY19.3\\"          # Root dir for SS results outputs
 MseDef@SBlim         <- 0.4
 MseDef@Flim          <- 1.4
 
 # Mix of models from 2 pooled, unbalanced grids
 # source("..\\OMconditioning\\RStuff\\phase2\\makeGridY17.2.f.R")  # only req'd if lists not aready saved
-load("objects\\OMrefY19.3.List.RDA")       #the weighted list of models
+load("objects\\OMrefY19.3List.RDA")       #the weighted list of models
 
 
 # not sure why some models failed to produce wtatage file, did on retest - maybe network problem?
@@ -42,10 +43,10 @@ load("objects\\OMrefY19.3.List.RDA")       #the weighted list of models
 #fileFail <- NULL
 #for (i in 1:length(OMrefY19.2WtList)){
 #  if(file.info(tmpDir %&% "\\wtatage.ss_new")$size < 10) fileFail <- c(fileFail, names(OMrefY19.2WtList[i]))
-#  if(file.info(tmpDir %&% "\\CumReport.sso")$size < 10 | file.info(tmpDir %&% "\\CumReport.sso")$size >90000) 
+#  if(file.info(tmpDir %&% "\\CumReport.sso")$size < 10 | file.info(tmpDir %&% "\\CumReport.sso")$size >90000)
 #      fileFail <- c(fileFail, names(OMrefY19.2WtList[i]))
 #  if(file.info(tmpDir %&% "\\data.ss_new")$size < 2.2e+6 | file.info(tmpDir %&% "\\data.ss_new"  )$size > 3.0e+6 ) fileFail <- c(fileFail, names(OMrefY19.2WtList[i]))
-#  
+#
 #  print(i)
 #}
 #OMrefY19.2WtList <- OMrefY19.2WtList[!(names(OMrefY19.2WtList) %in% fileFail)]
@@ -89,8 +90,8 @@ load("objects\\OMrefY19.3.List.RDA")       #the weighted list of models
 
 
 
-MseDef@OMList       <- as.list(names(OMrefY19.3.List))
-MseDef@modelWeight  <- as.karray(OMrefY19.3.List)  #= "karray",    # Plausibility weighting for given OMFile
+MseDef@OMList       <- as.list(names(OMrefY19.3List))
+MseDef@modelWeight  <- as.karray(OMrefY19.3List)  #= "karray",    # Plausibility weighting for given OMFile
 MseDef@totalSims        <- 500                 # = "numeric",   # Total number of simulations in MSE run.
 # nSimPerOMFile is ignored if totalSims is defined (modelWt requried either way)
 MseDef@nsimPerOMFile <- array(rep(1,length(MseDef@OMList)),dim=length(MseDef@OMList))   # Number of simulations per each SS specification file (vector of length OMList allows differental weighting, i.e. c(10,50,25)
