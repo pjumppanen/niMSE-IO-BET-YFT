@@ -1807,29 +1807,74 @@ setGeneric("printRunLogs", function(.Object, ...) standardGeneric("printRunLogs"
 setMethod("printRunLogs", "MseFramework",
   function(.Object)
   {
-    lapply(.Object@StockSynthesisModels,  function(model)
-                                          {
-                                            lapply(model@ProjectedVars, function(projVars)
-                                                                        {
-                                                                          # print all the logged errors
-                                                                          LogIdx <- which(!is.na(projVars@Log))
-                                                                          LogIdx <- which(sapply(projVars@Log[LogIdx], function(x) !is.null(x$error)))
-
-                                                                          if (length(LogIdx) > 0)
-                                                                          {
-                                                                            cat(paste("\n\n\n\nLogs reported in projecting model", .Object@MseDef@OMList[projVars@which], "\n--------------------------------------------------------------------------------\n"))
-                                                                          }
-
-                                                                          sapply(LogIdx,  function(ix)
+    dummy <- lapply(.Object@StockSynthesisModels, function(model)
+                                                  {
+                                                    dummy <- lapply(model@ProjectedVars,  function(projVars)
                                                                                           {
-                                                                                            if (!is.null(projVars@Log[[ix]]) && !is.null(projVars@Log[[ix]]$error))
-                                                                                            {
-                                                                                              cat(paste(projVars@Log[[ix]]$error, "\n--------------------------------------------------------------------------------\n"))
-                                                                                            }
-                                                                                          })
+                                                                                            # print all the logged errors
+                                                                                            LogIdx <- which(!is.na(projVars@Log))
 
-                                                                          cat("\n")
-                                                                       })
-                                          })
+                                                                                            if (length(LogIdx) > 0)
+                                                                                            {
+                                                                                              LogIdx <- which(sapply(projVars@Log[LogIdx], function(x) !is.null(x$error)))
+                                                                                            }
+
+                                                                                            if (length(LogIdx) > 0)
+                                                                                            {
+                                                                                              cat(paste("\n\n\n\nLogs reported in projecting model", .Object@MseDef@OMList[projVars@which], "\n--------------------------------------------------------------------------------\n"))
+
+                                                                                              dummy <- sapply(LogIdx, function(ix)
+                                                                                                                      {
+                                                                                                                        if (!is.null(projVars@Log[[ix]]) && !is.null(projVars@Log[[ix]]$error))
+                                                                                                                        {
+                                                                                                                          cat(paste(projVars@Log[[ix]]$error, "\n--------------------------------------------------------------------------------\n"))
+                                                                                                                        }
+                                                                                                                      })
+                                                                                            }
+
+                                                                                            cat("\n")
+                                                                                         })
+                                                  })
+  }
+)
+
+# -----------------------------------------------------------------------------
+
+setGeneric("execRunCallback", function(.Object, ...) standardGeneric("execRunCallback"))
+
+setMethod("execRunCallback", "MseFramework",
+  function(.Object, callbackFn)
+  {
+    with_env <- function(Fn, envir)
+    {
+      stopifnot(is.function(Fn))
+      environment(Fn) <- envir
+      return (Fn)
+    }
+
+    dummy <- lapply(.Object@StockSynthesisModels, function(model)
+                                                  {
+                                                    dummy <- lapply(model@ProjectedVars,  function(projVars)
+                                                                                          {
+                                                                                            # print all the logged errors
+                                                                                            LogIdx <- which(!is.na(projVars@Log))
+
+                                                                                            if (length(LogIdx) > 0)
+                                                                                            {
+                                                                                              LogIdx <- which(sapply(projVars@Log[LogIdx], function(x) !is.null(x$env)))
+                                                                                            }
+
+                                                                                            if (length(LogIdx) > 0)
+                                                                                            {
+                                                                                              dummy <- sapply(LogIdx, function(ix)
+                                                                                                                      {
+                                                                                                                        if (!is.null(projVars@Log[[ix]]) && !is.null(projVars@Log[[ix]]$env))
+                                                                                                                        {
+                                                                                                                          with_env(callbackFn, projVars@Log[[ix]]$env)(model, projVars, ix)
+                                                                                                                        }
+                                                                                                                      })
+                                                                                            }
+                                                                                         })
+                                                  })
   }
 )

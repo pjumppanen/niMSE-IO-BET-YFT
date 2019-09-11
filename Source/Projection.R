@@ -1123,7 +1123,7 @@ setMethod("initialize", "Projection",
       .Object@Log[["error"]] <- ErrorLog
     }
 
-    if (!is.null(MP_environment$save))
+    if (!is.null(MP_environment$save) && (MP_environment$save == TRUE))
     {
       .Object@Log[["env"]] <- MP_environment
     }

@@ -975,7 +975,7 @@ PellaTomlinsonProjection <- function(pset, BMSY_Prop=1.0, Gain=0.15, MinCatchPro
     #Initial Model parameters
     params <- log(c(C2Init, CMCsum, 0.9))
 
-    pset$env$save     <- TRUE
+    pset$env$save     <- debug
     pset$env$params   <- params
     pset$env$MSY      <- c()
     pset$env$BMSY     <- c()
