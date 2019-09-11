@@ -58,7 +58,7 @@ class(PT41.x60t25)<-"IO_MP_tune"
 
 PTproj.15 <- function(pset)
 {
-  return(PellaTomlinsonProjection(pset, BMSY_Prop=pset$tune, Gain=0.15))
+  return(PellaTomlinsonProjection(pset, BMSY_Prop=pset$tune * BMSY_Prop, Gain=0.15))
 }
 
 class(PTproj.15)<-"IO_MP_tune"
@@ -66,7 +66,7 @@ class(PTproj.15)<-"IO_MP_tune"
 
 PTproj.25 <- function(pset)
 {
-  return(PellaTomlinsonProjection(pset, BMSY_Prop=pset$tune, Gain=0.25))
+  return(PellaTomlinsonProjection(pset, BMSY_Prop=pset$tune * BMSY_Prop, Gain=0.25))
 }
 
 class(PTproj.25)<-"IO_MP_tune"
