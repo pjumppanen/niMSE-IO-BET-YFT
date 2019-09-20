@@ -29,7 +29,7 @@ setClass("Projection",
 # -----------------------------------------------------------------------------
 
 setMethod("initialize", "Projection",
-  function(.Object, ssModelData, RefVars, MseDef, sim, MP, interval, Report, CppMethod, EffortCeiling, TACTime, rULim, seed, tune)
+  function(.Object, ssModelData, RefVars, MseDef, sim, MP, interval, Report, CppMethod, EffortCeiling, TACTime, rULim, seed, tune, environment_MSY=NULL)
   {
     if (class(ssModelData) != "StockSynthesisModelData")
     {
@@ -49,6 +49,10 @@ setMethod("initialize", "Projection",
       stop()
     }
 
+    isMSY_projection <- !is.null(environment_MSY)
+
+    # --------------------------------------------------------------------
+
     projection.domov <- function(Ntemp, movtemp)
     {
       # P A R  x  P A R R
@@ -57,6 +61,8 @@ setMethod("initialize", "Projection",
       #return dim = PAR
       apply(karray(Ntemp, c(dim(Ntemp),nareas)) * movtemp, MARGIN=c(1,2,4), sum)
     }
+
+    # --------------------------------------------------------------------
 
     findFrep <- function(NsoRbyPAM, M_Y, npop, nages, nsubyears, FAgeRange)
     {
@@ -68,6 +74,8 @@ setMethod("initialize", "Projection",
 
       return (Frep)
     }
+
+    # --------------------------------------------------------------------
 
     sampCatch <- function(Csamp, nSamp)
     {
@@ -88,11 +96,15 @@ setMethod("initialize", "Projection",
       return (out)
     }
 
+    # --------------------------------------------------------------------
+
     sdconv <- function(m, sd)
     {
       # get log normal standard deviation from transformed space mean and standard deviation
       return ((log(1.0 + ((sd ^ 2) / (m ^ 2)))) ^ 0.5)
     }
+
+    # --------------------------------------------------------------------
 
     mconv <- function(m, sd)
     {
@@ -100,10 +112,14 @@ setMethod("initialize", "Projection",
       return (log(m) - 0.5 * log(1.0 + ((sd ^ 2) / (m ^ 2))))
     }
 
+    # --------------------------------------------------------------------
+
     trlnorm <- function(reps, mu, cv)
     {
       return (rlnorm(reps, mconv(mu, mu * cv), sdconv(mu, mu * cv)))
     }
+
+    # --------------------------------------------------------------------
 
     makeCAL <- function(CAA, LenAtAge, CAL_bins, CALsd=0.05)
     {
@@ -122,6 +138,91 @@ setMethod("initialize", "Projection",
 
       return(CAL)
     }
+
+    # --------------------------------------------------------------------
+
+    MSYreferencePoints <- function(ECurrent,
+                                   sel,
+                                   M,
+                                   C,
+                                   SSB0,
+                                   B0,
+                                   N,
+                                   NBefore,
+                                   SSN,
+                                   Wt_age,
+                                   #Wt_age_SB,
+                                   targpop,
+                                   nsubyears,
+                                   npop,
+                                   nages,
+                                   nareas,
+                                   nfleets,
+                                   FAgeRange)
+    {
+      # Assume M,C,SSN,Wt_age are single year slices. In addition assume N and NBefore
+      # have nsubyear + 1 entries for the subyear index with the +1 th entry
+      # corresponding to the first time step of the following year. In all cases the
+      # simulation index is removed / not present.
+      MSY    <- sum(karray(C[targpop,,,,], c(length(targpop), nages, nsubyears, nareas, nfleets)) * karray(Wt_age[targpop,], c(length(targpop),nages,nsubyears,nareas,nfleets)))
+      BMSY   <- sum(karray((NBefore[targpop,,1,]), c(length(targpop),nages,nareas)) * karray(Wt_age[targpop,], c(length(targpop),nages,nareas)))
+      softmp <- karray(NA, dim=c(nages,nsubyears,nareas,nfleets))
+
+      for(im in 1:nsubyears)
+      {
+        for(ir in 1:nareas)
+        {
+          for(ifleets in 1:nfleets)
+          {
+            softmp[,im,ir,ifleets] <- ECurrent[im,ir,ifleets] * sel[ifleets,]
+          }
+        }
+      }
+
+      sof <- apply(softmp, sum, MARGIN=c(1:3))
+
+      rm(softmp)
+
+      # DK: prod(N, sel, ECurrent for MSY year)   TC uses season 1 only; take average over seasons instead
+      # this is probably wrong and not a good option anyway
+      VBMSY <- sum(karray(rep(sof,each=length(targpop)), c(length(targpop),nages,nsubyears,nareas)) *
+                   karray((N[targpop,,1:nsubyears,]), c(length(targpop),nages,nsubyears,nareas)) *
+                   karray(rep(Wt_age[targpop,],nsubyears), c(length(targpop),nages,nsubyears,nareas)))
+
+      # All this stuff used to calculate FMSY (summed over regions, mean over age and season)
+      NsoRbyPAM <- apply(NBefore[,,,], FUN=sum, MARGIN=c(1:3))
+
+      # Note that as we are in steady state numbers at y + 1 subyear 1 should be the same as
+      # numbers at y subyear 1 . The values at nsubyears + 1 are incomplete because they need
+      # to wrap around to the next year first. As such, we base the nsubyears + 1 case on
+      # the first subyear.
+      NsoRbyPAM[,,nsubyears + 1] <- apply(NBefore[,,1,], FUN=sum, MARGIN=c(1:2))
+
+      ZsoRbyPAM <- karray(NA, dim=c(npop,nages-2,nsubyears))
+
+      ZsoRbyPAM[,,1] <- -log(NsoRbyPAM[,2:(nages-1),2] / NsoRbyPAM[,1:(nages-2),1])
+      ZsoRbyPAM[,,2] <- -log(NsoRbyPAM[,2:(nages-1),3] / NsoRbyPAM[,1:(nages-2),2])
+      ZsoRbyPAM[,,3] <- -log(NsoRbyPAM[,2:(nages-1),4] / NsoRbyPAM[,1:(nages-2),3])
+      ZsoRbyPAM[,,4] <- -log(NsoRbyPAM[,2:(nages-1),5] / NsoRbyPAM[,1:(nages-2),4])
+
+      MbyPAM    <- karray(rep(M[,1:(nages-2)],times=nsubyears), dim=c(npop,nages-2,nsubyears))
+      FsoRbyPAM <- ZsoRbyPAM - MbyPAM / nsubyears
+
+      FMSY1     <- mean(FsoRbyPAM[,FAgeRange[1]:FAgeRange[2],])  # 2:27 = true ages 1:26 (1:26 used by SS)
+
+      #potential change to integrated biomass calculation
+      SSBMSY    <- sum(karray(SSN[targpop,,1,],c(length(targpop),nages,nareas)) * karray(Wt_age[targpop,], c(length(targpop),nages,nareas)))
+      #SSBMSY     <- sum(karray(NBefore[targpop,,1,],c(length(targpop),nages,nareas)) * karray(Wt_age_SB[targpop,], c(length(targpop),nages,nareas)))
+
+      UMSY      <- MSY / VBMSY
+      SSBMSY_B0 <- SSBMSY / sum(SSB0[targpop])
+
+      return(c(MSY,BMSY,VBMSY,SSBMSY,UMSY,FMSY1,SSBMSY_B0,SSB0,B0))
+    }
+
+    # --------------------------------------------------------------------
+    # Start of contructor code
+    # --------------------------------------------------------------------
 
     .Object@Log <- list()
 
@@ -176,7 +277,7 @@ setMethod("initialize", "Projection",
       Fdist     <- karray(as.double(NA),c(npop,nfleets,nareas))                     # current F dist by fleet
       CAAF      <- karray(as.double(NA),c(nages,allyears,nfleets))                  # Catch at age by fleets
 
-      initYear <- nyears  # last assessment year
+      initYear  <- nyears  # last assessment year
 
       # subset all model parameters needed by the model run
       Len_age       <- ssModelData@Len_age
@@ -211,7 +312,70 @@ setMethod("initialize", "Projection",
       NLLI[1:initYear]                          <- ssModelData@NLLIss[1:initYear]
       NLL[1:initYear,,]                         <- ssModelData@NLLss[1:initYear,,]
 
-      SSB0 <- RefVars@SSB0
+      NullRecSpatialDevs                        <- karray(as.double(1.0),c(npop,nareas))
+      NBefore_Y                                 <- karray(NA,c(npop,nages,nsubyears + 1,nareas))  # this N should be the start of timestep
+      N_Y                                       <- karray(NA,c(npop,nages,nsubyears + 1,nareas))  # this N is updated within the timestep
+
+      SSN_Y                                     <- karray(as.double(NA),c(npop,nages,nsubyears,nareas))
+      NLL_Y                                     <- karray(as.double(NA),c(nsubyears,nCPUE))
+      NLLI_Y                                    <- as.double(NA)
+      C_Y                                       <- karray(as.double(NA),c(npop,nages,nsubyears,nareas,nfleets))
+      SSBA_Y                                    <- karray(as.double(NA),c(npop))
+
+      if (isMSY_projection)
+      {
+        # if running a projection for MSY estimation purposes it means that
+        # we are calculation RefVars and therefore cannot use it to obtain
+        # B0 and SSB0 values.
+
+        # Find survivorship
+        # -----------------
+        # Need to get initial equilibrium numbers right because SSB0 and rec depend on it
+        # NBefore recorded before M, hence the M=0 for a=1; integral for lastAge added (important for low M scenatios)
+        Madvanced           <- karray(as.double(NA), c(npop, nages))
+        Madvanced[1:npop,1] <- 0.0
+        Madvanced[,2:nages] <- M[, 1:(nages - 1), 1]
+        surv                <- t(exp(-apply(Madvanced[, 1:nages], c(1), cumsum) / nsubyears))
+
+        #infinite sum for plus group
+        surv[,nages] <- surv[,nages - 1] * exp(-Madvanced[,nages] / nsubyears) / (1.0 - exp(-Madvanced[,nages] / nsubyears))
+
+        y <- initYear
+        m <- 1
+
+        PAYMR <- as.matrix(expand.grid(1:npop,1:nages,y,m,1:nareas))    # Set up some karray indexes
+        PAMR  <- PAYMR[,c(1,2,3,5)]
+        PA    <- PAYMR[,c(1,2)]
+        P     <- PAYMR[,c(1)]
+        PAR   <- PAYMR[,c(1,2,5)]
+        PAY   <- PAYMR[,c(1,2,3)]
+
+        if (nareas > 1)
+        {
+          # Calculate virgin Numbers
+          NBefore_Y[PAMR] <- surv[PA] * R0[P] * Idist[PAR]
+        }
+        else
+        {
+          NBefore_Y[PAMR] <- surv[PA] * R0[P]
+        }
+
+        SSN_Y[PAMR] <- NBefore_Y[PAMR] * mat[PAY]
+
+        # potential change to combined maturity and mass-at-age
+        # Calculate spawning stock biomass
+        SSB_Y[PAMR] <- SSN_Y[PAMR] * Wt_age[PAY]
+
+        # Calculate total biomass
+        B_Y[PAMR] <- NBefore_Y[PAMR] * Wt_age[PAY]
+
+        SSB0 <- apply(SSB_Y[,,m,], 1, sum)
+        B0   <- apply(B_Y[,,m,], 1, sum)
+      }
+      else
+      {
+        SSB0 <- RefVars@SSB0
+      }
 
       # Calculate spawning stock biomass per recruit
       SSBpR   <- SSB0 / R0
@@ -230,76 +394,88 @@ setMethod("initialize", "Projection",
 
       recruitment_params <- findWindowedAR_params(ssModelData@RecACT)
 
-      # Autocorrelated rec devs for projection years
-      # --------------------------------------------
-      rndDevs <- karray(rep(ssModelData@ReccvT, times=ssModelData@npop * allyears * length(ssModelData@Recsubyr)) * rnorm(ssModelData@npop * allyears * length(ssModelData@Recsubyr)),
-                        dim=c(ssModelData@npop, allyears * length(ssModelData@Recsubyr)))
-
-      for (t in (ssModelData@nyears * length(ssModelData@Recsubyr) + 1):(allyears * length(ssModelData@Recsubyr)))
+      if (isMSY_projection)
       {
-        rndDevs[,t] <- recruitment_params$Alpha * rndDevs[,t - 1] + rndDevs[,t] * recruitment_params$Beta
-      }
+        Recdevs[PTm] <- 1.0
 
-      # We attach any recruitment scaling (recuitment shock implementation) to the recruitment deviates.
-      Recdevs   <- karray(as.double(NA), dim=c(ssModelData@npop, allyears * length(ssModelData@Recsubyr)))
-      PTm       <- as.matrix(expand.grid(1:ssModelData@npop, 1:(allyears * length(ssModelData@Recsubyr))))
-      P         <- PTm[,c(1)]
-      Y         <- floor((PTm[,c(2)] - 1) / length(ssModelData@Recsubyr)) + 1  # Calculate year from timestep
+        # Initial population at the beginning of projection before movement and mortality for reporting with noise
+        # --------------------------------------------------------------------------------------------------------
+        NBeforeInit <- ssModelData@NBeforeInit
 
-      if (length(MseDef@RecScale) == 1)
-      {
-        RecScale <- karray(c(rep(1.0, times=ssModelData@nyears), rep(MseDef@RecScale, times=MseDef@proyears)))
-      }
-      else if (length(MseDef@RecScale) == MseDef@proyears)
-      {
-        RecScale <- karray(c(rep(1.0, times=ssModelData@nyears), MseDef@RecScale))
+        # take out selectivity temporal variability as this is a MSY projection
+        # ---------------------------------------------------------------------
+        selTSSign     <- karray(1.0, dim=c(ssModelData@nfleets, 2))
+        selTSWaveLen  <- karray(0.0, dim=c(ssModelData@nfleets, 2))
+        selAgeRange   <- 0
+        selExpRange   <- 0
       }
       else
       {
-        print("ERROR: MSE definition RecScale vector is wrong length. It must be proyears in length")
-        stop()
+        # Autocorrelated rec devs for projection years
+        # --------------------------------------------
+        rndDevs <- karray(rep(ssModelData@ReccvT, times=ssModelData@npop * allyears * length(ssModelData@Recsubyr)) * rnorm(ssModelData@npop * allyears * length(ssModelData@Recsubyr)),
+                          dim=c(ssModelData@npop, allyears * length(ssModelData@Recsubyr)))
+
+        for (t in (ssModelData@nyears * length(ssModelData@Recsubyr) + 1):(allyears * length(ssModelData@Recsubyr)))
+        {
+          rndDevs[,t] <- recruitment_params$Alpha * rndDevs[,t - 1] + rndDevs[,t] * recruitment_params$Beta
+        }
+
+        # We attach any recruitment scaling (recuitment shock implementation) to the recruitment deviates.
+        Recdevs   <- karray(as.double(NA), dim=c(ssModelData@npop, allyears * length(ssModelData@Recsubyr)))
+        PTm       <- as.matrix(expand.grid(1:ssModelData@npop, 1:(allyears * length(ssModelData@Recsubyr))))
+        P         <- PTm[,c(1)]
+        Y         <- floor((PTm[,c(2)] - 1) / length(ssModelData@Recsubyr)) + 1  # Calculate year from timestep
+
+        if (length(MseDef@RecScale) == 1)
+        {
+          RecScale <- karray(c(rep(1.0, times=ssModelData@nyears), rep(MseDef@RecScale, times=MseDef@proyears)))
+        }
+        else if (length(MseDef@RecScale) == MseDef@proyears)
+        {
+          RecScale <- karray(c(rep(1.0, times=ssModelData@nyears), MseDef@RecScale))
+        }
+        else
+        {
+          print("ERROR: MSE definition RecScale vector is wrong length. It must be proyears in length")
+          stop()
+        }
+
+        Recdevs[PTm] <- RecScale[Y] * exp(rndDevs[PTm] - 0.5 * ssModelData@ReccvT[P] ^ 2)
+
+        rm(rndDevs, PTm, P, Y)
+
+        # Initial population at the beginning of projection before movement and mortality for reporting with noise
+        # --------------------------------------------------------------------------------------------------------
+        CVMatByPA   <- rep(MseDef@NInitCV * exp(-MseDef@NInitCVdecay * (0:(ssModelData@nages - 1))), each=ssModelData@npop)
+        CVMatByPAR  <- karray(rep(CVMatByPA, times=ssModelData@nareas), dim=c(ssModelData@npop, ssModelData@nages, ssModelData@nareas))
+        Ndevs       <- exp(CVMatByPAR * rnorm(prod(dim(ssModelData@NBeforeInit))) - 0.5 * CVMatByPAR * CVMatByPAR)
+        NBeforeInit <- ssModelData@NBeforeInit * Ndevs
+
+        rm(CVMatByPA, CVMatByPAR, Ndevs)
+
+
+        # selectivity temporal variability
+        # --------------------------------
+        selTSSign                 <- karray(round(runif(ssModelData@nfleets * 2)), dim=c(ssModelData@nfleets, 2))
+        selTSWaveLen              <- karray(runif(ssModelData@nfleets * 2) * (MseDef@selWLRange[2] - MseDef@selWLRange[1]) + MseDef@selWLRange[1], dim=c(ssModelData@nfleets, 2))
+        selTSSign[selTSSign < 1]  <- -1 # -1 or 1 indicate initial sin wave trend
+        selAgeRange               <- MseDef@selAgeRange
+        selExpRange               <- MseDef@selExpRange
       }
 
-      Recdevs[PTm] <- RecScale[Y] * exp(rndDevs[PTm] - 0.5 * ssModelData@ReccvT[P] ^ 2)
-
-      rm(rndDevs, PTm, P, Y)
-
-      # Initial population at the beginning of projection before movement and mortality for reporting with noise
-      # --------------------------------------------------------------------------------------------------------
-      CVMatByPA   <- rep(MseDef@NInitCV * exp(-MseDef@NInitCVdecay * (0:(ssModelData@nages - 1))), each=ssModelData@npop)
-      CVMatByPAR  <- karray(rep(CVMatByPA, times=ssModelData@nareas), dim=c(ssModelData@npop, ssModelData@nages, ssModelData@nareas))
-      Ndevs       <- exp(CVMatByPAR * rnorm(prod(dim(ssModelData@NBeforeInit))) - 0.5 * CVMatByPAR * CVMatByPAR)
-      NBeforeInit <- ssModelData@NBeforeInit * Ndevs
-
-      rm(CVMatByPA, CVMatByPAR, Ndevs)
-
-
-      # selectivity temporal variability
-      # --------------------------------
-      selTSSign                 <- karray(round(runif(ssModelData@nfleets * 2)), dim=c(ssModelData@nfleets, 2))
-      selTSWaveLen              <- karray(runif(ssModelData@nfleets * 2) * (MseDef@selWLRange[2] - MseDef@selWLRange[1]) + MseDef@selWLRange[1], dim=c(ssModelData@nfleets, 2))
-      selTSSign[selTSSign < 1]  <- -1 # -1 or 1 indicate initial sin wave trend
-
-
-      # historical simulation of one year to re-create N for first projection year
-      # ---------------------------------------------------------------------------
-      cat("\nRe-running final year of OM")
-      cat("\n")
+      if (!isMSY_projection)
+      {
+        # historical simulation of one year to re-create N for first projection year
+        # ---------------------------------------------------------------------------
+        cat("\nRe-running final year of OM")
+        cat("\n")
+      }
 
       y           <- initYear
 
       mm          <- nsubyears
       nSpawnPerYr <- length(ssModelData@Recsubyr)  # rec Index for more than 1 rec per year
-
-      NullRecSpatialDevs <- karray(as.double(1.0),c(npop,nareas))
-      NBefore_Y          <- karray(NA,c(npop,nages,nsubyears + 1,nareas))  # this N should be the start of timestep
-      N_Y                <- karray(NA,c(npop,nages,nsubyears + 1,nareas))  # this N is updated within the timestep
-
-      SSN_Y              <- karray(as.double(NA),c(npop,nages,nsubyears,nareas))
-      NLL_Y              <- karray(as.double(NA),c(nsubyears,nCPUE))
-      NLLI_Y             <- as.double(NA)
-      C_Y                <- karray(as.double(NA),c(npop,nages,nsubyears,nareas,nfleets))
-      SSBA_Y             <- karray(as.double(NA),c(npop))
 
       # Initialise starting population. Note N_Y initialisation redundant for R case but
       # needed for C++ case
@@ -478,7 +654,10 @@ setMethod("initialize", "Projection",
       # Run projections
       # ---------------------------------------------------------------------------
 
-      cat("\n Running projections \n")
+      if (!isMSY_projection)
+      {
+        cat("\n Running projections \n")
+      }
 
       firstMPy <- nyears + MseDef@firstMPYr - MseDef@lastCalendarYr
       upyrs    <- firstMPy + (0:(floor(ssModelData@proyears / interval))) * interval  # the years in which there are MP updates (e.g. every three years)
@@ -560,14 +739,25 @@ setMethod("initialize", "Projection",
 
 
       # print a progress report
-      cat(paste("Running MSE for ",MP, sep=""))
-      cat("\n")
+      if (!isMSY_projection)
+      {
+        cat(paste("Running MSE for ",MP, sep=""))
+        cat("\n")
 
-      # update the console
-      flush.console()
+        # update the console
+        flush.console()
+      }
 
       # initial TAC and TAE values required for first MP application
-      TAC   <- sum(CMCurrent) # refresh the MP store of TAC among simulations
+      if (isMSY_projection)
+      {
+        TAC <- environment_MSY$TAC
+      }
+      else
+      {
+        TAC <- sum(CMCurrent) # refresh the MP store of TAC among simulations
+      }
+
       TAE   <- karray(rep(0, nfleets), dim=c(nfleets))
       TACE  <- cbind(TAE, TAC)
 
@@ -585,14 +775,14 @@ setMethod("initialize", "Projection",
         PAY[,3]    <- y
 
         #projection years loop includes repeat of first year for rec and initializtion ... seemingly not anymore?
-        if (CppMethod == 0)
+        if (!isMSY_projection && (CppMethod == 0))
         {
           cat(".")
         }
 
         selTS <- sel
 
-        if (MseDef@selAgeRange >= 1)
+        if (selAgeRange >= 1)
         {
           #add an age shift to the selectivity noise
           selAge <- karray(rep(round(selTSSign[,2] * sin((y - nyears - 1) * selTSWaveLen[,2]) * MseDef@selAgeRange), nages), dim=dim(sel))
@@ -615,7 +805,7 @@ setMethod("initialize", "Projection",
           }
         }
 
-        selExp    <- exp(selTSSign[,1] * sin((y-nyears-1) * selTSWaveLen[,1]) * (MseDef@selExpRange))
+        selExp    <- exp(selTSSign[,1] * sin((y-nyears-1) * selTSWaveLen[,1]) * (selExpRange))
         selTS     <- selTS ^ rep(selExp, nages)
         CPUEselTS <- CPUEsel
 
@@ -646,29 +836,32 @@ setMethod("initialize", "Projection",
           }
         }
 
-        # set the bridging Catches between the last OM year and the first MP year
-        firstMPy <- nyears + MseDef@firstMPYr - MseDef@lastCalendarYr
-
-        if (y < firstMPy)
+        if (!isMSY_projection)
         {
-          yBridge <- y - nyears
+          # set the bridging Catches between the last OM year and the first MP year
+          firstMPy <- nyears + MseDef@firstMPYr - MseDef@lastCalendarYr
 
-          if ((yBridge <= length(MseDef@catchBridge)) && (sum(MseDef@catchBridge) > 0))
+          if (y < firstMPy)
           {
-            # use the known aggregate catch imported from the OMd
-            TAC   <- MseDef@catchBridge[yBridge]
-          }
-          else
-          {
-            #use the previous aggregate catch+error
-            TAC   <- TAC * exp(rnorm(length(TAC)) * MseDef@catchBridgeCV - 0.5 * MseDef@catchBridgeCV ^ 2)
-          }
+            yBridge <- y - nyears
 
-          TAE   <- karray(rep(0, nfleets), dim=c(nfleets))
-          TACE  <- list(TAEbyF=TAE, TAC=TAC)
+            if ((yBridge <= length(MseDef@catchBridge)) && (sum(MseDef@catchBridge) > 0))
+            {
+              # use the known aggregate catch imported from the OMd
+              TAC   <- MseDef@catchBridge[yBridge]
+            }
+            else
+            {
+              #use the previous aggregate catch+error
+              TAC   <- TAC * exp(rnorm(length(TAC)) * MseDef@catchBridgeCV - 0.5 * MseDef@catchBridgeCV ^ 2)
+            }
+
+            TAE   <- karray(rep(0, nfleets), dim=c(nfleets))
+            TACE  <- list(TAEbyF=TAE, TAC=TAC)
+          }
         }
 
-        if (y %in% upyrs)
+        if (!isMSY_projection && (y %in% upyrs))
         {
           #CPUEobsY based on merger of observed and simulated CPUE (proportional to IObs in projections)
           #calculate CPUE up to but not including the current year (MP does not necessarily have access to this value depending on data lag)
@@ -736,38 +929,45 @@ setMethod("initialize", "Projection",
           TACE <- get(MP)(pset)
         }
 
-        # Unpack MP TACs and TAEs
-        TAC    <- TACE$TAC
-        TAEbyF <- karray(TACE$TAEbyF, dim=c(nfleets))
-        #if the fleet has a TAE, this vector is used to exclude the fleet from the TAC extractions
-
-        .Object@TAC[y]     <- TAC
-        .Object@TAEbyF[y,] <- TAEbyF
-
-        if ((length(MseDef@ImplErrBias) > 1) && (y >= firstMPy))
-        {
-          if (MseDef@ImplErrBias[y - nyears] < 0)
-          {
-            TAC              <- 0.0
-            TAEbyF           <- RecentEbyF * abs(MseDef@ImplErrBias[y - nyears])
-            UpdateRecentEbyF <- FALSE
-          }
-          else if (MseDef@ImplErrBias[y - nyears] > 0)
-          {
-            TAC              <- TAC * MseDef@ImplErrBias[y - nyears]
-            UpdateRecentEbyF <- TRUE
-          }
-          else
-          {
-            UpdateRecentEbyF <- TRUE
-          }
-        }
-
         # Start of annual projection
         #---------------------------------------------------------------------
-        #Spatial devs in rec (affect spatial distribution but not total; streamlined implementationsame for all sims, pops, area)
-        recSpatialDevs <- karray(exp(ssModelData@ReccvR * rnorm(length(Recdist))), dim=dim(Recdist))
-        recSpatialDevs <- recSpatialDevs / karray(rep(apply(recSpatialDevs, FUN=mean, MARGIN=c(1)), nareas),dim=dim(Recdist))
+        if (isMSY_projection)
+        {
+          recSpatialDevs <- karray(1.0, dim=dim(Recdist))
+        }
+        else
+        {
+          # Unpack MP TACs and TAEs
+          TAC    <- TACE$TAC
+          TAEbyF <- karray(TACE$TAEbyF, dim=c(nfleets))
+          #if the fleet has a TAE, this vector is used to exclude the fleet from the TAC extractions
+
+          .Object@TAC[y]     <- TAC
+          .Object@TAEbyF[y,] <- TAEbyF
+
+          if ((length(MseDef@ImplErrBias) > 1) && (y >= firstMPy))
+          {
+            if (MseDef@ImplErrBias[y - nyears] < 0)
+            {
+              TAC              <- 0.0
+              TAEbyF           <- RecentEbyF * abs(MseDef@ImplErrBias[y - nyears])
+              UpdateRecentEbyF <- FALSE
+            }
+            else if (MseDef@ImplErrBias[y - nyears] > 0)
+            {
+              TAC              <- TAC * MseDef@ImplErrBias[y - nyears]
+              UpdateRecentEbyF <- TRUE
+            }
+            else
+            {
+              UpdateRecentEbyF <- TRUE
+            }
+          }
+
+          #Spatial devs in rec (affect spatial distribution but not total; streamlined implementationsame for all sims, pops, area)
+          recSpatialDevs <- karray(exp(ssModelData@ReccvR * rnorm(length(Recdist))), dim=dim(Recdist))
+          recSpatialDevs <- recSpatialDevs / karray(rep(apply(recSpatialDevs, FUN=mean, MARGIN=c(1)), nareas),dim=dim(Recdist))
+        }
 
         if (CppMethod != 0)
         {
@@ -1075,10 +1275,47 @@ setMethod("initialize", "Projection",
 
       } # projection year loop
 
-      # call the MP as a hook to plot diagnostics at the end of a run.
-      # "complete" key will be defined.
-      pset$complete <- TRUE
-      get(MP)(pset)
+      if (isMSY_projection)
+      {
+        # Update ECurrent to include required effort scaling to obtain TAC
+        ECurrent <- RecentEbyF
+
+        if (environment_MSY$optimisation)
+        {
+          BMSY <- sum(karray(C_Y[targpop,,,,], c(length(targpop),nages,nsubyears,nareas,nfleets)) *
+                      karray(Wt_age[targpop,,nyears], c(length(targpop),nages,nsubyears,nareas,nfleets)))
+
+          environment_MSY$Likelihood <- -log(BMSY)
+        }
+        else
+        {
+          environment_MSY$ReferencePoints <- MSYreferencePoints(ECurrent,
+                                                                sel,
+                                                                M,
+                                                                C_Y,
+                                                                SSB0,
+                                                                B0,
+                                                                N_Y,
+                                                                NBefore_Y,
+                                                                SSN_Y,
+                                                                Wt_age,
+                                                                #Wt_age_SB,
+                                                                targpop,
+                                                                nsubyears,
+                                                                npop,
+                                                                nages,
+                                                                nareas,
+                                                                nfleets,
+                                                                FAgeRange)
+        }
+      }
+      else
+      {
+        # call the MP as a hook to plot diagnostics at the end of a run.
+        # "complete" key will be defined.
+        pset$complete <- TRUE
+        get(MP)(pset)
+      }
 
       # Store results ...
       # archive timing may not be entirely consistent with SS for all quantitities,
