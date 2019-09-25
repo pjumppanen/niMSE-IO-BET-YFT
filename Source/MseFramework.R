@@ -499,6 +499,24 @@ setMethod("setProjectionYears", c("MseFramework"),
 
 # -----------------------------------------------------------------------------
 
+setGeneric("setRecommendedTACbyF", function(.Object, ...) standardGeneric("setRecommendedTACbyF"))
+
+setMethod("setRecommendedTACbyF", c("MseFramework"),
+  function(.Object, recommendedTACbyF, Report=FALSE, EffortCeiling=as.double(20.0), TACTime=0.5, rULim=0.5)
+  {
+    .Object@MseDef@recommendedTACbyF <- recommendedTACbyF
+
+    for (cn in 1:length(.Object@StockSynthesisModels))
+    {
+      .Object@StockSynthesisModels[[cn]]@RefVars <- new("ReferenceVars", .Object@StockSynthesisModels[[cn]]@ModelData, .Object@MseDef@MseDef, Report, EffortCeiling, TACTime, rULim)
+    }
+
+    return (.Object)
+  }
+)
+
+# -----------------------------------------------------------------------------
+
 setGeneric("getMPs", function(.Object, ...) standardGeneric("getMPs"))
 
 setMethod("getMPs", c("MseFramework"),

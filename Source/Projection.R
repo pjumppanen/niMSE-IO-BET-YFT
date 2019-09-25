@@ -861,6 +861,25 @@ setMethod("initialize", "Projection",
           }
         }
 
+        # Calculate new CMCurrent based on recommended TAC by fishery.
+        # Note that this only works for all fisheries under TAC.
+        if ((y                                   == firstMPy) &&
+            (length(MseDef@recommendedTACbyF)    == nfleets ) &&
+            all(!is.na(MseDef@recommendedTACbyF) == TRUE))
+        {
+          SAFl <- as.matrix(expand.grid(1:nsubyears,1:nareas,1:nfleets))
+          Fl   <- SAFl[,c(3)]
+
+          # Calculate a new CMCurrent that has the allocation of recommendedTACbyF
+          # by the subyear-area distribution of the original CMCurrent and set
+          # the new starting TAC
+          CMCurrent_byFl  <- apply(ssModelData@CMCurrent, sum, MARGIN=c(1:2))
+          CMCurrent[SAFl] <- MseDef@recommendedTACbyF[F1] * ssModelData@CMCurrent[SAFl] / CMCurrent_byFl[Fl]
+          TAC             <- sum(CMCurrent)
+          TAE             <- karray(rep(0, nfleets), dim=c(nfleets))
+          TACE            <- list(TAEbyF=TAE, TAC=TAC)
+        }
+
         if (!isMSY_projection && (y %in% upyrs))
         {
           #CPUEobsY based on merger of observed and simulated CPUE (proportional to IObs in projections)
@@ -933,7 +952,8 @@ setMethod("initialize", "Projection",
         #---------------------------------------------------------------------
         if (isMSY_projection)
         {
-          recSpatialDevs <- karray(1.0, dim=dim(Recdist))
+          recSpatialDevs   <- karray(1.0, dim=dim(Recdist))
+          UpdateRecentEbyF <- TRUE
         }
         else
         {
@@ -1277,9 +1297,6 @@ setMethod("initialize", "Projection",
 
       if (isMSY_projection)
       {
-        # Update ECurrent to include required effort scaling to obtain TAC
-        ECurrent <- RecentEbyF
-
         if (environment_MSY$optimisation)
         {
           BMSY <- sum(karray(C_Y[targpop,,,,], c(length(targpop),nages,nsubyears,nareas,nfleets)) *
@@ -1289,6 +1306,12 @@ setMethod("initialize", "Projection",
         }
         else
         {
+          SAFl <- as.matrix(expand.grid(1:nsubyears,1:nareas,1:nfleets))
+          Fl   <- SAFl[,c(3)]
+
+          # Update ECurrent to include required effort scaling to obtain TAC
+          ECurrent[SAFl] <- RecentEbyF[F1] * ECurrent[SAFl]
+
           environment_MSY$ReferencePoints <- MSYreferencePoints(ECurrent,
                                                                 sel,
                                                                 M,
