@@ -20,13 +20,14 @@ setClass("ReferenceVars",
 setMethod("initialize", "ReferenceVars",
   function(.Object, ssModelData=NULL, MseDef=NULL, Report=FALSE, EffortCeiling=as.double(20.0), TACTime=0.5, rULim=0.5)
   {
-    getMSYrefs <- function(.Object, CppMethod, nyears=40, toly=1e-1)
+    getMSYrefs <- function(.Object, CppMethod, nyears=40)
     {
+      TAC  <- sum(ssModelData@CMCurrent)
+
       # -----------------------------------------------------------------------
 
       objective <- function(par, reportIndicators)
       {
-        browser()
         environment_MSY <- environment()
 
         if (reportIndicators)
@@ -38,7 +39,7 @@ setMethod("initialize", "ReferenceVars",
           environment_MSY$optimisation <- TRUE
         }
 
-        environment_MSY$TAC <- par
+        environment_MSY$TAC <- TAC * exp(par)
 
         Proj <- new("Projection",
                     ssModelData=ssModelData,
@@ -46,7 +47,7 @@ setMethod("initialize", "ReferenceVars",
                     MseDef=MseDef,
                     sim=1,
                     MP="",
-                    interval,
+                    interval=3,
                     Report=Report,
                     CppMethod=CppMethod,
                     EffortCeiling=EffortCeiling,
@@ -70,20 +71,15 @@ setMethod("initialize", "ReferenceVars",
 
       # -----------------------------------------------------------------------
 
-      TAC  <- sum(ssModelData@CMCurrent)
-
       test <- optimize(objective,
-                       interval=log(c(TAC * 0.01, TAC * 100.0)),
+                       interval=log(c(0.01, 100.0)),
                        reportIndicators=FALSE,
-                       tol=toly)
+                       tol=1e-1)
 
-      browser()
-      best <- objective(test$minimum,
-                        reportIndicators=TRUE)
+      best <- objective(test$minimum, reportIndicators=TRUE)
 
-      browser()
-      print("TAC at MSY:")
-      print(test$minimum)
+      print(sprintf("TAC at MSY: %.2f, MSY: %.2f, MSY / TAC: %.2f", TAC * exp(test$minimum), best[1], best[1] / (TAC * exp(test$minimum))))
+      flush.console()
 
       return (best)
     }

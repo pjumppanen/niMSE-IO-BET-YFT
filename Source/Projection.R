@@ -37,7 +37,7 @@ setMethod("initialize", "Projection",
       stop()
     }
 
-    if (class(RefVars) != "ReferenceVars")
+    if (is.null(environment_MSY) && (class(RefVars) != "ReferenceVars"))
     {
       print(paste("ERROR: Could not create Projection.",deparse(substitute(RefVars)),"not of class ReferenceVars"))
       stop()
@@ -164,8 +164,8 @@ setMethod("initialize", "Projection",
       # have nsubyear + 1 entries for the subyear index with the +1 th entry
       # corresponding to the first time step of the following year. In all cases the
       # simulation index is removed / not present.
-      MSY    <- sum(karray(C[targpop,,,,], c(length(targpop), nages, nsubyears, nareas, nfleets)) * karray(Wt_age[targpop,], c(length(targpop),nages,nsubyears,nareas,nfleets)))
-      BMSY   <- sum(karray((NBefore[targpop,,1,]), c(length(targpop),nages,nareas)) * karray(Wt_age[targpop,], c(length(targpop),nages,nareas)))
+      MSY    <- sum(karray(C[targpop,,,,], c(length(targpop), nages, nsubyears, nareas, nfleets)) * karray(Wt_age[targpop,,nyears], c(length(targpop),nages,nsubyears,nareas,nfleets)))
+      BMSY   <- sum(karray((NBefore[targpop,,1,]), c(length(targpop),nages,nareas)) * karray(Wt_age[targpop,,nyears], c(length(targpop),nages,nareas)))
       softmp <- karray(NA, dim=c(nages,nsubyears,nareas,nfleets))
 
       for(im in 1:nsubyears)
@@ -187,7 +187,7 @@ setMethod("initialize", "Projection",
       # this is probably wrong and not a good option anyway
       VBMSY <- sum(karray(rep(sof,each=length(targpop)), c(length(targpop),nages,nsubyears,nareas)) *
                    karray((N[targpop,,1:nsubyears,]), c(length(targpop),nages,nsubyears,nareas)) *
-                   karray(rep(Wt_age[targpop,],nsubyears), c(length(targpop),nages,nsubyears,nareas)))
+                   karray(rep(Wt_age[targpop,,nyears],nsubyears), c(length(targpop),nages,nsubyears,nareas)))
 
       # All this stuff used to calculate FMSY (summed over regions, mean over age and season)
       NsoRbyPAM <- apply(NBefore[,,,], FUN=sum, MARGIN=c(1:3))
@@ -205,14 +205,14 @@ setMethod("initialize", "Projection",
       ZsoRbyPAM[,,3] <- -log(NsoRbyPAM[,2:(nages-1),4] / NsoRbyPAM[,1:(nages-2),3])
       ZsoRbyPAM[,,4] <- -log(NsoRbyPAM[,2:(nages-1),5] / NsoRbyPAM[,1:(nages-2),4])
 
-      MbyPAM    <- karray(rep(M[,1:(nages-2)],times=nsubyears), dim=c(npop,nages-2,nsubyears))
+      MbyPAM    <- karray(rep(M[,1:(nages-2),nyears],times=nsubyears), dim=c(npop,nages-2,nsubyears))
       FsoRbyPAM <- ZsoRbyPAM - MbyPAM / nsubyears
 
       FMSY1     <- mean(FsoRbyPAM[,FAgeRange[1]:FAgeRange[2],])  # 2:27 = true ages 1:26 (1:26 used by SS)
 
       #potential change to integrated biomass calculation
-      SSBMSY    <- sum(karray(SSN[targpop,,1,],c(length(targpop),nages,nareas)) * karray(Wt_age[targpop,], c(length(targpop),nages,nareas)))
-      #SSBMSY     <- sum(karray(NBefore[targpop,,1,],c(length(targpop),nages,nareas)) * karray(Wt_age_SB[targpop,], c(length(targpop),nages,nareas)))
+      SSBMSY    <- sum(karray(SSN[targpop,,1,],c(length(targpop),nages,nareas)) * karray(Wt_age[targpop,,nyears], c(length(targpop),nages,nareas)))
+      #SSBMSY     <- sum(karray(NBefore[targpop,,1,],c(length(targpop),nages,nareas)) * karray(Wt_age_SB[targpop,,nyears], c(length(targpop),nages,nareas)))
 
       UMSY      <- MSY / VBMSY
       SSBMSY_B0 <- SSBMSY / sum(SSB0[targpop])
@@ -243,7 +243,7 @@ setMethod("initialize", "Projection",
     .Object@nareas    <- nareas
     .Object@nyears    <- allyears
     .Object@nsubyears <- nsubyears
-    .Object@which     <- sim
+    .Object@which     <- as.integer(sim)
 
     .Object@F             <- karray(as.double(NA), dim=c(allyears))
     .Object@SSB           <- karray(as.double(NA), dim=c(npop, allyears))
@@ -344,11 +344,14 @@ setMethod("initialize", "Projection",
         m <- 1
 
         PAYMR <- as.matrix(expand.grid(1:npop,1:nages,y,m,1:nareas))    # Set up some karray indexes
-        PAMR  <- PAYMR[,c(1,2,3,5)]
+        PAMR  <- PAYMR[,c(1,2,4,5)]
         PA    <- PAYMR[,c(1,2)]
         P     <- PAYMR[,c(1)]
         PAR   <- PAYMR[,c(1,2,5)]
         PAY   <- PAYMR[,c(1,2,3)]
+
+        SSB_Y <- karray(as.double(NA),c(npop,nages,nsubyears,nareas))
+        B_Y   <- karray(as.double(NA),c(npop,nages,nsubyears,nareas))
 
         if (nareas > 1)
         {
@@ -393,6 +396,8 @@ setMethod("initialize", "Projection",
       }
 
       recruitment_params <- findWindowedAR_params(ssModelData@RecACT)
+      Recdevs            <- karray(as.double(NA), dim=c(ssModelData@npop, allyears * length(ssModelData@Recsubyr)))
+      PTm                <- as.matrix(expand.grid(1:ssModelData@npop, 1:(allyears * length(ssModelData@Recsubyr))))
 
       if (isMSY_projection)
       {
@@ -422,10 +427,8 @@ setMethod("initialize", "Projection",
         }
 
         # We attach any recruitment scaling (recuitment shock implementation) to the recruitment deviates.
-        Recdevs   <- karray(as.double(NA), dim=c(ssModelData@npop, allyears * length(ssModelData@Recsubyr)))
-        PTm       <- as.matrix(expand.grid(1:ssModelData@npop, 1:(allyears * length(ssModelData@Recsubyr))))
-        P         <- PTm[,c(1)]
-        Y         <- floor((PTm[,c(2)] - 1) / length(ssModelData@Recsubyr)) + 1  # Calculate year from timestep
+        P <- PTm[,c(1)]
+        Y <- floor((PTm[,c(2)] - 1) / length(ssModelData@Recsubyr)) + 1  # Calculate year from timestep
 
         if (length(MseDef@RecScale) == 1)
         {
@@ -478,9 +481,19 @@ setMethod("initialize", "Projection",
       nSpawnPerYr <- length(ssModelData@Recsubyr)  # rec Index for more than 1 rec per year
 
       # Initialise starting population. Note N_Y initialisation redundant for R case but
-      # needed for C++ case
-      NBefore_Y[,,1,] <- NBeforeInit
-      N_Y[,,1,]       <- NBeforeInit
+      # needed for C++ case. For MSY projection we increase the starting population size
+      # to ensure the stock doesn't crash on high F when the starting state is overfished.
+      # Without accounting for this the MSY projection could become biased low.
+      if (isMSY_projection)
+      {
+        NBefore_Y[,,1,] <- NBeforeInit * 3
+        N_Y[,,1,]       <- NBeforeInit * 3
+      }
+      else
+      {
+        NBefore_Y[,,1,] <- NBeforeInit
+        N_Y[,,1,]       <- NBeforeInit
+      }
 
       # Matrix index arrays used in historic and projection R code
       PAYMRF <- as.matrix(expand.grid(1:npop, 1:nages, initYear, 1, 1:nareas, 1:nfleets))
@@ -707,9 +720,12 @@ setMethod("initialize", "Projection",
       IrndDevs         <- karray(rnorm(allyears, 0, rep(Iimp, allyears)), c(allyears))
       IrndDevs[nyears] <- ssModelData@initIDev #initial dev based on historical obs
 
-      for (t in (nyears + 1):allyears)
+      if (length(ssModelData@IAC) != 0)
       {
-        IrndDevs[t] <- ssModelData@IAC * IrndDevs[t - 1] + IrndDevs[t] * sqrt(1.0 - ssModelData@IAC ^ 2)
+        for (t in (nyears + 1):allyears)
+        {
+          IrndDevs[t] <- ssModelData@IAC * IrndDevs[t - 1] + IrndDevs[t] * sqrt(1.0 - ssModelData@IAC ^ 2)
+        }
       }
 
       Ierr      <- exp(IrndDevs) * ssModelData@ITrend
@@ -759,7 +775,7 @@ setMethod("initialize", "Projection",
       }
 
       TAE   <- karray(rep(0, nfleets), dim=c(nfleets))
-      TACE  <- cbind(TAE, TAC)
+      TACE  <- list(TAEbyF=TAE, TAC=TAC)
 
       .Object@TAC[initYear]     <- TAC
       .Object@TAEbyF[initYear,] <- TAE
@@ -816,11 +832,11 @@ setMethod("initialize", "Projection",
 
         if ((y %in% c(nyears + proyears)))
         {
-          #plot some original and  modified selectivities
-          par(mfrow=c(4,4))
-
           if (Report)
           {
+            #plot some original and  modified selectivities
+            par(mfrow=c(4,4))
+
             # plot of selectivity temporal variability
             for (fi in 1:nfleets)
             {
@@ -873,8 +889,17 @@ setMethod("initialize", "Projection",
           # Calculate a new CMCurrent that has the allocation of recommendedTACbyF
           # by the subyear-area distribution of the original CMCurrent and set
           # the new starting TAC
-          CMCurrent_byFl  <- apply(ssModelData@CMCurrent, sum, MARGIN=c(1:2))
-          CMCurrent[SAFl] <- MseDef@recommendedTACbyF[F1] * ssModelData@CMCurrent[SAFl] / CMCurrent_byFl[Fl]
+          if (isMSY_projection)
+          {
+            recommendedTACbyF <- TAC * MseDef@recommendedTACbyF / sum(MseDef@recommendedTACbyF)
+          }
+          else
+          {
+            recommendedTACbyF <- MseDef@recommendedTACbyF
+          }
+
+          CMCurrent_byFl  <- apply(ssModelData@CMCurrent, sum, MARGIN=c(3))
+          CMCurrent[SAFl] <- recommendedTACbyF[Fl] * ssModelData@CMCurrent[SAFl] / (CMCurrent_byFl[Fl] + 1e-3)
           TAC             <- sum(CMCurrent)
           TAE             <- karray(rep(0, nfleets), dim=c(nfleets))
           TACE            <- list(TAEbyF=TAE, TAC=TAC)
@@ -952,6 +977,9 @@ setMethod("initialize", "Projection",
         #---------------------------------------------------------------------
         if (isMSY_projection)
         {
+          TAC    <- TACE$TAC
+          TAEbyF <- karray(TACE$TAEbyF, dim=c(nfleets))
+
           recSpatialDevs   <- karray(1.0, dim=dim(Recdist))
           UpdateRecentEbyF <- TRUE
         }
@@ -1299,10 +1327,11 @@ setMethod("initialize", "Projection",
       {
         if (environment_MSY$optimisation)
         {
-          BMSY <- sum(karray(C_Y[targpop,,,,], c(length(targpop),nages,nsubyears,nareas,nfleets)) *
-                      karray(Wt_age[targpop,,nyears], c(length(targpop),nages,nsubyears,nareas,nfleets)))
+          MSY <- sum(karray(C_Y[targpop,,,,], c(length(targpop),nages,nsubyears,nareas,nfleets)) *
+                     karray(Wt_age[targpop,,nyears], c(length(targpop),nages,nsubyears,nareas,nfleets)))
 
-          environment_MSY$Likelihood <- -log(BMSY)
+          environment_MSY$Likelihood <- -log(MSY) + 100.0 * log(TAC / MSY)
+#          environment_MSY$Likelihood <- -log(MSY)
         }
         else
         {
@@ -1310,7 +1339,7 @@ setMethod("initialize", "Projection",
           Fl   <- SAFl[,c(3)]
 
           # Update ECurrent to include required effort scaling to obtain TAC
-          ECurrent[SAFl] <- RecentEbyF[F1] * ECurrent[SAFl]
+          ECurrent[SAFl] <- RecentEbyF[Fl] * ECurrent[SAFl]
 
           environment_MSY$ReferencePoints <- MSYreferencePoints(ECurrent,
                                                                 sel,

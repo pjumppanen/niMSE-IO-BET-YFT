@@ -146,7 +146,7 @@ setMethod("initialize", "MseFramework",
 
         clusterEvalQ(cl, eval(parse("Source/MseMain.R")))
 
-        .Object@StockSynthesisModels <- parLapply(cl, JobList, FUN=runJob, .Object@MseDef, Report, UseMSYss, UseCluster)
+        .Object@StockSynthesisModels <- parLapply(cl, JobList, fun=runJob, .Object@MseDef, Report, UseMSYss, UseCluster)
 
         closeCluster()
 
@@ -502,13 +502,52 @@ setMethod("setProjectionYears", c("MseFramework"),
 setGeneric("setRecommendedTACbyF", function(.Object, ...) standardGeneric("setRecommendedTACbyF"))
 
 setMethod("setRecommendedTACbyF", c("MseFramework"),
-  function(.Object, recommendedTACbyF, Report=FALSE, EffortCeiling=as.double(20.0), TACTime=0.5, rULim=0.5)
+  function(.Object, recommendedTACbyF, Report=FALSE, UseCluster=NA, EffortCeiling=as.double(20.0), TACTime=0.5, rULim=0.5)
   {
-    .Object@MseDef@recommendedTACbyF <- recommendedTACbyF
+    # update catch distribution recommendation vector
+    .Object@MseDef@recommendedTACbyF <- as.karray(recommendedTACbyF)
 
-    for (cn in 1:length(.Object@StockSynthesisModels))
+    # callback function to update the MSY projection
+    runMSY_projection <- function(StockSynthesisModel, MseDef, Report, EffortCeiling, TACTime, rULim, UseCluster)
     {
-      .Object@StockSynthesisModels[[cn]]@RefVars <- new("ReferenceVars", .Object@StockSynthesisModels[[cn]]@ModelData, .Object@MseDef@MseDef, Report, EffortCeiling, TACTime, rULim)
+      if (UseCluster)
+      {
+        beginLog(StockSynthesisModel@ModelData@which)
+      }
+
+      StockSynthesisModel@RefVars <- new("ReferenceVars", StockSynthesisModel@ModelData, MseDef, Report, EffortCeiling, TACTime, rULim)
+
+      if (UseCluster)
+      {
+        endLog()
+      }
+
+      return (StockSynthesisModel)
+    }
+
+    # update MSY projections using cluster if requested
+    nJobs <- length(.Object@StockSynthesisModels)
+
+    if (is.na(UseCluster))
+    {
+      UseCluster <- .Object@MseDef@UseCluster
+    }
+
+    if (UseCluster && (nJobs > 1))
+    {
+      cl <- openCluster(nJobs)
+
+      clusterEvalQ(cl, eval(parse("Source/MseMain.R")))
+
+      .Object@StockSynthesisModels <- parLapply(cl, .Object@StockSynthesisModels, fun=runMSY_projection, .Object@MseDef, Report, EffortCeiling, TACTime, rULim, UseCluster)
+
+      closeCluster()
+
+      lapply(.Object@StockSynthesisModels, FUN=function(StockSynthesisModel) {printLog(StockSynthesisModel@ModelData@which)})
+    }
+    else
+    {
+      .Object@StockSynthesisModels <- lapply(.Object@StockSynthesisModels, FUN=runMSY_projection, .Object@MseDef, Report, EffortCeiling, TACTime, rULim, FALSE)
     }
 
     return (.Object)
