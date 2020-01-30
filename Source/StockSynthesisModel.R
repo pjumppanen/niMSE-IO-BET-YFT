@@ -13,7 +13,7 @@ setClass("StockSynthesisModel",
 # -----------------------------------------------------------------------------
 
 setMethod("initialize", "StockSynthesisModel",
-  function(.Object, MseDef=NULL, which=-1, seed=-1, Report=FALSE, UseMSYss=0)
+  function(.Object, MseDef=NULL, which=-1, seed=-1, Report=FALSE, UseMSYss=0, nbackupyears=0)
   {
     if (is.null(MseDef))
     {
@@ -38,8 +38,9 @@ setMethod("initialize", "StockSynthesisModel",
 
       ModelData <- new("StockSynthesisModelData")
 
-      .Object@ModelData@InitSeed <- as.integer(seed)
-      .Object@ModelData@which    <- as.integer(which)
+      .Object@ModelData@InitSeed      <- as.integer(seed)
+      .Object@ModelData@which         <- as.integer(which)
+      .Object@ModelData@nbackupyears  <- as.integer(nbackupyears)
 
       set.seed(.Object@ModelData@InitSeed)
 
@@ -132,7 +133,6 @@ setMethod("initialize", "StockSynthesisModel",
 
       .Object@ModelData@FAgeRange    <- karray(as.double(NA), dim=c(2))
 
-
       #should probably force nCPUE = nareas (?)
       .Object@ModelData@CPUEFleetNums   <- karray(ssMod$fleet_ID[!ssMod$IsFishFleet], dim=c(.Object@ModelData@nCPUE))
       .Object@ModelData@CPUEFleetAreas  <- karray(ssMod$fleet_area[!ssMod$IsFishFleet], dim=c(.Object@ModelData@nCPUE))
@@ -148,6 +148,9 @@ setMethod("initialize", "StockSynthesisModel",
       .Object@ModelData@Frepss          <- karray(as.double(NA), dim=c(allyears))
 
       .Object@ModelData@ITrend          <- karray(as.double(1.0), dim=c(allyears))
+
+      .Object@ModelData@CPUEmpY         <- karray(NA)
+      .Object@ModelData@CPUEmpNormYrs   <- as.numeric(NA)
 
       # --- set up M -------
       #assumes the last year vector is the one to use in projections, ignores sex, morphs, temporal varying growth)
@@ -467,7 +470,8 @@ setMethod("initialize", "StockSynthesisModel",
       }
 
       # This is the N by SPAYMR in the last year of the assessment, that is re-iterated in the first year of projections
-      .Object@ModelData@NBeforeInit <- NBefore[,,.Object@ModelData@nyears,1,]
+
+      .Object@ModelData@NBeforeInit <- NBefore[,,.Object@ModelData@nyears - .Object@ModelData@nbackupyears,1,]
 
       .Object@ModelData@SSBAss[] <- apply(karray(SSN[,,keep(1:allyears),.Object@ModelData@nsubyears,], c(.Object@ModelData@npop,.Object@ModelData@nages,allyears,.Object@ModelData@nareas)) * karray(.Object@ModelData@Wt_age[,,1:allyears], c(.Object@ModelData@npop,.Object@ModelData@nages,allyears,.Object@ModelData@nareas)), c(1,3), sum)
 
@@ -707,13 +711,17 @@ setMethod("initCPUE_SeriesFrom", c("StockSynthesisModel"),
 # -----------------------------------------------------------------------------
 
 setMethod("runMse", c("StockSynthesisModel"),
-  function(.Object, MseDef, MPs, tune=NA, interval=3, Report=FALSE, CppMethod=NA, cluster=NA, EffortCeiling = as.double(20.0), TACTime = 0.5, rULim = 0.5)
+  function(.Object, MseDef, MPs, tune=NA, interval=3, Report=FALSE, CppMethod=NA, cluster=NA, EffortCeiling = as.double(20.0), TACTime = 0.5, rULim = 0.5, CPUEmpY = NA, CPUEmpNormYrs = NA)
   {
     if (class(MseDef) != "MseDefinition")
     {
       print(paste("ERROR: Could not create StockSynthesisModel.",deparse(substitute(MseDef)),"not of class MseDefinition"))
       stop()
     }
+
+    # Set MP CPUE series and normalisation years
+    .Object@ModelData@CPUEmpY       <- karray(CPUEmpY)
+    .Object@ModelData@CPUEmpNormYrs <- as.numeric(CPUEmpNormYrs)
 
     # CPUE auto-correlation
     .Object@ModelData@IAC <- MseDef@IACin     #input value; could extract from each OM file

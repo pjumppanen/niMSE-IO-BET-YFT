@@ -226,17 +226,18 @@ setMethod("initialize", "Projection",
 
     .Object@Log <- list()
 
-    npop      <- ssModelData@npop
-    nareas    <- ssModelData@nareas
-    nyears    <- ssModelData@nyears
-    nsubyears <- ssModelData@nsubyears
-    proyears  <- ssModelData@proyears
-    nages     <- ssModelData@nages
-    nfleets   <- ssModelData@nfleets
-    nCPUE     <- ssModelData@nCPUE
-    targpop   <- as.integer(MseDef@targpop)
-    allyears  <- nyears + proyears
-    FAgeRange <- c(ssModelData@FAgeRange[1], ssModelData@FAgeRange[2])
+    npop          <- ssModelData@npop
+    nareas        <- ssModelData@nareas
+    nyears        <- ssModelData@nyears
+    nsubyears     <- ssModelData@nsubyears
+    proyears      <- ssModelData@proyears
+    nages         <- ssModelData@nages
+    nfleets       <- ssModelData@nfleets
+    nCPUE         <- ssModelData@nCPUE
+    targpop       <- as.integer(MseDef@targpop)
+    allyears      <- nyears + proyears
+    FAgeRange     <- c(ssModelData@FAgeRange[1], ssModelData@FAgeRange[2])
+    nbackupyears  <- ssModelData@nbackupyears
 
     .Object@npop      <- npop
     .Object@nfleets   <- nfleets
@@ -300,6 +301,7 @@ setMethod("initialize", "Projection",
       sel           <- ssModelData@sel
       mov           <- ssModelData@mov
       CPUEsel       <- ssModelData@CPUEsel
+      qCPUE         <- ssModelData@qCPUE
 
       CAAF[,1:initYear,]                        <- ssModelData@CAAFss[,1:initYear,]
       .Object@SSB[,1:initYear]                  <- ssModelData@SSBAss[,1:initYear]
@@ -475,7 +477,7 @@ setMethod("initialize", "Projection",
         cat("\n")
       }
 
-      y           <- initYear
+      y           <- initYear - nbackupyears
 
       mm          <- nsubyears
       nSpawnPerYr <- length(ssModelData@Recsubyr)  # rec Index for more than 1 rec per year
@@ -496,7 +498,7 @@ setMethod("initialize", "Projection",
       }
 
       # Matrix index arrays used in historic and projection R code
-      PAYMRF <- as.matrix(expand.grid(1:npop, 1:nages, initYear, 1, 1:nareas, 1:nfleets))
+      PAYMRF <- as.matrix(expand.grid(1:npop, 1:nages, y, 1, 1:nareas, 1:nfleets))
       PAMRF  <- PAYMRF[,c(1,2,4,5,6)]
       MRF    <- PAYMRF[,c(4,5,6)]
       PARF   <- PAYMRF[,c(1,2,5,6)]
@@ -506,7 +508,7 @@ setMethod("initialize", "Projection",
       AR     <- PAYMRF[,c(2,5)]
       RF     <- PAYMRF[,c(5,6)]
 
-      PAYMR  <- as.matrix(expand.grid(1:npop, 1:nages, initYear, 1, 1:nareas))
+      PAYMR  <- as.matrix(expand.grid(1:npop, 1:nages, y, 1, 1:nareas))
       PAMR   <- PAYMR[,c(1,2,4,5)]
       PAY    <- PAYMR[,c(1,2,3)]
       PAR    <- PAYMR[,c(1,2,5)]
@@ -677,8 +679,8 @@ setMethod("initialize", "Projection",
 
       #xxx might need to load historical Catch and CL (depending on MP), bypassed for now
 
-      CAAInit     <- karray(NA, dim=c(nages, nyears))
-      CAAIndInit  <- karray(NA, dim=c(nages, nyears)) #Catch-at-age for the abudnance index fleets
+      CAAInit     <- karray(NA, dim=c(nages, nyears - nbackupyears))
+      CAAIndInit  <- karray(NA, dim=c(nages, nyears - nbackupyears)) #Catch-at-age for the abudnance index fleets
 
       if (min(apply(CAAF, c(1,2), sum) < 0, na.rm=T))
       {
@@ -686,8 +688,8 @@ setMethod("initialize", "Projection",
         browser()
       }
 
-      CAAInit[,1:nyears]    <- sampCatch(apply(CAAF[,keep(1:nyears),], c(1,2),sum), MseDef@nCAAobs)                       # need time series for MP
-      CAAIndInit[,1:nyears] <- sampCatch(apply(CAAF[,keep(1:nyears),MseDef@indexFisheries], c(1,2), sum), MseDef@nCAAobs) # need time series for MP
+      CAAInit[,1:y]    <- sampCatch(apply(CAAF[,keep(1:y),], c(1,2),sum), MseDef@nCAAobs)                       # need time series for MP
+      CAAIndInit[,1:y] <- sampCatch(apply(CAAF[,keep(1:y),MseDef@indexFisheries], c(1,2), sum), MseDef@nCAAobs) # need time series for MP
 
       # xxx zzz need to load historical from OM eventually
       nCALbins <- 30
@@ -696,41 +698,91 @@ setMethod("initialize", "Projection",
       #CAL_bins   <- seq(0, max(Linf), length.out=nCALbins)
       CAL_bins   <- seq(0, 200, length.out=nCALbins - 1)
       CAL_bins   <- c(CAL_bins, CAL_bins[nCALbins - 1] * 2)     #add big +bin
-      CALInit    <- karray(NA, dim=c(nCALbins, nyears))
-      CALIndInit <- karray(NA, dim=c(nCALbins, nyears))
+      CALInit    <- karray(NA, dim=c(nCALbins, y))
+      CALIndInit <- karray(NA, dim=c(nCALbins, y))
 
       #DK change to use Len_age rather than recalc
-      #CAL                    <- makeCAL(CAA, Linf=Linf[1,1:nyears], K=K[1,1:nyears], t0=t0[1], CAL_bins)
-      #CAL[,1:nyears]         <- makeCAL(CAA[,1:nyears,drop=FALSE], Len_age[1,,1:nyears], CAL_bins)
-      CALInit[,1:nyears]     <- makeCAL(CAAInit[,1:nyears], Len_age_mid[1,,1:nyears], CAL_bins)
-      #CALLL10[,1:nyears]     <- makeCAL(CAALL10[,1:nyears,drop=FALSE], Len_age[1,,1:nyears], CAL_bins)
-      CALIndInit[,1:nyears]  <- makeCAL(CAAIndInit[,1:nyears], Len_age_mid[1,,1:nyears], CAL_bins)
+      #CAL               <- makeCAL(CAA, Linf=Linf[1,1:y], K=K[1,1:y], t0=t0[1], CAL_bins)
+      #CAL[,1:y]         <- makeCAL(CAA[,1:y,drop=FALSE], Len_age[1,,1:y], CAL_bins)
+      CALInit[,1:y]     <- makeCAL(CAAInit[,1:y], Len_age_mid[1,,1:y], CAL_bins)
+      #CALLL10[,1:y]     <- makeCAL(CAALL10[,1:y,drop=FALSE], Len_age[1,,1:y], CAL_bins)
+      CALIndInit[,1:y]  <- makeCAL(CAAIndInit[,1:y], Len_age_mid[1,,1:y], CAL_bins)
 
-      CAA     <- CAAInit
-      CAAInd  <- CAAIndInit
-      CAL     <- CALInit
-      CALInd  <- CALIndInit
+      CAA    <- CAAInit
+      CAAInd <- CAAIndInit
+      CAL    <- CALInit
+      CALInd <- CALIndInit
+      Ibeta  <- exp(runif(1, log(MseDef@Ibeta[1]), log(MseDef@Ibeta[2])))
 
       # Initialise observation model errors
       Cimp <- runif(1, MseDef@Ccv[1], MseDef@Ccv[2])
       Cb   <- trlnorm(1, MseDef@Cbmean, MseDef@Cbcv)
       Cerr <- karray(trlnorm(allyears, rep(Cb, allyears), rep(Cimp, allyears)), c(allyears))
-      Iimp <- runif(1, MseDef@Icv[1], MseDef@Icv[2])
+
+      if (any(!is.na(ssModelData@CPUEmpY)))
+      {
+        # Initialise IrndDevs based on supplied CPUE sequence using determined Icv, IAC, initIDev and qCPUE
+        .Object@CPUEobsY[1:initYear] <- ssModelData@CPUEmpY[1:initYear]
+
+        # Re-normalization by pre-defined period
+        if (any(is.na(ssModelData@CPUEmpNormYrs)))
+        {
+          CPUEmpNormYrs <- c(1, nyears)
+        }
+        else
+        {
+          CPUEmpNormYrs <- ssModelData@CPUEmpNormYrs - MseDef@firstCalendarYr + 1
+        }
+
+        MeanMP_CPUE   <- mean(ssModelData@CPUEmpY[CPUEmpNormYrs[1]:CPUEmpNormYrs[2]], na.rm=TRUE)
+        MeanObsCPUE   <- mean(ssModelData@CPUEobsY[CPUEmpNormYrs[1]:CPUEmpNormYrs[2]], na.rm=TRUE)
+        NormMP_CPUE   <- ssModelData@CPUEmpY[1:initYear] / MeanMP_CPUE
+        NormObsCPUE   <- ssModelData@CPUEobsY[1:initYear] / MeanObsCPUE
+        DevsCPUE      <- log(NormMP_CPUE) - log(NormObsCPUE)
+        MPcpueRMSE    <- sqrt(mean(DevsCPUE ^ 2, na.rm = TRUE))
+
+        # remove missing observations calculations
+        IdxA          <- CPUEmpNormYrs[1]:(CPUEmpNormYrs[2] - 1)
+        IdxB          <- (CPUEmpNormYrs[1] + 1):CPUEmpNormYrs[2]
+        ValidA        <- which(!is.na(NormMP_CPUE[IdxA]))
+        ValidB        <- which(!is.na(NormMP_CPUE[IdxB]))
+        valid         <- intersect(ValidA, ValidB)
+        lenValid      <- length(valid)
+
+        # calculate the starting point for the CPUE deviations
+        lastYrIndices <- c(valid[lenValid - 3], valid[lenValid - 2], valid[lenValid - 1], valid[lenValid])
+        initIDev      <- log(sum(ssModelData@CPUEobsY[IdxB[lastYrIndices]]) / sum(ssModelData@CPUEmpY[IdxB[lastYrIndices]]))
+        Iimp          <- MPcpueRMSE
+
+        # calculate the auto-correlation
+        IAC           <- cor(DevsCPUE[IdxA[valid]], DevsCPUE[IdxB[valid]])
+
+        # q to keep CPUE on original scale
+        #   CPUEobsY = qCPUE * (NLLI ^ Ibeta) * Ierr
+        #
+        qCPUE         <- exp(mean(log(.Object@CPUEobsY / (NLLI ^ Ibeta)), na.rm=TRUE))
+      }
+      else
+      {
+        # Initialise IrndDevs based on MseDef parameters and keep SS CPUE sequence
+        Iimp     <- runif(1, MseDef@Icv[1], MseDef@Icv[2])
+        initIDev <- ssModelData@initIDev
+        IAC      <- ssModelData@IAC
+        qCPUE    <- ssModelData@qCPUE
+      }
 
       IrndDevs         <- karray(rnorm(allyears, 0, rep(Iimp, allyears)), c(allyears))
-      IrndDevs[nyears] <- ssModelData@initIDev #initial dev based on historical obs
+      IrndDevs[nyears] <- initIDev
 
-      if (length(ssModelData@IAC) != 0)
+      if (length(IAC) != 0)
       {
         for (t in (nyears + 1):allyears)
         {
-          IrndDevs[t] <- ssModelData@IAC * IrndDevs[t - 1] + IrndDevs[t] * sqrt(1.0 - ssModelData@IAC ^ 2)
+          IrndDevs[t] <- IAC * IrndDevs[t - 1] + IrndDevs[t] * sqrt(1.0 - IAC ^ 2)
         }
       }
 
       Ierr      <- exp(IrndDevs) * ssModelData@ITrend
-      Ibeta     <- exp(runif(1, log(MseDef@Ibeta[1]), log(MseDef@Ibeta[2])))
-
       Btimp     <- runif(1, MseDef@Btcv[1], MseDef@Btcv[2])
       Btb       <- trlnorm(1, 1, MseDef@Btbcv)
       Bterr     <- karray(trlnorm(allyears, rep(Btb, allyears), rep(Btimp, allyears)), c(allyears))
@@ -785,7 +837,7 @@ setMethod("initialize", "Projection",
         Om.nt.beginProjection(Obj, as.double(rep(log(0.001), nfleets)))
       }
 
-      for (y in (nyears+1):(nyears + proyears))     # redo initl year for reporting; test implications
+      for (y in (nyears + 1 - nbackupyears):(nyears + proyears))     # redo initl year for reporting; test implications
       {
         PAYMRF[,3] <- y
         PAY[,3]    <- y
@@ -801,7 +853,7 @@ setMethod("initialize", "Projection",
         if (selAgeRange >= 1)
         {
           #add an age shift to the selectivity noise
-          selAge <- karray(rep(round(selTSSign[,2] * sin((y - nyears - 1) * selTSWaveLen[,2]) * MseDef@selAgeRange), nages), dim=dim(sel))
+          selAge <- karray(rep(round(selTSSign[,2] * sin((y - nyears + nbackupyears - 1) * selTSWaveLen[,2]) * MseDef@selAgeRange), nages), dim=dim(sel))
 
           for (fi in 1:nfleets)
           {
@@ -821,7 +873,7 @@ setMethod("initialize", "Projection",
           }
         }
 
-        selExp    <- exp(selTSSign[,1] * sin((y-nyears-1) * selTSWaveLen[,1]) * (selExpRange))
+        selExp    <- exp(selTSSign[,1] * sin((y - nyears  + nbackupyears - 1) * selTSWaveLen[,1]) * (selExpRange))
         selTS     <- selTS ^ rep(selExp, nages)
         CPUEselTS <- CPUEsel
 
@@ -857,7 +909,24 @@ setMethod("initialize", "Projection",
           # set the bridging Catches between the last OM year and the first MP year
           firstMPy <- nyears + MseDef@firstMPYr - MseDef@lastCalendarYr
 
-          if (y < firstMPy)
+          if (y < nyears + 1)
+          {
+            # run projection model from nyears - nbackupyears till now using historic catch data for TAC
+            TAC   <- .Object@CM[y]
+            TAE   <- karray(rep(0, nfleets), dim=c(nfleets))
+            TACE  <- list(TAEbyF=TAE, TAC=TAC)
+
+            # update CAA and CAL
+            nuy     <- (y - 2):(y - 1)
+            nCAA    <- sampCatch(apply(CAAF[,keep(nuy),], c(1,2), sum), nCAAobs)
+            nCAAInd <- sampCatch(apply(CAAF[,keep(nuy),MseDef@indexFisheries], c(1,2), sum), nCAAobs)
+
+            CAA     <- abind(CAA, nCAA, along=2)
+            CAAInd  <- abind(CAAInd, nCAAInd, along=2)
+            CAL     <- abind(CAL, makeCAL(nCAA, Len_age_mid[1,,nuy], CAL_bins), along=2)
+            CALInd  <- abind(CALInd, makeCAL(nCAAInd, Len_age_mid[1,,nuy], CAL_bins), along=2)
+          }
+          else if (y < firstMPy)
           {
             yBridge <- y - nyears
 
@@ -909,8 +978,8 @@ setMethod("initialize", "Projection",
         {
           #CPUEobsY based on merger of observed and simulated CPUE (proportional to IObs in projections)
           #calculate CPUE up to but not including the current year (MP does not necessarily have access to this value depending on data lag)
-          .Object@CPUEobsY[nyears:(y - 1)] <- ssModelData@qCPUE * (NLLI[nyears:(y - 1)] ^ Ibeta) * Ierr[nyears:(y - 1)]
-          Iobs                             <- .Object@CPUEobsY[1:(y - 1)]
+          .Object@CPUEobsY[(nyears - nbackupyears):(y - 1)] <- qCPUE * (NLLI[(nyears - nbackupyears):(y - 1)] ^ Ibeta) * Ierr[(nyears - nbackupyears):(y - 1)]
+          Iobs                                              <- .Object@CPUEobsY[1:(y - 1)]
 
           # Operate P A Y M R          #MP applied in these years only
 
@@ -1331,7 +1400,6 @@ setMethod("initialize", "Projection",
                      karray(Wt_age[targpop,,nyears], c(length(targpop),nages,nsubyears,nareas,nfleets)))
 
           environment_MSY$Likelihood <- -log(MSY) + 100.0 * log(TAC / MSY)
-#          environment_MSY$Likelihood <- -log(MSY)
         }
         else
         {
@@ -1374,13 +1442,28 @@ setMethod("initialize", "Projection",
       # but should be internally consistent
       # recalculate CPUE so last years can be reported even if they are outside of MP years
 
-      .Object@CPUEobsY[nyears:y] <- ssModelData@qCPUE * (NLLI[nyears:y] ^ Ibeta) * Ierr[nyears:y]
-      .Object@IobsArchive        <- .Object@CPUEobsY[1:y]
+      .Object@CPUEobsY[(nyears - nbackupyears):y] <- qCPUE * (NLLI[(nyears - nbackupyears):y] ^ Ibeta) * Ierr[(nyears - nbackupyears):y]
+      .Object@IobsArchive                         <- .Object@CPUEobsY[1:y]
 
       NLLR            <- apply(NLL[1:y,,], sum, MARGIN=c(1,3))
-      IobsR           <- ssModelData@qCPUE * (NLLR ^ Ibeta) * rep(Ierr, nCPUE)
+      IobsR           <- qCPUE * (NLLR ^ Ibeta) * rep(Ierr, nCPUE)
 
       .Object@IobsRArchive[1:y,] <- IobsR[1:y,]
+
+      # Debugging code to visualise the CPUE fit of supplied CPUE series after scaling
+      if (!isMSY_projection & FALSE)
+      {
+        p2 <- qCPUE * (NLLI ^ Ibeta) #* Ierr
+
+        plot((1:allyears) + MseDef@firstCalendarYr - 1, .Object@CPUEobsY, yaxs="i", ylim=c(0,37), main=MseDef@OMList[[ssModelData@which]] %&% " \n%CV " %&% round(MPcpueRMSE * 100) %&% "     rho " %&% (round(IAC * 100) / 100))
+        lines((1:allyears) + MseDef@firstCalendarYr - 1, ssModelData@CPUEobsY)
+        points((1:allyears) + MseDef@firstCalendarYr - 1, p2, pch=2, col=2)
+
+        if (max(abs(.Object@CPUEobsY[nyears:(y - 1)] - .Object@CPUEobsY[(nyears + 1):y])) > 5)
+        {
+          browser()
+        }
+      }
 
       if (CppMethod != 0)
       {

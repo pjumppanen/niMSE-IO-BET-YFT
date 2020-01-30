@@ -14,6 +14,7 @@ setClass("StockSynthesisModelData",
     nfleets               = "integer",
     nCPUE                 = "integer",
     UseMSYss              = "integer",
+    nbackupyears          = "integer",
     which                 = "integer",
 
     SSB0ss                = "numeric",
@@ -59,6 +60,8 @@ setClass("StockSynthesisModelData",
     CPUEFleetAreas        = "karray",
     CPUEobsMR             = "karray",
     CPUEobsY              = "karray",
+    CPUEmpY               = "karray",
+    CPUEmpNormYrs         = "numeric",
     initIDev              = "numeric",
     ECurrent              = "karray",
     CMCurrent             = "karray",
@@ -73,4 +76,15 @@ setClass("StockSynthesisModelData",
     InitSeed              = "integer",
     ProjectSeed           = "integer"
   )
+)
+
+# -----------------------------------------------------------------------------
+
+setMethod("initialize", "StockSynthesisModelData",
+  function(.Object)
+  {
+    .Object@nbackupyears  = as.integer(0)
+
+    return (.Object)
+  }
 )

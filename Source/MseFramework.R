@@ -123,7 +123,7 @@ setMethod("initialize", "MseFramework",
           beginLog(Job$which)
         }
 
-        StockSynthesisModel <- new("StockSynthesisModel", MseDef, Job$which, Job$seed, Report, UseMSYss)
+        StockSynthesisModel <- new("StockSynthesisModel", MseDef, Job$which, Job$seed, Report, UseMSYss, .Object@MseDef@nbackupyears)
 
         if (UseCluster)
         {
@@ -197,6 +197,23 @@ setGeneric("runMse", function(.Object, ...) standardGeneric("runMse"))
 setMethod("runMse", c("MseFramework"),
   function(.Object, MPs, TuningPars=NA, interval=3, Report=FALSE, CppMethod=NA, UseCluster=NA, EffortCeiling = as.double(20.0), TACTime = 0.5, rULim = 0.5)
   {
+    CPUEmpY       <- NA
+    CPUEmpNormYrs <- NA
+
+    if (!is.na(.Object@MseDef@cpueMP_File))
+    {
+      # Initialise MP CPUE series for use in projection
+      # Assumes saved data table with yr and cpue columns saved with write.table()
+      #
+      browser()
+      cpueTable     <- read.table(.Object@MseDef@cpueMP_File)
+      CPUEmpNormYrs <- .Object@MseDef@cpueMP_NormYrs
+      idxs          <- cpueTable$yr - .Object@MseDef@firstCalendarYr + 1
+      lengthYrs     <- max(cpueTable$yr) - .Object@MseDef@firstCalendarYr + 1
+      CPUEmpY       <- karray(NA, dim=lengthYrs)
+      CPUEmpY[idxs] <- cpueTable$cpue
+    }
+
     cluster <- NA
 
     if (is.na(UseCluster))
@@ -219,7 +236,7 @@ setMethod("runMse", c("MseFramework"),
         {
           beginLog(om@ModelData@which)
 
-          om <- runMse(om, .Object@MseDef, MPs, tune, interval, Report, CppMethod, cluster=NA, EffortCeiling, TACTime, rULim)
+          om <- runMse(om, .Object@MseDef, MPs, tune, interval, Report, CppMethod, cluster=NA, EffortCeiling, TACTime, rULim, CPUEmpY, CPUEmpNormYrs)
 
           print("\n")
 
@@ -233,7 +250,7 @@ setMethod("runMse", c("MseFramework"),
       }
       else
       {
-        StockSynthesisModels <- lapply(StockSynthesisModels, FUN=function(om) {return(runMse(om, .Object@MseDef, MPs, tune, interval, Report, CppMethod, cluster=NA, EffortCeiling, TACTime, rULim))})
+        StockSynthesisModels <- lapply(StockSynthesisModels, FUN=function(om) {return(runMse(om, .Object@MseDef, MPs, tune, interval, Report, CppMethod, cluster=NA, EffortCeiling, TACTime, rULim, CPUEmpY, CPUEmpNormYrs))})
       }
 
       return (StockSynthesisModels)

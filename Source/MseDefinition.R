@@ -86,7 +86,12 @@ setClass("MseDefinition",
     MSYbcv            = "numeric",   # Bias in observation of target catch (MSY)
     BMSYbcv           = "numeric",   # Bias in observation of target biomass (BMSY)
 
-    recommendedTACbyF = "karray"     # Vector specifying the TAC by fishery / catch distribution for the MP managed projection phase. If any value is NA then it isn't used.
+    cpueMP_File       = "character", # Historic CPUE series to assign to each OM run stored in file with yr and cpue columns. Read with read.table()
+    cpueMP_NormYrs    = "numeric",   # Two value vector specifying the start and end calenday year interval to normalise the CPUE series over
+
+    recommendedTACbyF = "karray",    # Vector specifying the TAC by fishery / catch distribution for the MP managed projection phase. If any value is NA then it isn't used.
+
+    nbackupyears      = "integer"    # number of years back from final historic year to start projection (ie. attempt to bypass the recruitment series issues in SS final years)
   )
 )
 
@@ -102,6 +107,9 @@ setMethod("initialize", "MseDefinition",
     .Object@totalSims         = 0 # default of 0 means simulations are based only on nsimPerOMFile.
                                   # non 0 totalSims and the nsimPerOMFile is calculated based on modelWeight and totalSims.
     .Object@Cbmean            = 1
+    .Object@cpueMP_File       = as.character(NA)
+    .Object@cpueMP_NormYrs    = as.numeric(NA)
+    .Object@nbackupyears      = as.integer(0)
 
     return (.Object)
   }
