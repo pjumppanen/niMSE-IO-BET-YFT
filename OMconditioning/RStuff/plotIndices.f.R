@@ -6,11 +6,13 @@ require("PerformanceAnalytics")
 # Instantiate cache
 SSModelCache <- new.env()
 
+# -----------------------------------------------------------------------------
 
 loadSSModel <- function(Model, SSRootDir, force=FALSE)
 {
   ModelPath    <- SSRootDir %&% Model
   ModifiedTime <- file.mtime(ModelPath)
+  Valid        <- FALSE
 
   if (!is.na(ModifiedTime))
   {
@@ -29,27 +31,48 @@ loadSSModel <- function(Model, SSRootDir, force=FALSE)
 
   if (!exists(Model, envir=SSModelCache) || force)
   {
-    FullModel       <- SS_output(dir=ModelPath, covar=FALSE, ncols=213, forecast=FALSE, checkcor=FALSE, warn=FALSE, printstats=FALSE, verbose=FALSE)
-    SimplifiedModel <- list(cpue                            = FullModel$cpue,
-                            Length_comp_Eff_N_tuning_check  = FullModel$Length_comp_Eff_N_tuning_check,
-                            derived_quants                  = FullModel$derived_quants,
-                            stdExists                       = FullModel$stdExists,
-                            equil_yield                     = FullModel$equil_yield,
-                            catchc1.0                       = FullModel$catchc1.0,
-                            timeseries                      = FullModel$timeseries,
-                            parameters                      = FullModel$parameters,
-                            maximum_gradient_component      = FullModel$maximum_gradient_component,
-                            likelihoods_used                = FullModel$likelihoods_used,
-                            likelihoods_raw_by_fleet        = FullModel$likelihoods_raw_by_fleet,
-                            recruit                         = FullModel$recruit,
-                            ModifiedTime                    = ModifiedTime)
+    ErrorLog <- NULL
 
-    assign(Model, SimplifiedModel, envir=SSModelCache)
-    rm(FullModel)
-    gc()
+    errorHandler <- function(e)
+    {
+      ErrorLog <<- paste(paste(sys.calls()), collapse="\n")
+    }
+
+    # We put the tryCatch here in case we can't load the model
+    FullModel <- tryCatch(withCallingHandlers(SS_output(dir=ModelPath, covar=FALSE, ncols=213, forecast=FALSE, checkcor=FALSE, warn=FALSE, printstats=FALSE, verbose=FALSE), error=errorHandler), error=function(e) print(e))
+
+    if (is.null(ErrorLog))
+    {
+      SimplifiedModel <- list(cpue                            = FullModel$cpue,
+                              Length_comp_Eff_N_tuning_check  = FullModel$Length_comp_Eff_N_tuning_check,
+                              derived_quants                  = FullModel$derived_quants,
+                              stdExists                       = FullModel$stdExists,
+                              equil_yield                     = FullModel$equil_yield,
+                              catchc1.0                       = FullModel$catchc1.0,
+                              timeseries                      = FullModel$timeseries,
+                              parameters                      = FullModel$parameters,
+                              maximum_gradient_component      = FullModel$maximum_gradient_component,
+                              likelihoods_used                = FullModel$likelihoods_used,
+                              likelihoods_raw_by_fleet        = FullModel$likelihoods_raw_by_fleet,
+                              recruit                         = FullModel$recruit,
+                              ModifiedTime                    = ModifiedTime)
+
+      assign(Model, SimplifiedModel, envir=SSModelCache)
+      rm(FullModel)
+      gc()
+
+      Valid <- TRUE
+    }
+    else
+    {
+      print(ErrorLog)
+    }
   }
+
+  return (Valid)
 }
 
+# -----------------------------------------------------------------------------
 
 getSSModel <- function(Model)
 {
@@ -63,6 +86,91 @@ getSSModel <- function(Model)
   {
     return (NA)
   }
+}
+
+# -----------------------------------------------------------------------------
+
+chooseBestModelFit <- function(modelList, SSRootDir)
+{
+  GoodModels <- c()
+  BadModels  <- c()
+  Warnings   <- c()
+  SSRootDir  <- gsub("\\\\", "/", SSRootDir)
+
+  for (model in modelList)
+  {
+    modelDir <- SSRootDir %&% model %&% "/"
+
+    BestLLH   <- 9.99e+256
+    BestModel <- -1
+
+    for (convergedNum in 0:5)
+    {
+      convergedDir  <- modelDir %&% "converged" %&% convergedNum %&% "/"
+      CumReportFile <- convergedDir %&% "CumReport.sso"
+
+      if (file.exists(CumReportFile))
+      {
+        con  <- file(CumReportFile, "rt")
+        Text <- paste(readLines(con), collapse="\n")
+        close(con)
+
+        # Look for:
+        # 2 Like_Value Total 17590.2
+        Pattern <- "Like_Value\\s+Total\\s+\\d+\\.\\d*[eE][+-]?\\d+|Like_Value\\s+Total\\s+\\d+[eE][+-]?\\d+|Like_Value\\s+Total\\s+\\d+\\.\\d*|Like_Value\\s?Total\\s?\\d+"
+        MatchA  <- regexpr(Pattern, Text, perl=TRUE)
+
+        if (MatchA[1] >= 0)
+        {
+          LikelihoodText <- substr(Text, MatchA[1], MatchA[1] + attr(MatchA, "match.length") - 1)
+          MatchB         <- regexpr("Like_Value\\s+Total\\s+", LikelihoodText, perl=TRUE)
+          Likelihood     <- as.double(substr(LikelihoodText, MatchB[1] + attr(MatchB, "match.length"), MatchB[1] + attr(MatchB, "match.length") + nchar(LikelihoodText)))
+
+          if (Likelihood < BestLLH)
+          {
+            BestLLH   <- Likelihood
+            BestModel <- convergedNum
+          }
+        }
+      }
+    }
+
+    if (BestModel >= 0)
+    {
+      GoodModels <- c(GoodModels, model)
+
+      # copy the relevant files to the parent directory
+      if (.Platform$OS.type == "windows")
+      {
+        copyCommand <- "copy " %&% modelDir %&% "converged" %&% BestModel %&% "/*.* " %&% modelDir
+        copyCommand <- gsub("/", "\\\\", copyCommand)
+      }
+      else
+      {
+        copyCommand <- "cp " %&% modelDir %&% "converged" %&% BestModel %&% "/*.* " %&% modelDir
+      }
+
+      print(paste("Copying ", model %&% "/converged" %&% BestModel, "to parent"))
+
+      shell(copyCommand)
+
+      WarningFile <- modelDir %&% "converged" %&% BestModel %&% "/warning.sso"
+
+      con  <- file(WarningFile, "rt")
+      Text <- paste(readLines(con), collapse="\n")
+      close(con)
+
+      Warnings <- c(Warnings, "Text")
+    }
+    else
+    {
+      print(paste("Model", model, "Failed to converge"))
+
+      BadModels <- c(BadModels, model)
+    }
+  }
+
+  return (list(GoodModels=GoodModels, BadModels=BadModels, Warnings=Warnings))
 }
 
 
@@ -118,10 +226,9 @@ plotIndices.f <- function(modList = gridZList,
                           refMSY=c(423),
                           doPlots=T,
                           SSRootDir="",
-                          refModel="TagLambda1")
+                          refModel="TagLambda1",
+                          maxAverageRecruitThreshold=3.0)
 {
-  ref <- getSSModel(refModel)
-
   # temporary check to figure out how 4 and 7 CPUE series configurations got tangled together?!
   ok <- notok <- NULL
 
@@ -130,19 +237,25 @@ plotIndices.f <- function(modList = gridZList,
     print(c(i,modList[i]))
 
     # load the model data
-    loadSSModel(modList[i], SSRootDir)
+    if (loadSSModel(modList[i], SSRootDir))
+    {
+      m <- getSSModel(modList[i])
 
-    m <- getSSModel(modList[i])
+      print(c("nCPUE  ", length(levels(as.factor(m$cpue$FleetName)))))
 
-    print(c("nCPUE  ", length(levels(as.factor(m$cpue$FleetName)))))
+      if (length(levels(as.factor(m$cpue$FleetName))) == 4)
+        ok <- c(ok, modList[i])
 
-    if (length(levels(as.factor(m$cpue$FleetName))) == 4)
-      ok <- c(ok, modList[i])
+      if (length(levels(as.factor(m$cpue$FleetName))) == 7)
+        notok <- c(notok, modList[i])
 
-    if (length(levels(as.factor(m$cpue$FleetName))) == 7)
+      rm(m)
+    }
+    else
+    {
+      # model missing
       notok <- c(notok, modList[i])
-
-    rm(m)
+    }
   }
 
   print(notok)
@@ -151,6 +264,8 @@ plotIndices.f <- function(modList = gridZList,
 
   if (inputRefLines)
   {
+    ref <- getSSModel(refModel)
+
     refMSY         <- ref$derived_quants[ref$derived_quants$LABEL == 'TotYield_MSY',]$Value * 4 / 1000
     refSSB0        <- ref$derived_quants[ref$derived_quants$LABEL == 'SPB_Virgin',]$Value / 1000
     refSSBY        <- ref$derived_quants[ref$derived_quants$LABEL == SPB_Yr,]$Value / 1000
@@ -213,14 +328,58 @@ plotIndices.f <- function(modList = gridZList,
   crashPen          <- NULL
   catchLLH          <- NULL
 
+  # these arrays are for a recuitment diagnostic checking for recruitment spikes
+  maxEstRecruitDev  <- NA
+  minEstRecruitDev  <- NA
+  meanEstRecruitDev <- NULL
+  qtrlyRecruitment  <- c()
+  quarters          <- c()
+  models            <- c()
+  nmodels           <- 0
+  recruitWarnings   <- list()
+
   for (i in 1:length(modList))
   {
     if (modList[i] != "nullMod")
     {
       m <- getSSModel(modList[i])
 
-      # .std file exists (does not distinguish between a Hessian inversion failure, or whether it was not calculated in the interest of time)
+      # update recruitment spike diagnostics
+      Recruit           <- m$recruit$pred_recr
+      SmoothedRecruit   <- lowess(Recruit)$y
+      RecruitDevEst     <- Recruit / SmoothedRecruit
+      qtrlyRecruitment  <- c(qtrlyRecruitment, Recruit)
+      quarters          <- c(quarters, 1:length(Recruit))
+      models            <- rep(i, times=length(Recruit))
 
+      if (!any(is.na(RecruitDevEst)))
+      {
+        nmodels           <- nmodels + 1
+        maxEstRecruitDev  <- pmax(maxEstRecruitDev, RecruitDevEst, na.rm=TRUE)
+        minEstRecruitDev  <- pmin(minEstRecruitDev, RecruitDevEst, na.rm=TRUE)
+
+        if (is.null(meanEstRecruitDev))
+        {
+          meanEstRecruitDev <- RecruitDevEst
+        }
+        else
+        {
+          meanEstRecruitDev <- meanEstRecruitDev + RecruitDevEst
+        }
+
+        # local check for spike
+        maxRecruitDev     <- max(RecruitDevEst, na.rm=TRUE)
+        avgRecruitDev     <- mean(RecruitDevEst, na.rm=TRUE)
+        maxAvgRatio       <- maxRecruitDev / avgRecruitDev
+        PossibleSpike     <- (maxAvgRatio > maxAverageRecruitThreshold)
+
+        if (PossibleSpike)
+        {
+          recruitWarnings[[length(recruitWarnings) + 1]] <- paste("possible recruitment spike in model", modList[i], ". Max to Average ratio =", maxAvgRatio)
+        }
+      }
+
+      # .std file exists (does not distinguish between a Hessian inversion failure, or whether it was not calculated in the interest of time)
       stdExistsall <- c(stdExistsall, m$stdExists)
 
       #MSY       <- max(m$equil_yield$Catch)
@@ -360,8 +519,6 @@ plotIndices.f <- function(modList = gridZList,
       # possibly misaligned by small amount, but this is irrelevant for CV calculation...
       rDevCalendarYr <- seasAsYrToDecYr.f(seasAsYr=m$recruit$year[m$recruit$era == "Main"], endSeasAsYr=356, numSeas=4, endYr=2015, endSeas=4)
       rdevByYr       <- tapply(rdev, as.factor(floor(rDevCalendarYr)), FUN=mean)
-      sigR           <- ref$sigma_R_in
-      #recFit2        <- c(recFit2, sum(log(sqrt(2*pi*sigR^2)) + ((rdev)^2 - 0.5*sigR^2)/(2*sigR^2)) ) #exactly the same as SS output except for a constant
       recFit2        <- c(recFit2,sqrt(sum(rdev^2)/nrdev))
       recFit2ByYr    <- c(recFit2ByYr,sqrt(sum(rdevByYr^2)/(nrdev/4)))
       rTrendall      <- c(rTrendall, rSlope)
@@ -395,10 +552,40 @@ plotIndices.f <- function(modList = gridZList,
     }
   }   # modList i
 
+  meanEstRecruitDev <- meanEstRecruitDev / nmodels
+
   print("pre-plots done")
 
   if (doPlots)
   {
+    # plot recruitment deviates summary
+    dt <- data.table(qtr=1:length(maxEstRecruitDev), max=maxEstRecruitDev, min=minEstRecruitDev, mean=meanEstRecruitDev)
+
+    print(ggplot(dt, aes(x = qtr, ymin = 0)) +
+                 ylab("recruitment deviates") +
+                 theme_bw() +
+                 ggtitle("Estimated recruitment\n deviates summary (max, mean & min).") +
+                 geom_line(aes(y = `min`), size=0.5, colour="blue") +
+                 geom_line(aes(y = `max`), size=0.5, colour="red") +
+                 geom_ribbon(aes(ymin = `min`, ymax = `mean`), fill = "grey", alpha = 0.6) +
+                 geom_ribbon(aes(ymin = `mean`, ymax = `max`), fill = "grey", alpha = 0.8) +
+                 geom_line(aes(y = `mean`), size=1))
+
+    # plot recruitment time series distribution
+    dt <- data.table(qtr=quarters, model=models, recruitment=qtrlyRecruitment)
+
+    dt <- dt[, as.list(quantile(recruitment, probs = c(0.1, 0.25, 0.5, 0.75, 0.9), na.rm = TRUE)), keyby = list(qtr)]
+
+    print(ggplot(dt, aes(x = qtr, ymin = 0)) +
+                 ylab("recruitment") +
+                 theme_bw() +
+                 ggtitle("Recruitment") +
+                 geom_line(aes(y = `10%`), size=0.5, colour="blue") +
+                 geom_line(aes(y = `90%`), size=0.5, colour="red") +
+                 geom_ribbon(aes(ymin = `10%`, ymax = `90%`), fill = "grey", alpha = 0.6) +
+                 geom_ribbon(aes(ymin = `25%`, ymax = `75%`), fill = "grey", alpha = 0.8) +
+                 geom_line(aes(y = `50%`), size=1))
+
     print(sum(stdExistsall))
     print(length(stdExistsall))
     par(mfrow=c(2,1))
@@ -1203,6 +1390,8 @@ plotIndices.f <- function(modList = gridZList,
 
   BY   <- SSBYall
   BMSY <- SSBMSYall
+
+  print(recruitWarnings)
 
   return (list(cbind(CPUE.fit, CL.Fit, tag.Fit, max.Grad, rec.Trend, rec.Fit, rec.RMSE,recByYr.RMSE, MSY, B_B.MSY, B_B0, BY, BMSY, modList, stdExistsall, crashPen, catchLLH), boundFailLOList, boundFailHIList, boundFailHIList2))
 }
