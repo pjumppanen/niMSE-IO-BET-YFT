@@ -29,7 +29,9 @@ loadSSModel <- function(Model, SSRootDir, force=FALSE)
     }
   }
 
-  if (!exists(Model, envir=SSModelCache) || force)
+  Valid <- exists(Model, envir=SSModelCache)
+
+  if (!Valid || force)
   {
     ErrorLog <- NULL
 
