@@ -692,13 +692,14 @@ setMethod("initCPUE_SeriesFrom", c("StockSynthesisModel"),
   function(.Object, RefModel)
   {
     # copy over CPUE related stuff in ModelData
-    .Object@ModelData@CPUEobsMR[]       <- RefModel@ModelData@CPUEobsMR[]
-    .Object@ModelData@CPUEobsY[]        <- RefModel@ModelData@CPUEobsY[]
-    .Object@ModelData@CPUEFleetNums[]   <- RefModel@ModelData@CPUEFleetNums[]
-    .Object@ModelData@CPUEFleetAreas[]  <- RefModel@ModelData@CPUEFleetAreas[]
-
-    # q to keep CPUE on original scale
-    .Object@ModelData@qCPUE             <- sum(.Object@ModelData@CPUEobsY[1:.Object@ModelData@nyears][!is.na(.Object@ModelData@CPUEobsY[1:.Object@ModelData@nyears])]) / sum(.Object@ModelData@NLLIss[1:.Object@ModelData@nyears][!is.na(.Object@ModelData@CPUEobsY[1:.Object@ModelData@nyears])])
+#    .Object@ModelData@NLLss[]           <- RefModel@ModelData@NLLss[]
+#    .Object@ModelData@NLLIss[]          <- RefModel@ModelData@NLLIss[]
+#    .Object@ModelData@qCPUE             <- RefModel@ModelData@qCPUE
+#    .Object@ModelData@CPUEsel           <- RefModel@ModelData@CPUEsel
+#    .Object@ModelData@CPUEobsMR[]       <- RefModel@ModelData@CPUEobsMR[]
+#    .Object@ModelData@CPUEobsY[]        <- RefModel@ModelData@CPUEobsY[]
+#    .Object@ModelData@CPUEFleetNums[]   <- RefModel@ModelData@CPUEFleetNums[]
+#    .Object@ModelData@CPUEFleetAreas[]  <- RefModel@ModelData@CPUEFleetAreas[]
 
     # copy over CPUE related stuff in HistoricVars
     .Object@HistoricVars@IobsArchive[]  <- RefModel@HistoricVars@IobsArchive[]

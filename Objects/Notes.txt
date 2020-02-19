@@ -1,0 +1,1 @@
+To save git space and simplify organization, this folder only contains the most recent OM specification objects, which allow the most up-to-date IOTC MSE results to be reproduced. Developers can be contacted for earlier objects and/or results if required.

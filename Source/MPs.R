@@ -72,7 +72,7 @@ PTproj.25 <- function(pset)
 class(PTproj.25)<-"IO_MP_tune"
 
 
-# imposes TAC change constraint on top of original MP PTproj.1.35bmsy.25
+# imposes TAC change constraint on top of original MP PTproj.1.35bmsy.25 
 PTproj.1.35bmsy.25.tc15 <- function(pset)
 {
   return(PellaTomlinsonProjection(pset, BMSY_Prop=1.35, Gain=0.25, MinCatchProp=0.20 * pset$tune, deltaTACLimUp=0.15, deltaTACLimDown=0.15))
@@ -206,14 +206,52 @@ PT41.15.216.t3<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.4395871){
 class(PT41.15.216.t3)<-"IO_MP"
 
 
-# the fishing mortality equivalent of PT41.tune.15
-PT41F.tune.15<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1., useF=T, deltaTACLimUp=0.15, deltaTACLimDown=0.15){
+# the fishing mortality equivalent of PT41.t15
+PT41F.t15<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1., useF=T, deltaTACLimUp=0.15, deltaTACLimDown=0.15){
   return(PellaTomlinson4010(pset, BLower=BLower,BUpper=BUpper,CMaxProp=pset$tune * CMaxProp, deltaTACLimUp=deltaTACLimUp, deltaTACLimDown=deltaTACLimDown, useF=T))
 }
-class(PT41F.tune.15)<-"IO_MP_tune"
+class(PT41F.t15)<-"IO_MP_tune"
 
+# the fishing mortality equivalent of PT41.t50
+PT41F.t50<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1., useF=T, deltaTACLimUp=0.5, deltaTACLimDown=0.5){
+  return(PellaTomlinson4010(pset, BLower=BLower,BUpper=BUpper,CMaxProp=pset$tune * CMaxProp, deltaTACLimUp=deltaTACLimUp, deltaTACLimDown=deltaTACLimDown, useF=T))
+}
+class(PT41F.t50)<-"IO_MP_tune"
 
+# the fishing mortality equivalent of PT41.t50
+PT41F.t75<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1., useF=T, deltaTACLimUp=0.75, deltaTACLimDown=0.75){
+  return(PellaTomlinson4010(pset, BLower=BLower,BUpper=BUpper,CMaxProp=pset$tune * CMaxProp, deltaTACLimUp=deltaTACLimUp, deltaTACLimDown=deltaTACLimDown, useF=T))
+}
+class(PT41F.t75)<-"IO_MP_tune"
 
+# a fishing mortality version of PT4010, with a shape exponent
+PT41F.t50.s30 <-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1., useF=T, deltaTACLimUp=0.5, deltaTACLimDown=0.5, shockAbsorber=0.3){
+  return(PellaTomlinson4010(pset, BLower=BLower,BUpper=BUpper,CMaxProp=pset$tune * CMaxProp, deltaTACLimUp=deltaTACLimUp, deltaTACLimDown=deltaTACLimDown, shockAbsorber=shockAbsorber, useF=T))
+}
+class(PT41F.t50.s30)<-"IO_MP_tune"
+
+# a fishing mortality version of PT4010, with a shape exponent
+PT30F.t50.s30 <-function(pset, BLower=0.,BUpper=0.3,CMaxProp=1., useF=T, deltaTACLimUp=0.5, deltaTACLimDown=0.5, shockAbsorber=0.3){
+  return(PellaTomlinson4010(pset, BLower=BLower,BUpper=BUpper,CMaxProp=pset$tune * CMaxProp, deltaTACLimUp=deltaTACLimUp, deltaTACLimDown=deltaTACLimDown, shockAbsorber=shockAbsorber, useF=T))
+}
+class(PT30F.t50.s30)<-"IO_MP_tune"
+
+# a fishing mortality version of PT4010, with a shape exponent
+PT80F.t50.s30 <-function(pset, BLower=0.,BUpper=0.8,CMaxProp=1., useF=T, deltaTACLimUp=0.5, deltaTACLimDown=0.5, shockAbsorber=0.3){
+  return(PellaTomlinson4010(pset, BLower=BLower,BUpper=BUpper,CMaxProp=pset$tune * CMaxProp, deltaTACLimUp=deltaTACLimUp, deltaTACLimDown=deltaTACLimDown, shockAbsorber=shockAbsorber, useF=T))
+}
+class(PT80F.t50.s30)<-"IO_MP_tune"
+
+# a fishing mortality version of PT4010, with a shape exponent
+PT80F.t75.s30 <-function(pset, BLower=0.,BUpper=0.8,CMaxProp=1., useF=T, deltaTACLimUp=0.75, deltaTACLimDown=0.75, shockAbsorber=0.3){
+  return(PellaTomlinson4010(pset, BLower=BLower,BUpper=BUpper,CMaxProp=pset$tune * CMaxProp, deltaTACLimUp=deltaTACLimUp, deltaTACLimDown=deltaTACLimDown, shockAbsorber=shockAbsorber, useF=T))
+}
+class(PT80F.t75.s30)<-"IO_MP_tune"
+
+PT30F.t75.s20 <-function(pset, BLower=0.,BUpper=0.3,CMaxProp=1., useF=T, deltaTACLimUp=0.75, deltaTACLimDown=0.75, shockAbsorber=0.2){
+  return(PellaTomlinson4010(pset, BLower=BLower,BUpper=BUpper,CMaxProp=pset$tune * CMaxProp, deltaTACLimUp=deltaTACLimUp, deltaTACLimDown=deltaTACLimDown, shockAbsorber=shockAbsorber, useF=T))
+}
+class(PT30F.t75.s20)<-"IO_MP_tune"
 
 
 # non-tuning
@@ -349,6 +387,11 @@ IT5.t25 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2, deltaTACLimUp=0.25, deltaTA
   return(CPUETarget(pset, ITargPars=c(pset$tune *1.0,deltaTACLimUp,deltaTACLimDown,0.2,0.1,0.1,0.1,0.1), yrsmth=yrsmth,lambda=lambda,xx=xx))
 }
 class(IT5.t25) <- "IO_MP_tune"
+
+IT5.t75 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2, deltaTACLimUp=0.75, deltaTACLimDown=0.75){
+  return(CPUETarget(pset, ITargPars=c(pset$tune *1.0,deltaTACLimUp,deltaTACLimDown,0.2,0.1,0.1,0.1,0.1), yrsmth=yrsmth,lambda=lambda,xx=xx))
+}
+class(IT5.t75) <- "IO_MP_tune"
 
 IT5.t50 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2, deltaTACLimUp=0.5, deltaTACLimDown=0.5){
   return(CPUETarget(pset, ITargPars=c(pset$tune *1.0,deltaTACLimUp,deltaTACLimDown,0.2,0.1,0.1,0.1,0.1), yrsmth=yrsmth,lambda=lambda,xx=xx))
@@ -495,115 +538,190 @@ MP_FunctionExports <- c(MP_FunctionExports, "PellaTomlinson4010")
 
 # Pella Tomlinson Production model with generic 40-10 type rule - MPs are defined with tuning parameters above
 # useF option uses the 40:10 rule for F rather than C, in which case FMax = FMSY*CMaxProp
-PellaTomlinson4010<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, deltaTACLimUp=0.9, deltaTACLimDown=0.9, useF=F, gridSearch=-4){
+# positive gridSearch value is preferred at this time
+PellaTomlinson4010<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, deltaTACLimUp=0.9, deltaTACLimDown=0.9, shockAbsorber=1, useF=F, gridSearch=3){
+
+  p <- -0.16  # don't bother trying to estimate p; for p = -0.16, BMSY/K ~0.33
   C_hist <- pset$Cobs
   I_hist <- pset$Iobs
   CMCsum <- pset$CMCsum  # "recent" annual catch in mass
+  lastTAC <- pset$prevTACE$TAC
+  MSYballpark <- mean(C_hist[40:50]) # assumes recent catch near MSY
+  Kballpark   <- 20.*MSYballpark # assumes recent harvest rate ~5%  
+  rballpark   <- MSYballpark/(Kballpark/((p+1)^(1/p))) # solves for r given K and MSY estimates 
 
-  #Initial Model parameters
-  rInit <- 0.1
-  KInit <- 20.*CMCsum #initial K defined relative to recent catches
-  p     <- -0.16  # don't bother trying to estimate p; for p = -0.16, BMSY/K ~0.33
+  
+  par(mfrow=c(2,2))
 
-  params      <- log(c(rInit,KInit))
-  lowerBounds <- log(exp(params)/20)
-  upperBounds <- log(exp(params)*20)
+  #print(c("I sum", sum(I_hist[29:50])))  #confirm that all MPs are using the same CPUE series 
 
-  par(mfrow=c(4,4))
+  # for speed and efficiency with minimization sensitivity, don't bother fitting if the population has essentially crashed
+  Iy <- I_hist[!is.na(I_hist)]
 
-  if(gridSearch >= 0){ #not required if minimal grid search used
+  if (mean(Iy[(length(Iy)-1):length(Iy)]) <  0.1*mean(Iy[1:5])){
+    print("skip PT fitting - stock clearly needs rebuilding")
+    newTAC <- 1.    #i.e. (almost) shutdown fishery
+  } else { 
+    #Initial Model parameters
+    #rInit <- 0.1
+    #KInit <- 20.*CMCsum #initial K defined relative to recent catches 
+    rBest       <- rballpark
+    KBest       <- Kballpark 
+    params      <- log(c(rBest,KBest))
+    lowerBounds <- log(exp(params)/20)  
+    upperBounds <- log(exp(params)*20)
+
+    #  if(gridSearch >= 0){ #not required if minimal grid search used
     bestOpt <- optim(par=params,fn=PT.f, returnOpt=1,
              C_hist=C_hist,I_hist=I_hist, CMCsum=CMCsum, p=p,
              method="L-BFGS-B",
              lower=lowerBounds,upper=upperBounds,
              hessian=F, doPlot=F)
-  # This is only for before and after gridSearch comparisons...otherwise get rid of it
-  #PT.f(params=bestOpt$par, returnOpt=2, C_hist=C_hist, I_hist=I_hist, CMCsum=CMCsum, p=p, doPlot=T)
-  }
-
-  #if using gridSearch, repeat the minimization for a grid of fixed K values, and find the corresponding r for each; then optimize both
-  if(gridSearch>0){
-    rInit   <- 0.1
-    for(iGrid in 1:gridSearch){
-      Kgrid   <- 20.*CMCsum*(4*(iGrid/gridSearch))
-      params  <- log(c(rInit))
-      #find best r for fixed K from grid
-      rOpt <- optim(par=params,fn=PT.f, returnOpt=1,        Kgrid=log(Kgrid),
-               C_hist=C_hist,I_hist=I_hist, CMCsum=CMCsum, p=p,
+    # This is only for before and after gridSearch comparisons...otherwise get rid of it
+    #PT.f(par=bestOpt$par, returnOpt=1, C_hist=C_hist, I_hist=I_hist, CMCsum=CMCsum, p=p, doPlot=T)
+    rBest <- exp(bestOpt$par[1])
+    KBest <- exp(bestOpt$par[2])
+    #  }
+    
+    #if using gridSearch, repeat the minimization for a grid of fixed K values, and find the corresponding r for each; then optimize both
+    if(gridSearch>0){
+      KgridMin <- 0.5
+      KgridMax  <- 2.5
+      repeat {
+        if (bestOpt$value < 10 | gridSearch > 200) break
+        #rInit    <- 0.1
+        for(iGrid in 1:gridSearch){
+          Kgrid   <- Kballpark*(KgridMin + KgridMax*((iGrid-1)/gridSearch)) 
+          params  <- log(c(rBest))
+          #find best r for fixed K from grid
+          rOpt <- optim(par=params,fn=PT.f, returnOpt=1,        Kgrid=log(Kgrid),
+               C_hist=C_hist,I_hist=I_hist, CMCsum=CMCsum, p=p,            
                method="L-BFGS-B",
                lower=lowerBounds[1],upper=upperBounds[1],
                hessian=F, doPlot=F)
-      #PT.f(params=c(rOpt$par, log(Kgrid)), returnOpt=2, C_hist=C_hist, I_hist=I_hist, CMCsum=CMCsum, p=p, doPlot=T)
-      #retain best solution for multi-variate minimization
-      if(rOpt$value < bestOpt$value){
-        bestOpt <- rOpt
-        KInit   <- Kgrid
-        rInit   <- exp(rOpt$par)
-      }
-    }
-    # Do a final minimization with r and K active from best starting point
-    params<-log(c(rInit,KInit))
-    bestOpt<-optim(par=params,fn=PT.f, returnOpt=1,
+          #retain best solution for multi-variate minimization
+          if(rOpt$value < bestOpt$value){ 
+            PT.f(params=c(rOpt$par, log(Kgrid)), returnOpt=1, C_hist=C_hist, I_hist=I_hist, CMCsum=CMCsum, p=p, doPlot=F)
+            bestOpt <- rOpt
+            rBest   <- exp(rOpt$par)
+            KBest   <- Kgrid
+          }
+          #print(c("iGrid,gridSearch,bestOpt$value"))
+          #print(c(iGrid,gridSearch,rOpt$value, bestOpt$value))
+        }
+        print("                                                                                  bestOpt$value  " %&% bestOpt$value)      
+        if(bestOpt$value > 5){  
+          #increase grid density
+          KgridMin <- KgridMin*0.95
+          KgridMax <- KgridMax*1.05
+          gridSearch <- floor(gridSearch*1.5)
+
+          #re-bracket best value
+          #KgridMin <- KBest*0.8
+          #KgridMax <- KBest*1.2
+    
+          print(c("                                                                                  gridSearch  " %&% gridSearch))
+          #readline("expand gridSearch") 
+        } 
+        #if(gridSearch>100) readline("max gridsearch reached") 
+      } # repeat loop
+
+      # Do a final minimization with r and K active from best starting point
+      params<-log(c(rBest,KBest))
+
+      finalOpt<-optim(par=params,fn=PT.f, returnOpt=1,
                C_hist=C_hist,I_hist=I_hist, CMCsum=CMCsum, p=p,
                method="L-BFGS-B",
                lower=lowerBounds,upper=upperBounds,
                hessian=F, doPlot=F)
+      #readline("final Opt complete")
+      if(finalOpt$value < bestOpt$value){ 
+        PT.f(par=c(finalOpt$par), returnOpt=1, C_hist=C_hist, I_hist=I_hist, CMCsum=CMCsum, p=p, doPlot=F)
+        #readline("final Opt better than previous best")
+        bestOpt <- finalOpt
+        rBest   <- exp(finalOpt$par[1])
+        KBest   <- exp(finalOpt$par[2])
+      }
+      #PT.f(par=params, returnOpt=2, C_hist=C_hist, I_hist=I_hist, CMCsum=CMCsum, p=p, doPlot=T)
+      #if(finalOpt$value>10){
+      #   readline("final calc ")
+      #}
   }
 
+    
+    
+    
+    
+    
   #speedy gridSearch only does a single func evaluation for grid of R and K then optimizes both from best point
-  if(gridSearch<0){
-    NgridK  <- abs(gridSearch)
-    Kgrid   <- 20.*CMCsum*(4*((1:NgridK)/NgridK))
-    rGrid   <- c(0.075, 0.1, 0.125)
-    bestLLH <- 9E+99
-    for(iGridK in 1:NgridK){
-      for(iGridr in 1:length(rGrid)){
-        params  <- log(c(rInit))
-        LLH <- PT.f(params=c(log(rGrid[iGridr]), log(Kgrid[iGridK])), returnOpt=1, C_hist=C_hist, I_hist=I_hist, CMCsum=CMCsum, p=p, doPlot=F)
-        #retain best solution for multi-variate minimization
-        if(LLH < bestLLH){
-          bestLLH <- LLH
-          KInit   <- Kgrid[iGridK]
-          rInit   <- rGrid[iGridr]
-        }
-      } #rGrid
-    } #Kgrid
-    # Do a final minimization with r and K active from best starting point
-    params<-log(c(rInit,KInit))
-    bestOpt<-optim(par=params,fn=PT.f, returnOpt=1,
+  #not as robust as above  
+    if(gridSearch<0){
+      NgridK  <- abs(gridSearch)
+      #Kgrid   <- 20.*CMCsum*(4*((1:NgridK)/NgridK)) 
+      #rGrid   <- c(0.075, 0.1, 0.125)
+    
+      MSYballpark <- mean(C_hist[40:50]) #CMCsum # assumes current catch near MSY
+      Kballpark   <- 20.*MSYballpark # assumes surrent harvest rate ~5%  
+      #Kgrid       <- Kballpark*(0.5*1.5^c(1:NgridK)) #mostly okay for BET NgridK=4  
+      Kgrid       <- Kballpark*(0.75*1.15^c(1:NgridK))  #mostly okay for BET NgridK=8
+      rGrid       <- c(0.75, 1., 1.25)*MSYballpark/(Kballpark/((p+1)^(1/p))) # solves for r given K and MSY estimates 
+
+      bestLLH <- 9E+99
+      for(iGridK in 1:NgridK){
+        for(iGridr in 1:length(rGrid)){
+          params  <- log(c(rGrid))
+          LLH <- PT.f(params=c(log(rGrid[iGridr]), log(Kgrid[iGridK])), returnOpt=1, C_hist=C_hist, I_hist=I_hist, CMCsum=CMCsum, p=p, doPlot=F)
+          #retain best solution for multi-variate minimization
+          if(LLH < bestLLH){ 
+            bestLLH <- LLH
+            KBest   <- Kgrid[iGridK]
+            rBest   <- rGrid[iGridr]
+          }
+        } #rGrid
+      } #Kgrid
+      # Do a final minimization with r and K active from best starting point
+      params<-log(c(rBest,KBest))
+      finalOpt<-optim(par=params,fn=PT.f, returnOpt=1,
                    C_hist=C_hist,I_hist=I_hist, CMCsum=CMCsum, p=p,
                    method="L-BFGS-B",
                    lower=lowerBounds,upper=upperBounds,
                    hessian=F, doPlot=F)
-  }
 
+    
+      rBest   <- exp(finalOpt$par[1])
+      KBest   <- exp(finalOpt$par[2])
+    }
+  
+  
+    #get the biomass/BMSY estimate - view final model fit if in doubt
+    params <- log(c(rBest,KBest))
+    d <- PT.f(par=params, returnOpt=2, C_hist=C_hist, I_hist=I_hist, CMCsum=CMCsum, p=p, doPlot=F)
+    #print("TAC applied to this result")  
+    #readline("extra calc check")
 
-  #get the biomass/BMSY estimate - view final model fit if in doubt
-  d <- PT.f(params=bestOpt$par, returnOpt=2, C_hist=C_hist, I_hist=I_hist, CMCsum=CMCsum, p=p, doPlot=F)
+    #Apply something like a 40-10 rule for catch relative to MSY
+    if(useF==F){
+      if(d["BY"]/d["K"] <= BLower)                            newTAC <- 1.    #i.e. (almost) shutdown fishery
+      if(d["BY"]/d["K"] >  BLower & d["BY"]/d["K"] <= BUpper) newTAC <- CMaxProp*(d["MSY"]*(d["BY"]/d["K"])/(BUpper-BLower) + d["MSY"]*( 1 - (BUpper/(BUpper-BLower))))^shockabsorber
+      if(d["BY"]/d["K"] >  BUpper)                            newTAC <- CMaxProp*d["MSY"]
+    }
+    #Apply the 40:10 rule to F rather than catch...
+    if(useF){
+      FMSY = -log(1-d["MSY"]/d["K"])
+      FMult = CMaxProp # maximum F relative to FMSY
+      if(d["BY"]/d["K"] <= BLower)                            TACF <- 0.0001    #i.e. (almost) shutdown fishery
+      if(d["BY"]/d["K"] >  BLower & d["BY"]/d["K"] <= BUpper) TACF <- FMult*FMSY*((d["BY"]/d["K"])/(BUpper-BLower) + ( 1 - (BUpper/(BUpper-BLower))))^shockAbsorber
+      if(d["BY"]/d["K"] >  BUpper)                            TACF <- FMult*FMSY
+      newTAC <-  d["BY"]*(1-exp(-TACF))
+    }
+ 
+    names(newTAC) <- "TAC"
 
-  lastTAC <- pset$prevTACE$TAC
-
-  #Apply something like a 40-10 rule for catch relative to MSY
-  if(useF==F){
-    if(d["BY"]/d["K"] <= BLower)                            newTAC <- 1.    #i.e. (almost) shutdown fishery
-    if(d["BY"]/d["K"] >  BLower & d["BY"]/d["K"] <= BUpper) newTAC <- CMaxProp*d["MSY"]*(d["BY"]/d["K"])/(BUpper-BLower) + CMaxProp*d["MSY"]*( 1 - (BUpper/(BUpper-BLower)))
-    if(d["BY"]/d["K"] >  BUpper)                            newTAC <- CMaxProp*d["MSY"]
-  }
-  #Apply the 40:10 rule to F rather than catch...
-  if(useF){
-    FMSY = -log(1-d["MSY"]/d["K"])
-    FMult = CMaxProp # maximum F relative to FMSY
-    if(d["BY"]/d["K"] <= BLower)                            TACF <- 0.0001    #i.e. (almost) shutdown fishery
-    if(d["BY"]/d["K"] >  BLower & d["BY"]/d["K"] <= BUpper) TACF <- FMult*FMSY*(d["BY"]/d["K"])/(BUpper-BLower) + FMult*FMSY*( 1 - (BUpper/(BUpper-BLower)))
-    if(d["BY"]/d["K"] >  BUpper)                            TACF <- FMult*FMSY
-    newTAC <-  d["BY"]*(1-exp(-TACF))
-  }
-
-  names(newTAC) <- "TAC"
-
+  }# bypass model fitting if stock already crashed...  
+  
   deltaTAC <- newTAC/lastTAC - 1
 
-#print(deltaTAC)
+  #print(deltaTAC)
   if(deltaTAC >  deltaTACLimUp)   deltaTAC =  deltaTACLimUp
   if(deltaTAC < -deltaTACLimDown) deltaTAC = -deltaTACLimDown
   newTAC <- lastTAC*(1+deltaTAC)
@@ -636,43 +754,98 @@ MP_FunctionExports <- c(MP_FunctionExports, "PT.f")
 #
 PT.f <- function(params, C_hist, I_hist, CMCsum, p, doPlot=F, returnOpt=1, Kgrid=F){
 
-
   #Model parameters
-  #B(t+1)=B(t) + (r/p)B(1-(B/K)^p) - C
-  Y <- length(C_hist)
-  B <- array(NA,dim=Y)
-  r <- exp(params[1])
+  #B(t+1)=B(t) + (r/p)B(1-(B/K)^p) - C    
+  
+  # not sure which of the following  options are most helpful or whether they interact, but conceptually seem like they might be  
+  # to improve numerical stability, tried adding a "foraging arena" type refuge - part of the population that is subject to harvesting
+  # but not vulnerable to LL CPUE = IrefugeMin + IrefugeProp*B/K 
+  minBI        <- 0.01 # 0.02 # if CPUE biomass decreases below this level, set CPUE and B LLH components to this level 
+                       # whether its a bit "wrong" is irrelevant if the model is in the space where fishery shut down is  required  
+  IrefugeMin   <- 0.1  # 0.1 # minimum proportion of biomass not vulnerable to LL CPUE
+  IrefugeProp  <- 0.5  # 0.5 # additional proportion not vulnerable as a function (proportional) of (1-B(y)/K)  
+
+  midIWt       <- 0.01 #weighting for majrrity of CPUE series
+  
+  initIWtYrs   <- 10    #number of initial years for different CPUE wt
+  initIWt      <- 1    #initial CPUEwt
+  
+  lastIWtYrs   <- 5    #number of final years for different CPUE wt
+  lastIWt      <- 5    #final CPUE wt
+
+  # mpLag defined for testing Paavo's projection idea to try and account for most recent removals
+  # implementation below only okay if mpLag < mpPeriod (i.e. usually 3)
+  mpLag <- 2 # should be an argument if usefu: 0 is the original  
+  
+  Y  <- length(C_hist) + 1 # i.e. can calculate biomass one year ahead of last catch
+  BI <- array(NA,dim=Y+mpLag)
+  B  <- array(NA,dim=Y+mpLag)
+  r  <- exp(params[1])
+
+  if(mpLag>0){
+    C_histProj <- c(C_hist,rep(C_hist[Y-1], mpLag))   
+  }
+  
   if(Kgrid){
     #if(returnOpt==2) browser()
     K <- exp(Kgrid)
-  } else {
+  } else {  
     K <- exp(params[2])
   }
   CPen <- 0
 
   B[1] <- K
   #Umax <- 0.9
-  for(y in 2:Y){
-    B[y] <- B[y-1] + ((p+1)/p)*r*B[y-1]*(1-(B[y-1]/K)^p) - C_hist[y-1]
-    if(is.na(B[y])) browser() # should not happen
-    # There should be a negative biomass penalty in here...maybe maximum harvest rate would be better?
+  for(y in 2:(Y+mpLag)){
+    B[y]  <- B[y-1] + ((p+1)/p)*r*B[y-1]*(1-(B[y-1]/K)^p) - C_histProj[y-1]
+    BI[y] <- B[y]*(1 - (IrefugeMin+IrefugeProp*(1-B[y]/K)))
+
+    if(is.na(B[y])){
+      print("                              Undefined Biomass Error")
+      browser()
+    } 
+
+    # options for avoiding negative biomass: some may be used in combination
+
+    # option 1 - set maximum HR  
+    #if (C_hist[y-1]/B[y] > 0.7){
+    #  CPen <- CPen + 0.1*(C_hist[y-1]/B[y] - 0.9)^2  
+    #}
+
+    # option 2 - penalize negative biomass (option 3 should take precedence if CPUErefuge > 0 ) 
     if (B[y]<1e-5){
-      CPen <- CPen + ((B[y]/K)^2)
+      CPen <- CPen + 0.1*((B[y]/K)^2)  
       B[y] <- 1e-5
     }
+    # option 3 - foraging arena - CPUE refuge i.e. min B in reserve that is not indexed by CPUE?
+    if (BI[y]<1e-5){
+      CPen <- CPen + 0.1*((BI[y]/K)^2)  
+      BI[y] <- 1e-5
+    }
+    
   }
 
-  # This should probably be in log-space
-  #q <- sum(I_hist[!is.na(I_hist)])/sum(B[!is.na(I_hist)])
-  #LLH <- sum((q*B[!is.na(I_hist)]-I_hist[!is.na(I_hist)])^2)
+  
+  # This should probably be in log-space (though this does make collapse situations more difficult)
+  # q <- sum(I_hist[!is.na(I_hist)])/sum(B[!is.na(I_hist)])
+  # LLH <- sum((q*B[!is.na(I_hist)]-I_hist[!is.na(I_hist)])^2)
   #Haddon's analytical soln for log-space q
-  q <- exp(1/sum(!is.na(I_hist))*sum(log(I_hist[!is.na(I_hist)] / B[!is.na(I_hist)])))
-  LLH <- sum(log(q*B[!is.na(I_hist)]/I_hist[!is.na(I_hist)])^2)
+  q <- exp(1/sum(!is.na(I_hist))*sum(log(I_hist[!is.na(I_hist)] / BI[!is.na(I_hist)])))
+  
+  Iy <- I_hist[!is.na(I_hist)]
+  BIy <- BI[!is.na(I_hist)]
 
-  if(returnOpt==2 & LLH > 5){
-    print("temporary (and not sufficient) check for PT.f minimization failure")
-    browser()
-  }
+  #log-space causes problems as B <- 0 set low values to 2%, i.e. anything below this should be the same for th MP anyway
+  Iy[Iy<minBI*mean(Iy[1:5])] <- minBI*mean(Iy[1:5])  
+  BIy[BIy<minBI*mean(BIy[1:5])] <- minBI*mean(BIy[1:5])  
+
+  #vector of CPUE weightings
+  Iwt <- rep(midIWt, length(Iy))
+  Iwt[1:initIWtYrs] <- initIWt
+  Iwt[(length(Iy)-(lastIWtYrs-1)):length(Iy)] <- lastIWt
+
+  #all obs weighted equally
+  LLH <- sum(Iwt*log(q*BIy/Iy)^2) 
 
   LLH <- LLH + CPen
 
@@ -680,24 +853,44 @@ PT.f <- function(params, C_hist, I_hist, CMCsum, p, doPlot=F, returnOpt=1, Kgrid
 
   # quick and dirty plausibility constraints - no claim that this is a good approach for constraining the PT model
   # This should be removed; perhaps repleaced with grid of starting points
-  if(MSY < 0.2*CMCsum) LLH <- LLH + (MSY - 0.2*CMCsum)^2
-  if(MSY > 5.0*CMCsum)  LLH <- LLH + (MSY - 5.0*CMCsum)^2
+  #if(MSY < 0.2*CMCsum) LLH <- LLH + (MSY - 0.2*CMCsum)^2
+  #if(MSY > 5.0*CMCsum)  LLH <- LLH + (MSY - 5.0*CMCsum)^2
 
 
   if(doPlot){
-    plot(I_hist/q, main="MSY: " %&% MSY %&% " C(Y)/MSY: " %&% as.character(CMCsum/MSY), ylim=c(0,max(I_hist/q, na.rm=T)))
-    lines(B)
-    lines(C_hist,col=2)
+    depPercent <- round(1000*B[Y]/B[1])/10
+    obj        <- round(10*LLH)/10
+    msy        <- round(MSY/1000)
+    
+    plot(BI, type='l', col=5, main="BT/B0 %: " %&% depPercent %&% "\nMSY " %&% msy %&% "    Obj " %&% obj, ylim=c(0,max(I_hist/q, na.rm=T)))
+    points(I_hist/q,col=1)
+    lines(B,col=3)
+    lines(10*C_hist,col=2)
     print("")
-    print(c("PT.f  OBJfn:           K:             r:             MSY: "))
-    print(c(LLH, K,  r,  MSY), digits=2)
+    print(c("PT.f  OBJfn:         ", LLH))
+    print(c("K:  ", K))
+    print(c("r:  ", r))
+    print(c("MSY:  ", MSY))
+    print(c("BT/B0:", B[Y]/B[1]))
+    print(c("BT+lag/B0:", B[Y+mpLag]/B[1]))
   }
 
+  #check for poor model fit
+  #if(parent.frame(6)$MseDef@OMList[parent.frame(3)$sim] == "h70_M10_t10_q0_iH_iR1_CLRW_SL"){
+  if(returnOpt==2 & LLH > 10 & mean(B[(Y-3):Y])/B[1] > 0.1){
+    print("temporary (and not sufficient) check for PT.f minimization failure")
+    print(parent.frame(6)$MseDef@OMList[parent.frame(3)$sim]) #problem model
+    browser()
+  } 
+  #}
+  
+  
+  
   if(returnOpt == 1){ # return objective function
     return(LLH)
   } else {         # return MSY-related stuff
     BMSY <- K/((p+1)^(1/p))
-    outList <- c(B[Y], K, MSY, BMSY)
+    outList <- c(B[Y+mpLag], K, MSY, BMSY)
     names(outList) <- c("BY","K","MSY","BMSY")
     return(outList)
   }
@@ -1120,7 +1313,7 @@ PellaTomlinsonProjection <- function(pset, BMSY_Prop=1.0, Gain=0.15, MinCatchPro
 
   #End of pipe TAC change constraint - might interact poorly with constraint above
   deltaTAC <- newTAC/lastTAC - 1
-
+  
   #print(deltaTAC)
   if(deltaTAC >  deltaTACLimUp)   deltaTAC =  deltaTACLimUp
   if(deltaTAC < -deltaTACLimDown) deltaTAC = -deltaTACLimDown
@@ -1691,6 +1884,111 @@ class(CCt.216.t3) <- "IO_MP"
 
 #------------------------------------------------------------------------------
 
+# non-tuning constant catch with TAC change constraints to find minimum rebuilding times
+CC001.t15 <- function(pset, deltaTACLimUp = 0.15, deltaTACLimDown = 0.15)
+{
+  
+  lastTAC  <- pset$prevTACE$TAC
+  newTAC   <- 1000.0 #aggregate TAC (annual) by fishery
+  TAEbyF   <- 0.0 * pset$prevTACE$TAEbyF #TAE by fishery
+
+  deltaTAC <- newTAC/lastTAC - 1
+  
+  #print(deltaTAC)
+  if(deltaTAC >  deltaTACLimUp)   deltaTAC =  deltaTACLimUp
+  if(deltaTAC < -deltaTACLimDown) deltaTAC = -deltaTACLimDown
+  newTAC <- lastTAC*(1+deltaTAC)
+
+  return (list(TAEbyF=TAEbyF,TAC=newTAC))
+}
+
+class(CC001.t15) <- "IO_MP"
+
+#------------------------------------------------------------------------------
+# non-tuning constant catch with TAC change constraints to find minimum rebuilding times
+CC001.t25 <- function(pset, deltaTACLimUp = 0.25, deltaTACLimDown = 0.25)
+{
+  
+  lastTAC  <- pset$prevTACE$TAC
+  newTAC   <- 1000.0 #aggregate TAC (annual) by fishery
+  TAEbyF   <- 0.0 * pset$prevTACE$TAEbyF #TAE by fishery
+  
+  deltaTAC <- newTAC/lastTAC - 1
+  
+  #print(deltaTAC)
+  if(deltaTAC >  deltaTACLimUp)   deltaTAC =  deltaTACLimUp
+  if(deltaTAC < -deltaTACLimDown) deltaTAC = -deltaTACLimDown
+  newTAC <- lastTAC*(1+deltaTAC)
+  
+  return (list(TAEbyF=TAEbyF,TAC=newTAC))
+}
+
+class(CC001.t25) <- "IO_MP"
+
+#------------------------------------------------------------------------------
+# non-tuning constant catch with TAC change constraints to find minimum rebuilding times
+CC001.t35 <- function(pset, deltaTACLimUp = 0.35, deltaTACLimDown = 0.35)
+{
+  
+  lastTAC  <- pset$prevTACE$TAC
+  newTAC   <- 1000.0 #aggregate TAC (annual) by fishery
+  TAEbyF   <- 0.0 * pset$prevTACE$TAEbyF #TAE by fishery
+  
+  deltaTAC <- newTAC/lastTAC - 1
+  
+  #print(deltaTAC)
+  if(deltaTAC >  deltaTACLimUp)   deltaTAC =  deltaTACLimUp
+  if(deltaTAC < -deltaTACLimDown) deltaTAC = -deltaTACLimDown
+  newTAC <- lastTAC*(1+deltaTAC)
+  
+  return (list(TAEbyF=TAEbyF,TAC=newTAC))
+}
+
+class(CC001.t35) <- "IO_MP"
+
+#------------------------------------------------------------------------------
+# non-tuning constant catch with TAC change constraints to find minimum rebuilding times
+CC001.t45 <- function(pset, deltaTACLimUp = 0.45, deltaTACLimDown = 0.45)
+{
+  
+  lastTAC  <- pset$prevTACE$TAC
+  newTAC   <- 1000.0 #aggregate TAC (annual) by fishery
+  TAEbyF   <- 0.0 * pset$prevTACE$TAEbyF #TAE by fishery
+  
+  deltaTAC <- newTAC/lastTAC - 1
+  
+  #print(deltaTAC)
+  if(deltaTAC >  deltaTACLimUp)   deltaTAC =  deltaTACLimUp
+  if(deltaTAC < -deltaTACLimDown) deltaTAC = -deltaTACLimDown
+  newTAC <- lastTAC*(1+deltaTAC)
+  
+  return (list(TAEbyF=TAEbyF,TAC=newTAC))
+}
+
+class(CC001.t45) <- "IO_MP"
+
+#------------------------------------------------------------------------------
+# non-tuning constant catch with TAC change constraints to find minimum rebuilding times
+CC001.t65 <- function(pset, deltaTACLimUp = 0.65, deltaTACLimDown = 0.65)
+{
+  
+  lastTAC  <- pset$prevTACE$TAC
+  newTAC   <- 1000.0 #aggregate TAC (annual) by fishery
+  TAEbyF   <- 0.0 * pset$prevTACE$TAEbyF #TAE by fishery
+  
+  deltaTAC <- newTAC/lastTAC - 1
+  
+  #print(deltaTAC)
+  if(deltaTAC >  deltaTACLimUp)   deltaTAC =  deltaTACLimUp
+  if(deltaTAC < -deltaTACLimDown) deltaTAC = -deltaTACLimDown
+  newTAC <- lastTAC*(1+deltaTAC)
+  
+  return (list(TAEbyF=TAEbyF,TAC=newTAC))
+}
+
+class(CC001.t65) <- "IO_MP"
+#------------------------------------------------------------------------------
+
 
 # non-tuning
 CC001 <- function(pset)
@@ -1733,7 +2031,7 @@ CC091 <- function(pset)
 {
   TAC     <- 91000.0 #aggregate TAC (annual) by fishery (BET reported in 2017)
   TAEbyF  <- 0.0 * pset$prevTACE$TAEbyF #TAE by fishery
-
+  
   return (list(TAEbyF=TAEbyF,TAC=TAC))
 }
 class(CC091) <- "IO_MP"

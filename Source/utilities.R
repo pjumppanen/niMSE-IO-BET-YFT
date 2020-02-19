@@ -251,7 +251,6 @@ createTable1 <- function(years, results, MPs, MPs_short, prefix="")
     print("ERROR: maximum number of MPs is 30")
     stop()
   }
-
   Table1 <- findTable1_Data(years, results, MPs)
 
   MPs                 <- Table1[,j=MP]
