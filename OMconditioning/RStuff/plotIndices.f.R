@@ -90,46 +90,114 @@ getSSModel <- function(Model)
 
 # -----------------------------------------------------------------------------
 
-chooseBestModelFit <- function(modelList, SSRootDir)
+chooseBestFitModels <- function(modelList, SSRootDir, UseParFile=TRUE)
 {
   GoodModels <- c()
   BadModels  <- c()
   Warnings   <- c()
   SSRootDir  <- gsub("\\\\", "/", SSRootDir)
+  TotalCount <- length(modelList)
+  cn         <- 1
 
   for (model in modelList)
   {
     modelDir <- SSRootDir %&% model %&% "/"
 
+    print(paste(cn, "of", TotalCount))
+    cn        <- cn + 1
     BestLLH   <- 9.99e+256
     BestModel <- -1
 
     for (convergedNum in 0:5)
     {
-      convergedDir  <- modelDir %&% "converged" %&% convergedNum %&% "/"
-      CumReportFile <- convergedDir %&% "CumReport.sso"
+      convergedDir <- modelDir %&% "converged" %&% convergedNum %&% "/"
+      DirList      <- dir(convergedDir)
 
-      if (file.exists(CumReportFile))
+      if (length(DirList) > 0)
       {
-        con  <- file(CumReportFile, "rt")
-        Text <- paste(readLines(con), collapse="\n")
-        close(con)
-
-        # Look for:
-        # 2 Like_Value Total 17590.2
-        Pattern <- "Like_Value\\s+Total\\s+\\d+\\.\\d*[eE][+-]?\\d+|Like_Value\\s+Total\\s+\\d+[eE][+-]?\\d+|Like_Value\\s+Total\\s+\\d+\\.\\d*|Like_Value\\s?Total\\s?\\d+"
-        MatchA  <- regexpr(Pattern, Text, perl=TRUE)
-
-        if (MatchA[1] >= 0)
+        if (UseParFile)
         {
-          LikelihoodText <- substr(Text, MatchA[1], MatchA[1] + attr(MatchA, "match.length") - 1)
-          MatchB         <- regexpr("Like_Value\\s+Total\\s+", LikelihoodText, perl=TRUE)
-          Likelihood     <- as.double(substr(LikelihoodText, MatchB[1] + attr(MatchB, "match.length"), MatchB[1] + attr(MatchB, "match.length") + nchar(LikelihoodText)))
+          parFile <- NULL
 
-          if (Likelihood < BestLLH)
+          # find par file
+          for (Name in DirList)
           {
-            BestLLH   <- Likelihood
-            BestModel <- convergedNum
+            if (grepl(".+\\.par", Name, perl=TRUE))
+            {
+              parFile <- Name
+            }
+          }
+
+          if (is.null(parFile))
+          {
+            print(paste("WARNING: Cannot find .par file in ", convergedDir))
+          }
+          else
+          {
+            parFile <- convergedDir %&% parFile
+            con     <- file(parFile, "rt")
+            Text    <- paste(readLines(con), collapse="\n")
+            close(con)
+
+            # Look for:
+            # 2 Objective function value = 17590.2
+            Pattern <- "Objective\\s+function\\s+value\\s+=\\s+\\d+\\.\\d*[eE][+-]?\\d+|Objective\\s+function\\s+value\\s+=\\s+\\d+[eE][+-]?\\d+|Objective\\s+function\\s+value\\s+=\\s+\\d+\\.\\d*|Objective\\s+function\\s+value\\s+=\\s+\\d+"
+            MatchA  <- regexpr(Pattern, Text, perl=TRUE)
+
+            if (MatchA[1] >= 0)
+            {
+              LikelihoodText <- substr(Text, MatchA[1], MatchA[1] + attr(MatchA, "match.length") - 1)
+              MatchB         <- regexpr("Objective\\s+function\\s+value\\s+=\\s+", LikelihoodText, perl=TRUE)
+              Likelihood     <- as.double(substr(LikelihoodText, MatchB[1] + attr(MatchB, "match.length"), MatchB[1] + attr(MatchB, "match.length") + nchar(LikelihoodText)))
+
+              if (Likelihood < BestLLH)
+              {
+                BestLLH   <- Likelihood
+                BestModel <- convergedNum
+              }
+            }
+            else
+            {
+              print(paste("WARNING: Cannot find Likelihood in ", parFile))
+            }
+          }
+        }
+        else
+        {
+          CumReportFile <- convergedDir %&% "CumReport.sso"
+
+          if (file.exists(CumReportFile))
+          {
+            con  <- file(CumReportFile, "rt")
+            Text <- paste(readLines(con), collapse="\n")
+            close(con)
+
+            # Look for:
+            # 2 Like_Value Total 17590.2
+            Pattern <- "Like_Value\\s+Total\\s+\\d+\\.\\d*[eE][+-]?\\d+|Like_Value\\s+Total\\s+\\d+[eE][+-]?\\d+|Like_Value\\s+Total\\s+\\d+\\.\\d*|Like_Value\\s+Total\\s+\\d+"
+            MatchA  <- gregexpr(Pattern, Text, perl=TRUE)
+            Num     <- length(MatchA[[1]])
+
+            if (Num > 0)
+            {
+              LikelihoodText <- substr(Text, MatchA[[1]][Num], MatchA[[1]][Num] + attr(MatchA[[1]], "match.length")[Num] - 1)
+              MatchB         <- regexpr("Like_Value\\s+Total\\s+", LikelihoodText, perl=TRUE)
+              Likelihood     <- as.double(substr(LikelihoodText, MatchB[1] + attr(MatchB, "match.length"), MatchB[1] + attr(MatchB, "match.length") + nchar(LikelihoodText)))
+
+              if (Likelihood < BestLLH)
+              {
+                BestLLH   <- Likelihood
+                BestModel <- convergedNum
+              }
+            }
+            else
+            {
+              print(paste("WARNING: Cannot find Likelihood in ", CumReportFile))
+            }
+          }
+          else
+          {
+            print(paste("WARNING: Cannot find CumReport.sso file in ", convergedDir))
           }
         }
       }
@@ -152,6 +220,7 @@ chooseBestModelFit <- function(modelList, SSRootDir)
 
       print(paste("Copying ", model %&% "/converged" %&% BestModel, "to parent"))
 
+      flush.console()
       shell(copyCommand)
 
       WarningFile <- modelDir %&% "converged" %&% BestModel %&% "/warning.sso"
