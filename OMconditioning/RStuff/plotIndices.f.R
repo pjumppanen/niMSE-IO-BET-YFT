@@ -298,10 +298,22 @@ plotIndices.f <- function(modList = gridZList,
                           doPlots=T,
                           SSRootDir="",
                           refModel="TagLambda1",
-                          maxAverageRecruitThreshold=3.0)
+                          firstCalendarYr=1952,
+                          maxAverageRecruitThreshold=5.0,
+                          cpueMP_File=NULL,
+                          cpueNormYrs=NULL)
 {
   # temporary check to figure out how 4 and 7 CPUE series configurations got tangled together?!
-  ok <- notok <- NULL
+  ok    <- NULL
+  notok <- NULL
+  MPdat <- NULL
+
+  if (!is.null(cpueMP_File))
+  {
+    # Initialise MPdat (CPUE series for MP projection)
+    # Assumes saved data table with yr and cpue columns saved with write.table()
+    MPdat <- read.table(cpueMP_File)
+  }
 
   for (i in 1:length(modList))
   {
@@ -382,6 +394,9 @@ plotIndices.f <- function(modList = gridZList,
   essall            <- array(NA, dim = c(numMod, numFleets))
   cpueRMSEall       <- array(NA, dim = c(numMod, numCPUE))
   cpueRMSEByYrall   <- array(NA, dim = c(numMod, numCPUE))  # use means of CPUE to emphasize interannual variability
+  cpueMPRMSEByYrall <- NULL  # calculate fit between MP cpue (constant among OMs) and SS model-specifc cpue aggregated over seasons and areas
+  cpueMPACByYrall   <- NULL  # calculate lag(1) autocorrelation between MP cpue (constant among OMs) and SS model-specifc cpue aggregated over seasons and areas
+
   gradall           <- NULL
   stdExistsall      <- NULL
   boundCheckall     <- NULL
@@ -414,6 +429,9 @@ plotIndices.f <- function(modList = gridZList,
     if (modList[i] != "nullMod")
     {
       m <- getSSModel(modList[i])
+
+      endYr       <- firstCalendarYr + (max(m$recruit$year) - min(m$recruit$year) + 1) / 4 - 1 + 1 / 8
+      endSeasAsYr <- max(m$recruit$year)
 
       # update recruitment spike diagnostics
       Recruit           <- m$recruit$pred_recr
@@ -498,7 +516,8 @@ plotIndices.f <- function(modList = gridZList,
       names(cpueRMSE) <- tmp[, 1]
 
       #CPUE RMSE among years
-      cpueCalendarYr <- floor(seasAsYrToDecYr.f(seasAsYr=m$cpue$Yr, endSeasAsYr=356, numSeas=4, endYr=2015, endSeas=4))
+      cpueCalendarYr <- floor(seasAsYrToDecYr.f(seasAsYr=m$cpue$Yr, endSeasAsYr=endSeasAsYr, numSeas=4, endYr=endYr, endSeas=4))
+      recCalendarYrs <- seasAsYrToDecYr.f(seasAsYr=m$recruit$year, endSeasAsYr=endSeasAsYr, numSeas=4, endYr=endYr, endSeas=4)
 
       #remove years with some missing seasons
       tmp <- table(m$cpue$FleetName, cpueCalendarYr)
@@ -543,6 +562,47 @@ plotIndices.f <- function(modList = gridZList,
 
       cpueRMSEall[i, ]     <- as.numeric(cpueRMSE)
       cpueRMSEByYrall[i, ] <- as.numeric(cpueRMSEByYr)
+
+      if (!is.null(MPdat))
+      {
+        #calculate cpue RMSE describing lack of fit between SS model prediction and MP CPUE (.e. not observed CPUE used in model fitting)
+        #sum predicted cpue over year and region
+        cpueAggPred        <- as.data.frame(aggregate(m$cpue$Exp, by=list(cpueCalendarYr), FUN=sum))
+        names(cpueAggPred) <- c("yr","cpuePred")
+        cpueAgg            <- merge(cpueAggPred, MPdat, by.y="yr")
+
+        # check if normalization period set
+        if (is.null(cpueNormYrs))
+        {
+          cpueNormYrs <- cpueCalendarYr
+        }
+
+        #re-normalization over pre-defined period
+        cpueAgg$cpue      <- cpueAgg$cpue / mean(cpueAgg$cpue[cpueAgg$yr %in% cpueNormYrs], na.rm=TRUE)
+        cpueAgg$cpuePred  <- cpueAgg$cpuePred / mean(cpueAgg$cpuePred[cpueAgg$yr %in% cpueNormYrs], na.rm=TRUE)
+
+        cpueAgg$dev       <- log(cpueAgg$cpue) - log(cpueAgg$cpuePred)
+        MPcpueRMSE        <- sqrt(mean(cpueAgg$dev ^ 2, na.rm=TRUE))
+
+        # remove missing observations calculations
+        count             <- length(cpueAgg$dev)
+        IdxA              <- 1:(count - 1)
+        IdxB              <- 2:count
+        ValidA            <- which(!is.na(cpueAgg$dev[IdxA]))
+        ValidB            <- which(!is.na(cpueAgg$dev[IdxB]))
+        valid             <- intersect(ValidA, ValidB)
+        MPcpueAC          <- cor(cpueAgg$dev[IdxA[valid]], cpueAgg$dev[IdxB[valid]])
+
+        if (i %in% c(1, floor(0.33 * length(modList)), floor(0.67 * length(modList)), length(modList)))
+        {
+          plot(cpueAgg$yr, cpueAgg$cpue, ylim=c(0,3), yaxs='i', main="%CV " %&% round(MPcpueRMSE*100) %&% "     rho " %&% (round(MPcpueAC*100)/100))
+          lines(cpueAgg$yr,cpueAgg$cpuePred)
+        }
+
+        cpueMPRMSEByYrall <- c(cpueMPRMSEByYrall, MPcpueRMSE)
+        cpueMPACByYrall   <- c(cpueMPACByYrall, MPcpueAC)
+      }
+
       gradall              <- c(gradall, m$maximum_gradient_component)
       boundCheckall        <- c(boundCheckall, sum(m$parameters$Status=="HI" | m$parameters$Status=="LO", na.rm=T))
 
@@ -585,10 +645,8 @@ plotIndices.f <- function(modList = gridZList,
       rSlope   <- unname(coefficients(lm(rdev ~ c(1:nrdev)))[2])
       #rTrend   <- length(m$recruit$dev[m$recruit$era == "Main"]) * rSlope * 100
 
-      #seasAsYrToDecYr.f(seasAsYr=101, endSeasAsYr=272, numSeas=4, endYr=2014, endSeas=4)
-
       # possibly misaligned by small amount, but this is irrelevant for CV calculation...
-      rDevCalendarYr <- seasAsYrToDecYr.f(seasAsYr=m$recruit$year[m$recruit$era == "Main"], endSeasAsYr=356, numSeas=4, endYr=2015, endSeas=4)
+      rDevCalendarYr <- seasAsYrToDecYr.f(seasAsYr=m$recruit$year[m$recruit$era == "Main"], endSeasAsYr=endSeasAsYr, numSeas=4, endYr=endYr, endSeas=4)
       rdevByYr       <- tapply(rdev, as.factor(floor(rDevCalendarYr)), FUN=mean)
       recFit2        <- c(recFit2,sqrt(sum(rdev^2)/nrdev))
       recFit2ByYr    <- c(recFit2ByYr,sqrt(sum(rdevByYr^2)/(nrdev/4)))
@@ -609,6 +667,9 @@ plotIndices.f <- function(modList = gridZList,
       essall[i, ]           <- NA
       cpueRMSEall[i, ]      <- NA
       cpueRMSEByYrall[i, ]  <- NA
+      cpueMPRMSEByYrall     <- NA
+      cpueMPACByYrall       <- NA
+
       gradall               <- c(gradall, NA)
       stdExistsall          <- c(stdExistsall, NA)
       boundCheckall         <- c(boundCheckall, NA)
@@ -630,9 +691,11 @@ plotIndices.f <- function(modList = gridZList,
   if (doPlots)
   {
     # plot recruitment deviates summary
-    dt <- data.table(qtr=1:length(maxEstRecruitDev), max=maxEstRecruitDev, min=minEstRecruitDev, mean=meanEstRecruitDev)
+    calendar_years <- as.Date(365.256 * (recCalendarYrs - firstCalendarYr), origin=as.Date(paste(firstCalendarYr, 1, 1, sep="-")))
 
-    print(ggplot(dt, aes(x = qtr, ymin = 0)) +
+    dt <- data.table(yr=calendar_years, max=maxEstRecruitDev, min=minEstRecruitDev, mean=meanEstRecruitDev)
+
+    print(ggplot(dt, aes(x = yr, ymin = 0)) +
                  ylab("recruitment deviates") +
                  theme_bw() +
                  ggtitle("Estimated recruitment\n deviates summary (max, mean & min).") +
@@ -643,11 +706,11 @@ plotIndices.f <- function(modList = gridZList,
                  geom_line(aes(y = `mean`), size=1))
 
     # plot recruitment time series distribution
-    dt <- data.table(qtr=quarters, model=models, recruitment=qtrlyRecruitment)
+    dt <- data.table(yr=calendar_years, model=models, recruitment=qtrlyRecruitment)
 
-    dt <- dt[, as.list(quantile(recruitment, probs = c(0.1, 0.25, 0.5, 0.75, 0.9), na.rm = TRUE)), keyby = list(qtr)]
+    dt <- dt[, as.list(quantile(recruitment, probs = c(0.1, 0.25, 0.5, 0.75, 0.9), na.rm = TRUE)), keyby = list(yr)]
 
-    print(ggplot(dt, aes(x = qtr, ymin = 0)) +
+    print(ggplot(dt, aes(x = yr, ymin = 0)) +
                  ylab("recruitment") +
                  theme_bw() +
                  ggtitle("Recruitment") +
@@ -1289,6 +1352,46 @@ plotIndices.f <- function(modList = gridZList,
       first <- last+1
     }
 
+    if (!is.null(MPdat))
+    {
+      spacer  <- array(NA, dim=c(dim(fList)[1], length(unique(as.vector(fList)))))
+      plotDat <- cbind(cpueMPRMSEByYrall, spacer)
+
+      boxplot(plotDat, ylab = "MP CPUE RMSE (annualized) ", main="MP CPUE agreement with SS Model ", names=c("all", rep(" ", length(unique(as.vector(fList))))))
+
+      first   <- 2
+      colList <- c(8, 2:ncol(fList))
+
+      for (i in 1:ncol(fList))
+      {
+        last <- first + length(unique(fList[, i])) - 1
+
+        boxplot(cpueMPRMSEByYrall ~ fList[,i], col=colList[i], add=T, at=first:last)
+        text((first:last), 1.01 * max(cpueMPRMSEByYrall), round(table(fList[, i]) / sum(table(fList[, i])), 2))
+
+        first <- last + 1
+      }
+
+
+      spacer  <- array(NA, dim=c(dim(fList)[1], length(unique(as.vector(fList)))))
+      plotDat <- cbind(cpueMPACByYrall, spacer)
+
+      boxplot(plotDat, ylab = "MP CPUE rho (annualized) ", main="MP CPUE auto-correlation (with SS Model Expected) ", names=c("all", rep(" ", length(unique(as.vector(fList))))))
+
+      first   <- 2
+      colList <- c(8, 2:ncol(fList))
+
+      for (i in 1:ncol(fList))
+      {
+        last <- first + length(unique(fList[, i])) - 1
+
+        boxplot(cpueMPACByYrall ~ fList[,i], col=colList[i], add=T, at=first:last)
+        text((first:last), 1.01 * max(cpueMPACByYrall), round(table(fList[, i]) / sum(table(fList[, i])), 2))
+
+        first <- last + 1
+      }
+    }
+
     par(mfrow = c(1,1))
 
     for(r in 1:4)
@@ -1314,6 +1417,8 @@ plotIndices.f <- function(modList = gridZList,
         first <- last+1
       }
     }
+
+    #calculate the RMSE between annualized, aggregated predicted CPUE from SS and aggregated annualized cpue to be used in the MP
 
     #par(mfrow = mfrowLayout)
     #for (c in 1:numCPUE) {
@@ -1650,7 +1755,7 @@ chart.Correlation2 <- function (R, histogram = TRUE, method = c("pearson", "kend
     rm(method)
     hist.panel = function(x, ... = NULL) {
         par(new = TRUE)
-        hist(x, col = "light gray", probability = TRUE, axes = FALSE, main = "", breaks = "FD")
+        hist(x, col = "light gray", probability = TRUE, axes = FALSE, main = "", breaks = 30)
         lines(density(x, na.rm = TRUE), col = "red", lwd = 1)
         rug(x)
     }
