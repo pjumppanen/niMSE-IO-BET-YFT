@@ -298,7 +298,8 @@ plotIndices.f <- function(modList = gridZList,
                           doPlots=T,
                           SSRootDir="",
                           refModel="TagLambda1",
-                          firstCalendarYr=1952,
+                          firstCalendarYr=1952, # BET=1952, YFT=1950
+                          firstYrQtr =101,      # BET=101,  YFT=13
                           maxAverageRecruitThreshold=5.0,
                           cpueMP_File=NULL,
                           cpueNormYrs=NULL)
@@ -312,7 +313,7 @@ plotIndices.f <- function(modList = gridZList,
   {
     # Initialise MPdat (CPUE series for MP projection)
     # Assumes saved data table with yr and cpue columns saved with write.table()
-    MPdat <- read.table(cpueMP_File)
+    MPdat <- read.table(cpueMP_File, header=T)
   }
 
   for (i in 1:length(modList))
@@ -430,9 +431,12 @@ plotIndices.f <- function(modList = gridZList,
     {
       m <- getSSModel(modList[i])
 
-      endYr       <- firstCalendarYr + (max(m$recruit$year) - min(m$recruit$year) + 1) / 4 - 1 + 1 / 8
-      endSeasAsYr <- max(m$recruit$year)
-
+      # This is not sufficient to  
+      #endYr       <- firstCalendarYr + (max(m$recruit$year) - min(m$recruit$year) + 1) / 4 - 1 + 1 / 8
+      #endSeasAsYr <- max(m$recruit$year)
+      endYr       <- firstCalendarYr + (max(m$cpue$Yr) - firstYrQtr + 1) / 4 - 1 + 1 / 8
+      endSeasAsYr <- max(m$cpue$Yr)
+      
       # update recruitment spike diagnostics
       Recruit           <- m$recruit$pred_recr
       SmoothedRecruit   <- lowess(Recruit)$y
@@ -598,7 +602,6 @@ plotIndices.f <- function(modList = gridZList,
           plot(cpueAgg$yr, cpueAgg$cpue, ylim=c(0,3), yaxs='i', main="%CV " %&% round(MPcpueRMSE*100) %&% "     rho " %&% (round(MPcpueAC*100)/100))
           lines(cpueAgg$yr,cpueAgg$cpuePred)
         }
-
         cpueMPRMSEByYrall <- c(cpueMPRMSEByYrall, MPcpueRMSE)
         cpueMPACByYrall   <- c(cpueMPACByYrall, MPcpueAC)
       }
@@ -1349,6 +1352,8 @@ plotIndices.f <- function(modList = gridZList,
       boxplot(rowMeans(cpueRMSEByYrall) ~ fList[,i], col=colList[i], add=T, at=first:last)
       text((first:last),1.01*max(rowMeans(cpueRMSEByYrall)), round(table(fList[,i])/sum(table(fList[,i])),2))
 
+  
+      
       first <- last+1
     }
 
