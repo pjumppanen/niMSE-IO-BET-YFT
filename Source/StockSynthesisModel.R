@@ -21,6 +21,55 @@ setMethod("initialize", "StockSynthesisModel",
     }
     else
     {
+      decodeAndCheckSurveyName <- function(SurveyName, CpueIdxOnly=FALSE)
+      {
+        Match   <- regexpr("SURVEY", SurveyName, perl=TRUE)
+        CpueIdx <- NULL
+        QtrIdx  <- 1:4
+        Scale   <- 1.0 / 4
+
+        if (Match[1] > 0)
+        {
+          len     <- attr(Match, "match.length")
+          SubName <- substring(SurveyName, Match[1] + len)
+          Match   <- regexpr("\\d+", SubName, perl=TRUE)
+
+          if (Match[1] <= 0)
+          {
+            stop("No survey nunmber found in CPUE stock synthesis name data")
+          }
+
+          len     <- attr(Match, "match.length")
+          CpueIdx <- as.numeric(substr(SubName, Match[1], len))
+          SubName <- substring(SubName, Match[1] + len)
+
+          if (nchar(SubName) > 0)
+          {
+            if (substr(SubName, 1, 1) != "Q")
+            {
+              stop("Expecting Q as quarter delimiter in CPUE stock synthesis name data")
+            }
+
+            QtrIdx <- as.numeric(substring(SubName, 2))
+            Scale  <- 1.0
+          }
+        }
+        else
+        {
+          # CPUE survey naming convention to understood
+          stop("Expecting CPUE stock synthesis name data to be prefixed with 'SURVEY'")
+        }
+
+        if (CpueIdxOnly)
+        {
+          return (CpueIdx)
+        }
+        else
+        {
+          return (list(CpueIdx=CpueIdx, QtrIdx=QtrIdx, Scale=Scale))
+        }
+      }
+
       if (class(MseDef) != "MseDefinition")
       {
         stop(paste("Could not create StockSynthesisModel.",deparse(substitute(MseDef)),"not of class MseDefinition"))
@@ -53,8 +102,19 @@ setMethod("initialize", "StockSynthesisModel",
         par(mfrow=c(3,3)) #Plot some SS results while importing
       }
 
+      # Determine the number of CPUE series
+      AllSurveyIndices <- sapply(levels(factor(ssMod$cpue$Name)), decodeAndCheckSurveyName, CpueIdxOnly=TRUE)
+      SurveyIndices    <- as.integer(levels(factor(AllSurveyIndices)))
+
+      if (min(SurveyIndices) != 1 || max(SurveyIndices) != length(SurveyIndices))
+      {
+        stop(paste ("CPUE Survey names must be numbered 1 to the number of surveys. Currently: ", SurveyIndices))
+      }
+
+      nCPUE <- length(SurveyIndices)
+
       # ssoutput.f no longer req'd, r4ss fixed
-      ssMod <- SS_output2(dir=MseDef@SSRootDir %&% MseDef@OMList[which] %&% "\\converged0", covar=FALSE, ncols=213,forecast=FALSE)
+      ssMod <- SS_output2(dir=MseDef@SSRootDir %&% MseDef@OMList[which], covar=FALSE, ncols=213,forecast=FALSE)
 
       # P nfleets excluding surveys (and some fleets are misleading - should be re-configured as time blocks in selectivity)
       .Object@ModelData@nsim      <- as.integer(MseDef@nsimPerOMFile[which])
@@ -64,7 +124,7 @@ setMethod("initialize", "StockSynthesisModel",
       .Object@ModelData@nareas    <- as.integer(ssMod$nareas)
       .Object@ModelData@npop      <- MseDef@npop
       .Object@ModelData@nfleets   <- as.integer(sum(ssMod$IsFishFleet))
-      .Object@ModelData@nCPUE     <- ssMod$nfleets - ssMod$nfishfleets
+      .Object@ModelData@nCPUE     <- nCPUE
       .Object@ModelData@UseMSYss  <- as.integer(UseMSYss)
 
       # note MSE age 1 = SS age 0
@@ -273,11 +333,19 @@ setMethod("initialize", "StockSynthesisModel",
       {
         yrSeas <- seasAsYrToMSEYrSeas.f(seasAsYr=ssMod$cpue$Yr[i], endSeasAsYr = ssMod$endyr, numSeas = MseDef@nsubyears, endYr = MseDef@lastCalendarYr, endSeas = MseDef@lastSeas, firstSeasAsYr = MseDef@firstSSYr, firstSeas = MseDef@firstSeas) #generic
 
-        .Object@ModelData@CPUEobsMR[yrSeas[1]:.Object@ModelData@nyears,yrSeas[2]:.Object@ModelData@nsubyears, as.numeric(substr(ssMod$cpue$Name[i], 7, 7))] <- ssMod$cpue$Obs[i]
+        # CPUE series may be broken down quarterly. In such case assume the survey name is of the form SURVEY1Q2 etc.
+        # if all is correct the ss year should automatically line up with the year season extracted so we should be
+        # able to ignore the Q number and it should end up in the right array location. We add check code to
+        # ensure this consistency and flag an error and abort should they be in disagreement so that the
+        # problem can be resolved.
+        #QtrIdx   <- yrSeas[2]:.Object@ModelData@nsubyears
+        decoding <- decodeAndCheckSurveyName(ssMod$cpue$Name[i])
+
+        .Object@ModelData@CPUEobsMR[yrSeas[1]:.Object@ModelData@nyears, decoding$QtrIdx, decoding$CpueIdx] <- decoding$Scale * ssMod$cpue$Vuln_bio[i]
       }
 
       # Annual
-      .Object@ModelData@CPUEobsY[] <- apply(.Object@ModelData@CPUEobsMR, FUN=sum, MARGIN=c(1))
+      .Object@ModelData@CPUEobsY[] <- apply(.Object@ModelData@CPUEobsMR, FUN=sum, MARGIN=c(1), na.rm=TRUE)
 
       # Calculate initial aggregate annual CPUE index deviate for aggregate autocorrelation of index
       lastYrIndices              <- (max(ssMod$cpue$Yr) - 3):max(ssMod$cpue$Yr)
