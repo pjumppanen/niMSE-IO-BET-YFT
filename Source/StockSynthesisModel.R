@@ -102,6 +102,9 @@ setMethod("initialize", "StockSynthesisModel",
         par(mfrow=c(3,3)) #Plot some SS results while importing
       }
 
+      # ssoutput.f no longer req'd, r4ss fixed
+      ssMod <- SS_output2(dir=MseDef@SSRootDir %&% MseDef@OMList[which], covar=FALSE, ncols=213,forecast=FALSE)
+
       # Determine the number of CPUE series
       AllSurveyIndices <- sapply(levels(factor(ssMod$cpue$Name)), decodeAndCheckSurveyName, CpueIdxOnly=TRUE)
       SurveyIndices    <- as.integer(levels(factor(AllSurveyIndices)))
@@ -113,8 +116,6 @@ setMethod("initialize", "StockSynthesisModel",
 
       nCPUE <- length(SurveyIndices)
 
-      # ssoutput.f no longer req'd, r4ss fixed
-      ssMod <- SS_output2(dir=MseDef@SSRootDir %&% MseDef@OMList[which], covar=FALSE, ncols=213,forecast=FALSE)
 
       # P nfleets excluding surveys (and some fleets are misleading - should be re-configured as time blocks in selectivity)
       .Object@ModelData@nsim      <- as.integer(MseDef@nsimPerOMFile[which])
@@ -323,7 +324,7 @@ setMethod("initialize", "StockSynthesisModel",
 
       # Extract CPUE Observations
       print("WARNING: missing CPUE values (after time series start) are substituted with preceding value(i.e. not a good idea if there are many missing obs)")
-      print("WARNING: Observed CPUE series are adopted from the first SS model in the OMList")
+      print("Note: Observed CPUE for MP is an external file based on external analysis reproducible for MP application")
       # substitute missing CPUE values for expedience (assumes SS output in temporal order)
 
       # all OMs use the CPUE data defined in the first SS model list

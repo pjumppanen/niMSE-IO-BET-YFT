@@ -438,7 +438,8 @@ betPlots.f <- function(mseObj,
                        rename=NA,
                        outputPath=NA,
                        prefix="",
-                       outFileType="emf") # or "png" which does not scale well
+                       outFileType="emf",
+                       obsRefYr=2018) # or "png" which does not scale well
 {
   require(devEMF)
 
@@ -505,27 +506,27 @@ betPlots.f <- function(mseObj,
   }
 
   beginDraw(prefix %&% "Recruitment", width=plotWidth, height=plotHeight, outputPath=outputPath)
-  plotOMruns2(histd, projd, "Recruitment", ylab= "Recruitment", lastHistYr = 2015, firstMPYr = 2021)
+  plotOMruns2(histd, projd, "Recruitment", ylab= "Recruitment", lastHistYr = obsRefYr, firstMPYr = 2021)
   endDraw(outputPath=outputPath)
 
   beginDraw(prefix %&% "SSB_SSBMSY", width=plotWidth, height=plotHeight, outputPath=outputPath)
-  plotOMruns2(histd, projd, "SSB/SSBMSY", limit=SBLim, target=SBTarg, ylab= "SSB/SSBMSY", lastHistYr = 2015, firstMPYr = 2021)
+  plotOMruns2(histd, projd, "SSB/SSBMSY", limit=SBLim, target=SBTarg, ylab= "SSB/SSBMSY", lastHistYr = obsRefYr, firstMPYr = 2021)
   endDraw(outputPath=outputPath)
 
   beginDraw(prefix %&% "F_FMSY", width=plotWidth, height=plotHeight, outputPath=outputPath)
-  plotOMruns2(histd, projd, "F/FMSY", limit=FLim, target=FTarg, ylab= "F/FMSY", lastHistYr = 2015, firstMPYr = 2021)
+  plotOMruns2(histd, projd, "F/FMSY", limit=FLim, target=FTarg, ylab= "F/FMSY", lastHistYr = obsRefYr, firstMPYr = 2021)
   endDraw(outputPath=outputPath)
 
   beginDraw(prefix %&% "C", width=plotWidth, height=plotHeight, outputPath=outputPath)
-  plotOMruns2(histd, projd, "C", Cref=Cref*1000, CScale=0.001, ylab= "Catch (1000t)", lastHistYr = 2015, firstMPYr = 2021)
+  plotOMruns2(histd, projd, "C", Cref=Cref*1000, CScale=0.001, ylab= "Catch (1000t)", lastHistYr = obsRefYr, firstMPYr = 2021)
   endDraw(outputPath=outputPath)
 
   beginDraw(prefix %&% "CPUE", width=plotWidth, height=plotHeight, outputPath=outputPath)
-  plotOMruns2(histd, projd, "CPUE(aggregate)", Cref=Cref, ylab= "CPUE(aggregate)", lastHistYr = 2015, firstMPYr = 2021)
+  plotOMruns2(histd, projd, "CPUE(aggregate)", Cref=Cref, ylab= "CPUE(aggregate)", lastHistYr = obsRefYr, firstMPYr = 2021)
   endDraw(outputPath=outputPath)
 
   beginDraw(prefix %&% "KobeCols", width=plotWidth, height=plotHeight, outputPath=outputPath)
-  plotKobeCols(om=histd[histd$qname %in% c("PrGreen","PrOrange","PrYellow","PrRed"),], runs=projd[projd$qname%in% c("PrGreen","PrOrange","PrYellow","PrRed"),], lastHistYr = 2015, firstMPYr = 2021)
+  plotKobeCols(om=histd[histd$qname %in% c("PrGreen","PrOrange","PrYellow","PrRed"),], runs=projd[projd$qname%in% c("PrGreen","PrOrange","PrYellow","PrRed"),], lastHistYr = obsRefYr, firstMPYr = 2021)
   endDraw(outputPath=outputPath)
 
   perfd <- msevizPerformanceData(mseObj, YearsAveraged)
