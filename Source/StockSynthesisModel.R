@@ -793,6 +793,13 @@ setMethod("runMse", c("StockSynthesisModel"),
     .Object@ModelData@CPUEmpY       <- karray(CPUEmpY)
     .Object@ModelData@CPUEmpNormYrs <- as.numeric(CPUEmpNormYrs)
 
+    if (any(!is.na(CPUEmpY)))
+    {
+      # Initialise the CPUE series with the supplied one
+      nyears                                     <- length(CPUEmpY)
+      .Object@HistoricVars@IobsArchive[1:nyears] <- CPUEmpY
+    }
+
     # CPUE auto-correlation
     .Object@ModelData@IAC <- MseDef@IACin     #input value; could extract from each OM file
 
