@@ -751,7 +751,8 @@ setMethod("initialize", "Projection",
 
         # calculate the starting point for the CPUE deviations
         lastYrIndices <- c(valid[lenValid - 3], valid[lenValid - 2], valid[lenValid - 1], valid[lenValid])
-        initIDev      <- log(sum(ssModelData@CPUEobsY[IdxB[lastYrIndices]]) / sum(ssModelData@CPUEmpY[IdxB[lastYrIndices]]))
+        norm          <- exp(mean(log(.Object@CPUEobsY[1:nyears] / ssModelData@CPUEobsY[1:nyears]), na.rm=TRUE))
+        initIDev      <- log(norm * sum(ssModelData@CPUEobsY[IdxB[lastYrIndices]]) / sum(ssModelData@CPUEmpY[IdxB[lastYrIndices]]))
         Iimp          <- MPcpueRMSE
 
         # calculate the auto-correlation
@@ -760,7 +761,7 @@ setMethod("initialize", "Projection",
         # q to keep CPUE on original scale
         #   CPUEobsY = qCPUE * (NLLI ^ Ibeta) * Ierr
         #
-        qCPUE         <- exp(mean(log(.Object@CPUEobsY / (NLLI ^ Ibeta)), na.rm=TRUE))
+        qCPUE         <- ssModelData@qCPUE * norm
       }
       else
       {
