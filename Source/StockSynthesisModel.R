@@ -346,7 +346,7 @@ setMethod("initialize", "StockSynthesisModel",
       }
 
       # Annual
-      .Object@ModelData@CPUEobsY[] <- apply(.Object@ModelData@CPUEobsMR, FUN=sum, MARGIN=c(1), na.rm=TRUE)
+      .Object@ModelData@CPUEobsY[] <- apply(.Object@ModelData@CPUEobsMR, FUN=sum, MARGIN=c(1))
 
       # Calculate initial aggregate annual CPUE index deviate for aggregate autocorrelation of index
       lastYrIndices              <- (max(ssMod$cpue$Yr) - 3):max(ssMod$cpue$Yr)
