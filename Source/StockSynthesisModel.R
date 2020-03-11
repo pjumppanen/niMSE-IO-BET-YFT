@@ -21,6 +21,136 @@ setMethod("initialize", "StockSynthesisModel",
     }
     else
     {
+      extractMigrationCoefficients <- function(ssMod, LastYearsCount=5, OffsetYearsCount=2)
+      {
+        nareas            <- ssMod$nareas
+        nages             <- length(ssMod$endgrowth$Age)
+        SeasonalMigration <- karray(NA, dim=c(2, nareas, nareas, MseDef@nsubyears))
+        juvenileAge       <- 0
+
+        for (age in 0:nages)
+        {
+          coeffLevels <- as.numeric(levels(factor(m$movement[[paste("age", age, sep="")]])))
+
+          if ((length(coeffLevels) == 2) && (coeffLevels == c(0, 1)))
+          {
+            # Remember SS has 0 based age and we have 1
+            juvenileAge <- age + 1
+          }
+          else
+          {
+            break
+          }
+        }
+
+        for (Idx in 1:length(ssMod$movement$Source_area))
+        {
+          SourceArea   <- ssMod$movement$Source_area[Idx]
+          DestArea     <- ssMod$movement$Dest_area[Idx]
+          MovementKeyA <- paste("MoveParm_A_seas_1_GP_1from_", SourceArea, "to_", DestArea, sep="")
+          MovementKeyB <- paste("MoveParm_B_seas_1_GP_1from_", SourceArea, "to_", DestArea, sep="")
+
+          if (is.null(ssMod$MGparmAdj[[MovementKeyA]]) || is.null(ssMod$MGparmAdj[[MovementKeyB]]))
+          {
+            print("ERROR: Movement parameters missing")
+            browser()
+            stop()
+          }
+
+          nSS_years <- length(ssMod$MGparmAdj$Year)
+
+          # average seasonal indices
+          ssOffsetYears <- OffsetYearsCount * MseDef@nsubyears
+
+          for (ssYrIdx in (nSS_years - LastYearsCount * MseDef@nsubyears - ssOffsetYears + 1):(nSS_years - ssOffsetYears))
+          {
+            yrSeas <- seasAsYrToMSEYrSeas.f(seasAsYr=ssMod$MGparmAdj$Year[ssYrIdx],
+                                            endSeasAsYr=ssMod$endyr,
+                                            numSeas=MseDef@nsubyears,
+                                            endYr=MseDef@lastCalendarYr,
+                                            endSeas=MseDef@lastSeas,
+                                            firstSeasAsYr=MseDef@firstSSYr,
+                                            firstSeas=MseDef@firstSeas)
+
+            subyear <- yrSeas[2]
+
+            SeasonalMigration[1, SourceArea, DestArea, subyear] <- sum(SeasonalMigration[1, SourceArea, DestArea, subyear], ssMod$MGparmAdj[[MovementKeyA]][ssYrIdx], na.rm=TRUE)
+            SeasonalMigration[2, SourceArea, DestArea, subyear] <- sum(SeasonalMigration[2, SourceArea, DestArea, subyear], ssMod$MGparmAdj[[MovementKeyB]][ssYrIdx], na.rm=TRUE)
+          }
+        }
+
+        SeasonalMigration <- SeasonalMigration / LastYearsCount
+
+        # normalise coeeficients
+        SeasonalMigration  <- exp(SeasonalMigration)
+        TotalsBySourceArea <- apply(SeasonalMigration, c(1, 2, 4), sum, na.rm=TRUE)
+
+        for (Idx in 1:nareas)
+        {
+          SeasonalMigration[,,Idx,] <- SeasonalMigration[,,Idx,] / TotalsBySourceArea
+        }
+
+        # replace NA's with 0
+        SeasonalMigration[] <- sapply(as.numeric(SeasonalMigration), function(val) {if (is.na(val)) 0.0 else val})
+
+        # create age and season based movement matrix
+        mov                 <- karray(0.0, dim=c(nages, MseDef@nsubyears, nareas, nareas))
+        CheckSeasonality    <- sum(SeasonalMigration[,,,] - rep(SeasonalMigration[,,,1], times=MseDef@nsubyears))
+
+        if (CheckSeasonality != 0)
+        {
+          # We have season movement
+          for (Area in 1:nareas)
+          {
+            mov[1:juvenileAge,,Area,Area] <- rep(1, times=MseDef@nsubyears)
+          }
+
+          for (Idx in 1:length(ssMod$movement$Source_area))
+          {
+            SourceArea <- ssMod$movement$Source_area[Idx]
+            DestArea   <- ssMod$movement$Dest_area[Idx]
+
+            # Remember SS has 0 based age and we have 1
+            MinAge     <- ssMod$movement$minage[Idx] + 1
+            MaxAge     <- ssMod$movement$maxage[Idx] + 1
+
+            YoungMigration    <- SeasonalMigration[1, SourceArea, DestArea,]
+            OldMigration      <- SeasonalMigration[2, SourceArea, DestArea,]
+            LogYoungMigration <- log(YoungMigration)
+            LogOldMigration   <- log(OldMigration)
+
+            MinAges                                            <- t(mov[(juvenileAge + 1):MinAge,,SourceArea,DestArea])
+            MinAges[]                                          <- YoungMigration
+            mov[(juvenileAge + 1):MinAge,,SourceArea,DestArea] <- t(MinAges)
+            MaxAges                                            <- t(mov[MaxAge:nages,,SourceArea,DestArea])
+            MaxAges[]                                          <- OldMigration
+            mov[MaxAge:nages,,SourceArea,DestArea]             <- t(MaxAges)
+            AgeSpan                                            <- MaxAge - MinAge
+
+            if (AgeSpan >= 2)
+            {
+              for (Age in (MinAge + 1):(MaxAge - 1))
+              {
+                mov[Age,,SourceArea,DestArea] <- exp(LogYoungMigration * (MaxAge - Age) / AgeSpan + LogOldMigration * (Age - MinAge) / AgeSpan)
+              }
+            }
+          }
+
+        } else
+        {
+          # We don't have seasonal movement
+          for (Idx in 1:nrow(ssMod$movement))
+          {
+            row                                 <- ssMod$movement[Idx,]
+            SourceArea                          <- row$Source_area
+            DestArea                            <- row$Dest_area
+            mov[1:nages,, SourceArea, DestArea] <- as.numeric(row[1,][7:length(row)])
+          }
+        }
+
+        return (mov)
+      }
+
       decodeAndCheckSurveyName <- function(SurveyName, CpueIdxOnly=FALSE)
       {
         Match   <- regexpr("SURVEY", SurveyName, perl=TRUE)
@@ -406,30 +536,17 @@ setMethod("initialize", "StockSynthesisModel",
 
       if (.Object@ModelData@nareas > 1)
       {
-        # Import SS movement parms
-        ssmov <- ssMod$movement
+        mov_mat <- extractMigrationCoefficients(ssMod)
 
-        for (i in 1:nrow(ssmov))
+        for (ip in 1:.Object@ModelData@npop)
         {
-          from        <- ssmov$Source_area[i]
-          to          <- ssmov$Dest_area[i]
-          nColOffSet  <- 6
-          moveVec     <- ssmov[i, (nColOffSet + 1):(nColOffSet + nagesss)]
-          moveVec     <- as.numeric(moveVec) # MSE maxage older than SS
-
-          for (ip in 1:.Object@ModelData@npop)
-          {
-            # Note that OM is configured for seasonal movement, but SS uses mean annual migration; hence the repetition for each OM season
-            for(im in 1:.Object@ModelData@nsubyears)
-            {
-              mov[ip,,im,from,to] <- moveVec
-            }
-          }
+          mov[ip,,,] <- mov_mat
         }
 
         .Object@ModelData@mov <- mov
 
         rm(mov)
+        rm(mov_mat)
 
         # movement function
         projection.domov <- function(Ntemp, movtemp)
