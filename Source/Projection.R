@@ -1471,6 +1471,8 @@ setMethod("initialize", "Projection",
         Om.destroy(Obj)
       }
 
+      flush.console()
+
       return (.Object)
     }
 
@@ -1478,7 +1480,24 @@ setMethod("initialize", "Projection",
 
     errorHandler <- function(e)
     {
-      ErrorLog <<- paste(paste(sys.calls()), collapse="\n")
+      # this code truncates the call list because in parallel contexts
+      # it ends up going to a really high context and then quotes the
+      # entire root object content. This keeps the content small
+      # but with enough context to be useful.
+      Calls <- sys.calls()
+      Len   <- length(Calls)
+
+      for (Idx in 1:Len)
+      {
+        if (regexpr("withCallingHandlers", Calls[Idx]) > 0)
+        {
+          Calls <- Calls[Idx:Len]
+          break
+        }
+      }
+
+      # archive truncated call list
+      ErrorLog <<- paste(paste(Calls), collapse="\n")
     }
 
     # We put the tryCatch here so we can have the object initialised to a
