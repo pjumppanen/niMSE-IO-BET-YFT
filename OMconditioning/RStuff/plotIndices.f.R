@@ -231,7 +231,7 @@ chooseBestFitModels <- function(modelList, SSRootDir, UseParFile=TRUE)
       Text <- paste(readLines(con), collapse="\n")
       close(con)
 
-      Warnings <- c(Warnings, "Text")
+      Warnings <- c(Warnings, Text)
     }
     else
     {
@@ -431,12 +431,9 @@ plotIndices.f <- function(modList = gridZList,
     {
       m <- getSSModel(modList[i])
 
-      # This is not sufficient to  
-      #endYr       <- firstCalendarYr + (max(m$recruit$year) - min(m$recruit$year) + 1) / 4 - 1 + 1 / 8
-      #endSeasAsYr <- max(m$recruit$year)
       endYr       <- firstCalendarYr + (max(m$cpue$Yr) - firstYrQtr + 1) / 4 - 1 + 1 / 8
       endSeasAsYr <- max(m$cpue$Yr)
-      
+
       # update recruitment spike diagnostics
       Recruit           <- m$recruit$pred_recr
       SmoothedRecruit   <- lowess(Recruit)$y
@@ -1352,8 +1349,6 @@ plotIndices.f <- function(modList = gridZList,
       boxplot(rowMeans(cpueRMSEByYrall) ~ fList[,i], col=colList[i], add=T, at=first:last)
       text((first:last),1.01*max(rowMeans(cpueRMSEByYrall)), round(table(fList[,i])/sum(table(fList[,i])),2))
 
-  
-      
       first <- last+1
     }
 
