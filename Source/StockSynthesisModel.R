@@ -30,7 +30,7 @@ setMethod("initialize", "StockSynthesisModel",
 
         for (age in 0:nages)
         {
-          coeffLevels <- as.numeric(levels(factor(m$movement[[paste("age", age, sep="")]])))
+          coeffLevels <- as.numeric(levels(factor(ssMod$movement[[paste("age", age, sep="")]])))
 
           if ((length(coeffLevels) == 2) && (coeffLevels == c(0, 1)))
           {
@@ -536,11 +536,12 @@ setMethod("initialize", "StockSynthesisModel",
 
       if (.Object@ModelData@nareas > 1)
       {
+        # Read migration - confirmed to work as before for no seasonality
         mov_mat <- extractMigrationCoefficients(ssMod)
 
         for (ip in 1:.Object@ModelData@npop)
         {
-          mov[ip,,,] <- mov_mat
+          mov[ip,,,,] <- mov_mat
         }
 
         .Object@ModelData@mov <- mov
