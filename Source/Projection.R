@@ -757,7 +757,7 @@ setMethod("initialize", "Projection",
 
         # If Icv[1] > 0 then assume we a doing robustness testing and will use the Icv and IAC from
         # the MseDef rather thanthe calculated values.
-        if (MseDef@Icv[1] > 0)
+        if (MseDef@Icv[1] >= 0)
         {
           Iimp        <- runif(1, MseDef@Icv[1], MseDef@Icv[2])
           IAC         <- ssModelData@IAC
