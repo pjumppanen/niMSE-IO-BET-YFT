@@ -719,7 +719,9 @@ setMethod("initialize", "Projection",
       Cb   <- trlnorm(1, MseDef@Cbmean, MseDef@Cbcv)
       Cerr <- karray(trlnorm(allyears, rep(Cb, allyears), rep(Cimp, allyears)), c(allyears))
 
-      if (any(!is.na(ssModelData@CPUEmpY)))
+      # Calculate the CPUE CV and auto-correlation for the given MP CPUE series 
+      #   unless it does not exist, or the MSE definition has positive input values for Icv and IAC (for robustness testing)
+      if (any(!is.na(ssModelData@CPUEmpY)) & !(MseDef@Icv[1]>0 ))
       {
         # Initialise IrndDevs based on supplied CPUE sequence using determined Icv, IAC, initIDev and qCPUE
         .Object@CPUEobsY[1:initYear] <- ssModelData@CPUEmpY[1:initYear]
@@ -754,7 +756,8 @@ setMethod("initialize", "Projection",
         norm          <- exp(mean(log(.Object@CPUEobsY[1:nyears] / ssModelData@CPUEobsY[1:nyears]), na.rm=TRUE))
         initIDev      <- log(norm * sum(ssModelData@CPUEobsY[IdxB[lastYrIndices]]) / sum(ssModelData@CPUEmpY[IdxB[lastYrIndices]]))
         Iimp          <- MPcpueRMSE
-
+        if(Iimp < 0.2)  Iimp  <- 0.2
+        
         # calculate the auto-correlation
         IAC           <- cor(DevsCPUE[IdxA[valid]], DevsCPUE[IdxB[valid]])
 
