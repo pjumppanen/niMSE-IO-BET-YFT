@@ -719,9 +719,8 @@ setMethod("initialize", "Projection",
       Cb   <- trlnorm(1, MseDef@Cbmean, MseDef@Cbcv)
       Cerr <- karray(trlnorm(allyears, rep(Cb, allyears), rep(Cimp, allyears)), c(allyears))
 
-      # Calculate the CPUE CV and auto-correlation for the given MP CPUE series 
-      #   unless it does not exist, or the MSE definition has positive input values for Icv and IAC (for robustness testing)
-      if (any(!is.na(ssModelData@CPUEmpY)) & !(MseDef@Icv[1]>0 ))
+      # Calculate the CPUE CV and auto-correlation for the given MP CPUE series
+      if (any(!is.na(ssModelData@CPUEmpY)))
       {
         # Initialise IrndDevs based on supplied CPUE sequence using determined Icv, IAC, initIDev and qCPUE
         .Object@CPUEobsY[1:initYear] <- ssModelData@CPUEmpY[1:initYear]
@@ -755,11 +754,23 @@ setMethod("initialize", "Projection",
         lastYrIndices <- c(valid[lenValid - 3], valid[lenValid - 2], valid[lenValid - 1], valid[lenValid])
         norm          <- exp(mean(log(.Object@CPUEobsY[1:nyears] / ssModelData@CPUEobsY[1:nyears]), na.rm=TRUE))
         initIDev      <- log(norm * sum(ssModelData@CPUEobsY[IdxB[lastYrIndices]]) / sum(ssModelData@CPUEmpY[IdxB[lastYrIndices]]))
-        Iimp          <- MPcpueRMSE
-        if(Iimp < 0.2)  Iimp  <- 0.2
-        
-        # calculate the auto-correlation
-        IAC           <- cor(DevsCPUE[IdxA[valid]], DevsCPUE[IdxB[valid]])
+
+        # If Icv[1] > 0 then assume we a doing robustness testing and will use the Icv and IAC from
+        # the MseDef rather thanthe calculated values.
+        if (MseDef@Icv[1] > 0)
+        {
+          Iimp        <- runif(1, MseDef@Icv[1], MseDef@Icv[2])
+          IAC         <- ssModelData@IAC
+        }
+        else
+        {
+          Iimp        <- MPcpueRMSE
+
+          if (Iimp < 0.2) Iimp <- 0.2
+
+          # calculate the auto-correlation
+          IAC         <- cor(DevsCPUE[IdxA[valid]], DevsCPUE[IdxB[valid]])
+        }
 
         # q to keep CPUE on original scale
         #   CPUEobsY = qCPUE * (NLLI ^ Ibeta) * Ierr
