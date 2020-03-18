@@ -205,7 +205,7 @@ setMethod("runMse", c("MseFramework"),
       # Initialise MP CPUE series for use in projection
       # Assumes saved data table with yr and cpue columns saved with write.table()
       #
-      cpueTable     <- read.table(.Object@MseDef@cpueMP_File)
+      cpueTable     <- read.table(.Object@MseDef@cpueMP_File, header=TRUE)
       CPUEmpNormYrs <- .Object@MseDef@cpueMP_NormYrs
       idxs          <- cpueTable$yr - .Object@MseDef@firstCalendarYr + 1
       lengthYrs     <- max(cpueTable$yr) - .Object@MseDef@firstCalendarYr + 1
