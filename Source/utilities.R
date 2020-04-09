@@ -460,10 +460,10 @@ betPlots.f <- function(mseObj,
   plotHeight2=scaleAll*3.375
   if(outFileType=="png"){
     plotWidth=scaleAll*588
-    plotHeight=scaleAll*588  
+    plotHeight=scaleAll*588
     plotHeight2=scaleAll*3.375/6*588
   }
-    
+
   beginDraw <- function(filename, width=plotWidth, height=plotHeight, outputPath=NA)
   {
     if (is.na(outputPath))
@@ -490,9 +490,24 @@ betPlots.f <- function(mseObj,
     }
   }
 
-  histd <- msevizHistoricTimeSeriesData(mseObj)
-  projd <- msevizProjectedTimeSeriesData(mseObj)
-  
+  if (class(mseObj) == "list")
+  {
+    len   <- length(mseObj)
+    histd <- msevizHistoricTimeSeriesData(mseObj[[1]])
+    projd <- msevizProjectedTimeSeriesData(mseObj[[1]])
+
+    for (ix in 2:len)
+    {
+      histd <- merge(histd, msevizHistoricTimeSeriesData(mseObj[[ix]]), all=TRUE)
+      projd <- merge(projd, msevizProjectedTimeSeriesData(mseObj[[ix]]), all=TRUE)
+    }
+  }
+  else
+  {
+    histd <- msevizHistoricTimeSeriesData(mseObj)
+    projd <- msevizProjectedTimeSeriesData(mseObj)
+  }
+
   projd <- projd[year <= 2040,]
 
   if (!is.na(rename))
@@ -529,7 +544,20 @@ betPlots.f <- function(mseObj,
   plotKobeCols(om=histd[histd$qname %in% c("PrGreen","PrOrange","PrYellow","PrRed"),], runs=projd[projd$qname%in% c("PrGreen","PrOrange","PrYellow","PrRed"),], lastHistYr = obsRefYr, firstMPYr = 2021)
   endDraw(outputPath=outputPath)
 
-  perfd <- msevizPerformanceData(mseObj, YearsAveraged)
+  if (class(mseObj) == "list")
+  {
+    len   <- length(mseObj)
+    perfd <- msevizPerformanceData(mseObj[[1]], YearsAveraged)
+
+    for (ix in 2:len)
+    {
+      perfd <- merge(perfd, msevizPerformanceData(mseObj[[ix]], YearsAveraged), all=TRUE)
+    }
+  }
+  else
+  {
+    perfd <- msevizPerformanceData(mseObj, YearsAveraged)
+  }
 
   if (!is.na(rename))
   {
@@ -540,7 +568,7 @@ betPlots.f <- function(mseObj,
 
     perfd[,"mp"] <- perfd[,substitute(mp)]
   }
-  
+
   beginDraw(prefix %&% "BPs", width=plotWidth, height=plotHeight2, outputPath=outputPath)
   grid::pushViewport(grid::viewport(layout = grid::grid.layout(nrow = 1, ncol = 1)))
   print(plotBPs2(perfd, limit=BETLims, target=BETTargs, blackRef=Cref, indicators = c("S3", "S9", "S6", "S10", "S14")), vp = grid::viewport(layout.pos.row = 1, layout.pos.col = 1))
