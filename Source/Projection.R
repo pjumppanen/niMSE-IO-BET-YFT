@@ -735,8 +735,9 @@ setMethod("initialize", "Projection",
           CPUEmpNormYrs <- ssModelData@CPUEmpNormYrs - MseDef@firstCalendarYr + 1
         }
 
-        MeanMP_CPUE   <- mean(ssModelData@CPUEmpY[CPUEmpNormYrs[1]:CPUEmpNormYrs[2]], na.rm=TRUE)
-        MeanObsCPUE   <- mean(ssModelData@CPUEobsY[CPUEmpNormYrs[1]:CPUEmpNormYrs[2]], na.rm=TRUE)
+        NormYrIdxs    <- CPUEmpNormYrs[1]:CPUEmpNormYrs[2]
+        MeanMP_CPUE   <- mean(ssModelData@CPUEmpY[NormYrIdxs], na.rm=TRUE)
+        MeanObsCPUE   <- mean(ssModelData@CPUEobsY[NormYrIdxs], na.rm=TRUE)
         NormMP_CPUE   <- ssModelData@CPUEmpY[1:initYear] / MeanMP_CPUE
         NormObsCPUE   <- ssModelData@CPUEobsY[1:initYear] / MeanObsCPUE
         DevsCPUE      <- log(NormMP_CPUE) - log(NormObsCPUE)
@@ -752,11 +753,11 @@ setMethod("initialize", "Projection",
 
         # calculate the starting point for the CPUE deviations
         lastYrIndices <- c(valid[lenValid - 3], valid[lenValid - 2], valid[lenValid - 1], valid[lenValid])
-        norm          <- exp(mean(log(.Object@CPUEobsY[1:nyears] / ssModelData@CPUEobsY[1:nyears]), na.rm=TRUE))
-        initIDev      <- log(norm * sum(ssModelData@CPUEobsY[IdxB[lastYrIndices]]) / sum(ssModelData@CPUEmpY[IdxB[lastYrIndices]]))
+        norm          <- exp(mean(log(.Object@CPUEobsY[NormYrIdxs] / ssModelData@CPUEobsY[NormYrIdxs]), na.rm=TRUE))
+        initIDev      <- log(sum(ssModelData@CPUEmpY[IdxB[lastYrIndices]]) / (norm * sum(ssModelData@CPUEobsY[IdxB[lastYrIndices]])))
 
         # If Icv[1] > 0 then assume we a doing robustness testing and will use the Icv and IAC from
-        # the MseDef rather thanthe calculated values.
+        # the MseDef rather than the calculated values.
         if (MseDef@Icv[1] > 0)
         {
           Iimp        <- runif(1, MseDef@Icv[1], MseDef@Icv[2])
@@ -1466,16 +1467,38 @@ setMethod("initialize", "Projection",
       .Object@IobsRArchive[1:y,] <- IobsR[1:y,]
 
       # Debugging code to visualise the CPUE fit of supplied CPUE series after scaling
-      if (!isMSY_projection & FALSE)
+      if (!isMSY_projection & exists("DebugCPUE", envir=sys.frame()))
       {
-        p2 <- qCPUE * (NLLI ^ Ibeta) #* Ierr
+        LastSSB0 <- 0
 
-        plot((1:allyears) + MseDef@firstCalendarYr - 1, .Object@CPUEobsY, yaxs="i", ylim=c(0,37), main=MseDef@OMList[[ssModelData@which]] %&% " \n%CV " %&% round(MPcpueRMSE * 100) %&% "     rho " %&% (round(IAC * 100) / 100))
-        lines((1:allyears) + MseDef@firstCalendarYr - 1, ssModelData@CPUEobsY)
-        points((1:allyears) + MseDef@firstCalendarYr - 1, p2, pch=2, col=2)
-
-        if (max(abs(.Object@CPUEobsY[nyears:(y - 1)] - .Object@CPUEobsY[(nyears + 1):y])) > 5)
+        if (exists("LastSSB0", envir=sys.frame()))
         {
+          LastSSB0 <- get("LastSSB0", envir=sys.frame())
+        }
+
+        if (RefVars@SSB0 != LastSSB0)
+        {
+          assign("LastSSB0", RefVars@SSB0, envir=sys.frame())
+
+          firstIdx   <- min(which(!is.na(.Object@CPUEobsY)))
+          Years      <- (1:allyears) + MseDef@firstCalendarYr - 1
+          CPUE       <- .Object@CPUEobsY
+          Observed   <- qCPUE * (NLLI ^ Ibeta)
+          Idxs       <- firstIdx:allyears
+          data       <- data.frame(year=Years[Idxs], cpue=CPUE[Idxs], actual=Observed[Idxs])
+          lastHistYr <- nyears + MseDef@firstCalendarYr - 1
+          Title      <- MseDef@OMList[[ssModelData@which]] %&% " \n%CV " %&% round(Iimp * 100) %&% ", rho " %&% (round(IAC * 100) / 100)
+
+          print(ggplot(data, aes(x = year)) +
+                       geom_vline(aes(xintercept = lastHistYr)) +
+                       ylab("CPUE") +
+                       theme_bw() +
+                       ylim(0.0, 1.7) +
+                       theme(plot.title = element_text(hjust = 0.5)) +
+                       ggtitle(Title) +
+                       geom_point(aes(y = cpue), color="black", size=2) +
+                       geom_line(aes(y = actual), col="red", size=0.5))
+
           browser()
         }
       }
