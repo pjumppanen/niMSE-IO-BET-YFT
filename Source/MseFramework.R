@@ -1951,3 +1951,27 @@ setMethod("execRunCallback", "MseFramework",
                                                   })
   }
 )
+
+# -----------------------------------------------------------------------------
+
+setGeneric("subset", function(.Object, ...) standardGeneric("subset"))
+
+setMethod("subset", "MseFramework",
+  function(.Object, ModelList)
+  {
+    if (length(ModelList > 0))
+    {
+      if (class(ModelList[[1]]) == "numeric")
+      {
+        .Object@StockSynthesisModels <- .Object@StockSynthesisModels[ModelList]
+      }
+      else
+      {
+        SelectList                   <- which(.Object@MseDef@OMList %in% ModelList)
+        .Object@StockSynthesisModels <- .Object@StockSynthesisModels[SelectList]
+      }
+    }
+
+    return (.Object)
+  }
+)
