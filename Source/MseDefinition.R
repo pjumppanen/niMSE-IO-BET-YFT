@@ -88,6 +88,8 @@ setClass("MseDefinition",
 
     cpueMP_File       = "character", # Historic CPUE series to assign to each OM run stored in file with yr and cpue columns. Read with read.table()
     cpueMP_NormYrs    = "numeric",   # Two value vector specifying the start and end calenday year interval to normalise the CPUE series over
+    UseCPUEfromSS     = "logical",   # If TRUE then use the stock synthesis CPUE series but if cpueMP_File is defined then normalise q to that CPUE series
+    UseInitIDevfromSS = "logical",   # If TRUE then use the stock synthesis CPUE series derived initIDev deviate
 
     recommendedTACbyF = "karray",    # Vector specifying the TAC by fishery / catch distribution for the MP managed projection phase. If any value is NA then it isn't used.
 
@@ -109,6 +111,8 @@ setMethod("initialize", "MseDefinition",
     .Object@Cbmean            = 1
     .Object@cpueMP_File       = as.character(NA)
     .Object@cpueMP_NormYrs    = as.numeric(NA)
+    .Object@UseCPUEfromSS     = FALSE
+    .Object@UseInitIDevfromSS = FALSE
     .Object@nbackupyears      = as.integer(0)
 
     return (.Object)

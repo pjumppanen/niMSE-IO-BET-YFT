@@ -921,6 +921,12 @@ setMethod("runMse", c("StockSynthesisModel"),
     # CPUE auto-correlation
     .Object@ModelData@IAC <- MseDef@IACin     #input value; could extract from each OM file
 
+    # Are we using the stock synthesis CPUE series
+    .Object@ModelData@UseCPUEfromSS <- MseDef@UseCPUEfromSS
+
+    # Are we using the stock synthesis derived initIDev
+    .Object@ModelData@UseInitIDevfromSS <- MseDef@UseInitIDevfromSS
+
     # Trend in CPUE observation error (Multiplier)
     if (MseDef@ITrendin >= 0)
     {

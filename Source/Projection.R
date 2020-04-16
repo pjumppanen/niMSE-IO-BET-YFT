@@ -722,8 +722,16 @@ setMethod("initialize", "Projection",
       # Calculate the CPUE CV and auto-correlation for the given MP CPUE series
       if (any(!is.na(ssModelData@CPUEmpY)))
       {
-        # Initialise IrndDevs based on supplied CPUE sequence using determined Icv, IAC, initIDev and qCPUE
-        .Object@CPUEobsY[1:initYear] <- ssModelData@CPUEmpY[1:initYear]
+        if (ssModelData@UseCPUEfromSS)
+        {
+          # Re-scale stock synthesis CPUE to be comparable scale to CPUEmpY
+          .Object@CPUEobsY[1:initYear] <- ssModelData@CPUEobsY[1:initYear] * exp(mean(log(ssModelData@CPUEmpY[1:initYear] / ssModelData@CPUEobsY[1:initYear]), na.rm=TRUE))
+        }
+        else
+        {
+          # Initialise IrndDevs based on supplied CPUE sequence using determined Icv, IAC, initIDev and qCPUE
+          .Object@CPUEobsY[1:initYear] <- ssModelData@CPUEmpY[1:initYear]
+        }
 
         # Re-normalization by pre-defined period
         if (any(is.na(ssModelData@CPUEmpNormYrs)))
@@ -754,7 +762,15 @@ setMethod("initialize", "Projection",
         # calculate the starting point for the CPUE deviations
         lastYrIndices <- c(valid[lenValid - 3], valid[lenValid - 2], valid[lenValid - 1], valid[lenValid])
         norm          <- exp(mean(log(.Object@CPUEobsY[NormYrIdxs] / ssModelData@CPUEobsY[NormYrIdxs]), na.rm=TRUE))
-        initIDev      <- log(sum(ssModelData@CPUEmpY[IdxB[lastYrIndices]]) / (norm * sum(ssModelData@CPUEobsY[IdxB[lastYrIndices]])))
+
+        if (ssModelData@UseInitIDevfromSS)
+        {
+          initIDev <- ssModelData@initIDev
+        }
+        else
+        {
+          initIDev <- log(sum(ssModelData@CPUEmpY[IdxB[lastYrIndices]]) / (norm * sum(ssModelData@CPUEobsY[IdxB[lastYrIndices]])))
+        }
 
         # If Icv[1] > 0 then assume we a doing robustness testing and will use the Icv and IAC from
         # the MseDef rather than the calculated values.

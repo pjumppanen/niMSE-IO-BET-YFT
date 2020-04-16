@@ -62,6 +62,8 @@ setClass("StockSynthesisModelData",
     CPUEobsY              = "karray",
     CPUEmpY               = "karray",
     CPUEmpNormYrs         = "numeric",
+    UseCPUEfromSS         = "logical",
+    UseInitIDevfromSS     = "logical",
     initIDev              = "numeric",
     ECurrent              = "karray",
     CMCurrent             = "karray",
@@ -83,7 +85,9 @@ setClass("StockSynthesisModelData",
 setMethod("initialize", "StockSynthesisModelData",
   function(.Object)
   {
-    .Object@nbackupyears  = as.integer(0)
+    .Object@nbackupyears      = as.integer(0)
+    .Object@UseCPUEfromSS     = FALSE
+    .Object@UseInitIDevfromSS = FALSE
 
     return (.Object)
   }
