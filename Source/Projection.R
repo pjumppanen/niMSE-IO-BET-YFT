@@ -736,32 +736,31 @@ setMethod("initialize", "Projection",
         # Re-normalization by pre-defined period
         if (any(is.na(ssModelData@CPUEmpNormYrs)))
         {
-          CPUEmpNormYrs <- c(1, nyears)
+          CPUEmpNormYrs <- 1:nyears
         }
         else
         {
           CPUEmpNormYrs <- ssModelData@CPUEmpNormYrs - MseDef@firstCalendarYr + 1
         }
 
-        NormYrIdxs    <- CPUEmpNormYrs[1]:CPUEmpNormYrs[2]
-        MeanMP_CPUE   <- mean(ssModelData@CPUEmpY[NormYrIdxs], na.rm=TRUE)
-        MeanObsCPUE   <- mean(ssModelData@CPUEobsY[NormYrIdxs], na.rm=TRUE)
+        MeanMP_CPUE   <- mean(ssModelData@CPUEmpY[CPUEmpNormYrs], na.rm=TRUE)
+        MeanObsCPUE   <- mean(ssModelData@CPUEobsY[CPUEmpNormYrs], na.rm=TRUE)
         NormMP_CPUE   <- ssModelData@CPUEmpY[1:initYear] / MeanMP_CPUE
         NormObsCPUE   <- ssModelData@CPUEobsY[1:initYear] / MeanObsCPUE
         DevsCPUE      <- log(NormMP_CPUE) - log(NormObsCPUE)
         MPcpueRMSE    <- sqrt(mean(DevsCPUE ^ 2, na.rm = TRUE))
 
         # remove missing observations calculations
-        IdxA          <- CPUEmpNormYrs[1]:(CPUEmpNormYrs[2] - 1)
-        IdxB          <- (CPUEmpNormYrs[1] + 1):CPUEmpNormYrs[2]
-        ValidA        <- which(!is.na(NormMP_CPUE[IdxA]))
-        ValidB        <- which(!is.na(NormMP_CPUE[IdxB]))
+        IdxA          <- CPUEmpNormYrs[1:length(CPUEmpNormYrs)-1]
+        IdxB          <- IdxA + 1
+        ValidA        <- which(!is.na(DevsCPUE[IdxA]))
+        ValidB        <- which(!is.na(DevsCPUE[IdxB]))
         valid         <- intersect(ValidA, ValidB)
         lenValid      <- length(valid)
 
         # calculate the starting point for the CPUE deviations
         lastYrIndices <- c(valid[lenValid - 3], valid[lenValid - 2], valid[lenValid - 1], valid[lenValid])
-        norm          <- exp(mean(log(.Object@CPUEobsY[NormYrIdxs] / ssModelData@CPUEobsY[NormYrIdxs]), na.rm=TRUE))
+        norm          <- exp(mean(log(.Object@CPUEobsY[CPUEmpNormYrs] / ssModelData@CPUEobsY[CPUEmpNormYrs]), na.rm=TRUE))
 
         if (ssModelData@UseInitIDevfromSS)
         {
