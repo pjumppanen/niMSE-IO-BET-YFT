@@ -3,7 +3,7 @@
 require("PerformanceAnalytics")
 
 
-# Instantiate cache
+# Instantiate cache ... might want to comment out if debugging - otherwise source carefully or have to reload everything 
 SSModelCache <- new.env()
 
 # -----------------------------------------------------------------------------
@@ -231,7 +231,7 @@ chooseBestFitModels <- function(modelList, SSRootDir, UseParFile=TRUE)
       Text <- paste(readLines(con), collapse="\n")
       close(con)
 
-      Warnings <- c(Warnings, Text)
+      Warnings <- c(Warnings, "Text")
     }
     else
     {
@@ -288,7 +288,7 @@ plotIndices.f <- function(modList = gridZList,
                           mFile = F,
                           mfrowLayout = c(3,2),
                           SPB_Yr="SPB_276",
-                          inputRefLines=T, #override list below which are extracted from reports etc
+                          inputRefLines=T, #override the argument list and extract from files
                           refSSB0=c(3421,2492,4628),
                           refSSBY=c(786,457,1009),
                           refSSBMSY=c(1200,751,1483),
@@ -327,11 +327,13 @@ plotIndices.f <- function(modList = gridZList,
 
       print(c("nCPUE  ", length(levels(as.factor(m$cpue$FleetName)))))
 
-      if (length(levels(as.factor(m$cpue$FleetName))) == 4)
+      
+      # This specific check for CPUE length is no longer appropriate
+      #if (length(levels(as.factor(m$cpue$FleetName))) == 4)
         ok <- c(ok, modList[i])
 
-      if (length(levels(as.factor(m$cpue$FleetName))) == 7)
-        notok <- c(notok, modList[i])
+      #if (length(levels(as.factor(m$cpue$FleetName))) == 7)
+      #  notok <- c(notok, modList[i])
 
       rm(m)
     }
@@ -359,7 +361,6 @@ plotIndices.f <- function(modList = gridZList,
   }
 
   par(mar = c(4, 4, 3, 1) + 0.1)
-
   factorList <- array(NA, dim = c(length(modList), length(unlist(strsplit(modList[1], split = "_")))))
 
   for (mi in 1:length(modList))
@@ -379,6 +380,13 @@ plotIndices.f <- function(modList = gridZList,
   numFleets <- length(m$Length_comp_Eff_N_tuning_check$mean_effN)
   numCPUE   <- length(levels(as.factor(m$cpue$FleetName)))
 
+  # quality of fit calcs with seasonal  BET  CPUE are not correct, though fit to MP CPUE should be
+  skipYrCPUECalcs <- F
+  if(numCPUE != 4 ) {
+    readline("Warning: numCPUE <> 4 so annualized CPUE RMSE fit to obs calc are probably not valid (MP CPUE fit probably ok)")
+    skipYrCPUECalcs <- T
+  }
+  
   rm(m)
 
   pBoundall         <- NULL
@@ -416,12 +424,18 @@ plotIndices.f <- function(modList = gridZList,
   catchLLH          <- NULL
 
   # these arrays are for a recuitment diagnostic checking for recruitment spikes
+  # note that PJ  used  his own non-standard rec dev definitions, 
+  # i.e.  related to rec distributions and smoothers rather than SR relationship deviations
+  # traditional dev diagnostics added
+  
   maxEstRecruitDev  <- NA
   minEstRecruitDev  <- NA
   meanEstRecruitDev <- NULL
   qtrlyRecruitment  <- c()
+  qtrlyRecDev       <- c()
   quarters          <- c()
   models            <- c()
+  recEra            <- c()
   nmodels           <- 0
   recruitWarnings   <- list()
 
@@ -431,14 +445,20 @@ plotIndices.f <- function(modList = gridZList,
     {
       m <- getSSModel(modList[i])
 
+      # This is not sufficient to  
+      #endYr       <- firstCalendarYr + (max(m$recruit$year) - min(m$recruit$year) + 1) / 4 - 1 + 1 / 8
+      #endSeasAsYr <- max(m$recruit$year)
       endYr       <- firstCalendarYr + (max(m$cpue$Yr) - firstYrQtr + 1) / 4 - 1 + 1 / 8
       endSeasAsYr <- max(m$cpue$Yr)
-
+      
       # update recruitment spike diagnostics
       Recruit           <- m$recruit$pred_recr
+      RecDev            <- m$recruit$dev
+      recEra            <- m$recruit$era
       SmoothedRecruit   <- lowess(Recruit)$y
       RecruitDevEst     <- Recruit / SmoothedRecruit
       qtrlyRecruitment  <- c(qtrlyRecruitment, Recruit)
+      qtrlyRecDev       <- c(qtrlyRecDev, RecDev)
       quarters          <- c(quarters, 1:length(Recruit))
       models            <- rep(i, times=length(Recruit))
 
@@ -478,6 +498,7 @@ plotIndices.f <- function(modList = gridZList,
       #BMin      <- min(m$equil_yield$Depletion)
       #BMinall   <- c(BMinall, BMin)
       #SSBY      <- as.numeric(m$derived_quants[substring(m$derived_quants$LABEL, 1, 8) == SPB_Yr, ]$Value)
+
       SSBY      <- m$derived_quants[m$derived_quants$LABEL == SPB_Yr,]$Value
       SSBYall   <- c(SSBYall,SSBY)
       #SSB0      <- as.numeric(subset(m$derived_quants, m$derived_quants$LABEL == "SPB_Virgin")$Value)
@@ -536,13 +557,11 @@ plotIndices.f <- function(modList = gridZList,
         print(c(ii,m$cpue$FleetName[ii], as.character(cpueCalendarYr[ii]), tmp[m$cpue$FleetName[ii],as.character(cpueCalendarYr[ii])], tmp[m$cpue$FleetName[ii],as.character(cpueCalendarYr[ii])]==4))
         cpueDevSet[ii] <- tmp[m$cpue$FleetName[ii],as.character(cpueCalendarYr[ii])]==4
       }
-
       #cpueDevByYrByFleet  <- aggregate(m$cpue$Dev[cpueDevFullSet], by = list(fleetName = m$cpue$FleetName[cpueDevFullSet], year=cpueCalendarYr[cpueDevFullSet]), FUN = mean)
       cpueDevByYrByFleet  <- aggregate(m$cpue$Dev[cpueDevSet], by = list(fleetName = m$cpue$FleetName[cpueDevSet], year=cpueCalendarYr[cpueDevSet]), FUN = mean)
       tmp                 <- aggregate(cpueDevByYrByFleet$x^2, by = list(fleetName = cpueDevByYrByFleet$fleetName), FUN = mean)
       cpueRMSEByYr        <- sqrt(tmp[, 2])
       names(cpueRMSEByYr) <- tmp[, 1]
-
       #tmp2             <- aggregate(m$cpue$Dev^2, by = list(fleetName = m$cpue$FleetName), FUN = mean)
       #cpueRMSE         <- sqrt(tmp[, 2])
       #names(cpueRMSE)  <- tmp[, 1]
@@ -562,7 +581,7 @@ plotIndices.f <- function(modList = gridZList,
       }
 
       cpueRMSEall[i, ]     <- as.numeric(cpueRMSE)
-      cpueRMSEByYrall[i, ] <- as.numeric(cpueRMSEByYr)
+      if (!skipYrCPUECalcs) cpueRMSEByYrall[i, ] <- as.numeric(cpueRMSEByYr)
 
       if (!is.null(MPdat))
       {
@@ -705,20 +724,23 @@ plotIndices.f <- function(modList = gridZList,
                  geom_ribbon(aes(ymin = `mean`, ymax = `max`), fill = "grey", alpha = 0.8) +
                  geom_line(aes(y = `mean`), size=1))
 
-    # plot recruitment time series distribution
-    dt <- data.table(yr=calendar_years, model=models, recruitment=qtrlyRecruitment)
-
-    dt <- dt[, as.list(quantile(recruitment, probs = c(0.1, 0.25, 0.5, 0.75, 0.9), na.rm = TRUE)), keyby = list(yr)]
-
+    # plot recruitment time series distribution..changed to distribution of devs from SR
+    #dt <- data.table(yr=calendar_years, model=models, recruitment=qtrlyRecruitment)
+    #dt <- dt[, as.list(quantile(recruitment, probs = c(0.1, 0.25, 0.5, 0.75, 0.9), na.rm = TRUE)), keyby = list(yr)]
+    dt <- data.table(yr=calendar_years, model=models, recruitment=qtrlyRecDev, era=recEra)
+    dt <- dt[era %in% c("Main","Late"),]
+    dt <- dt[, as.list(quantile(recruitment, probs = c(0., 0.1, 0.25, 0.5, 0.75, 0.9, 1.), na.rm = TRUE)), keyby = list(yr)]
+    
     print(ggplot(dt, aes(x = yr, ymin = 0)) +
-                 ylab("recruitment") +
+                 ylab("Recruitment deviated from SR") +
                  theme_bw() +
-                 ggtitle("Recruitment") +
-                 geom_line(aes(y = `10%`), size=0.5, colour="blue") +
-                 geom_line(aes(y = `90%`), size=0.5, colour="red") +
-                 geom_ribbon(aes(ymin = `10%`, ymax = `90%`), fill = "grey", alpha = 0.6) +
-                 geom_ribbon(aes(ymin = `25%`, ymax = `75%`), fill = "grey", alpha = 0.8) +
-                 geom_line(aes(y = `50%`), size=1))
+                 ggtitle(" ") +
+                 geom_line(aes(y = `0%`), size=0.5, colour="black") +
+                 geom_line(aes(y = `100%`), size=0.5, colour="black") +
+                 geom_ribbon(aes(ymin = `10%`, ymax = `90%`), fill = "grey", alpha = 0.3) +
+                 geom_ribbon(aes(ymin = `25%`, ymax = `75%`), fill = "grey", alpha = 0.7) +
+                 geom_line(aes(y = `50%`), size=1)+
+                 geom_line(aes(y = 0), size=0.2, colour="red"))
 
     print(sum(stdExistsall))
     print(length(stdExistsall))
@@ -1069,7 +1091,6 @@ plotIndices.f <- function(modList = gridZList,
     abline(h=refMSY,col=1)
 
     par(mfrow = mfrowLayout)
-
     boxplot(SSBYall/1000, ylab = "SSBY (1000 t)", ylim = c(0, 2500))
     abline(h=refSSBY,col=3)
 
@@ -1118,7 +1139,7 @@ plotIndices.f <- function(modList = gridZList,
     spacer  <- array(NA, dim=c(dim(fList)[1], length(unique(as.vector(fList)))))
     plotDat <- cbind(SSBYoSSBMSYall,spacer)
 
-    boxplot(plotDat, ylab = "SSB(2015)/SSBMSY", names=c("all",rep(" ",length(unique(as.vector(fList))))))
+    boxplot(plotDat, ylab = "SSB(Current)/SSBMSY", ylim=c(0,2.5), names=c("all",rep(" ",length(unique(as.vector(fList))))))
 
     first   <- 2
 
@@ -1186,7 +1207,7 @@ plotIndices.f <- function(modList = gridZList,
     spacer  <- array(NA, dim=c(dim(fList)[1], length(unique(as.vector(fList)))))
     plotDat <- cbind(SSBYoSSB0all,spacer)
 
-    boxplot(plotDat, ylab = "SSB(current)/SSB0", names=c("all",rep(" ",length(unique(as.vector(fList))))))
+    boxplot(plotDat, ylab = "SSB(current)/SSB0", ylim=c(0,1.1), names=c("all",rep(" ",length(unique(as.vector(fList))))))
 
     first   <- 2
 
@@ -1304,7 +1325,7 @@ plotIndices.f <- function(modList = gridZList,
 
     par(mfrow = c(1,1))
 
-    for(r in 1:4)
+    for(r in 1:numCPUE)
     {  #region
       spacer  <- array(NA, dim=c(dim(fList)[1], length(unique(as.vector(fList)))))
       plotDat <- cbind(cpueRMSEall[,r],spacer)
@@ -1328,30 +1349,31 @@ plotIndices.f <- function(modList = gridZList,
       }
     }
 
-    par(mfrow = c(1,1))
+    if (!skipYrCPUECalcs){
+     par(mfrow = c(1,1))
 
-    spacer  <- array(NA, dim=c(dim(fList)[1], length(unique(as.vector(fList)))))
-    plotDat <- cbind(rowMeans(cpueRMSEByYrall),spacer)
+     spacer  <- array(NA, dim=c(dim(fList)[1], length(unique(as.vector(fList)))))
+     plotDat <- cbind(rowMeans(cpueRMSEByYrall),spacer)
 
-    boxplot(plotDat, ylab = "CPUE RMSE (annualized) ", main="mean(all regions) ", names=c("all",rep(" ",length(unique(as.vector(fList))))))
+     boxplot(plotDat, ylab = "CPUE RMSE (annualized) ", main="mean(all regions) ", names=c("all",rep(" ",length(unique(as.vector(fList))))))
 
-    first <- 2
+     first <- 2
 
-    #boxplot(cpueRMSEall[,r] ~ fList[,], ylab = "CPUE RMSE", main="Region " %&% r, names=rep(" ",length(unique(as.vector(fList)))))
-    #
-    #first   <- 1
-    colList <- c(8,2:ncol(fList))
+     #boxplot(cpueRMSEall[,r] ~ fList[,], ylab = "CPUE RMSE", main="Region " %&% r, names=rep(" ",length(unique(as.vector(fList)))))
+     #
+     #first   <- 1
+     colList <- c(8,2:ncol(fList))
 
-    for (i in 1:ncol(fList))
-    {
+     for (i in 1:ncol(fList))
+     {
       last <- first + length(unique(fList[,i]))-1
 
       boxplot(rowMeans(cpueRMSEByYrall) ~ fList[,i], col=colList[i], add=T, at=first:last)
       text((first:last),1.01*max(rowMeans(cpueRMSEByYrall)), round(table(fList[,i])/sum(table(fList[,i])),2))
-
       first <- last+1
-    }
-
+     }
+    } #if (!skipYrCPUECalcs)
+    
     if (!is.null(MPdat))
     {
       spacer  <- array(NA, dim=c(dim(fList)[1], length(unique(as.vector(fList)))))
@@ -1394,29 +1416,31 @@ plotIndices.f <- function(modList = gridZList,
 
     par(mfrow = c(1,1))
 
-    for(r in 1:4)
-    {  #region
-      spacer  <- array(NA, dim=c(dim(fList)[1], length(unique(as.vector(fList)))))
-      plotDat <- cbind(cpueRMSEByYrall[,r],spacer)
+    if(!skipYrCPUECalcs){
+      for(r in 1:4)
+      {  #region
+        spacer  <- array(NA, dim=c(dim(fList)[1], length(unique(as.vector(fList)))))
+        plotDat <- cbind(cpueRMSEByYrall[,r],spacer)
 
-      boxplot(plotDat, ylab = "CPUE RMSE (annualized)", main="Region " %&% r, names=c("all",rep(" ",length(unique(as.vector(fList))))))
+        boxplot(plotDat, ylab = "CPUE RMSE (annualized)", main="Region " %&% r, names=c("all",rep(" ",length(unique(as.vector(fList))))))
 
-      first <- 2
+        first <- 2
 
-      #boxplot(cpueRMSEall[,r] ~ fList[,], ylab = "CPUE RMSE", main="Region " %&% r, names=rep(" ",length(unique(as.vector(fList)))))
-      #
-      #first   <- 1
-      colList <- c(8,2:ncol(fList))
+        #boxplot(cpueRMSEall[,r] ~ fList[,], ylab = "CPUE RMSE", main="Region " %&% r, names=rep(" ",length(unique(as.vector(fList)))))
+        #
+        #first   <- 1
+        colList <- c(8,2:ncol(fList))
 
-      for (i in 1:ncol(fList))
-      {
-        last <- first + length(unique(fList[,i]))-1
+        for (i in 1:ncol(fList))
+        {
+          last <- first + length(unique(fList[,i]))-1
 
-        boxplot(cpueRMSEByYrall[,r] ~ fList[,i], col=colList[i], add=T, at=first:last)
-
-        first <- last+1
+          boxplot(cpueRMSEByYrall[,r] ~ fList[,i], col=colList[i], add=T, at=first:last)
+  
+          first <- last+1
+        }
       }
-    }
+    } #skip annual cpue
 
     #calculate the RMSE between annualized, aggregated predicted CPUE from SS and aggregated annualized cpue to be used in the MP
 
