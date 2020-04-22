@@ -3,7 +3,7 @@
 require("PerformanceAnalytics")
 
 
-# Instantiate cache ... might want to comment out if debugging - otherwise source carefully or have to reload everything 
+# Instantiate cache ... might want to comment out if debugging - otherwise source carefully or have to reload everything
 SSModelCache <- new.env()
 
 # -----------------------------------------------------------------------------
@@ -327,7 +327,7 @@ plotIndices.f <- function(modList = gridZList,
 
       print(c("nCPUE  ", length(levels(as.factor(m$cpue$FleetName)))))
 
-      
+
       # This specific check for CPUE length is no longer appropriate
       #if (length(levels(as.factor(m$cpue$FleetName))) == 4)
         ok <- c(ok, modList[i])
@@ -386,7 +386,7 @@ plotIndices.f <- function(modList = gridZList,
     readline("Warning: numCPUE <> 4 so annualized CPUE RMSE fit to obs calc are probably not valid (MP CPUE fit probably ok)")
     skipYrCPUECalcs <- T
   }
-  
+
   rm(m)
 
   pBoundall         <- NULL
@@ -424,10 +424,10 @@ plotIndices.f <- function(modList = gridZList,
   catchLLH          <- NULL
 
   # these arrays are for a recuitment diagnostic checking for recruitment spikes
-  # note that PJ  used  his own non-standard rec dev definitions, 
+  # note that PJ  used  his own non-standard rec dev definitions,
   # i.e.  related to rec distributions and smoothers rather than SR relationship deviations
   # traditional dev diagnostics added
-  
+
   maxEstRecruitDev  <- NA
   minEstRecruitDev  <- NA
   meanEstRecruitDev <- NULL
@@ -445,12 +445,12 @@ plotIndices.f <- function(modList = gridZList,
     {
       m <- getSSModel(modList[i])
 
-      # This is not sufficient to  
+      # This is not sufficient to
       #endYr       <- firstCalendarYr + (max(m$recruit$year) - min(m$recruit$year) + 1) / 4 - 1 + 1 / 8
       #endSeasAsYr <- max(m$recruit$year)
       endYr       <- firstCalendarYr + (max(m$cpue$Yr) - firstYrQtr + 1) / 4 - 1 + 1 / 8
       endSeasAsYr <- max(m$cpue$Yr)
-      
+
       # update recruitment spike diagnostics
       Recruit           <- m$recruit$pred_recr
       RecDev            <- m$recruit$dev
@@ -587,14 +587,17 @@ plotIndices.f <- function(modList = gridZList,
       {
         #calculate cpue RMSE describing lack of fit between SS model prediction and MP CPUE (.e. not observed CPUE used in model fitting)
         #sum predicted cpue over year and region
-        cpueAggPred        <- as.data.frame(aggregate(m$cpue$Exp, by=list(cpueCalendarYr), FUN=sum))
-        names(cpueAggPred) <- c("yr","cpuePred")
-        cpueAgg            <- merge(cpueAggPred, MPdat, by.y="yr")
+        dt                 <- data.table(cpue=m$cpue$Vuln_bio, fleet=m$cpue$FleetNum, yr=m$cpue$Yr)
+        combinedSurveys    <- dt[, .(cpue=sum(cpue)), by=yr]
+        combinedSurveys$yr <- floor(seasAsYrToDecYr.f(seasAsYr=combinedSurveys$yr, endSeasAsYr=endSeasAsYr, numSeas=4, endYr=endYr, endSeas=4))
+        cpueAggPred        <- combinedSurveys[, .(cpuePred=mean(cpue)), by=yr]
+        cpueAggPred        <- cpueAggPred[yr >= firstCalendarYr & yr <= floor(endYr)]
+        cpueAgg            <- merge(cpueAggPred, as.data.table(MPdat), by="yr", all=TRUE)
 
         # check if normalization period set
         if (is.null(cpueNormYrs))
         {
-          cpueNormYrs <- cpueCalendarYr
+          cpueNormYrs <- as.integer(levels(factor(cpueCalendarYr)))
         }
 
         #re-normalization over pre-defined period
@@ -620,6 +623,7 @@ plotIndices.f <- function(modList = gridZList,
         }
         cpueMPRMSEByYrall <- c(cpueMPRMSEByYrall, MPcpueRMSE)
         cpueMPACByYrall   <- c(cpueMPACByYrall, MPcpueAC)
+        browser()
       }
 
       gradall              <- c(gradall, m$maximum_gradient_component)
@@ -730,7 +734,7 @@ plotIndices.f <- function(modList = gridZList,
     dt <- data.table(yr=calendar_years, model=models, recruitment=qtrlyRecDev, era=recEra)
     dt <- dt[era %in% c("Main","Late"),]
     dt <- dt[, as.list(quantile(recruitment, probs = c(0., 0.1, 0.25, 0.5, 0.75, 0.9, 1.), na.rm = TRUE)), keyby = list(yr)]
-    
+
     print(ggplot(dt, aes(x = yr, ymin = 0)) +
                  ylab("Recruitment deviated from SR") +
                  theme_bw() +
@@ -1373,7 +1377,7 @@ plotIndices.f <- function(modList = gridZList,
       first <- last+1
      }
     } #if (!skipYrCPUECalcs)
-    
+
     if (!is.null(MPdat))
     {
       spacer  <- array(NA, dim=c(dim(fList)[1], length(unique(as.vector(fList)))))
@@ -1436,7 +1440,7 @@ plotIndices.f <- function(modList = gridZList,
           last <- first + length(unique(fList[,i]))-1
 
           boxplot(cpueRMSEByYrall[,r] ~ fList[,i], col=colList[i], add=T, at=first:last)
-  
+
           first <- last+1
         }
       }
