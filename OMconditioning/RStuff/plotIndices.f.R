@@ -590,7 +590,7 @@ plotIndices.f <- function(modList = gridZList,
         dt                 <- data.table(cpue=m$cpue$Vuln_bio, fleet=m$cpue$FleetNum, yr=m$cpue$Yr)
         combinedSurveys    <- dt[, .(cpue=sum(cpue)), by=yr]
         combinedSurveys$yr <- floor(seasAsYrToDecYr.f(seasAsYr=combinedSurveys$yr, endSeasAsYr=endSeasAsYr, numSeas=4, endYr=endYr, endSeas=4))
-        cpueAggPred        <- combinedSurveys[, .(cpuePred=mean(cpue)), by=yr]
+        cpueAggPred        <- combinedSurveys[, .(cpuePred=sum(cpue)), by=yr]
         cpueAggPred        <- cpueAggPred[yr >= firstCalendarYr & yr <= floor(endYr)]
         cpueAgg            <- merge(cpueAggPred, as.data.table(MPdat), by="yr", all=TRUE)
 
@@ -605,7 +605,9 @@ plotIndices.f <- function(modList = gridZList,
         cpueAgg$cpuePred  <- cpueAgg$cpuePred / mean(cpueAgg$cpuePred[cpueAgg$yr %in% cpueNormYrs], na.rm=TRUE)
 
         cpueAgg$dev       <- log(cpueAgg$cpue) - log(cpueAgg$cpuePred)
-        MPcpueRMSE        <- sqrt(mean(cpueAgg$dev ^ 2, na.rm=TRUE))
+        bias              <- mean(cpueAgg$dev, na.rm=TRUE)
+        MPcpueRMSE        <- sqrt(mean((cpueAgg$dev - bias) ^ 2, na.rm=TRUE))
+        cpueAgg$cpuePred  <- cpueAgg$cpuePred * exp(bias)
 
         # remove missing observations calculations
         count             <- length(cpueAgg$dev)
@@ -618,12 +620,20 @@ plotIndices.f <- function(modList = gridZList,
 
         if (i %in% c(1, floor(0.33 * length(modList)), floor(0.67 * length(modList)), length(modList)))
         {
-          plot(cpueAgg$yr, cpueAgg$cpue, ylim=c(0,3), yaxs='i', main="%CV " %&% round(MPcpueRMSE*100) %&% "     rho " %&% (round(MPcpueAC*100)/100))
-          lines(cpueAgg$yr,cpueAgg$cpuePred)
+          Title <- modList[i] %&% " \n%CV " %&% round(MPcpueRMSE * 100) %&% ", rho " %&% (round(MPcpueAC * 100) / 100)
+
+          print(ggplot(cpueAgg, aes(x = yr)) +
+                       ylab("CPUE") +
+                       theme_bw() +
+                       ylim(0.0, 3.0) +
+                       theme(plot.title = element_text(hjust = 0.5)) +
+                       ggtitle(Title) +
+                       geom_point(aes(y = cpue), color="black", size=2) +
+                       geom_line(aes(y = cpuePred), col="red", size=0.5))
         }
+
         cpueMPRMSEByYrall <- c(cpueMPRMSEByYrall, MPcpueRMSE)
         cpueMPACByYrall   <- c(cpueMPACByYrall, MPcpueAC)
-        browser()
       }
 
       gradall              <- c(gradall, m$maximum_gradient_component)

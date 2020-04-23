@@ -748,7 +748,8 @@ setMethod("initialize", "Projection",
         NormMP_CPUE   <- ssModelData@CPUEmpY[1:initYear] / MeanMP_CPUE
         NormObsCPUE   <- ssModelData@CPUEobsY[1:initYear] / MeanObsCPUE
         DevsCPUE      <- log(NormMP_CPUE) - log(NormObsCPUE)
-        MPcpueRMSE    <- sqrt(mean(DevsCPUE ^ 2, na.rm = TRUE))
+        BiasCPUE      <- mean(DevsCPUE, na.rm=TRUE)
+        MPcpueRMSE    <- sqrt(mean((DevsCPUE - BiasCPUE) ^ 2, na.rm = TRUE))
 
         # remove missing observations calculations
         IdxA          <- CPUEmpNormYrs[1:length(CPUEmpNormYrs)-1]
@@ -1508,7 +1509,7 @@ setMethod("initialize", "Projection",
                        geom_vline(aes(xintercept = lastHistYr)) +
                        ylab("CPUE") +
                        theme_bw() +
-                       ylim(0.0, 1.7) +
+                       ylim(0.0, 3.0) +
                        theme(plot.title = element_text(hjust = 0.5)) +
                        ggtitle(Title) +
                        geom_point(aes(y = cpue), color="black", size=2) +

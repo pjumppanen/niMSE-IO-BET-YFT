@@ -1954,9 +1954,9 @@ setMethod("execRunCallback", "MseFramework",
 
 # -----------------------------------------------------------------------------
 
-setGeneric("subset", function(.Object, ...) standardGeneric("subset"))
+setGeneric("subsetModels", function(.Object, ...) standardGeneric("subset"))
 
-setMethod("subset", "MseFramework",
+setMethod("subsetModels", "MseFramework",
   function(.Object, ModelList)
   {
     if (length(ModelList > 0))
