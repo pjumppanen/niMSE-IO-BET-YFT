@@ -57,6 +57,8 @@ loadSSModel <- function(Model, SSRootDir, force=FALSE)
                               likelihoods_used                = FullModel$likelihoods_used,
                               likelihoods_raw_by_fleet        = FullModel$likelihoods_raw_by_fleet,
                               recruit                         = FullModel$recruit,
+                              endyr                           = FullModel$endyr,
+                              startyr                         = FullModel$startyr,
                               ModifiedTime                    = ModifiedTime)
 
       assign(Model, SimplifiedModel, envir=SSModelCache)
@@ -298,7 +300,7 @@ plotIndices.f <- function(modList = gridZList,
                           doPlots=T,
                           SSRootDir="",
                           refModel="TagLambda1",
-                          firstCalendarYr=1952, # BET=1952, YFT=1950
+                          lastCalendarYr=2018, # BET=1952, YFT=1950
                           firstYrQtr =101,      # BET=101,  YFT=13
                           maxAverageRecruitThreshold=5.0,
                           cpueMP_File=NULL,
@@ -446,10 +448,8 @@ plotIndices.f <- function(modList = gridZList,
       m <- getSSModel(modList[i])
 
       # This is not sufficient to
-      #endYr       <- firstCalendarYr + (max(m$recruit$year) - min(m$recruit$year) + 1) / 4 - 1 + 1 / 8
-      #endSeasAsYr <- max(m$recruit$year)
-      endYr       <- firstCalendarYr + (max(m$cpue$Yr) - firstYrQtr + 1) / 4 - 1 + 1 / 8
-      endSeasAsYr <- max(m$cpue$Yr)
+      firstCalendarYr <- lastCalendarYr + 1 - (m$endyr - m$startyr + 1) / 4
+      endSeasAsYr     <- max(m$cpue$Yr)
 
       # update recruitment spike diagnostics
       Recruit           <- m$recruit$pred_recr
@@ -538,8 +538,8 @@ plotIndices.f <- function(modList = gridZList,
       names(cpueRMSE) <- tmp[, 1]
 
       #CPUE RMSE among years
-      cpueCalendarYr <- floor(seasAsYrToDecYr.f(seasAsYr=m$cpue$Yr, endSeasAsYr=endSeasAsYr, numSeas=4, endYr=endYr, endSeas=4))
-      recCalendarYrs <- seasAsYrToDecYr.f(seasAsYr=m$recruit$year, endSeasAsYr=endSeasAsYr, numSeas=4, endYr=endYr, endSeas=4)
+      cpueCalendarYr <- floor(seasAsYrToDecYr.f(seasAsYr=m$cpue$Yr, endSeasAsYr=endSeasAsYr, numSeas=4, endYr=lastCalendarYr, endSeas=4))
+      recCalendarYrs <- seasAsYrToDecYr.f(seasAsYr=m$recruit$year, endSeasAsYr=endSeasAsYr, numSeas=4, endYr=lastCalendarYr, endSeas=4)
 
       #remove years with some missing seasons
       tmp <- table(m$cpue$FleetName, cpueCalendarYr)
@@ -589,9 +589,9 @@ plotIndices.f <- function(modList = gridZList,
         #sum predicted cpue over year and region
         dt                 <- data.table(cpue=m$cpue$Vuln_bio, fleet=m$cpue$FleetNum, yr=m$cpue$Yr)
         combinedSurveys    <- dt[, .(cpue=sum(cpue)), by=yr]
-        combinedSurveys$yr <- floor(seasAsYrToDecYr.f(seasAsYr=combinedSurveys$yr, endSeasAsYr=endSeasAsYr, numSeas=4, endYr=endYr, endSeas=4))
+        combinedSurveys$yr <- floor(seasAsYrToDecYr.f(seasAsYr=combinedSurveys$yr, endSeasAsYr=endSeasAsYr, numSeas=4, endYr=lastCalendarYr, endSeas=4))
         cpueAggPred        <- combinedSurveys[, .(cpuePred=sum(cpue)), by=yr]
-        cpueAggPred        <- cpueAggPred[yr >= firstCalendarYr & yr <= floor(endYr)]
+        cpueAggPred        <- cpueAggPred[yr >= firstCalendarYr & yr <= lastCalendarYr]
         cpueAgg            <- merge(cpueAggPred, as.data.table(MPdat), by="yr", all=TRUE)
 
         # check if normalization period set
@@ -679,7 +679,7 @@ plotIndices.f <- function(modList = gridZList,
       #rTrend   <- length(m$recruit$dev[m$recruit$era == "Main"]) * rSlope * 100
 
       # possibly misaligned by small amount, but this is irrelevant for CV calculation...
-      rDevCalendarYr <- seasAsYrToDecYr.f(seasAsYr=m$recruit$year[m$recruit$era == "Main"], endSeasAsYr=endSeasAsYr, numSeas=4, endYr=endYr, endSeas=4)
+      rDevCalendarYr <- seasAsYrToDecYr.f(seasAsYr=m$recruit$year[m$recruit$era == "Main"], endSeasAsYr=endSeasAsYr, numSeas=4, endYr=lastCalendarYr, endSeas=4)
       rdevByYr       <- tapply(rdev, as.factor(floor(rDevCalendarYr)), FUN=mean)
       recFit2        <- c(recFit2,sqrt(sum(rdev^2)/nrdev))
       recFit2ByYr    <- c(recFit2ByYr,sqrt(sum(rdevByYr^2)/(nrdev/4)))

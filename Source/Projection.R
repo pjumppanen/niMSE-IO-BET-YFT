@@ -750,6 +750,7 @@ setMethod("initialize", "Projection",
         DevsCPUE      <- log(NormMP_CPUE) - log(NormObsCPUE)
         BiasCPUE      <- mean(DevsCPUE, na.rm=TRUE)
         MPcpueRMSE    <- sqrt(mean((DevsCPUE - BiasCPUE) ^ 2, na.rm = TRUE))
+        NormObsCPUE   <- NormObsCPUE * exp(BiasCPUE)
 
         # remove missing observations calculations
         IdxA          <- CPUEmpNormYrs[1:length(CPUEmpNormYrs)-1]
@@ -1501,7 +1502,7 @@ setMethod("initialize", "Projection",
           CPUE       <- .Object@CPUEobsY
           Observed   <- qCPUE * (NLLI ^ Ibeta)
           Idxs       <- firstIdx:allyears
-          data       <- data.frame(year=Years[Idxs], cpue=CPUE[Idxs], actual=Observed[Idxs])
+          data       <- data.frame(year=Years[Idxs], cpue=CPUE[Idxs], actual=Observed[Idxs], modelled=NormObsCPUE[Idxs])
           lastHistYr <- nyears + MseDef@firstCalendarYr - 1
           Title      <- MseDef@OMList[[ssModelData@which]] %&% " \n%CV " %&% round(Iimp * 100) %&% ", rho " %&% (round(IAC * 100) / 100)
 
@@ -1513,7 +1514,8 @@ setMethod("initialize", "Projection",
                        theme(plot.title = element_text(hjust = 0.5)) +
                        ggtitle(Title) +
                        geom_point(aes(y = cpue), color="black", size=2) +
-                       geom_line(aes(y = actual), col="red", size=0.5))
+                       geom_line(aes(y = actual), col="red", size=0.5) +
+                       geom_line(aes(y = modelled), col="green", size=0.5))
 
           browser()
         }

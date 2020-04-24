@@ -151,11 +151,11 @@ setMethod("initialize", "StockSynthesisModel",
         return (mov)
       }
 
-      decodeAndCheckSurveyName <- function(SurveyName, CpueIdxOnly=FALSE)
+      decodeAndCheckSurveyName <- function(SurveyName, Quarter=1, CpueIdxOnly=FALSE)
       {
         Match   <- regexpr("SURVEY", SurveyName, perl=TRUE)
         CpueIdx <- NULL
-        QtrIdx  <- 1:4
+        QtrIdx  <- Quarter
         Scale   <- 1.0 / 4
 
         if (Match[1] > 0)
@@ -166,7 +166,7 @@ setMethod("initialize", "StockSynthesisModel",
 
           if (Match[1] <= 0)
           {
-            stop("No survey nunmber found in CPUE stock synthesis name data")
+            stop("No survey number found in CPUE stock synthesis name data")
           }
 
           len     <- attr(Match, "match.length")
@@ -236,7 +236,7 @@ setMethod("initialize", "StockSynthesisModel",
       ssMod <- SS_output2(dir=MseDef@SSRootDir %&% MseDef@OMList[which], covar=FALSE, ncols=213,forecast=FALSE)
 
       # Determine the number of CPUE series
-      AllSurveyIndices <- sapply(levels(factor(ssMod$cpue$Name)), decodeAndCheckSurveyName, CpueIdxOnly=TRUE)
+      AllSurveyIndices <- sapply(levels(factor(ssMod$cpue$Name)), decodeAndCheckSurveyName, Quarter=1, CpueIdxOnly=TRUE)
       SurveyIndices    <- as.integer(levels(factor(AllSurveyIndices)))
 
       if (min(SurveyIndices) != 1 || max(SurveyIndices) != length(SurveyIndices))
@@ -470,13 +470,14 @@ setMethod("initialize", "StockSynthesisModel",
         # ensure this consistency and flag an error and abort should they be in disagreement so that the
         # problem can be resolved.
         #QtrIdx   <- yrSeas[2]:.Object@ModelData@nsubyears
-        decoding <- decodeAndCheckSurveyName(ssMod$cpue$Name[i])
+        decoding <- decodeAndCheckSurveyName(ssMod$cpue$Name[i],  yrSeas[2])
 
-        .Object@ModelData@CPUEobsMR[yrSeas[1]:.Object@ModelData@nyears, decoding$QtrIdx, decoding$CpueIdx] <- decoding$Scale * ssMod$cpue$Vuln_bio[i]
+        .Object@ModelData@CPUEobsMR[yrSeas[1], decoding$QtrIdx, decoding$CpueIdx] <- decoding$Scale * ssMod$cpue$Vuln_bio[i]
       }
 
       # Annual
-      .Object@ModelData@CPUEobsY[] <- apply(.Object@ModelData@CPUEobsMR, FUN=sum, MARGIN=c(1))
+      .Object@ModelData@CPUEobsY[]                                       <- apply(.Object@ModelData@CPUEobsMR, c(1), FUN=sum, na.rm=TRUE)
+      .Object@ModelData@CPUEobsY[which(.Object@ModelData@CPUEobsY == 0)] <- NA
 
       # Calculate initial aggregate annual CPUE index deviate for aggregate autocorrelation of index
       lastYrIndices              <- (max(ssMod$cpue$Yr) - 3):max(ssMod$cpue$Yr)
