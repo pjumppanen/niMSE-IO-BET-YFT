@@ -600,16 +600,15 @@ plotIndices.f <- function(modList = gridZList,
           cpueNormYrs <- as.integer(levels(factor(cpueCalendarYr)))
         }
 
-        #re-normalization over pre-defined period
-        cpueAgg$cpue      <- cpueAgg$cpue / mean(cpueAgg$cpue[cpueAgg$yr %in% cpueNormYrs], na.rm=TRUE)
-        cpueAgg$cpuePred  <- cpueAgg$cpuePred / mean(cpueAgg$cpuePred[cpueAgg$yr %in% cpueNormYrs], na.rm=TRUE)
+        # calculate q scaling
+        norm              <- exp(mean(log(cpueAgg$cpue[cpueAgg$yr %in% cpueNormYrs] / cpueAgg$cpuePred[cpueAgg$yr %in% cpueNormYrs]), na.rm=TRUE))
+        cpueAgg$cpuePred  <- cpueAgg$cpuePred * norm
 
+        # calculate the RMSE
         cpueAgg$dev       <- log(cpueAgg$cpue) - log(cpueAgg$cpuePred)
-        bias              <- mean(cpueAgg$dev, na.rm=TRUE)
-        MPcpueRMSE        <- sqrt(mean((cpueAgg$dev - bias) ^ 2, na.rm=TRUE))
-        cpueAgg$cpuePred  <- cpueAgg$cpuePred * exp(bias)
+        MPcpueRMSE        <- sqrt(mean(cpueAgg$dev ^ 2, na.rm=TRUE))
 
-        # remove missing observations calculations
+        # remove missing observations and calculate the lag 1 auto-correlation
         count             <- length(cpueAgg$dev)
         IdxA              <- 1:(count - 1)
         IdxB              <- 2:count

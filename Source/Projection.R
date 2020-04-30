@@ -743,34 +743,30 @@ setMethod("initialize", "Projection",
           CPUEmpNormYrs <- ssModelData@CPUEmpNormYrs - MseDef@firstCalendarYr + 1
         }
 
-        MeanMP_CPUE   <- mean(ssModelData@CPUEmpY[CPUEmpNormYrs], na.rm=TRUE)
-        MeanObsCPUE   <- mean(ssModelData@CPUEobsY[CPUEmpNormYrs], na.rm=TRUE)
-        NormMP_CPUE   <- ssModelData@CPUEmpY[1:initYear] / MeanMP_CPUE
-        NormObsCPUE   <- ssModelData@CPUEobsY[1:initYear] / MeanObsCPUE
-        DevsCPUE      <- log(NormMP_CPUE) - log(NormObsCPUE)
-        BiasCPUE      <- mean(DevsCPUE, na.rm=TRUE)
-        MPcpueRMSE    <- sqrt(mean((DevsCPUE - BiasCPUE) ^ 2, na.rm = TRUE))
-        NormObsCPUE   <- NormObsCPUE * exp(BiasCPUE)
+        # calculate q scaling
+        norm          <- exp(mean(log(.Object@CPUEobsY[CPUEmpNormYrs] / ssModelData@CPUEobsY[CPUEmpNormYrs]), na.rm=TRUE))
+        NormObsCPUE   <- norm * ssModelData@CPUEobsY[1:initYear]
 
-        # remove missing observations calculations
-        IdxA          <- CPUEmpNormYrs[1:length(CPUEmpNormYrs)-1]
+        # calculate the RMSE
+        DevsCPUE      <- log(.Object@CPUEobsY[1:initYear]) - log(NormObsCPUE)
+        MPcpueRMSE    <- sqrt(mean(DevsCPUE ^ 2, na.rm = TRUE))
+
+        # remove missing observations
+        IdxA          <- 1:(initYear-1)
         IdxB          <- IdxA + 1
         ValidA        <- which(!is.na(DevsCPUE[IdxA]))
         ValidB        <- which(!is.na(DevsCPUE[IdxB]))
         valid         <- intersect(ValidA, ValidB)
         lenValid      <- length(valid)
 
-        # calculate the starting point for the CPUE deviations
-        lastYrIndices <- c(valid[lenValid - 3], valid[lenValid - 2], valid[lenValid - 1], valid[lenValid])
-        norm          <- exp(mean(log(.Object@CPUEobsY[CPUEmpNormYrs] / ssModelData@CPUEobsY[CPUEmpNormYrs]), na.rm=TRUE))
-
         if (ssModelData@UseInitIDevfromSS)
         {
-          initIDev <- ssModelData@initIDev
+          initIDev      <- ssModelData@initIDev
         }
         else
         {
-          initIDev <- log(sum(ssModelData@CPUEmpY[IdxB[lastYrIndices]]) / (norm * sum(ssModelData@CPUEobsY[IdxB[lastYrIndices]])))
+          lastYrIndices <- c(valid[lenValid - 3], valid[lenValid - 2], valid[lenValid - 1], valid[lenValid])
+          initIDev      <- log(sum(ssModelData@CPUEmpY[IdxB[lastYrIndices]]) / (norm * sum(ssModelData@CPUEobsY[IdxB[lastYrIndices]])))
         }
 
         # If Icv[1] > 0 then assume we a doing robustness testing and will use the Icv and IAC from
@@ -786,7 +782,7 @@ setMethod("initialize", "Projection",
 
           if (Iimp < 0.2) Iimp <- 0.2
 
-          # calculate the auto-correlation
+          # calculate the lag 1 auto-correlation
           IAC         <- cor(DevsCPUE[IdxA[valid]], DevsCPUE[IdxB[valid]])
         }
 
@@ -1504,7 +1500,7 @@ setMethod("initialize", "Projection",
           Idxs       <- firstIdx:allyears
           data       <- data.frame(year=Years[Idxs], cpue=CPUE[Idxs], actual=Observed[Idxs], modelled=NormObsCPUE[Idxs])
           lastHistYr <- nyears + MseDef@firstCalendarYr - 1
-          Title      <- MseDef@OMList[[ssModelData@which]] %&% " \n%CV " %&% round(Iimp * 100) %&% ", rho " %&% (round(IAC * 100) / 100)
+          Title      <- MseDef@OMList[[ssModelData@which]] %&% " \n%CV " %&% round(MPcpueRMSE * 100) %&% ", rho " %&% (round(IAC * 100) / 100)
 
           print(ggplot(data, aes(x = year)) +
                        geom_vline(aes(xintercept = lastHistYr)) +
