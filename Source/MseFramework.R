@@ -37,6 +37,7 @@ setClass("MseFramework",
     MseDef                = "MseDefinition",  # parent MSE definition
     tune                  = "numeric",        # vector of tuning parameters from last runMse() call
     tuneError             = "numeric",        # vector of tuning error / degree fit parameters from last runMse() call
+    MP_SourceFilePaths    = "list",           # vector of source file paths to MP implementations
     StockSynthesisModels  = "list"            # list of StockSynthesisModel objects
   )
 )
@@ -48,7 +49,9 @@ setMethod("initialize", "MseFramework",
   {
     if (is.null(MseDef))
     {
-      # do nothing. This is an empty constructor for object upgrading
+      # do nothing. This is an empty constructor for object upgrading but we
+      # initialise the MPs.R because it requires a valid initial empty list
+      .Object@MP_SourceFilePaths <- list()
     }
     else
     {
@@ -101,6 +104,9 @@ setMethod("initialize", "MseFramework",
       # Initialise MseDef via initialiseMseDef(). Note that this function will
       # change the definition if a plausibility weighting specification is used.
       .Object@MseDef <- initialiseMseDef(MseDef)
+
+      # initialise the list of MP source files
+      .Object@MP_SourceFilePaths <- list()
 
       idx <- 0
 
@@ -220,11 +226,59 @@ setMethod("runMse", c("MseFramework"),
       UseCluster <- .Object@MseDef@UseCluster
     }
 
+    # Source external MP files to current session
+    for (SourcePath in .Object@MP_SourceFilePaths)
+    {
+      SourcePath <- normalizePath(SourcePath, winslash="/", mustWork=FALSE)
+      
+      if (file.exists(SourcePath))
+      {
+        source(SourcePath)
+      }
+      else
+      {
+        cat(paste("WARNING: cannot source MP source file ", SourcePath))
+      }
+    }
+
+    # Compile dependent MP sources. Must happen after sourcing MP source
+    # otherwise it might be undefined and crash out. Note that we do not
+    # need to load either TMB or BuildSys explicitely in niMSE-IO-BET-YFT
+    # because this should be included in the supplied source code for the
+    # custom MP so will get instantiated when the source code is loaded
+    # as in above. This avoids making TMB and BuildSys a necessary 
+    # dependency when it isn't used.
+    for (MP in MPs)
+    {
+      MP_function <- get(MP)
+      BSysProject <- attr(MP_function, "BSysProject")
+
+      if (!is.null(BSysProject))
+      {
+        BSysProject <- make(BSysProject)
+      }
+    }
+    
     if (UseCluster)
     {
       cluster <- openCluster()
 
       clusterEvalQ(cluster, eval(parse("Source/MseMain.R")))
+
+      # Source external MP files to each cluster process
+      for (SourcePath in .Object@MP_SourceFilePaths)
+      {
+        SourcePath <- normalizePath(SourcePath, winslash="/", mustWork=FALSE)
+      
+        if (file.exists(SourcePath))
+        {
+          # Need to quote it so that it doesn't get treated as a variable 
+          # but a string literal
+          SourcePath <- paste0("\"", SourcePath, "\"")
+
+          clusterEvalQ(cluster, eval(parse(text=SourcePath)))
+        }
+      }
     }
 
     runModels <- function(StockSynthesisModels, MPs, tune, interval, Report, CppMethod, EffortCeiling, TACTime, rULim)
@@ -1970,6 +2024,39 @@ setMethod("subsetModels", "MseFramework",
         SelectList                   <- which(.Object@MseDef@OMList %in% ModelList)
         .Object@StockSynthesisModels <- .Object@StockSynthesisModels[SelectList]
       }
+    }
+
+    return (.Object)
+  }
+)
+
+# -----------------------------------------------------------------------------
+
+setGeneric("addMP_SourceCode", function(.Object, ...) standardGeneric("addMP_SourceCode"))
+
+setMethod("addMP_SourceCode", "MseFramework",
+  function(.Object, SourceFiles)
+  {
+    if (length(SourceFiles > 0))
+    {
+      for (SourceFile in SourceFiles)
+      {
+        if (!file.exists(SourceFile))
+        {
+          cat(paste("Cannot find source file", SourceFile, ". Please provide an explicit path to file."))
+        }
+
+        if (any(lapply(.Object@MP_SourceFilePaths, function(item) {return (SourceFile == item)})))
+        {
+          cat(paste(SourceFile, "is already added to this framework."))
+        }
+        else
+        {
+          idx <- length(.Object@MP_SourceFilePaths) + 1
+
+          .Object@MP_SourceFilePaths[[idx]] <- SourceFile
+        }
+      }      
     }
 
     return (.Object)

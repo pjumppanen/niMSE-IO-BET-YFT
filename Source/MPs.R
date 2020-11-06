@@ -10,9 +10,6 @@
 #------------------------------------------------------------------------------
 
 
-MP_FunctionExports <- c()
-
-
 #Pella-Tomlinson 40:10-type MPs (details implemented below)
 #------------------------------------------------------------------------------
 
@@ -583,10 +580,6 @@ class(IT3.50)<-"IO_MP"
 
 #------------------------------------------------------------------------------
 
-MP_FunctionExports <- c(MP_FunctionExports, "PellaTomlinson4010")
-
-#------------------------------------------------------------------------------
-
 # Pella Tomlinson Production model with generic 40-10 type rule - MPs are defined with tuning parameters above
 # useF option uses the 40:10 rule for F rather than C, in which case FMax = FMSY*CMaxProp
 # positive gridSearch value is preferred at this time
@@ -795,10 +788,6 @@ PellaTomlinson4010<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, deltaTACL
 
 
 # -----------------------------------------------------------------------------
-
-MP_FunctionExports <- c(MP_FunctionExports, "PT.f")
-
-# -----------------------------------------------------------------------------
 #Pella-Tomlinson Model function
 #unstable as C approaches B
 #
@@ -956,10 +945,6 @@ PT.f <- function(params, C_hist, I_hist, CMCsum, p, doPlot=F, returnOpt=1, Kgrid
 
 
 # -----------------------------------------------------------------------------
-
-MP_FunctionExports <- c(MP_FunctionExports, "PellaTomlinsonAlternative")
-
-# -----------------------------------------------------------------------------
 # Pella Tomlinson Production model with generic 40-10 type rule - MPs are
 # defined with tuning parameters above useF option uses the 40:10 rule for F
 # rather than C, in which case FMax = FMSY*CMaxProp
@@ -1063,10 +1048,6 @@ PellaTomlinsonAlternative <- function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, 
   return (list(TAEbyF=TAEbyF, TAC=newTAC))
 }
 
-
-#------------------------------------------------------------------------------
-
-MP_FunctionExports <- c(MP_FunctionExports, "PellaTomlinsonAbsoluteLimits")
 
 # -----------------------------------------------------------------------------
 # Pella Tomlinson Production model based MP with TAC chnage limits based on
@@ -1195,10 +1176,6 @@ PellaTomlinsonAbsoluteLimits <- function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.
   return (list(TAEbyF=TAEbyF, TAC=newTAC))
 }
 
-# -----------------------------------------------------------------------------
-
-
-MP_FunctionExports <- c(MP_FunctionExports, "PellaTomlinsonProjection")
 
 # -----------------------------------------------------------------------------
 # Fit Pella Tomlinson Production model and use it to determine a TAC to drive
@@ -1377,10 +1354,6 @@ PellaTomlinsonProjection <- function(pset, BMSY_Prop=1.0, Gain=0.15, MinCatchPro
   return (list(TAEbyF=TAEbyF, TAC=newTAC))
 }
 
-# -----------------------------------------------------------------------------
-
-
-MP_FunctionExports <- c(MP_FunctionExports, "PT.project")
 
 # -----------------------------------------------------------------------------
 
@@ -1412,10 +1385,6 @@ PT.project <- function(model, C, B0)
   return (B)
 }
 
-# -----------------------------------------------------------------------------
-
-MP_FunctionExports <- c(MP_FunctionExports, "PT.model.fixed.p")
-
 
 # -----------------------------------------------------------------------------
 # Pella-Tomlinson Model function
@@ -1427,11 +1396,6 @@ PT.model.fixed.p <- function(params, C_hist, I_hist, Type, p, weight=NULL)
 
 
 # -----------------------------------------------------------------------------
-
-MP_FunctionExports <- c(MP_FunctionExports, "PT.model.fixed.p.gradient")
-
-
-# -----------------------------------------------------------------------------
 # Pella-Tomlinson Model gradient function
 # -----------------------------------------------------------------------------
 PT.model.fixed.p.gradient <- function(params, C_hist, I_hist, Type, p, weight=NULL)
@@ -1440,11 +1404,6 @@ PT.model.fixed.p.gradient <- function(params, C_hist, I_hist, Type, p, weight=NU
 
   return (c(gradient[1], gradient[2], gradient[4]))
 }
-
-
-# -----------------------------------------------------------------------------
-
-MP_FunctionExports <- c(MP_FunctionExports, "PT.model")
 
 
 # -----------------------------------------------------------------------------
@@ -1546,10 +1505,6 @@ PT.model <- function(params, C_hist, I_hist, Type, weight=NULL)
   }
 }
 
-# -----------------------------------------------------------------------------
-
-
-MP_FunctionExports <- c(MP_FunctionExports, "PT.model.gradient")
 
 # -----------------------------------------------------------------------------
 # AD adjoint of PT-model obtained by Tapenade AD of code,
@@ -1837,8 +1792,6 @@ PT.model.gradient <- function(params, C_hist, I_hist, Type, weight=NULL)
   return (paramsb)
 }
 
-
-MP_FunctionExports <- c(MP_FunctionExports, "CPUETarget")
 
 #------------------------------------------------------------------------------
 # MP resembling first level of ETBF Harvest Strategy (CPUE slope to target)
@@ -2381,10 +2334,6 @@ CC50CE1.0bet <- function(pset)
 
 class(CC50CE1.0bet) <- "IO_MP"
 
-
-
-#------------------------------------------------------------------------------
-MP_FunctionExports <- c(MP_FunctionExports, "CPUE_setpoint_control")
 
 #------------------------------------------------------------------------------
 # MP using CPUE setpoint to control TAC along with Pella-Tomlinson model to

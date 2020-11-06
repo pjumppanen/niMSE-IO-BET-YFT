@@ -1,3 +1,13 @@
+require(BuildSys)
+require(TMB)
+
+
+# Assumed that working folder is root of niMSE-IO-BET-YFT and that this code 
+# resides in the "MPs/PellaTomlinsonProjectTMB" sub folder.
+Project <- new("BSysProject", WorkingFolder="./MPs/PellaTomlinsonProjectTMB")
+
+# -----------------------------------------------------------------------------
+
 PTproj.TMB.25 <- function(pset)
 {
   save(pset, file="Objects/pset.RDA")
@@ -5,10 +15,8 @@ PTproj.TMB.25 <- function(pset)
   return(PellaTomlinsonProjectionTMB(pset, BMSY_Prop=pset$tune, Gain=0.25, debug=FALSE))
 }
 
-class(PTproj.TMB.25) <- "IO_MP_tune"
-
-
-MP_FunctionExports <- c(MP_FunctionExports, "PellaTomlinsonProjectionTMB")
+class(PTproj.TMB.25)               <- "IO_MP_tune"
+attr(PTproj.TMB.25, "BSysProject") <- Project 
 
 
 # -----------------------------------------------------------------------------
@@ -17,15 +25,6 @@ MP_FunctionExports <- c(MP_FunctionExports, "PellaTomlinsonProjectionTMB")
 # -----------------------------------------------------------------------------
 PellaTomlinsonProjectionTMB <- function(pset, BMSY_Prop=1.0, Gain=0.15, MinCatchProp=0.15, debug=FALSE, deltaTACLimUp=0.9, deltaTACLimDown=0.9)
 {
-  buildLibrary <- function()
-  {
-    require(BuildSys)
-
-    Project <- new("BSysProject", Flat=FALSE, SourceName="Source", InstallLibraryName="lib/x64")
-    Project <- make(Project)
-    Project <- make(Project, "install")
-  }
-
   # -----------------------------------------------------------------------------
   # Projection model
   # -----------------------------------------------------------------------------
@@ -59,23 +58,9 @@ PellaTomlinsonProjectionTMB <- function(pset, BMSY_Prop=1.0, Gain=0.15, MinCatch
 
   # -----------------------------------------------------------------------------
 
-  loadLib <- function(LibPath, BaseName)
-  {
-    if (is.null(getLoadedDLLs()[[BaseName]]))
-    {
-      LibName <- paste(LibPath, BaseName, .Platform$dynlib.ext, sep="")
-      
-      dyn.load(LibName)
-    }
-  }
-
-  # -----------------------------------------------------------------------------
-
   require(TMB)
 
   LibName <- "PTmodel"
-
-  loadLib("lib/x64/", LibName)
 
   C_hist <- pset$Cobs
   I_hist <- pset$Iobs

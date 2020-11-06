@@ -258,7 +258,20 @@ setMethod("runProjection", c("ManagementVars", "ReferenceVars", "StockSynthesisM
         beginLog(sim)
       }
 
+      MP_function <- get(MP)
+      BSysProject <- attr(MP_function, "BSysProject")
+
+      if (!is.null(BSysProject))
+      {
+        loadLibrary(BSysProject)
+      }
+
       Proj <- new("Projection", ssModelData, RefVars, MseDef, sim, MP, interval, Report, CppMethod, EffortCeiling, TACTime, rULim, seed[sim], tune)
+
+      if (!is.null(BSysProject))
+      {
+        unloadLibrary(BSysProject)
+      }
 
       if (UseCluster)
       {
