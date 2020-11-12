@@ -272,11 +272,12 @@ setMethod("runMse", c("MseFramework"),
       
         if (file.exists(SourcePath))
         {
-          # Need to quote it so that it doesn't get treated as a variable 
-          # but a string literal
-          SourcePath <- paste0("\"", SourcePath, "\"")
-
-          clusterEvalQ(cluster, eval(parse(text=SourcePath)))
+          # This is the only way I have found to do this. It seems impossible to do a simple "literal" substituition
+          # from a variable as in the clusterEvalQ() above. I can develop something that runs but in fails to instantiate
+          # the code where it needs to be, thus rendering it useless. Seems to be tied up in the cryptic ways R handles
+          # scoping through environments so I'm just going to use a global "SourcePath" instead.
+          clusterExport(cluster, list("SourcePath"), envir=environment())
+          clusterEvalQ(cluster, eval(parse(SourcePath)))
         }
       }
     }
