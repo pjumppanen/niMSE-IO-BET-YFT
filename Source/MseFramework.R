@@ -2063,3 +2063,72 @@ setMethod("addMP_SourceCode", "MseFramework",
     return (.Object)
   }
 )
+
+# -----------------------------------------------------------------------------
+
+setGeneric("excludeFailedProjections", function(.Object, ...) standardGeneric("excludeFailedProjections"))
+
+setMethod("excludeFailedProjections", "MseFramework",
+  function(.Object)
+  {
+    FilteredModels <- list()
+    Idy            <- 0
+
+    for (Model in .Object@StockSynthesisModels)
+    {
+      FilteredProjVars <- list()
+      Idx              <- 0
+
+      for (ProjVars in Model@ProjectedVars)
+      {
+        ValidIdxs <- 1:ProjVars@nsim
+        LogIdx    <- which(!is.na(ProjVars@Log))
+
+        if (length(LogIdx) > 0)
+        {
+          ValidIdxs <- which(sapply(ProjVars@Log[LogIdx], function(x) is.null(x$error)))
+        }
+
+        nsims     <- length(ValidIdxs)
+
+        if (nsims > 0)
+        {
+          if (nsims < ProjVars@nsim)
+          {
+            ProjVars@nsim          <- nsims
+            ProjVars@Log           <- ProjVars@Log[ValidIdxs]
+            ProjVars@F             <- ProjVars@F[ValidIdxs,]
+            ProjVars@SSB           <- ProjVars@SSB[ValidIdxs,,]
+            ProjVars@B             <- ProjVars@B[ValidIdxs,,]
+            ProjVars@CM            <- ProjVars@CM[ValidIdxs,,]
+            ProjVars@CMbyF         <- ProjVars@CMbyF[ValidIdxs,,,]
+            ProjVars@Rec           <- ProjVars@Rec[ValidIdxs,]
+            ProjVars@RecYrQtr      <- ProjVars@RecYrQtr[ValidIdxs,]
+            ProjVars@IobsArchive   <- ProjVars@IobsArchive[ValidIdxs,]
+            ProjVars@IobsRArchive  <- ProjVars@IobsRArchive[ValidIdxs,,]
+            ProjVars@TAC           <- ProjVars@TAC[ValidIdxs,]
+            ProjVars@TAEbyF        <- ProjVars@TAEbyF[ValidIdxs,,]
+          }
+
+          Idx <- Idx + 1
+
+          FilteredProjVars[[Idx]] <- ProjVars
+        }
+      }
+
+      if (Idx > 0)
+      {
+        Model@ProjectedVars <- FilteredProjVars
+
+        Idy <- Idy + 1
+
+        FilteredModels[[Idy]] <- Model
+      }
+    }
+
+    .Object@StockSynthesisModels <- FilteredModels
+
+    return (.Object)
+  }
+)
+
