@@ -37,6 +37,7 @@ setClass("MseFramework",
     MseDef                = "MseDefinition",  # parent MSE definition
     tune                  = "numeric",        # vector of tuning parameters from last runMse() call
     tuneError             = "numeric",        # vector of tuning error / degree fit parameters from last runMse() call
+    MP_SourceFilePaths    = "list",           # vector of source file paths to MP implementations
     StockSynthesisModels  = "list"            # list of StockSynthesisModel objects
   )
 )
@@ -48,7 +49,9 @@ setMethod("initialize", "MseFramework",
   {
     if (is.null(MseDef))
     {
-      # do nothing. This is an empty constructor for object upgrading
+      # do nothing. This is an empty constructor for object upgrading but we
+      # initialise the MPs.R because it requires a valid initial empty list
+      .Object@MP_SourceFilePaths <- list()
     }
     else
     {
@@ -101,6 +104,9 @@ setMethod("initialize", "MseFramework",
       # Initialise MseDef via initialiseMseDef(). Note that this function will
       # change the definition if a plausibility weighting specification is used.
       .Object@MseDef <- initialiseMseDef(MseDef)
+
+      # initialise the list of MP source files
+      .Object@MP_SourceFilePaths <- list()
 
       idx <- 0
 
@@ -220,11 +226,60 @@ setMethod("runMse", c("MseFramework"),
       UseCluster <- .Object@MseDef@UseCluster
     }
 
+    # Source external MP files to current session
+    for (SourcePath in .Object@MP_SourceFilePaths)
+    {
+      SourcePath <- normalizePath(SourcePath, winslash="/", mustWork=FALSE)
+      
+      if (file.exists(SourcePath))
+      {
+        source(SourcePath)
+      }
+      else
+      {
+        cat(paste("WARNING: cannot source MP source file ", SourcePath))
+      }
+    }
+
+    # Compile dependent MP sources. Must happen after sourcing MP source
+    # otherwise it might be undefined and crash out. Note that we do not
+    # need to load either TMB or BuildSys explicitely in niMSE-IO-BET-YFT
+    # because this should be included in the supplied source code for the
+    # custom MP so will get instantiated when the source code is loaded
+    # as in above. This avoids making TMB and BuildSys a necessary 
+    # dependency when it isn't used.
+    for (MP in MPs)
+    {
+      MP_function <- get(MP)
+      BSysProject <- attr(MP_function, "BSysProject")
+
+      if (!is.null(BSysProject))
+      {
+        BSysProject <- make(BSysProject)
+      }
+    }
+    
     if (UseCluster)
     {
       cluster <- openCluster()
 
       clusterEvalQ(cluster, eval(parse("Source/MseMain.R")))
+
+      # Source external MP files to each cluster process
+      for (SourcePath in .Object@MP_SourceFilePaths)
+      {
+        SourcePath <- normalizePath(SourcePath, winslash="/", mustWork=FALSE)
+      
+        if (file.exists(SourcePath))
+        {
+          # This is the only way I have found to do this. It seems impossible to do a simple "literal" substituition
+          # from a variable as in the clusterEvalQ() above. I can develop something that runs but in fails to instantiate
+          # the code where it needs to be, thus rendering it useless. Seems to be tied up in the cryptic ways R handles
+          # scoping through environments so I'm just going to use a global "SourcePath" instead.
+          clusterExport(cluster, list("SourcePath"), envir=environment())
+          clusterEvalQ(cluster, eval(parse(SourcePath)))
+        }
+      }
     }
 
     runModels <- function(StockSynthesisModels, MPs, tune, interval, Report, CppMethod, EffortCeiling, TACTime, rULim)
@@ -1975,3 +2030,105 @@ setMethod("subsetModels", "MseFramework",
     return (.Object)
   }
 )
+
+# -----------------------------------------------------------------------------
+
+setGeneric("addMP_SourceCode", function(.Object, ...) standardGeneric("addMP_SourceCode"))
+
+setMethod("addMP_SourceCode", "MseFramework",
+  function(.Object, SourceFiles)
+  {
+    if (length(SourceFiles > 0))
+    {
+      for (SourceFile in SourceFiles)
+      {
+        if (!file.exists(SourceFile))
+        {
+          cat(paste("Cannot find source file", SourceFile, ". Please provide an explicit path to file."))
+        }
+
+        if (any(lapply(.Object@MP_SourceFilePaths, function(item) {return (SourceFile == item)})))
+        {
+          cat(paste(SourceFile, "is already added to this framework."))
+        }
+        else
+        {
+          idx <- length(.Object@MP_SourceFilePaths) + 1
+
+          .Object@MP_SourceFilePaths[[idx]] <- SourceFile
+        }
+      }      
+    }
+
+    return (.Object)
+  }
+)
+
+# -----------------------------------------------------------------------------
+
+setGeneric("excludeFailedProjections", function(.Object, ...) standardGeneric("excludeFailedProjections"))
+
+setMethod("excludeFailedProjections", "MseFramework",
+  function(.Object)
+  {
+    FilteredModels <- list()
+    Idy            <- 0
+
+    for (Model in .Object@StockSynthesisModels)
+    {
+      FilteredProjVars <- list()
+      Idx              <- 0
+
+      for (ProjVars in Model@ProjectedVars)
+      {
+        ValidIdxs <- 1:ProjVars@nsim
+        LogIdx    <- which(!is.na(ProjVars@Log))
+
+        if (length(LogIdx) > 0)
+        {
+          ValidIdxs <- which(sapply(ProjVars@Log[LogIdx], function(x) is.null(x$error)))
+        }
+
+        nsims     <- length(ValidIdxs)
+
+        if (nsims > 0)
+        {
+          if (nsims < ProjVars@nsim)
+          {
+            ProjVars@nsim          <- nsims
+            ProjVars@Log           <- ProjVars@Log[ValidIdxs]
+            ProjVars@F             <- ProjVars@F[ValidIdxs,]
+            ProjVars@SSB           <- ProjVars@SSB[ValidIdxs,,]
+            ProjVars@B             <- ProjVars@B[ValidIdxs,,]
+            ProjVars@CM            <- ProjVars@CM[ValidIdxs,,]
+            ProjVars@CMbyF         <- ProjVars@CMbyF[ValidIdxs,,,]
+            ProjVars@Rec           <- ProjVars@Rec[ValidIdxs,]
+            ProjVars@RecYrQtr      <- ProjVars@RecYrQtr[ValidIdxs,]
+            ProjVars@IobsArchive   <- ProjVars@IobsArchive[ValidIdxs,]
+            ProjVars@IobsRArchive  <- ProjVars@IobsRArchive[ValidIdxs,,]
+            ProjVars@TAC           <- ProjVars@TAC[ValidIdxs,]
+            ProjVars@TAEbyF        <- ProjVars@TAEbyF[ValidIdxs,,]
+          }
+
+          Idx <- Idx + 1
+
+          FilteredProjVars[[Idx]] <- ProjVars
+        }
+      }
+
+      if (Idx > 0)
+      {
+        Model@ProjectedVars <- FilteredProjVars
+
+        Idy <- Idy + 1
+
+        FilteredModels[[Idy]] <- Model
+      }
+    }
+
+    .Object@StockSynthesisModels <- FilteredModels
+
+    return (.Object)
+  }
+)
+
