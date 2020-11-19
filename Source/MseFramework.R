@@ -405,7 +405,6 @@ setMethod("runMse", c("MseFramework"),
           return (tuneValue)
         }
 
-        idx      <- 1
         MP_Names <- names(TunedMPs)
 
         for (MP in TunedMPs)
@@ -515,23 +514,6 @@ setMethod("runMse", c("MseFramework"),
             .Object@tune[tuneIdx[[MP]]]      <- 10 ^ res$minimum
             .Object@tuneError[tuneIdx[[MP]]] <- res$objective
           }
-
-          MP_idx     <- tuneIdx[[MP]]
-          MP_Name    <- if (is.null(MP_Names)) NULL else MP_Names[MP_idx]
-          tune_value <- .Object@tune[tuneIdx[[MP]]]
-          tune_error <- .Object@tuneError[tuneIdx[[MP]]]
-          tunedMP    <- new("MP_Spec", MP, MP_Name=MP_Name, tune=tune_value, tune_error=tune_error, errorMessage=ErrorMessage, bisectMethod=TuningPars@bisectMethod)
-
-          if (class(MPs) == "list")
-          {
-            MPs[[MP_idx]] <- tunedMP
-          }
-          else
-          {
-            MPs[MP_idx] <- tunedMP
-          }
-
-          idx <- idx + 1
         }
       }
     }
