@@ -4,15 +4,24 @@ require(TMB)
 
 # Assumed that working folder is root of niMSE-IO-BET-YFT and that this code 
 # resides in the "MPs/PellaTomlinsonProjectTMB" sub folder.
-Project <- new("BSysProject", WorkingFolder="./MPs/PellaTomlinsonProjectTMB")
+Project <- new("BSysProject", WorkingFolder="./MPs/PellaTomlinsonProjectTMB", Debug=FALSE)
+
+# -----------------------------------------------------------------------------
+
+PTproj.TMB.15 <- function(pset)
+{
+  return(PellaTomlinsonProjectionTMB(pset, BMSY_Prop=pset$tune, Gain=0.15, debug=FALSE, deltaTACLimUp=0.15, deltaTACLimDown=0.15))
+}
+
+class(PTproj.TMB.15)               <- "IO_MP_tune"
+attr(PTproj.TMB.15, "BSysProject") <- Project 
+
 
 # -----------------------------------------------------------------------------
 
 PTproj.TMB.25 <- function(pset)
 {
-  save(pset, file="Objects/pset.RDA")
-
-  return(PellaTomlinsonProjectionTMB(pset, BMSY_Prop=pset$tune, Gain=0.25, debug=FALSE))
+  return(PellaTomlinsonProjectionTMB(pset, BMSY_Prop=pset$tune, Gain=0.15, debug=FALSE, deltaTACLimUp=0.25, deltaTACLimDown=0.25))
 }
 
 class(PTproj.TMB.25)               <- "IO_MP_tune"
