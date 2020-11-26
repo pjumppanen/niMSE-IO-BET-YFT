@@ -453,7 +453,7 @@ plotKobeCols <- function (om, runs, ylab="", lastHistYr=2015, firstMPYr = 2019)
 
    group.colors <- c(PrGreen = "green",PrOrange = "orange", PrYellow = "yellow",PrRed = "red")
 
-    p1 <- ggplot(om, aes(x = year, y = V1, ymin=0)) +
+    p1 <- ggplot(om, aes(x = year, y = V1)) +
         geom_bar(aes(y = V1, x = year, fill = qname), colour="black", stat="identity") +
         #scale_fill_manual(values = c("green","orange","yellow","red")) +
         scale_fill_manual(values=group.colors) +
@@ -466,7 +466,7 @@ plotKobeCols <- function (om, runs, ylab="", lastHistYr=2015, firstMPYr = 2019)
         theme(plot.title = element_text(hjust = 0.5))
 
 
-    p2 <- ggplot(runs, aes(x = year, y= V1, ymin=0)) +
+    p2 <- ggplot(runs, aes(x = year, y= V1)) +
         #scale_y_discrete(expand = c(0,0)) +
         #scale_x_discrete(expand = c(0,0)) +
         geom_bar(aes(y = V1, x = year, fill = qname), colour="black", stat="identity") +
