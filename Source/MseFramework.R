@@ -2079,17 +2079,17 @@ setMethod("excludeFailedProjections", "MseFramework",
           {
             ProjVars@nsim          <- nsims
             ProjVars@Log           <- ProjVars@Log[ValidIdxs]
-            ProjVars@F             <- ProjVars@F[ValidIdxs,]
-            ProjVars@SSB           <- ProjVars@SSB[ValidIdxs,,]
-            ProjVars@B             <- ProjVars@B[ValidIdxs,,]
-            ProjVars@CM            <- ProjVars@CM[ValidIdxs,,]
-            ProjVars@CMbyF         <- ProjVars@CMbyF[ValidIdxs,,,]
-            ProjVars@Rec           <- ProjVars@Rec[ValidIdxs,]
-            ProjVars@RecYrQtr      <- ProjVars@RecYrQtr[ValidIdxs,]
-            ProjVars@IobsArchive   <- ProjVars@IobsArchive[ValidIdxs,]
-            ProjVars@IobsRArchive  <- ProjVars@IobsRArchive[ValidIdxs,,]
-            ProjVars@TAC           <- ProjVars@TAC[ValidIdxs,]
-            ProjVars@TAEbyF        <- ProjVars@TAEbyF[ValidIdxs,,]
+            ProjVars@F             <- ProjVars@F[keep(ValidIdxs),]
+            ProjVars@SSB           <- ProjVars@SSB[keep(ValidIdxs),,]
+            ProjVars@B             <- ProjVars@B[keep(ValidIdxs),,]
+            ProjVars@CM            <- ProjVars@CM[keep(ValidIdxs),,]
+            ProjVars@CMbyF         <- ProjVars@CMbyF[keep(ValidIdxs),,,]
+            ProjVars@Rec           <- ProjVars@Rec[keep(ValidIdxs),]
+            ProjVars@RecYrQtr      <- ProjVars@RecYrQtr[keep(ValidIdxs),]
+            ProjVars@IobsArchive   <- ProjVars@IobsArchive[keep(ValidIdxs),]
+            ProjVars@IobsRArchive  <- ProjVars@IobsRArchive[keep(ValidIdxs),,]
+            ProjVars@TAC           <- ProjVars@TAC[keep(ValidIdxs),]
+            ProjVars@TAEbyF        <- ProjVars@TAEbyF[keep(ValidIdxs),,]
           }
 
           Idx <- Idx + 1
