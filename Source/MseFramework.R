@@ -1178,7 +1178,6 @@ setMethod("msevizHistoricTimeSeriesData", c("MseFramework"),
   }
 )
 
-
 # -----------------------------------------------------------------------------
 
 setGeneric("msevizProjectedTimeSeriesData", function(.Object, ...) standardGeneric("msevizProjectedTimeSeriesData"))
@@ -2111,6 +2110,29 @@ setMethod("excludeFailedProjections", "MseFramework",
     .Object@StockSynthesisModels <- FilteredModels
 
     return (.Object)
+  }
+)
+
+# -----------------------------------------------------------------------------
+
+setGeneric("referenceVarData", function(.Object, ...) standardGeneric("referenceVarData"))
+
+setMethod("referenceVarData", c("MseFramework"),
+  function(.Object)
+  {
+    dataList <- list()
+    colNames <- slotNames("ReferenceVars")
+    nModels  <- length(.Object@StockSynthesisModels)
+
+    for (cn in 1:nModels)
+    {
+      for (colName in colNames)
+      {
+        dataList[[colName]] <- c(dataList[[colName]], slot(.Object@StockSynthesisModels[[cn]]@RefVars, colName))
+      }
+    }
+
+    return (as.data.table(dataList))
   }
 )
 
