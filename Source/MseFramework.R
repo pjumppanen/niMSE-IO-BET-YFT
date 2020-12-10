@@ -995,13 +995,17 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
                 {
                   # Calculate the TAC by F to be used against catch
                   isTACFleet  <- (HistoricVars@TAEbyF == 0)
+                  dims        <- dim(isTACFleet)
+                  nsim        <- dims[1]
+                  proyears    <- dims[2]
+                  nfleets     <- dims[3]
                   CMCurrent   <- apply(om@ModelData@CMCurrent, c(3), sum)
-                  SYF         <- as.matrix(expand.grid(1:om@ModelData@nsim, 1:om@ModelData@proyears, 1:om@ModelData@nfleets))
+                  SYF         <- as.matrix(expand.grid(1:nsim, 1:proyears, 1:nfleets))
                   SY          <- SYF[,c(1,2)]
                   F           <- SYF[,3]
-                  CRefbyF     <- karray(CMCurrent[F] * isTACFleet[SYF], dim=c(om@ModelData@nsim, om@ModelData@proyears, om@ModelData@nfleets))
+                  CRefbyF     <- karray(CMCurrent[F] * isTACFleet[SYF], dim=c(nsim, proyears, nfleets))
                   SumCRefbyF  <- apply(CRefbyF, c(1,2), sum)
-                  TACbyF      <- karray(HistoricVars@TAC[SY] * CRefbyF[SYF] / SumCRefbyF[SY], dim=c(om@ModelData@nsim, om@ModelData@proyears, om@ModelData@nfleets))
+                  TACbyF      <- karray(HistoricVars@TAC[SY] * CRefbyF[SYF] / SumCRefbyF[SY], dim=c(nsim, proyears, nfleets))
 
                   for (fi in 1:HistoricVars@nfleets)
                   {
