@@ -530,3 +530,76 @@ plotCbyTAC <- function(runs.dt, firstMPYr = 2019)
 
   grid::popViewport()
 }
+
+
+plotConTAC_timeDistributionByF <- function(runs.dt)
+{
+  MPs     <- levels(factor(runs.dt$mp))
+  qnames  <- levels(factor(runs.dt$qname))
+  idx     <- grep("C/TAC by Fleet", qnames)
+  qnames  <- qnames[idx]
+  total   <- length(qnames)
+  pages   <- 1
+
+  if (total > 4)
+  {
+    pages <- floor(total / 4)
+    total <- 4
+  }
+
+  nrows   <- floor(total ^ 0.5)
+  ncols   <- ceiling(total / nrows)
+
+  quantize <- function(x)
+  {
+    floor(20 * x) / 20
+  }
+
+  for (MP in MPs)
+  {
+    idx <- 1
+
+    for (page in 1:pages)
+    {
+      grid::pushViewport(grid::viewport(layout = grid::grid.layout(nrow = nrows, ncol = ncols)))
+
+      for (nrow in 1:nrows)
+      {
+        for (ncol in 1:ncols)
+        {
+          if (idx <= length(qnames))
+          {
+            name <- qnames[idx]
+
+            data <- runs.dt[(mp==MP) & (qname==name),]
+            norm <- nrow(data) / length(levels(factor(data$year)))
+            data <- data.table(data, Quantile=data[,quantize(data)])
+            data <- data.table(data, Probability=rep(1 / norm, times=nrow(data)))
+            bins <- as.double(levels(factor(data$Quantile)))
+
+            probability.data <- data[,list(Probability=sum(Probability)), by=c("year","Quantile")]
+            heat.map.data    <- as.data.table(expand.grid(year=probability.data$year, Quantile=(0:20) / 20, Probability=0))
+            heat.map.data    <- probability.data[heat.map.data, on=c("year","Quantile")][,c("year", "Quantile", "Probability")]
+
+            heat.map.data$Probability <- sapply(heat.map.data$Prob, function(x) {if (is.na(x)) 0.0 else x})
+
+            setnames(heat.map.data, c("year", "Quantile", "Probability"), c("Year", "Quantile", "Probability"))
+
+            pl <- ggplot(data=heat.map.data, aes(x=Quantile, y=Year, fill=Probability)) +
+                                            ggtitle(name) +  
+                                            geom_tile() +
+                                            scale_fill_distiller(palette = "RdPu") + 
+                                            theme_bw()
+
+            print(pl, vp = grid::viewport(layout.pos.row = nrow, layout.pos.col = ncol))
+          }
+
+          idx <- idx + 1
+        }
+      }
+
+      grid::popViewport()
+      grid::grid.newpage()
+    }
+  }
+}
