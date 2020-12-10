@@ -676,7 +676,7 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
     # define handlers for all statistics
     # ----------------------------------
     statHandlers[["CPUE(aggregate)"]] <- list(
-      addFn = function(HistoricVars, RefVars, context)
+      addFn = function(HistoricVars, RefVars, context, om)
               {
                 # Aggregate CPUE series skips final year
                 return(addRows(context, HistoricVars@IobsArchive, "CPUE(aggregate)"))
@@ -689,7 +689,7 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
       )
 
     statHandlers[["Recruitment"]] <- list(
-      addFn = function(HistoricVars, RefVars, context)
+      addFn = function(HistoricVars, RefVars, context, om)
               {
                 # Recruitment
                 return (addRows(context, HistoricVars@Rec, "Recruitment"))
@@ -702,7 +702,7 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
       )
 
     statHandlers[["B/B0"]] <- list(
-      addFn = function(HistoricVars, RefVars, context)
+      addFn = function(HistoricVars, RefVars, context, om)
               {
                 #B/B0
                 B_B0 <- b_b0(HistoricVars, RefVars)
@@ -724,7 +724,7 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
       )
 
     statHandlers[["B/BMSY"]] <- list(
-      addFn = function(HistoricVars, RefVars, context)
+      addFn = function(HistoricVars, RefVars, context, om)
               {
                 #B/BMSY
                 B_BMSY <- b_bmsy(HistoricVars, RefVars)
@@ -738,7 +738,7 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
       )
 
     statHandlers[["SSB/SSB0"]] <- list(
-      addFn = function(HistoricVars, RefVars, context)
+      addFn = function(HistoricVars, RefVars, context, om)
               {
                 #SSB/SSB0
                 SSB_SSB0 <- ssb_ssb0(HistoricVars, RefVars)
@@ -760,7 +760,7 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
       )
 
     statHandlers[["SSB/SSBMSY"]] <- list(
-      addFn = function(HistoricVars, RefVars, context)
+      addFn = function(HistoricVars, RefVars, context, om)
               {
                 #SSB/SSBMSY
                 SSB_SSBMSY <- ssb_ssbmsy(HistoricVars, RefVars)
@@ -774,7 +774,7 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
       )
 
     statHandlers[["F/FMSY"]] <- list(
-      addFn = function(HistoricVars, RefVars, context)
+      addFn = function(HistoricVars, RefVars, context, om)
               {
                 #F/FMSY
                 F_FMSY <- f_fmsy(HistoricVars, RefVars)
@@ -788,7 +788,7 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
       )
 
     statHandlers[["C"]] <- list(
-      addFn = function(HistoricVars, RefVars, context)
+      addFn = function(HistoricVars, RefVars, context, om)
               {
                 #Catch
                 if (bHistoric)
@@ -808,7 +808,7 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
       )
 
     statHandlers[["TAC"]] <- list(
-      addFn = function(HistoricVars, RefVars, context)
+      addFn = function(HistoricVars, RefVars, context, om)
               {
                 #Catch
                 if (bHistoric)
@@ -828,7 +828,7 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
       )
 
     statHandlers[["C/TAC"]] <- list(
-      addFn = function(HistoricVars, RefVars, context)
+      addFn = function(HistoricVars, RefVars, context, om)
               {
 
                 #Catch
@@ -849,7 +849,7 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
       )
 
     statHandlers[["PrGreen"]] <- list(
-      addFn = function(HistoricVars, RefVars, context)
+      addFn = function(HistoricVars, RefVars, context, om)
               {
                 B_BMSY  <- b_bmsy(HistoricVars, RefVars)
                 F_FMSY  <- f_fmsy(HistoricVars, RefVars)
@@ -867,7 +867,7 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
       )
 
     statHandlers[["PrRed"]] <- list(
-      addFn = function(HistoricVars, RefVars, context)
+      addFn = function(HistoricVars, RefVars, context, om)
               {
                 B_BMSY <- b_bmsy(HistoricVars, RefVars)
                 F_FMSY <- f_fmsy(HistoricVars, RefVars)
@@ -885,7 +885,7 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
       )
 
     statHandlers[["PrOrange"]] <- list(
-      addFn = function(HistoricVars, RefVars, context)
+      addFn = function(HistoricVars, RefVars, context, om)
               {
                 B_BMSY   <- b_bmsy(HistoricVars, RefVars)
                 F_FMSY   <- f_fmsy(HistoricVars, RefVars)
@@ -903,7 +903,7 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
       )
 
     statHandlers[["PrYellow"]] <- list(
-      addFn = function(HistoricVars, RefVars, context)
+      addFn = function(HistoricVars, RefVars, context, om)
               {
                 B_BMSY   <- b_bmsy(HistoricVars, RefVars)
                 F_FMSY   <- f_fmsy(HistoricVars, RefVars)
@@ -922,7 +922,7 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
 
 
     statHandlers[["Recruitment by Qtr"]] <- list(
-      addFn = function(HistoricVars, RefVars, context)
+      addFn = function(HistoricVars, RefVars, context, om)
               {
                 # Rec by Qtr
                 QtrYrBases  <- (0:(HistoricVars@nyears - 1)) * 4
@@ -953,7 +953,7 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
       )
 
     statHandlers[["CbyRF"]] <- list(
-      addFn = function(HistoricVars, RefVars, context)
+      addFn = function(HistoricVars, RefVars, context, om)
               {
                 #Catch by fishery
                 if (HistoricVars@nfleets > 1)
@@ -987,8 +987,46 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
                 }
       )
 
+    statHandlers[["C/TACbyRF"]] <- list(
+      addFn = function(HistoricVars, RefVars, context, om)
+              {
+                #Catch by fishery
+                if ((HistoricVars@nfleets >= 1) && !bHistoric)
+                {
+                  # Calculate the TAC by F to be used against catch
+                  isTACFleet  <- (HistoricVars@TAEbyF == 0)
+                  CMCurrent   <- apply(om@ModelData@CMCurrent, c(3), sum)
+                  SYF         <- as.matrix(expand.grid(1:om@ModelData@nsim, 1:om@ModelData@proyears, 1:om@ModelData@nfleets))
+                  SY          <- SYF[,c(1,2)]
+                  F           <- SYF[,3]
+                  CRefbyF     <- karray(CMCurrent[F] * isTACFleet[SYF], dim=c(om@ModelData@nsim, om@ModelData@proyears, om@ModelData@nfleets))
+                  SumCRefbyF  <- apply(CRefbyF, c(1,2), sum)
+                  TACbyF      <- karray(HistoricVars@TAC[SY] * CRefbyF[SYF] / SumCRefbyF[SY], dim=c(om@ModelData@nsim, om@ModelData@proyears, om@ModelData@nfleets))
+
+                  for (fi in 1:HistoricVars@nfleets)
+                  {
+                    context <- addRows(context, HistoricVars@CMbyF[,.Object@MseDef@targpop,,fi] / TACbyF[,,fi], paste("C/TAC by Fleet",fi))
+                  }
+                }
+
+                return (context)
+              },
+
+      countFn = function(HistoricVars)
+                {
+                  count <- 0
+
+                  if ((HistoricVars@nfleets >= 1) && !bHistoric)
+                  {
+                    count <- HistoricVars@nfleets * HistoricVars@nyears * HistoricVars@nsim
+                  }
+
+                  return (count)
+                }
+      )
+
     statHandlers[["CPUEbyArea"]] <- list(
-      addFn = function(HistoricVars, RefVars, context)
+      addFn = function(HistoricVars, RefVars, context, om)
               {
                 #CPUE by region
                 if (HistoricVars@nareas > 1)
@@ -1119,7 +1157,7 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
               return (context)
             }
 
-            res <- handler$addFn(om@HistoricVars, om@RefVars, res)
+            res <- handler$addFn(om@HistoricVars, om@RefVars, res, om)
 
             res$iter <- res$iter + om@ModelData@nsim
 
@@ -1154,7 +1192,7 @@ setMethod("msevizTimeSeriesData", c("MseFramework"),
                 return (context)
               }
 
-              res <- handler$addFn(ProjVar, om@RefVars, res)
+              res <- handler$addFn(ProjVar, om@RefVars, res, om)
             }
 
             res$iter <- res$iter + om@ModelData@nsim
