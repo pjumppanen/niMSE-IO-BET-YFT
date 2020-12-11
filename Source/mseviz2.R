@@ -532,7 +532,7 @@ plotCbyTAC <- function(runs.dt, firstMPYr = 2019)
 }
 
 
-plotConTAC_timeDistributionByF <- function(runs.dt)
+plotConTAC_timeDistributionByF <- function(runs.dt, nbins=10)
 {
   MPs       <- levels(factor(runs.dt$mp))
   qnames    <- levels(factor(runs.dt$qname))
@@ -562,7 +562,7 @@ plotConTAC_timeDistributionByF <- function(runs.dt)
 
   quantize <- function(x)
   {
-    floor(20 * x) / 20
+    floor(nbins * x) / nbins
   }
 
   for (MP in MPs)
@@ -572,7 +572,11 @@ plotConTAC_timeDistributionByF <- function(runs.dt)
     for (page in 1:pages)
     {
       grid::grid.newpage()
-      grid::pushViewport(grid::viewport(layout = grid::grid.layout(nrow = nrows, ncol = ncols)))
+      grid::pushViewport(grid::viewport(layout = grid::grid.layout(nrow = 15, ncol = 1)))
+
+      grid::grid.text(paste("C / TAC for", MP), vp = viewport(layout.pos.row = 1, layout.pos.col = 1))
+
+      grid::pushViewport(grid::viewport(layout.pos.row = 2:15, layout.pos.col = 1, layout = grid::grid.layout(nrow = nrows, ncol = ncols)))
 
       for (nrow in 1:nrows)
       {
@@ -582,14 +586,14 @@ plotConTAC_timeDistributionByF <- function(runs.dt)
           {
             name <- TACfleets[idx]
 
-            data <- runs.dt[(mp==MP) & (qname==name),]
+            data <- runs.dt[(mp == MP) & (qname == name),]
             norm <- nrow(data) / length(levels(factor(data$year)))
             data <- data.table(data, Quantile=data[, quantize(data)])
             data <- data.table(data, Probability=rep(100 / norm, times=nrow(data)))
             bins <- as.double(levels(factor(data$Quantile)))
 
             probability.data <- data[,list(Probability=sum(Probability)), by=c("year","Quantile")]
-            heat.map.data    <- as.data.table(expand.grid(year=probability.data$year, Quantile=(0:20) / 20, Probability=0))
+            heat.map.data    <- as.data.table(expand.grid(year=probability.data$year, Quantile=(0:nbins) / nbins, Probability=0))
             heat.map.data    <- probability.data[heat.map.data, on=c("year","Quantile")][,c("year", "Quantile", "Probability")]
 
             heat.map.data$Probability <- sapply(heat.map.data$Prob, function(x) {if (is.na(x)) 0.0 else x})
@@ -599,7 +603,7 @@ plotConTAC_timeDistributionByF <- function(runs.dt)
                                              ylab("Year") + 
                                              ggtitle(sub("C/TAC by ", "", name)) +  
                                              geom_tile() +
-                                             scale_fill_distiller(palette = "Spectral", name="runs %") + 
+                                             scale_fill_distiller(palette = "Spectral", name="% of runs") + 
                                              theme_bw()
 
             print(pl, vp = grid::viewport(layout.pos.row = nrow, layout.pos.col = ncol))
@@ -609,6 +613,7 @@ plotConTAC_timeDistributionByF <- function(runs.dt)
         }
       }
 
+      grid::popViewport()
       grid::popViewport()
     }
   }
