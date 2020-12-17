@@ -618,3 +618,108 @@ plotConTAC_timeDistributionByF <- function(runs.dt, nbins=10)
     }
   }
 }
+
+
+plotConTAC_proptionsByF <- function(runs.dt, thresholds=c(0.9, 0.98), colours=c("red", "green", "blue"))
+{
+  MPs       <- levels(factor(runs.dt$mp))
+  qnames    <- levels(factor(runs.dt$qname))
+  idx       <- grep("C/TAC by Fleet", qnames)
+  qnames    <- qnames[idx]
+  TACfleets <- c()
+
+  for (name in qnames)
+  {
+    if (!all(is.na(runs.dt[qname==name,]$data)))
+    {
+      TACfleets <- c(TACfleets, name)
+    }
+  }
+
+  total   <- length(TACfleets)
+  pages   <- 1
+
+  if (total > 4)
+  {
+    pages <- floor(total / 4)
+    total <- 4
+  }
+
+  nrows   <- floor(total ^ 0.5)
+  ncols   <- ceiling(total / nrows)
+  breaks  <- sort(thresholds)
+
+  quantize <- function(x)
+  {
+    length(which(x > breaks))
+  }
+
+  groups          <- sapply(c(thresholds, 2.0), quantize)
+  low.thresholds  <- c(0.0, thresholds)
+  high.thresholds <- c(thresholds, 1.0)
+  group.names     <- c()
+
+  for (ix in 1:length(low.thresholds))
+  {
+    group.names <- c(group.names, paste(low.thresholds[ix], "-" , high.thresholds[ix]))
+  }
+  
+  for (MP in MPs)
+  {
+    idx <- 1
+
+    for (page in 1:pages)
+    {
+      grid::grid.newpage()
+      grid::pushViewport(grid::viewport(layout = grid::grid.layout(nrow = 15, ncol = 1)))
+
+      grid::grid.text(paste("C / TAC for", MP), vp = viewport(layout.pos.row = 1, layout.pos.col = 1))
+
+      grid::pushViewport(grid::viewport(layout.pos.row = 2:15, layout.pos.col = 1, layout = grid::grid.layout(nrow = nrows, ncol = ncols)))
+
+      for (nrow in 1:nrows)
+      {
+        for (ncol in 1:ncols)
+        {
+          if (idx <= length(TACfleets))
+          {
+            name <- TACfleets[idx]
+
+            data <- runs.dt[(mp == MP) & (qname == name),]
+            norm <- nrow(data) / length(levels(factor(data$year)))
+            data <- data.table(data, Quantile=data[, sapply(data, quantize)])
+            data <- data.table(data, Probability=rep(100 / norm, times=nrow(data)))
+            bins <- as.double(levels(factor(data$Quantile)))
+
+            colourise <- function(x)
+            {
+              sapply(x, function(x) {colours[x]})
+            }
+
+            colourise <- function(x)
+            {
+              return (colours[x + 1])
+            }
+
+            probability.data <- data[,list(Probability=sum(Probability), colour=colourise(Quantile)), by=c("year","Quantile")]
+
+            pl <- ggplot(probability.data, aes(x = year, y=Probability, group=Quantile, color=colour)) +
+                         geom_line() + 
+                         ggtitle(sub("C/TAC by ", "", name)) +  
+                         scale_y_continuous(limits = c(0, 100)) + 
+                         scale_colour_discrete(name="C/TAC", breaks=colours, labels=group.names) + 
+                         ylab("% models") +
+                         theme_bw()
+
+            print(pl, vp = grid::viewport(layout.pos.row = nrow, layout.pos.col = ncol))
+          }
+
+          idx <- idx + 1
+        }
+      }
+
+      grid::popViewport()
+      grid::popViewport()
+    }
+  }
+}
