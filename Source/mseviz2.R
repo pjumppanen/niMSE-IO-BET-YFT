@@ -620,7 +620,7 @@ plotConTAC_timeDistributionByF <- function(runs.dt, nbins=10)
 }
 
 
-plotConTAC_proptionsByF <- function(runs.dt, thresholds=c(0.9, 0.98), colours=c("red", "green", "blue"))
+plotConTAC_proptionsByF <- function(runs.dt, firstMPYr, thresholds=c(0.9, 0.98), colours=c("red3", "darkorange3", "darkgreen"))
 {
   MPs       <- levels(factor(runs.dt$mp))
   qnames    <- levels(factor(runs.dt$qname))
@@ -636,12 +636,13 @@ plotConTAC_proptionsByF <- function(runs.dt, thresholds=c(0.9, 0.98), colours=c(
     }
   }
 
-  total   <- length(TACfleets)
+  # Add one for all fleet summary
+  total   <- length(TACfleets) + 1
   pages   <- 1
 
   if (total > 4)
   {
-    pages <- floor(total / 4)
+    pages <- ceiling(total / 4)
     total <- 4
   }
 
@@ -649,12 +650,12 @@ plotConTAC_proptionsByF <- function(runs.dt, thresholds=c(0.9, 0.98), colours=c(
   ncols   <- ceiling(total / nrows)
   breaks  <- sort(thresholds)
 
-  quantize <- function(x)
+  category <- function(x)
   {
-    length(which(x > breaks))
+    paste(length(which(x > breaks)))
   }
 
-  groups          <- sapply(c(thresholds, 2.0), quantize)
+  groups          <- sapply(c(thresholds, 2.0), category)
   low.thresholds  <- c(0.0, thresholds)
   high.thresholds <- c(thresholds, 1.0)
   group.names     <- c()
@@ -687,27 +688,37 @@ plotConTAC_proptionsByF <- function(runs.dt, thresholds=c(0.9, 0.98), colours=c(
 
             data <- runs.dt[(mp == MP) & (qname == name),]
             norm <- nrow(data) / length(levels(factor(data$year)))
-            data <- data.table(data, Quantile=data[, sapply(data, quantize)])
+            data <- data.table(data, Category=data[, sapply(data, category)])
             data <- data.table(data, Probability=rep(100 / norm, times=nrow(data)))
-            bins <- as.double(levels(factor(data$Quantile)))
 
-            colourise <- function(x)
-            {
-              sapply(x, function(x) {colours[x]})
-            }
+            probability.data <- data[,list(Probability=sum(Probability)), by=c("year","Category")]
 
-            colourise <- function(x)
-            {
-              return (colours[x + 1])
-            }
-
-            probability.data <- data[,list(Probability=sum(Probability), colour=colourise(Quantile)), by=c("year","Quantile")]
-
-            pl <- ggplot(probability.data, aes(x = year, y=Probability, group=Quantile, color=colour)) +
+            pl <- ggplot(probability.data, aes(x = year, y=Probability, group=Category, colour=Category)) +
                          geom_line() + 
-                         ggtitle(sub("C/TAC by ", "", name)) +  
+                         geom_vline(aes(xintercept = firstMPYr), linetype=2) +
+                         ggtitle(sub("C/TAC by ", "", name)) + 
+                         scale_colour_manual(name="C/TAC", values=colours, labels=group.names) + 
                          scale_y_continuous(limits = c(0, 100)) + 
-                         scale_colour_discrete(name="C/TAC", breaks=colours, labels=group.names) + 
+                         ylab("% models") +
+                         theme_bw()
+
+            print(pl, vp = grid::viewport(layout.pos.row = nrow, layout.pos.col = ncol))
+          }
+          else if (idx == length(TACfleets) + 1)
+          {
+            data <- runs.dt[(mp == MP) & (qname %in% TACfleets),]
+            norm <- nrow(data) / length(levels(factor(data$year)))
+            data <- data.table(data, Category=data[, sapply(data, category)])
+            data <- data.table(data, Probability=rep(100 / norm, times=nrow(data)))
+
+            probability.data <- data[,list(Probability=sum(Probability)), by=c("year","Category")]
+
+            pl <- ggplot(probability.data, aes(x = year, y=Probability, group=Category, colour=Category)) +
+                         geom_line() + 
+                         geom_vline(aes(xintercept = firstMPYr), linetype=2) +
+                         ggtitle("All fleets") + 
+                         scale_colour_manual(name="C/TAC", values=colours, labels=group.names) + 
+                         scale_y_continuous(limits = c(0, 100)) + 
                          ylab("% models") +
                          theme_bw()
 
