@@ -250,7 +250,16 @@ setMethod("runMse", c("MseFramework"),
     # dependency when it isn't used.
     for (MP in MPs)
     {
-      MP_function <- get(MP)
+      if (class(MP) == "MP_Spec")
+      {
+        MP_Name <- MP@MP_Name
+      }
+      else
+      {
+        MP_Name <- MP
+      }
+
+      MP_function <- get(MP_Name)
       BSysProject <- attr(MP_function, "BSysProject")
 
       if (!is.null(BSysProject))
