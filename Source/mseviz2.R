@@ -198,8 +198,8 @@ plotOMruns2 <- function(om.dt,
   # subset data based on model parameters
   if (length(OrList > 0) || length(AndList > 0))
   {
-    Use.om   <- TRUE
-    Use.runs <- TRUE
+    Use.om   <- if (length(OrList) > 0) FALSE else TRUE
+    Use.runs <- Use.om
 
     for (filter in OrList)
     {
