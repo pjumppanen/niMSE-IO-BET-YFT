@@ -2041,6 +2041,32 @@ setMethod("execRunCallback", "MseFramework",
 
 # -----------------------------------------------------------------------------
 
+setGeneric("forAllModelDataDo", function(.Object, ...) standardGeneric("forAllModelDataDo"))
+
+setMethod("forAllModelDataDo", "MseFramework",
+  function(.Object, callbackFn)
+  {
+    with_env <- function(Fn, envir)
+    {
+      stopifnot(is.function(Fn))
+      environment(Fn) <- envir
+      return (Fn)
+    }
+
+    for (ix in 1:length(.Object@StockSynthesisModels))
+    {
+      ModelData <- .Object@StockSynthesisModels[[ix]]@ModelData
+      RefVars   <- .Object@StockSynthesisModels[[ix]]@RefVars
+
+      .Object@StockSynthesisModels[[ix]]@ModelData <- callbackFn(ModelData, RefVars, ix)
+    }
+
+    return (.Object)
+  }
+)
+
+# -----------------------------------------------------------------------------
+
 setGeneric("subsetModels", function(.Object, ...) standardGeneric("subsetModels"))
 
 setMethod("subsetModels", "MseFramework",
