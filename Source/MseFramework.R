@@ -2046,13 +2046,6 @@ setGeneric("forAllModelDataDo", function(.Object, ...) standardGeneric("forAllMo
 setMethod("forAllModelDataDo", "MseFramework",
   function(.Object, callbackFn)
   {
-    with_env <- function(Fn, envir)
-    {
-      stopifnot(is.function(Fn))
-      environment(Fn) <- envir
-      return (Fn)
-    }
-
     for (ix in 1:length(.Object@StockSynthesisModels))
     {
       ModelData <- .Object@StockSynthesisModels[[ix]]@ModelData
