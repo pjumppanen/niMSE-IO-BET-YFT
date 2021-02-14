@@ -8,7 +8,7 @@ detectCoresWithLimit <- function()
 {
   nCores <- detectCores()
 
-  if (MaxCores > 0) && (nCores > MaxCores))
+  if ((MaxCores > 0) && (nCores > MaxCores))
   {
     nCores <- MaxCores
   }
