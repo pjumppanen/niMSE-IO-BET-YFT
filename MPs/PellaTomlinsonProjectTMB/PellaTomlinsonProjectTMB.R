@@ -10,7 +10,7 @@ Project <- new("BSysProject", WorkingFolder="./MPs/PellaTomlinsonProjectTMB", De
 
 PTproj.TMB.15 <- function(pset)
 {
-  return(PellaTomlinsonProjectionTMB(pset, BMSY_Prop=pset$tune, Gain=0.15, debug=FALSE, deltaTACLimUp=0.15, deltaTACLimDown=0.15))
+  return(PellaTomlinsonProjectionTMB(pset, BMSY_Prop=pset$tune, Gain=0.07, debug=FALSE, deltaTACLimUp=0.15, deltaTACLimDown=0.15))
 }
 
 class(PTproj.TMB.15)               <- "IO_MP_tune"
@@ -21,7 +21,7 @@ attr(PTproj.TMB.15, "BSysProject") <- Project
 
 PTproj.TMB.25 <- function(pset)
 {
-  return(PellaTomlinsonProjectionTMB(pset, BMSY_Prop=pset$tune, Gain=0.15, debug=FALSE, deltaTACLimUp=0.25, deltaTACLimDown=0.25))
+  return(PellaTomlinsonProjectionTMB(pset, BMSY_Prop=pset$tune, Gain=0.07, debug=FALSE, deltaTACLimUp=0.25, deltaTACLimDown=0.25))
 }
 
 class(PTproj.TMB.25)               <- "IO_MP_tune"
