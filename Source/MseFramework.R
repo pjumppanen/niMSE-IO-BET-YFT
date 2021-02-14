@@ -2097,7 +2097,7 @@ setMethod("addMP_SourceCode", "MseFramework",
         {
           cat(paste("Cannot find source file", SourceFile, ". Please provide an explicit path to file.\n"))
         }
-        else if (any(unlist(lapply(.Object@MP_SourceFilePaths, function(item) {return (SourceFile == item)})))
+        else if (any(unlist(lapply(.Object@MP_SourceFilePaths, function(item) {return (SourceFile == item)}))))
         {
           cat(paste(SourceFile, "is already added to this framework.\n"))
         }
