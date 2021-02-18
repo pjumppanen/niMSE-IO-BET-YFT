@@ -230,7 +230,7 @@ setMethod("runMse", c("MseFramework"),
     for (SourcePath in .Object@MP_SourceFilePaths)
     {
       SourcePath <- normalizePath(SourcePath, winslash="/", mustWork=FALSE)
-      
+
       if (file.exists(SourcePath))
       {
         source(SourcePath)
@@ -246,20 +246,22 @@ setMethod("runMse", c("MseFramework"),
     # need to load either TMB or BuildSys explicitely in niMSE-IO-BET-YFT
     # because this should be included in the supplied source code for the
     # custom MP so will get instantiated when the source code is loaded
-    # as in above. This avoids making TMB and BuildSys a necessary 
+    # as in above. This avoids making TMB and BuildSys a necessary
     # dependency when it isn't used.
     for (MP in MPs)
     {
       if (class(MP) == "MP_Spec")
       {
         MP_Name <- MP@MP_Name
+        MPrun   <- MP@MP
       }
       else
       {
         MP_Name <- MP
+        MPrun   <- MP
       }
 
-      MP_function <- get(MP_Name)
+      MP_function <- get(MPrun)
       BSysProject <- attr(MP_function, "BSysProject")
 
       if (!is.null(BSysProject))
@@ -267,7 +269,7 @@ setMethod("runMse", c("MseFramework"),
         BSysProject <- make(BSysProject)
       }
     }
-    
+
     if (UseCluster)
     {
       cluster <- openCluster()
@@ -278,7 +280,7 @@ setMethod("runMse", c("MseFramework"),
       for (SourcePath in .Object@MP_SourceFilePaths)
       {
         SourcePath <- normalizePath(SourcePath, winslash="/", mustWork=FALSE)
-      
+
         if (file.exists(SourcePath))
         {
           # This is the only way I have found to do this. It seems impossible to do a simple "literal" substituition
@@ -2095,12 +2097,11 @@ setMethod("addMP_SourceCode", "MseFramework",
       {
         if (!file.exists(SourceFile))
         {
-          cat(paste("Cannot find source file", SourceFile, ". Please provide an explicit path to file."))
+          cat(paste("Cannot find source file", SourceFile, ". Please provide an explicit path to file.\n"))
         }
-
-        if (any(lapply(.Object@MP_SourceFilePaths, function(item) {return (SourceFile == item)})))
+        else if (any(unlist(lapply(.Object@MP_SourceFilePaths, function(item) {return (SourceFile == item)}))))
         {
-          cat(paste(SourceFile, "is already added to this framework."))
+          cat(paste(SourceFile, "is already added to this framework.\n"))
         }
         else
         {
@@ -2108,7 +2109,7 @@ setMethod("addMP_SourceCode", "MseFramework",
 
           .Object@MP_SourceFilePaths[[idx]] <- SourceFile
         }
-      }      
+      }
     }
 
     return (.Object)
@@ -2205,4 +2206,3 @@ setMethod("referenceVarData", c("MseFramework"),
     return (as.data.table(dataList))
   }
 )
-
