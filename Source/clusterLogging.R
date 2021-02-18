@@ -2,6 +2,22 @@ library(parallel)
 
 # -----------------------------------------------------------------------------
 
+MaxCores <- 0
+
+detectCoresWithLimit <- function()
+{
+  nCores <- detectCores()
+
+  if ((MaxCores > 0) && (nCores > MaxCores))
+  {
+    nCores <- MaxCores
+  }
+
+  return (nCores)
+}
+
+# -----------------------------------------------------------------------------
+
 openCluster <- function(Jobs=-1)
 {
   beginMonitoring <- function(Id)
@@ -24,7 +40,7 @@ openCluster <- function(Jobs=-1)
 
   assign("clusterMonitor", monitorEnv, envir=globalenv())
 
-  nCores <- detectCores()
+  nCores <- detectCoresWithLimit()
 
   if ((Jobs > 0) && (Jobs < nCores))
   {
