@@ -380,16 +380,30 @@ setMethod("initialize", "StockSynthesisModel",
       }
 
       # check recruitment scaling parameter so errors are picked up early
-      if ((length(MseDef@RecScale) != 1) && (length(MseDef@RecScale) != MseDef@proyears))
+      if ((length(MseDef@RecScale) != 1) && (length(MseDef@RecScale) < MseDef@proyears))
       {
-        print("ERROR: MSE definition RecScale vector is wrong length. It must be proyears in length")
+        print(paste("ERROR: MSE definition RecScale vector is wrong length. It must be at least", proyears, "in length"))
         stop()
       }
 
       # check implementation error bias parameter so errors are picked up early
-      if ((length(MseDef@ImplErrBias) != 1) && (length(MseDef@ImplErrBias) != MseDef@proyears))
+      if ((length(MseDef@ImplErrBias) != 1) && (length(MseDef@ImplErrBias) < MseDef@proyears))
       {
-        print("ERROR: MSE definition ImplErrBias vector is wrong length. It must be proyears in length")
+        print(paste("ERROR: MSE definition ImplErrBias vector is wrong length. It must be at least", proyears, "in length"))
+        stop()
+      }
+
+      # check Cbmean parameter so errors are picked up early
+      if ((length(MseDef@Cbmean) != 1) && (length(MseDef@Cbmean) < MseDef@proyears))
+      {
+        print(paste("ERROR: MSE definition Cbmean vector is wrong length. It must be at least", proyears, "in length"))
+        stop()
+      }
+
+      # check Cbmean parameter so errors are picked up early
+      if ((length(MseDef@Cbcv) != 1) && (length(MseDef@Cbcv) < MseDef@proyears))
+      {
+        print(paste("ERROR: MSE definition Cbcv vector is wrong length. It must be at least", proyears, "in length"))
         stop()
       }
 
@@ -905,6 +919,34 @@ setMethod("runMse", c("StockSynthesisModel"),
     if (class(MseDef) != "MseDefinition")
     {
       print(paste("ERROR: Could not create StockSynthesisModel.",deparse(substitute(MseDef)),"not of class MseDefinition"))
+      stop()
+    }
+
+    # check recruitment scaling parameter so errors are picked up early
+    if ((length(MseDef@RecScale) != 1) && (length(MseDef@RecScale) < MseDef@proyears))
+    {
+      print(paste("ERROR: MSE definition RecScale vector is wrong length. It must be at least", proyears, "in length"))
+      stop()
+    }
+
+    # check implementation error bias parameter so errors are picked up early
+    if ((length(MseDef@ImplErrBias) != 1) && (length(MseDef@ImplErrBias) < MseDef@proyears))
+    {
+      print(paste("ERROR: MSE definition ImplErrBias vector is wrong length. It must be at least", proyears, "in length"))
+      stop()
+    }
+
+    # check Cbmean parameter so errors are picked up early
+    if ((length(MseDef@Cbmean) != 1) && (length(MseDef@Cbmean) < MseDef@proyears))
+    {
+      print(paste("ERROR: MSE definition Cbmean vector is wrong length. It must be at least", proyears, "in length"))
+      stop()
+    }
+
+    # check Cbmean parameter so errors are picked up early
+    if ((length(MseDef@Cbcv) != 1) && (length(MseDef@Cbcv) < MseDef@proyears))
+    {
+      print(paste("ERROR: MSE definition Cbcv vector is wrong length. It must be at least", proyears, "in length"))
       stop()
     }
 

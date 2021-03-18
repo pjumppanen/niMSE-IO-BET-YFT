@@ -436,13 +436,13 @@ setMethod("initialize", "Projection",
         {
           RecScale <- karray(c(rep(1.0, times=ssModelData@nyears), rep(MseDef@RecScale, times=MseDef@proyears)))
         }
-        else if (length(MseDef@RecScale) == MseDef@proyears)
+        else if (length(MseDef@RecScale) >= MseDef@proyears)
         {
           RecScale <- karray(c(rep(1.0, times=ssModelData@nyears), MseDef@RecScale))
         }
         else
         {
-          print("ERROR: MSE definition RecScale vector is wrong length. It must be proyears in length")
+          print(paste("ERROR: MSE definition RecScale vector is wrong length. It must be", proyears, "in length"))
           stop()
         }
 
@@ -719,17 +719,6 @@ setMethod("initialize", "Projection",
 
       if ((length(MseDef@Cbmean) > 1) || (length(MseDef@Cbcv) > 1))
       {
-        if ((length(MseDef@Cbmean) != length(MseDef@Cbcv)) && ((length(MseDef@Cbmean) != 1) && (length(MseDef@Cbcv) != 1)))
-        {
-          print(paste("ERROR: Cbmean and Cbcv in MseDef must have same length."))
-          stop()
-        }
-        else if ((length(MseDef@Cbmean) != proyears) && (length(MseDef@Cbcv) != proyears))
-        {
-          print(paste("ERROR: Cbmean and Cbcv in MseDef must have length of 1 or proyears."))
-          stop()
-        }
-        
         Cb <- trlnorm(proyears, MseDef@Cbmean, MseDef@Cbcv)
       }
       else
@@ -1112,17 +1101,24 @@ setMethod("initialize", "Projection",
           .Object@TAC[y]     <- TAC
           .Object@TAEbyF[y,] <- TAEbyF
 
-          if ((length(MseDef@ImplErrBias) > 1) && (y >= firstMPy))
+          if (y >= firstMPy)
           {
-            if (MseDef@ImplErrBias[y - nyears] < 0)
+            ErrBiasIdx <- 1
+
+            if (length(MseDef@ImplErrBias) > 1)
+            {
+              ErrBiasIdx <- y - nyears
+            }
+
+            if (MseDef@ImplErrBias[ErrBiasIdx] < 0)
             {
               TAC              <- 0.0
-              TAEbyF           <- RecentEbyF * abs(MseDef@ImplErrBias[y - nyears])
+              TAEbyF           <- RecentEbyF * abs(MseDef@ImplErrBias[ErrBiasIdx])
               UpdateRecentEbyF <- FALSE
             }
-            else if (MseDef@ImplErrBias[y - nyears] > 0)
+            else if (MseDef@ImplErrBias[ErrBiasIdx] > 0)
             {
-              TAC              <- TAC * MseDef@ImplErrBias[y - nyears]
+              TAC              <- TAC * MseDef@ImplErrBias[ErrBiasIdx]
               UpdateRecentEbyF <- TRUE
             }
             else
