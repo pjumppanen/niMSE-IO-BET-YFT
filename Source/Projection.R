@@ -716,8 +716,28 @@ setMethod("initialize", "Projection",
 
       # Initialise observation model errors
       Cimp <- runif(1, MseDef@Ccv[1], MseDef@Ccv[2])
-      Cb   <- trlnorm(1, MseDef@Cbmean, MseDef@Cbcv)
-      Cerr <- karray(trlnorm(allyears, rep(Cb, allyears), rep(Cimp, allyears)), c(allyears))
+
+      if ((length(MseDef@Cbmean) > 1) || (length(MseDef@Cbcv) > 1))
+      {
+        if ((length(MseDef@Cbmean) != length(MseDef@Cbcv)) && ((length(MseDef@Cbmean) != 1) && (length(MseDef@Cbcv) != 1)))
+        {
+          print(paste("ERROR: Cbmean and Cbcv in MseDef must have same length."))
+          stop()
+        }
+        else if ((length(MseDef@Cbmean) != proyears) && (length(MseDef@Cbcv) != proyears))
+        {
+          print(paste("ERROR: Cbmean and Cbcv in MseDef must have length of 1 or proyears."))
+          stop()
+        }
+        
+        Cb <- trlnorm(proyears, MseDef@Cbmean, MseDef@Cbcv)
+      }
+      else
+      {
+        Cb <- rep(trlnorm(1, MseDef@Cbmean, MseDef@Cbcv), proyears)
+      }
+
+      Cerr <- karray(c(rep(1.0, nyears), trlnorm(proyears, Cb, rep(Cimp, proyears))), c(allyears))
 
       # Calculate the CPUE CV and auto-correlation for the given MP CPUE series
       if (any(!is.na(ssModelData@CPUEmpY)))
@@ -958,6 +978,7 @@ setMethod("initialize", "Projection",
           else if (y < firstMPy)
           {
             yBridge <- y - nyears
+            Cerr[y] <- 1.0
 
             if ((yBridge <= length(MseDef@catchBridge)) && (sum(MseDef@catchBridge) > 0))
             {
