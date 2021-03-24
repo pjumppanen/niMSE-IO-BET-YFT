@@ -977,7 +977,7 @@ setMethod("initialize", "Projection",
             else
             {
               #use the previous aggregate catch+error
-              TAC   <- TAC * exp(rnorm(length(TAC)) * MseDef@catchBridgeCV - 0.5 * MseDef@catchBridgeCV ^ 2)
+              TAC   <- MseDef@catchBridge[length(MseDef@catchBridge)] * exp(rnorm(length(TAC)) * MseDef@catchBridgeCV - 0.5 * MseDef@catchBridgeCV ^ 2)
             }
 
             TAE   <- karray(rep(0, nfleets), dim=c(nfleets))
