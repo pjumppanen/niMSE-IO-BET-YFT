@@ -1110,20 +1110,23 @@ setMethod("initialize", "Projection",
               ErrBiasIdx <- y - nyears
             }
 
-            if (MseDef@ImplErrBias[ErrBiasIdx] < 0)
+            if (!is.na(MseDef@ImplErrBias[ErrBiasIdx]))
             {
-              TAC              <- 0.0
-              TAEbyF           <- RecentEbyF * abs(MseDef@ImplErrBias[ErrBiasIdx])
-              UpdateRecentEbyF <- FALSE
-            }
-            else if (MseDef@ImplErrBias[ErrBiasIdx] > 0)
-            {
-              TAC              <- TAC * MseDef@ImplErrBias[ErrBiasIdx]
-              UpdateRecentEbyF <- TRUE
-            }
-            else
-            {
-              UpdateRecentEbyF <- TRUE
+              if (MseDef@ImplErrBias[ErrBiasIdx] < 0)
+              {
+                TAC              <- 0.0
+                TAEbyF           <- RecentEbyF * abs(MseDef@ImplErrBias[ErrBiasIdx])
+                UpdateRecentEbyF <- FALSE
+              }
+              else if (MseDef@ImplErrBias[ErrBiasIdx] > 0)
+              {
+                TAC              <- TAC * MseDef@ImplErrBias[ErrBiasIdx]
+                UpdateRecentEbyF <- TRUE
+              }
+              else
+              {
+                UpdateRecentEbyF <- TRUE
+              }
             }
           }
 
