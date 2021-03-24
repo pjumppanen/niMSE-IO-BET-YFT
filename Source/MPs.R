@@ -363,6 +363,47 @@ IT5.t15 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2, deltaTACLimUp=0.15, deltaTA
 }
 class(IT5.t15) <- "IO_MP_tune"
 
+IT5.t15g5 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2, deltaTACLimUp=0.15, deltaTACLimDown=0.15){
+  return(CPUETarget(pset, ITargPars=c(pset$tune *1.0,deltaTACLimUp,deltaTACLimDown,0.5,0.5,0.5,0.5), yrsmth=yrsmth,lambda=lambda,xx=xx))
+}
+class(IT5.t15g5) <- "IO_MP_tune"
+
+IT5.t15g10 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2, deltaTACLimUp=0.15, deltaTACLimDown=0.15){
+  return(CPUETarget(pset, ITargPars=c(pset$tune *1.0,deltaTACLimUp,deltaTACLimDown,1.,1.,1.,1.), yrsmth=yrsmth,lambda=lambda,xx=xx))
+}
+class(IT5.t15g10) <- "IO_MP_tune"
+
+IT5.t15g20 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2, deltaTACLimUp=0.15, deltaTACLimDown=0.15){
+  return(CPUETarget(pset, ITargPars=c(pset$tune *1.0,deltaTACLimUp,deltaTACLimDown,2.,2.,2.,2.), yrsmth=yrsmth,lambda=lambda,xx=xx))
+}
+class(IT5.t15g20) <- "IO_MP_tune"
+
+
+IT5.t15g1010 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2, deltaTACLimUp=0.15, deltaTACLimDown=0.15){
+  return(CPUETarget(pset, ITargPars=c(pset$tune *1.0,deltaTACLimUp,deltaTACLimDown,1.,0.,1.,0.), yrsmth=yrsmth,lambda=lambda,xx=xx))
+}
+class(IT5.t15g1010) <- "IO_MP_tune"
+
+
+IT5.t15g0.50.5 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2, deltaTACLimUp=0.15, deltaTACLimDown=0.15){
+  return(CPUETarget(pset, ITargPars=c(pset$tune *1.0,deltaTACLimUp,deltaTACLimDown,0.,.5,0.,.5), yrsmth=yrsmth,lambda=lambda,xx=xx))
+}
+class(IT5.t15g0.50.5) <- "IO_MP_tune"
+
+
+IT5.t15g0101 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2, deltaTACLimUp=0.15, deltaTACLimDown=0.15){
+  return(CPUETarget(pset, ITargPars=c(pset$tune *1.0,deltaTACLimUp,deltaTACLimDown,0.,1.,0.,1.), yrsmth=yrsmth,lambda=lambda,xx=xx))
+}
+class(IT5.t15g0101) <- "IO_MP_tune"
+
+IT5.t15g0202 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2, deltaTACLimUp=0.15, deltaTACLimDown=0.15){
+  return(CPUETarget(pset, ITargPars=c(pset$tune *1.0,deltaTACLimUp,deltaTACLimDown,0.,2.,0.,2.), yrsmth=yrsmth,lambda=lambda,xx=xx))
+}
+class(IT5.t15g0202) <- "IO_MP_tune"
+
+
+
+
 # delay TAC change for initial stability
 IT5.td15 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2, deltaTACLimUp=0.15, deltaTACLimDown=0.15){
   if(pset$y<73){ #for BET 67 = 2021
@@ -451,7 +492,7 @@ IT5.t10g3 <- function(pset,yrsmth=5,lambda=0.4,xx=0.2, deltaTACLimUp=0.1, deltaT
 }
 class(IT5.t10g3) <- "IO_MP_tune"
 
-# all gain parameters = .3
+# 7 year smoothing all gain parameters = .2
 IT7.t15g2 <- function(pset,yrsmth=7,lambda=0.4,xx=0.2, deltaTACLimUp=0.15, deltaTACLimDown=0.15){
   return(CPUETarget(pset, ITargPars=c(pset$tune *1.0,deltaTACLimUp,deltaTACLimDown,0.2,0.2,0.2,0.2,0.2), yrsmth=yrsmth,lambda=lambda,xx=xx))
 }
