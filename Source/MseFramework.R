@@ -301,7 +301,14 @@ setMethod("runMse", c("MseFramework"),
         {
           beginLog(om@ModelData@which)
 
-          om <- runMse(om, .Object@MseDef, MPs, tune, interval, Report, CppMethod, cluster=NA, EffortCeiling, TACTime, rULim, CPUEmpY, CPUEmpNormYrs)
+          # put exception handler on run job
+          new.om <- tryCatch(runMse(om, .Object@MseDef, MPs, tune, interval, Report, CppMethod, cluster=NA, EffortCeiling, TACTime, rULim, CPUEmpY, CPUEmpNormYrs), 
+                             error=function(e) print(e))
+
+          if (isS4(new.om))
+          {
+            om <- new.om
+          }
 
           print("\n")
 
