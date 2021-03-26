@@ -18,7 +18,7 @@ detectCoresWithLimit <- function()
 
 # -----------------------------------------------------------------------------
 
-openCluster <- function(Jobs=-1)
+openCluster <- function(Jobs=-1, UseMonitor=TRUE)
 {
   beginMonitoring <- function(Id)
   {
@@ -47,32 +47,36 @@ openCluster <- function(Jobs=-1)
     nCores <- Jobs
   }
 
-  cluster   <- makeCluster(nCores)
-  WorkerIds <- 1:nCores
-  FileName  <- tempfile("runMonitor", fileext=".R")
+  cluster <- makeCluster(nCores)
 
-  if (identical(.Platform$OS.type, "windows"))
+  if (UseMonitor)
   {
-    # Backslashes passed to command processor are a pain on Windows so use forward slash instead
-    FileName <- gsub("\\\\", "/", FileName)
+    WorkerIds <- 1:nCores
+    FileName  <- tempfile("runMonitor", fileext=".R")
+
+    if (identical(.Platform$OS.type, "windows"))
+    {
+      # Backslashes passed to command processor are a pain on Windows so use forward slash instead
+      FileName <- gsub("\\\\", "/", FileName)
+    }
+
+    assign("cluster",         cluster,   envir=clusterMonitor)
+    assign("WorkerIds",       WorkerIds, envir=clusterMonitor)
+    assign("monitorFileName", FileName,  envir=clusterMonitor)
+
+    clusterEvalQ(cluster, eval(parse("Source/clusterLogging.R")))
+
+    monitorFile <- file(FileName, "wt")
+    writeLines("runMonitor <- ", con=monitorFile)
+    writeLines(capture.output(print(runMonitor)), con=monitorFile)
+    close(monitorFile)
+
+    CmdLine <- paste("R --vanilla --quiet -e \"source('", FileName, "');runMonitor(", nCores, ")\"", sep="")
+
+    system(CmdLine, wait=FALSE, invisible=FALSE)
+
+    parSapply(cluster, WorkerIds, FUN=beginMonitoring)
   }
-
-  assign("cluster",         cluster,   envir=clusterMonitor)
-  assign("WorkerIds",       WorkerIds, envir=clusterMonitor)
-  assign("monitorFileName", FileName,  envir=clusterMonitor)
-
-  clusterEvalQ(cluster, eval(parse("Source/clusterLogging.R")))
-
-  monitorFile <- file(FileName, "wt")
-  writeLines("runMonitor <- ", con=monitorFile)
-  writeLines(capture.output(print(runMonitor)), con=monitorFile)
-  close(monitorFile)
-
-  CmdLine <- paste("R --vanilla --quiet -e \"source('", FileName, "');runMonitor(", nCores, ")\"", sep="")
-
-  system(CmdLine, wait=FALSE, invisible=FALSE)
-
-  parSapply(cluster, WorkerIds, FUN=beginMonitoring)
 
   return (cluster)
 }
@@ -123,14 +127,18 @@ closeCluster <- function(TimeOutTime=15)
   }
 
   clusterMonitor <- get("clusterMonitor",   envir=globalenv())
-  cluster        <- get("cluster",          envir=clusterMonitor)
-  WorkerIds      <- get("WorkerIds",        envir=clusterMonitor)
-  FileName       <- get("monitorFileName",  envir=clusterMonitor)
 
-  parSapply(cluster, WorkerIds, FUN=endMonitoring)
-  stopCluster(cluster)
+  if (exists("cluster", envir=clusterMonitor))
+  {
+    cluster        <- get("cluster",          envir=clusterMonitor)
+    WorkerIds      <- get("WorkerIds",        envir=clusterMonitor)
+    FileName       <- get("monitorFileName",  envir=clusterMonitor)
 
-  unlink(FileName)
+    parSapply(cluster, WorkerIds, FUN=endMonitoring)
+    stopCluster(cluster)
+
+    unlink(FileName)
+  }
 }
 
 # -----------------------------------------------------------------------------
@@ -153,15 +161,20 @@ endLog <- function(Id)
 
 printLog <- function(Id)
 {
-  StdOutFileName <- paste("clusterStdOutFile", Id, ".txt", sep="")
+  clusterMonitor <- get("clusterMonitor",   envir=globalenv())
 
-  if (file.exists(StdOutFileName))
+  if (exists("cluster", envir=clusterMonitor))
   {
-    con <- file(StdOutFileName, "rt")
+    StdOutFileName <- paste("clusterStdOutFile", Id, ".txt", sep="")
 
-    writeLines(readLines(con))
-    close(con)
-    unlink(StdOutFileName)
+    if (file.exists(StdOutFileName))
+    {
+      con <- file(StdOutFileName, "rt")
+
+      writeLines(readLines(con))
+      close(con)
+      unlink(StdOutFileName)
+    }
   }
 }
 

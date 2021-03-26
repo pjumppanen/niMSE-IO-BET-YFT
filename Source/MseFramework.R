@@ -45,7 +45,7 @@ setClass("MseFramework",
 # -----------------------------------------------------------------------------
 
 setMethod("initialize", "MseFramework",
-  function(.Object, MseDef=NULL, Report=FALSE, UseCluster=NA, UseMSYss=0)
+  function(.Object, MseDef=NULL, Report=FALSE, UseCluster=NA, UseMSYss=0, UseMonitor=TRUE)
   {
     if (is.null(MseDef))
     {
@@ -148,7 +148,7 @@ setMethod("initialize", "MseFramework",
 
       if (UseCluster && (nJobs > 1))
       {
-        cl <- openCluster(nJobs)
+        cl <- openCluster(nJobs, UseMonitor)
 
         clusterEvalQ(cl, eval(parse("Source/MseMain.R")))
 
@@ -201,7 +201,7 @@ setMethod("initCPUE_SeriesFrom", c("MseFramework"),
 setGeneric("runMse", function(.Object, ...) standardGeneric("runMse"))
 
 setMethod("runMse", c("MseFramework"),
-  function(.Object, MPs, TuningPars=NA, interval=3, Report=FALSE, CppMethod=NA, UseCluster=NA, EffortCeiling = as.double(20.0), TACTime = 0.5, rULim = 0.5)
+  function(.Object, MPs, TuningPars=NA, interval=3, Report=FALSE, CppMethod=NA, UseCluster=NA, EffortCeiling = as.double(20.0), TACTime = 0.5, rULim = 0.5, UseMonitor=FALSE)
   {
     CPUEmpY       <- NA
     CPUEmpNormYrs <- NA
@@ -272,7 +272,7 @@ setMethod("runMse", c("MseFramework"),
 
     if (UseCluster)
     {
-      cluster <- openCluster()
+      cluster <- openCluster(-1, UseMonitor)
 
       clusterEvalQ(cluster, eval(parse("Source/MseMain.R")))
 
@@ -573,7 +573,7 @@ setMethod("setProjectionYears", c("MseFramework"),
 setGeneric("setRecommendedTACbyF", function(.Object, ...) standardGeneric("setRecommendedTACbyF"))
 
 setMethod("setRecommendedTACbyF", c("MseFramework"),
-  function(.Object, recommendedTACbyF, Report=FALSE, UseCluster=NA, EffortCeiling=as.double(20.0), TACTime=0.5, rULim=0.5)
+  function(.Object, recommendedTACbyF, Report=FALSE, UseCluster=NA, EffortCeiling=as.double(20.0), TACTime=0.5, rULim=0.5, UseMonitor=TRUE)
   {
     # update catch distribution recommendation vector
     .Object@MseDef@recommendedTACbyF <- as.karray(recommendedTACbyF)
@@ -606,7 +606,7 @@ setMethod("setRecommendedTACbyF", c("MseFramework"),
 
     if (UseCluster && (nJobs > 1))
     {
-      cl <- openCluster(nJobs)
+      cl <- openCluster(nJobs, UseMonitor)
 
       clusterEvalQ(cl, eval(parse("Source/MseMain.R")))
 
