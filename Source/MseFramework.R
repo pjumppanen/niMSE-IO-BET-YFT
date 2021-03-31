@@ -302,7 +302,7 @@ setMethod("runMse", c("MseFramework"),
           beginLog(om@ModelData@which)
 
           # put exception handler on run job
-          new.om <- tryCatch(runMse(om, .Object@MseDef, MPs, tune, interval, Report, CppMethod, cluster=NA, EffortCeiling, TACTime, rULim, CPUEmpY, CPUEmpNormYrs), 
+          new.om <- tryCatch(runMse(om, .Object@MseDef, MPs, tune, interval, Report, CppMethod, cluster=NA, EffortCeiling, TACTime, rULim, CPUEmpY, CPUEmpNormYrs),
                              error=function(e) print(e))
 
           if (isS4(new.om))
@@ -330,6 +330,8 @@ setMethod("runMse", c("MseFramework"),
 
     .Object@tune      <- rep(1.0, times=length(MPs))
     .Object@tuneError <- rep(0.0, times=length(MPs))
+
+    tuneErrorMsg <- rep("", times=length(MPs))
 
     if (class(TuningPars) == "TuningParameters")
     {
@@ -466,7 +468,8 @@ setMethod("runMse", c("MseFramework"),
 
               print(ErrorMessage)
 
-              .Object@tune[tuneIdx[[MP]]] <- NA
+              .Object@tune[tuneIdx[[MP]]]         <- NA
+              .Object@tuneErrorMsg[tuneIdx[[MP]]] <- ErrorMessage
 
             } else
             {
@@ -534,10 +537,28 @@ setMethod("runMse", c("MseFramework"),
           }
         }
       }
-    }
 
-    # re-run all models with final tuning
-    .Object@StockSynthesisModels <- runModels(.Object@StockSynthesisModels, MPs, .Object@tune, interval, Report, CppMethod, EffortCeiling, TACTime, rULim)
+      # re-run all models with final tuning
+      .Object@StockSynthesisModels <- runModels(.Object@StockSynthesisModels, MPs, .Object@tune, interval, Report, CppMethod, EffortCeiling, TACTime, rULim)
+
+      # Save tuning results
+      for (idx in 1:length(.Object@StockSynthesisModels))
+      {
+        for (idy in 1:length(.Object@StockSynthesisModels[[idx]]@ProjectedVars))
+        {
+          Idz <- tuneIdx[[.Object@StockSynthesisModels[[1]]@ProjectedVars[[1]]@MP@MP]]
+
+          .Object@StockSynthesisModels[[idx]]@ProjectedVars[[idy]]@MP@tune          <- .Object@tune[Idz]
+          .Object@StockSynthesisModels[[idx]]@ProjectedVars[[idy]]@MP@tuneError     <- .Object@tuneError[Idz]
+          .Object@StockSynthesisModels[[idx]]@ProjectedVars[[idy]]@MP@errorMessage  <- tuneErrorMsg[Idz]
+        }
+      }
+    }
+    else
+    {
+      # run all models without tuning
+      .Object@StockSynthesisModels <- runModels(.Object@StockSynthesisModels, MPs, .Object@tune, interval, Report, CppMethod, EffortCeiling, TACTime, rULim)
+    }
 
     if (UseCluster)
     {
