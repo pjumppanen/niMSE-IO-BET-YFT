@@ -468,8 +468,8 @@ setMethod("runMse", c("MseFramework"),
 
               print(ErrorMessage)
 
-              .Object@tune[tuneIdx[[MP]]]         <- NA
-              .Object@tuneErrorMsg[tuneIdx[[MP]]] <- ErrorMessage
+              .Object@tune[tuneIdx[[MP]]] <- NA
+              tuneErrorMsg[tuneIdx[[MP]]] <- ErrorMessage
 
             } else
             {
