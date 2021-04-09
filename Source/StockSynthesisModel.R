@@ -1026,9 +1026,8 @@ setMethod("runMse", c("StockSynthesisModel"),
           MP_Name <- MP
         }
 
-        tune_value <- tune_value
         tune_error <- as.numeric(NA)
-        MP         <- new("MP_Spec", MP, MP_Name, tune, tune_error)
+        MP         <- new("MP_Spec", MP, MP_Name, tune_value, tune_error)
       }
 
       MP_class      <- class(get(MPn))
