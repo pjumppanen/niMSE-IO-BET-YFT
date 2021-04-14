@@ -2214,6 +2214,39 @@ setMethod("excludeFailedProjections", "MseFramework",
 
 # -----------------------------------------------------------------------------
 
+setGeneric("percentFailedProjections", function(.Object, ...) standardGeneric("percentFailedProjections"))
+
+setMethod("percentFailedProjections", "MseFramework",
+  function(.Object)
+  {
+    TotalProjections          <- 0
+    TotalSucceededProjections <- 0
+
+    for (Model in .Object@StockSynthesisModels)
+    {
+      for (ProjVars in Model@ProjectedVars)
+      {
+        ValidIdxs <- 1:ProjVars@nsim
+        LogIdx    <- which(!is.na(ProjVars@Log))
+
+        if (length(LogIdx) > 0)
+        {
+          ValidIdxs <- which(sapply(ProjVars@Log[LogIdx], function(x) is.null(x$error)))
+        }
+
+        TotalProjections          <- TotalProjections + ProjVars@nsim 
+        TotalSucceededProjections <- TotalSucceededProjections + length(ValidIdxs)
+      }
+    }
+
+    PercentFailed <- 100.0 * (TotalProjections - TotalSucceededProjections) / TotalProjections
+    
+    return (PercentFailed)
+  }
+)
+
+# -----------------------------------------------------------------------------
+
 setGeneric("referenceVarData", function(.Object, ...) standardGeneric("referenceVarData"))
 
 setMethod("referenceVarData", c("MseFramework"),
