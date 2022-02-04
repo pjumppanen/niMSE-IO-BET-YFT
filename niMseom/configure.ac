@@ -1,5 +1,5 @@
 # niMseom configure script
-AC_INIT([adt], [1.0], [bug-automake@gnu.org])
+AC_INIT([niMseom], [1.0], [bug-automake@gnu.org])
 AM_PROG_AR
 LT_INIT
 
