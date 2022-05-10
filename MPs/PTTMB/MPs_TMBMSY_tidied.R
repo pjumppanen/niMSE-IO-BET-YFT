@@ -581,6 +581,25 @@ attr(PT41FM.t25.tmb, "BSysProject") <- ProjectPT41F # xxx part of PJ MP format c
 
 
 #------------------------------------------------------------------------------
+# Function for logging MP performance data
+#------------------------------------------------------------------------------
+logPerformance <- function(pset, Report)
+{
+  if (!is.null(pset$MP_environment)                  & 
+      exists("TAC",       envir=pset$MP_environment) &
+      exists("B",         envir=pset$MP_environment) &
+      exists("Depletion", envir=pset$MP_environment) &
+      exists("q",         envir=pset$MP_environment))
+  {
+    pset$MP_environment$TAC        <- c(pset$MP_environment$TAC, Report$newTAC[length(Report$newTAC)])
+    pset$MP_environment$B          <- c(pset$MP_environment$B, Report$B_t[length(Report$B_t)])
+    pset$MP_environment$Depletion  <- c(pset$MP_environment$Depletion, Report$Depletion_t[length(Report$Depletion_t)])
+    pset$MP_environment$q          <- c(pset$MP_environment$q, Report$q[length(Report$q)])
+  }
+}
+
+
+#------------------------------------------------------------------------------
 # Pella Tomlinson Production model with generic 40-10 type rule - MPs are defined with tuning parameters above
 # useF option uses the 40:10 rule for F rather than C, in which case FMax = FMSY*CMaxProp
 # positive gridSearch value is preferred at this time
@@ -662,6 +681,8 @@ PT4010tmb<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, deltaTACLimUp=0.9,
   Opt[["diagnostics"]] = data.frame( "Est"=Opt$par, "final_gradient"=obj$gr(Opt$par) )
   Report = obj$report()
   SD = try(sdreport( obj ))
+
+  logPerformance(pset, Report)
 
   if(!all(is.finite(Report$nll_comp))) browser()   
   if(!all(is.finite(Opt$objective))) browser()   
@@ -855,6 +876,8 @@ if(convergeAttempt > 8 ){
     Report = obj$report()
     SD = try(sdreport( obj ))
     
+    logPerformance(pset, Report)
+
     if(!all(is.finite(Report$nll_comp))) browser()   
     if(!all(is.finite(Opt$objective))) browser()   
     
@@ -1233,6 +1256,7 @@ PTBoB0Targ<-function(pset, BLower=0.1,BUpper=0.4,BoB0Targ=0.34, deltaTACLimUp=0.
     SDProj = try(sdreport( objProj ))
     if(runif(1)<diagnose) Plot_FnProj(report=Report2, reportProj=ReportProj, sdsummary=summary(SD), sdsummaryProj = summary(SDProj), tmbList = tmbList, OMMSY=pset$MSY)
     
+    logPerformance(pset, ReportProj)
     
     newTAC <- ReportProj$newTAC
     print(c("newTAC  ",newTAC))
