@@ -583,7 +583,7 @@ attr(PT41FM.t25.tmb, "BSysProject") <- ProjectPT41F # xxx part of PJ MP format c
 #------------------------------------------------------------------------------
 # Function for logging MP performance data
 #------------------------------------------------------------------------------
-logPerformance <- function(pset, Report)
+logPerformance <- function(pset, Report, TAC)
 {
   if (!is.null(pset$MP_environment)                  & 
       exists("TAC",       envir=pset$MP_environment) &
@@ -591,7 +591,7 @@ logPerformance <- function(pset, Report)
       exists("Depletion", envir=pset$MP_environment) &
       exists("q",         envir=pset$MP_environment))
   {
-    pset$MP_environment$TAC        <- c(pset$MP_environment$TAC, Report$newTAC[length(Report$newTAC)])
+    pset$MP_environment$TAC        <- c(pset$MP_environment$TAC, TAC)
     pset$MP_environment$B          <- c(pset$MP_environment$B, Report$B_t[length(Report$B_t)])
     pset$MP_environment$Depletion  <- c(pset$MP_environment$Depletion, Report$Depletion_t[length(Report$Depletion_t)])
     pset$MP_environment$q          <- c(pset$MP_environment$q, Report$q[length(Report$q)])
@@ -682,8 +682,6 @@ PT4010tmb<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, deltaTACLimUp=0.9,
   Report = obj$report()
   SD = try(sdreport( obj ))
 
-  logPerformance(pset, Report)
-
   if(!all(is.finite(Report$nll_comp))) browser()   
   if(!all(is.finite(Opt$objective))) browser()   
 
@@ -737,6 +735,7 @@ PT4010tmb<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, deltaTACLimUp=0.9,
       if(BY / k  >  BUpper) TACF <- FMult*FMSY
       newTAC <-  BY*(1-exp(-TACF))
     }
+
   #print(Report$nll_comp)
   names(newTAC) <- "TAC"
   } # fit the PT model
@@ -771,6 +770,8 @@ PT4010tmb<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, deltaTACLimUp=0.9,
   #dyn.unload( dynlib("source/PTtmbMSY") )
 #if(CMaxProp > 0.5 & CMaxProp < 5)  browser()
 #  browser()
+  logPerformance(pset, Report, newTAC)
+
   return (list(TAEbyF=pset$prevTACE$TAEbyF,TAC=newTAC))
 }
 
@@ -876,8 +877,6 @@ if(convergeAttempt > 8 ){
     Report = obj$report()
     SD = try(sdreport( obj ))
     
-    logPerformance(pset, Report)
-
     if(!all(is.finite(Report$nll_comp))) browser()   
     if(!all(is.finite(Opt$objective))) browser()   
     
@@ -997,6 +996,8 @@ msy <- exp(Report$log_MSY)
   #dyn.unload( dynlib("source/PTtmbMSY") )
   #if(CMaxProp > 0.5 & CMaxProp < 5)  browser()
   #  browser()
+  logPerformance(pset, Report, newTAC)
+
   if(is.na(newTAC)){browser()}
   return (list(TAEbyF=pset$prevTACE$TAEbyF,TAC=newTAC))
 }
@@ -1256,8 +1257,6 @@ PTBoB0Targ<-function(pset, BLower=0.1,BUpper=0.4,BoB0Targ=0.34, deltaTACLimUp=0.
     SDProj = try(sdreport( objProj ))
     if(runif(1)<diagnose) Plot_FnProj(report=Report2, reportProj=ReportProj, sdsummary=summary(SD), sdsummaryProj = summary(SDProj), tmbList = tmbList, OMMSY=pset$MSY)
     
-    logPerformance(pset, ReportProj)
-    
     newTAC <- ReportProj$newTAC
     print(c("newTAC  ",newTAC))
     if(is.na(newTAC)){browser()}
@@ -1314,6 +1313,8 @@ PTBoB0Targ<-function(pset, BLower=0.1,BUpper=0.4,BoB0Targ=0.34, deltaTACLimUp=0.
   #  browser()
   
   #print(c("newTAC 2",newTAC))
+  logPerformance(pset, ReportProj, newTAC)
+    
   if(is.na(newTAC)){browser()}
   return (list(TAEbyF=pset$prevTACE$TAEbyF,TAC=newTAC))
 } # PTBoB0Targ

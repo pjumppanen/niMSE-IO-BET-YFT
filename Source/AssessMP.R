@@ -23,13 +23,14 @@ require(keep)
 #
 # source("./Source/AssessMP.R")
 #
-# MP_Interval     <- 1
-# firstMPYr       <- 2020
+# theta           <- 1.0 #tuning parameter
+# MP_Interval     <- 3
+# LastTAC         <- 100000
 # CatchAndCPUEcsv <- "./Source/test.csv"
 # MP_SourcePath   <- "./MPs/PTTMB/MPs_TMBMSY_tidied.R"
 # MP_Name         <- "PTBoB0Targ.t15.pr15"
 # 
-# results <- assessMP(MP_Name, MP_SourcePath, CatchAndCPUEcsv, firstMPYr, MP_Interval)
+# results <- assessMP(MP_Name, MP_SourcePath, CatchAndCPUEcsv, MP_Interval)
 #
 # print(results$TAC)
 # print(results$B)
@@ -37,7 +38,7 @@ require(keep)
 # print(results$q)
 #
 # -----------------------------------------------------------------------------
-assessMP <- function(MP_Name, MP_SourcePath, CatchAndCPUEcsv, firstMPYr, MP_Interval)
+assessMP <- function(MP_Name, MP_SourcePath, CatchAndCPUEcsv, LastTAC, MP_Interval, theta)
 {
   # source the MP
   source(MP_SourcePath)
@@ -97,34 +98,26 @@ assessMP <- function(MP_Name, MP_SourcePath, CatchAndCPUEcsv, firstMPYr, MP_Inte
 
   # Evaluate selected MP over all available MP years
   nfleets                   <- 1
-  y                         <- firstMPYr
+  y                         <- MaxYear
   MP_environment            <- rlang::new_environment()
   MP_environment$TAC        <- c()
   MP_environment$B          <- c()
   MP_environment$Depletion  <- c()
   MP_environment$q          <- c()
-  TAC                       <- 0.0
   TAE                       <- karray(rep(0, nfleets), dim=c(nfleets))
-  TACE                      <- list(TAEbyF=TAE, TAC=TAC)
+  TACE                      <- list(TAEbyF=TAE, TAC=LastTAC)
 
-  while (y <= MaxYear)
-  {
-    selection <- 1:which(y==CatchAndCPUE$y)
+  pset <- list(y=y - MinYear + 1,
+              Cobs=CatchAndCPUE$Cobs,
+              Iobs=CatchAndCPUE$Iobs,
+              tune=theta,
+              MSY=NA,
+              prevTACE = TACE,
+              interval=MP_Interval,
+              MP_environment=MP_environment)
 
-    pset <- list(y=y - MinYear + 1,
-                Cobs=CatchAndCPUE$Cobs[selection],
-                Iobs=CatchAndCPUE$Iobs[selection],
-                tune=1.0,
-                MSY=0,
-                prevTACE = TACE,
-                interval=MP_Interval,
-                MP_environment=MP_environment)
-
-    # Call MP with pset set of data
-    TACE <- MP(pset)
-
-    y <- y + MP_Interval
-  }
+  # Call MP with pset set of data
+  TACE <- MP(pset)
 
   return (MP_environment)
 }
