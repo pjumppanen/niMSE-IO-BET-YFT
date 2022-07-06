@@ -27,6 +27,8 @@ ui <- fluidPage(
   sidebarLayout(
     # Sidebar panel for inputs
     sidebarPanel(
+      p(strong("MP:"), MP_Name),
+      p(strong("Tuning Objective:"), TuningObj),
       fileInput("file", 
                 h3("Catch and CPUE file"),
                 accept = c("text/csv",
@@ -59,8 +61,14 @@ ui <- fluidPage(
 
     # Main panel for outputs
     mainPanel(
-      plotOutput(outputId = "cobsPlot", inline=TRUE),
-      plotOutput(outputId = "iobsPlot", inline=TRUE),
+      tabsetPanel(
+          tabPanel("Recommendation",
+            plotOutput(outputId = "cobsPlot", inline=TRUE),
+            plotOutput(outputId = "iobsPlot", inline=TRUE),
+            tableOutput('table'),
+          ),
+          tabPanel("Model Fit")
+        ),
       width=9
     )
   )
@@ -132,7 +140,7 @@ server <- function(input, output)
     CatchAndCPUE <- read.csv(input$file$datapath, header = TRUE)
     results      <- assessMP(MP_Name, MP_SourcePath, input$file$datapath, input$lastTAC, MP_Interval, MP_theta)
 
-    return (list(CE=CatchAndCPUE, TAC=results$TAC, B=results$B, Dpeletion=results$Depletion, q=results$q))
+    return (list(CE=CatchAndCPUE, TAC=results$TAC, B=results$B, Depletion=results$Depletion, q=results$q))
   })
 
   graphWidth <- reactive({
@@ -140,18 +148,23 @@ server <- function(input, output)
     })
 
   graphHeight <- reactive({
-    input$PageHeight * 0.4
+    input$PageHeight * 0.35
     })
 
   observeEvent(input$go, 
     {
       Data <- data()
+      TAC_point <- data.frame(y=max(Data$CE$y) + 1, Cobs=Data$TAC, Label="TAC")
+      performance_data <- data.frame(TAC=sprintf("%3g", Data$TAC), Depletion=sprintf("%3g", Data$Depletion), B=sprintf("%3g", Data$B), q=sprintf("%3g", Data$q))
 
       output$cobsPlot <- renderPlot({
       ggplot(Data$CE, aes(x=y, y=Cobs)) +
-        geom_line( color="darkblue", size=2, alpha=0.9) +
+        geom_line(color="darkblue", size=2, alpha=0.9) +
+        geom_point(data=TAC_point, color="black", shape=18, size=6, mapping=aes(x=y, y=Cobs)) + 
+        geom_text(data=TAC_point, color="black", size=5, nudge_x=2.5, mapping=aes(x=y, y=Cobs, label=Label)) + 
         theme_bw() +
-        ggtitle("Catch")
+        xlab("Year") + 
+        ylab("Catch")
       },
       width=graphWidth,
       height=graphHeight)
@@ -160,10 +173,13 @@ server <- function(input, output)
         ggplot(Data$CE, aes(x=y, y=Iobs)) +
         geom_line( color="darkred", size=2, alpha=0.9) +
         theme_bw() +
-        ggtitle("CPUE")
+        xlab("Year") + 
+        ylab("CPUE")
       },
       width=graphWidth,
       height=graphHeight)
+
+      output$table <- renderTable(performance_data)
     })
 
 }
