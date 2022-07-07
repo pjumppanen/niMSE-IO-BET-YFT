@@ -9,9 +9,9 @@ library(ggplot2)
 # "PTBoB0Targ.t15","B3",1.295104
 
 MP_SourcePath <- "./MPs/PTTMB/MPs_TMBMSY_tidied.R"
-MP_Name       <- "PTBoB0Targ.t15"
-TuningObj     <- "B3"
-MP_theta      <- 1.295104
+MP_Name       <- "PT41F.t15.tmb"
+TuningObj     <- "B2"
+MP_theta      <- 3.718027
 MP_Interval   <- 1
 
 # source the MP code
@@ -30,15 +30,11 @@ ui <- fluidPage(
       p(strong("MP:"), MP_Name),
       p(strong("Tuning Objective:"), TuningObj),
       fileInput("file", 
-                h3("Catch and CPUE file"),
+                h3("Catch, CPUE and TAC file"),
                 accept = c("text/csv",
                            "text/comma-separated-values,text/plain",
                            ".csv")),
-      numericInput("lastTAC",
-                   "Last TAC",
-                   value=NA,
-                   min=10.0),
-      actionButton("go", "Find TAC"),
+      textOutput("dummy"),
       tags$head(tags$script('
                             var PageWidth  = 0;
                             var PageHeight = 0;
@@ -65,9 +61,11 @@ ui <- fluidPage(
           tabPanel("Recommendation",
             plotOutput(outputId = "cobsPlot", inline=TRUE),
             plotOutput(outputId = "iobsPlot", inline=TRUE),
-            tableOutput('table'),
+            htmlOutput("TAC")
           ),
-          tabPanel("Model Fit")
+          tabPanel("Model Fit",
+            plotOutput(outputId = "biomassPlot", inline=TRUE)
+          )
         ),
       width=9
     )
@@ -107,6 +105,12 @@ server <- function(input, output)
       return("Iobs Column missing (observed CPUE)")
     }
 
+    # Check for TAC column
+    if (!any(Names == "TAC"))
+    {
+      return("TAC Column missing (historic TAC)")
+    }
+
     # Check for ascending contiguous years
     MinYear <- min(CatchAndCPUE$y)
     MaxYear <- max(CatchAndCPUE$y)
@@ -122,12 +126,6 @@ server <- function(input, output)
       y <- y + 1
     }
 
-    # Check for last TAC
-    if (is.na(input$lastTAC))
-    {
-      return("Enter last assessments TAC")
-    }
-
     return (NULL)
   }
   
@@ -136,11 +134,10 @@ server <- function(input, output)
       check(input)
     )
 
-#    browser()
     CatchAndCPUE <- read.csv(input$file$datapath, header = TRUE)
-    results      <- assessMP(MP_Name, MP_SourcePath, input$file$datapath, input$lastTAC, MP_Interval, MP_theta)
+    results      <- assessMP(MP_Name, MP_SourcePath, input$file$datapath, MP_Interval, MP_theta)
 
-    return (list(CE=CatchAndCPUE, TAC=results$TAC, B=results$B, Depletion=results$Depletion, q=results$q))
+    return (list(CE=CatchAndCPUE, TAC=results$TAC, B=results$B, Depletion=results$Depletion, q=results$q, plots=results$plots))
   })
 
   graphWidth <- reactive({
@@ -151,37 +148,49 @@ server <- function(input, output)
     input$PageHeight * 0.35
     })
 
-  observeEvent(input$go, 
+  output$dummy <- reactive({
+    if (!is.null(input$file))
     {
-      Data <- data()
+      Data      <- data()
       TAC_point <- data.frame(y=max(Data$CE$y) + 1, Cobs=Data$TAC, Label="TAC")
-      performance_data <- data.frame(TAC=sprintf("%3g", Data$TAC), Depletion=sprintf("%3g", Data$Depletion), B=sprintf("%3g", Data$B), q=sprintf("%3g", Data$q))
+      colors    <- c("Cobs"="darkblue", "TAC"="darkgrey")
 
       output$cobsPlot <- renderPlot({
-      ggplot(Data$CE, aes(x=y, y=Cobs)) +
-        geom_line(color="darkblue", size=2, alpha=0.9) +
-        geom_point(data=TAC_point, color="black", shape=18, size=6, mapping=aes(x=y, y=Cobs)) + 
-        geom_text(data=TAC_point, color="black", size=5, nudge_x=2.5, mapping=aes(x=y, y=Cobs, label=Label)) + 
-        theme_bw() +
-        xlab("Year") + 
-        ylab("Catch")
-      },
-      width=graphWidth,
-      height=graphHeight)
+        ggplot(Data$CE, aes(x=y, y=Cobs)) +
+          geom_line(mapping=aes(x=y, y=Cobs, color="Cobs"), size=2, alpha=0.9) +
+          geom_line(mapping=aes(x=y, y=TAC, color="TAC"), size=2, alpha=0.9) +
+          geom_point(data=TAC_point, color="black", shape=5, size=6, mapping=aes(x=y, y=Cobs)) + 
+          geom_text(data=TAC_point, color="black", size=5, nudge_x=2.5, mapping=aes(x=y, y=Cobs, label=Label)) + 
+          labs(x="Year", y="Catch", color="Legend") +
+          scale_color_manual(values=colors) + 
+          theme_bw()
+        },
+        width=graphWidth,
+        height=graphHeight)
 
       output$iobsPlot <- renderPlot({
-        ggplot(Data$CE, aes(x=y, y=Iobs)) +
-        geom_line( color="darkred", size=2, alpha=0.9) +
-        theme_bw() +
-        xlab("Year") + 
-        ylab("CPUE")
-      },
-      width=graphWidth,
-      height=graphHeight)
+          ggplot(Data$CE, aes(x=y, y=Iobs)) +
+          geom_line( color="darkred", size=2, alpha=0.9) +
+          theme_bw() +
+          xlab("Year") + 
+          ylab("CPUE")
+        },
+        width=graphWidth,
+        height=graphHeight)
 
-      output$table <- renderTable(performance_data)
+      output$biomassPlot <- renderPlot({
+          Data$plots
+        },
+        width=graphWidth,
+        height=graphHeight)
+
+      output$TAC <- renderUI({
+        HTML(sprintf("<b>Recommended TAC:</b> %3g", Data$TAC))
+      })
+    }
+
+    return ("")
     })
-
 }
 
 # Run the app ----

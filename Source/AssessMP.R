@@ -30,7 +30,7 @@ require(keep)
 # MP_SourcePath   <- "./MPs/PTTMB/MPs_TMBMSY_tidied.R"
 # MP_Name         <- "PTBoB0Targ.t15.pr15"
 # 
-# results <- assessMP(MP_Name, MP_SourcePath, CatchAndCPUEcsv, MP_Interval)
+# results <- assessMP(MP_Name, MP_SourcePath, CatchAndCPUEcsv, MP_Interval, theta)
 #
 # print(results$TAC)
 # print(results$B)
@@ -38,7 +38,7 @@ require(keep)
 # print(results$q)
 #
 # -----------------------------------------------------------------------------
-assessMP <- function(MP_Name, MP_SourcePath, CatchAndCPUEcsv, LastTAC, MP_Interval, theta)
+assessMP <- function(MP_Name, MP_SourcePath, CatchAndCPUEcsv, MP_Interval, theta)
 {
   # source the MP
   source(MP_SourcePath)
@@ -47,10 +47,11 @@ assessMP <- function(MP_Name, MP_SourcePath, CatchAndCPUEcsv, LastTAC, MP_Interv
   # make sure the MP is compiled if it is a c++ based one
   MP          <- get(MP_Name)
   BSysProject <- attr(MP, "BSysProject")
-
+  
   if (!is.null(BSysProject))
   {
     BSysProject <- make(BSysProject)
+
     loadLibrary(BSysProject)
   }
 
@@ -75,6 +76,12 @@ assessMP <- function(MP_Name, MP_SourcePath, CatchAndCPUEcsv, LastTAC, MP_Interv
     stop("Iobs Column missing (observed CPUE)")
   }
 
+  # Check for TAC column
+  if (!any(Names == "TAC"))
+  {
+    return("TAC Column missing (historic TAC)")
+  }
+
   # Check for ascending contiguous years
   MinYear <- min(CatchAndCPUE$y)
   MaxYear <- max(CatchAndCPUE$y)
@@ -96,6 +103,14 @@ assessMP <- function(MP_Name, MP_SourcePath, CatchAndCPUEcsv, LastTAC, MP_Interv
     stop("MP_Interval must be >= 1")
   }
 
+  # Find LastTAC
+  LastTAC <- CatchAndCPUE$TAC[length(CatchAndCPUE$TAC)]
+
+  if (is.null(LastTAC) || is.na(LastTAC))
+  {
+    stop("MP requires a TAC value in the last recorded year of data")
+  }
+
   # Evaluate selected MP over all available MP years
   nfleets                   <- 1
   y                         <- MaxYear
@@ -104,6 +119,7 @@ assessMP <- function(MP_Name, MP_SourcePath, CatchAndCPUEcsv, LastTAC, MP_Interv
   MP_environment$B          <- c()
   MP_environment$Depletion  <- c()
   MP_environment$q          <- c()
+  MP_environment$plots      <- c()
   TAE                       <- karray(rep(0, nfleets), dim=c(nfleets))
   TACE                      <- list(TAEbyF=TAE, TAC=LastTAC)
 
@@ -118,6 +134,11 @@ assessMP <- function(MP_Name, MP_SourcePath, CatchAndCPUEcsv, LastTAC, MP_Interv
 
   # Call MP with pset set of data
   TACE <- MP(pset)
+
+#  if (!is.null(BSysProject))
+#  {
+#    unloadLibrary(BSysProject)
+#  }
 
   return (MP_environment)
 }

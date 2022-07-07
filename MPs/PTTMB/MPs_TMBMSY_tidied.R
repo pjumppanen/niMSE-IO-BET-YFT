@@ -579,11 +579,21 @@ PT41FM.t25.tmb<-function(pset, BLower=0.001,BUpper=0.004,CMaxProp=1., useF=1, de
 class(PT41FM.t25.tmb)<-"IO_MP_tune"
 attr(PT41FM.t25.tmb, "BSysProject") <- ProjectPT41F # xxx part of PJ MP format change
 
+#------------------------------------------------------------------------------
 
+shouldLogPerformance <- function(pset)
+{
+  return ((!is.null(pset$MP_environment)                  & 
+           exists("TAC",       envir=pset$MP_environment) &
+           exists("B",         envir=pset$MP_environment) &
+           exists("Depletion", envir=pset$MP_environment) &
+           exists("q",         envir=pset$MP_environment)))
+}
+   
 #------------------------------------------------------------------------------
 # Function for logging MP performance data
 #------------------------------------------------------------------------------
-logPerformance <- function(pset, Report, TAC)
+logPerformance <- function(pset, Report, TAC, plots=NA)
 {
   if (!is.null(pset$MP_environment)                  & 
       exists("TAC",       envir=pset$MP_environment) &
@@ -591,10 +601,11 @@ logPerformance <- function(pset, Report, TAC)
       exists("Depletion", envir=pset$MP_environment) &
       exists("q",         envir=pset$MP_environment))
   {
-    pset$MP_environment$TAC        <- c(pset$MP_environment$TAC, TAC)
-    pset$MP_environment$B          <- c(pset$MP_environment$B, Report$B_t[length(Report$B_t)])
-    pset$MP_environment$Depletion  <- c(pset$MP_environment$Depletion, Report$Depletion_t[length(Report$Depletion_t)])
-    pset$MP_environment$q          <- c(pset$MP_environment$q, Report$q[length(Report$q)])
+    pset$MP_environment$TAC        <- c(pset$MP_environment$TAC, as.double(TAC))
+    pset$MP_environment$B          <- c(pset$MP_environment$B, as.double(Report$B_t[length(Report$B_t)]))
+    pset$MP_environment$Depletion  <- c(pset$MP_environment$Depletion, as.double(Report$Depletion_t[length(Report$Depletion_t)]))
+    pset$MP_environment$q          <- c(pset$MP_environment$q, as.double(Report$q[length(Report$q)]))
+    pset$MP_environment$plots      <- plots
   }
 }
 
@@ -770,7 +781,12 @@ PT4010tmb<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, deltaTACLimUp=0.9,
   #dyn.unload( dynlib("source/PTtmbMSY") )
 #if(CMaxProp > 0.5 & CMaxProp < 5)  browser()
 #  browser()
-  logPerformance(pset, Report, newTAC)
+  if (shouldLogPerformance(pset))
+  {
+    plots <- c()
+
+    logPerformance(pset, Report, newTAC, plots)
+  }
 
   return (list(TAEbyF=pset$prevTACE$TAEbyF,TAC=newTAC))
 }
@@ -996,7 +1012,12 @@ msy <- exp(Report$log_MSY)
   #dyn.unload( dynlib("source/PTtmbMSY") )
   #if(CMaxProp > 0.5 & CMaxProp < 5)  browser()
   #  browser()
-  logPerformance(pset, Report, newTAC)
+  if (shouldLogPerformance(pset))
+  {
+    plots <- c()
+    
+    logPerformance(pset, Report, newTAC, plots)
+  }
 
   if(is.na(newTAC)){browser()}
   return (list(TAEbyF=pset$prevTACE$TAEbyF,TAC=newTAC))
@@ -1313,8 +1334,13 @@ PTBoB0Targ<-function(pset, BLower=0.1,BUpper=0.4,BoB0Targ=0.34, deltaTACLimUp=0.
   #  browser()
   
   #print(c("newTAC 2",newTAC))
-  logPerformance(pset, ReportProj, newTAC)
+  if (shouldLogPerformance(pset))
+  {
+    plots <- reportPlots(report=Report2, sdsummary=summary(SD), tmbList = tmbList, OMMSY=pset$MSY)
     
+    logPerformance(pset, ReportProj, newTAC, plots)
+  }
+
   if(is.na(newTAC)){browser()}
   return (list(TAEbyF=pset$prevTACE$TAEbyF,TAC=newTAC))
 } # PTBoB0Targ
@@ -1322,7 +1348,7 @@ PTBoB0Targ<-function(pset, BLower=0.1,BUpper=0.4,BoB0Targ=0.34, deltaTACLimUp=0.
 #------------------------------------------------------------------------------
 
 # MP plot func for testing
-Plot_Fn = function( report, sdsummary, tmbList, OMMSY){
+Plot_Fn <- function( report, sdsummary, tmbList, OMMSY){
   par( mfrow=c(2,2), mar=c(3,3,2,0), mgp=c(2,0.5,0), tck=-0.02)
   Y <- length(report$B_t)
   data <- tmbList$Data
@@ -1454,5 +1480,55 @@ Plot_FnProj = function( report, reportProj, sdsummary, sdsummaryProj, tmbList, O
   #print("")
   #print(Y)
   #browser()
+}
+
+#------------------------------------------------------------------------------
+
+reportPlots <- function(report, sdsummary, tmbList, OMMSY)
+{
+  Y <- length(report$B_t)
+  data <- tmbList$Data
+#browser()
+  # Biomass
+  biomass_serr  <- as.double(sdsummary[which(rownames(sdsummary)=="B_t"), "Std. Error"]) / 1000
+  biomass       <- as.double(report$B_t) / 1000
+  biomass_lower <- biomass - biomass_serr
+  biomass_upper <- biomass + biomass_serr
+  biomass_cpue  <- as.double(data$I_t / report$q) / 1000
+  biomass_data  <- data.frame(t=1:Y, B_t=biomass, lower=biomass_lower, upper=biomass_upper, B_cpue=biomass_cpue)
+  biomass_plot  <- ggplot(data=biomass_data, aes(x=t, y=B_t)) + 
+                     geom_line(colour="DarkBlue", size=2, alpha=0.9) +
+                     geom_point(color="black", shape=18, size=6, mapping=aes(x=t, y=B_cpue)) + 
+                     geom_ribbon(data=biomass_data, aes(x=t, ymin=lower, ymax=upper), alpha=0.1)
+
+  # Depletion
+  #matplot( cbind(report$B_t/report$k,report$Depletion_t), type="l", ylim=c(-.4,1.5), ylab="", xlab="year", main="B/K + Prod devs")
+#  plot(report$Depletion_t, type="l", ylim=c(-.4,1.5), ylab="", xlab="year", main="B/K & Prod devs")
+#  Mat = cbind( report$Depletion_t, sdsummary[which(rownames(sdsummary)=="Depletion_t"),"Std. Error"])
+#  polygon( x=c(1:Y,Y:1), y=c(Mat[,1]+Mat[,2],rev(Mat[,1]-Mat[,2])), col=rgb(1,0,0,0.2), border=NA)
+#
+#  Mat2 = cbind(report$recDev, sdsummary[which(rownames(sdsummary)=="recDev"),"Std. Error"])
+#  polygon( x=c(1:Y,Y:1), y=c(Mat2[,1]+Mat2[,2],rev(Mat2[,1]-Mat2[,2])), col=rgb(0,0,1,0.2), border=NA)
+#  
+#  lines(report$recDev)
+#  abline(h=0., lty=2)
+#  abline(h=1., lty=2)
+  
+  # Catch
+#  plot(1:Y, data$c_t/1000, type="l", ylab="", xlab="year", main="Catch")
+  
+  #production function
+#  B   <- seq(0.01, report$k, report$k/100)
+#  RG1 <- ((report$shape+1)/report$shape)*report$r*B*(1-(abs(B/report$k))^report$shape) 
+#  BMSYoK <- floor(100*B[RG1==max(RG1)]/report$k)
+#  msy <- floor(exp(report$log_MSY)/1000)
+#  k   <- floor(report$k/1000)
+#  msyok  <- floor(1000*msy/k)/10
+#  OMMSY  <- floor(OMMSY/1000)
+#  plot(B/1000,RG1/1000, type='l', cex.main=0.7,
+#       main = "MSY: " %&% msy %&% "    k: " %&% k %&% "  OM-MSY: " %&% OMMSY
+#           %&% "\nBMSY/K: " %&% BMSYoK %&% "%  MSY/k: " %&% msyok %&% "%")
+
+  return (biomass_plot)
 }
 
