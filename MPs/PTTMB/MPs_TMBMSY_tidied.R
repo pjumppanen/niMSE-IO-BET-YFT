@@ -728,13 +728,13 @@ PT4010tmb<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, deltaTACLimUp=0.9,
     msy <- exp(Report$log_MSY)
     k   <- Report$k
     Y   <- length(Report$B_t)
-    SD <- summary(SD)
+    SD1 <- summary(SD)
     
     # Current biomass point estimate
     #BY  <- Report$B_t[Y]  
     # Current biomass probably simplistic lower confidence bound
     BCI <- 0.4   # 0.25 = lower 25th assuming normal
-    BY  <- SD[rownames(SD)=="B_t",][Y,1] + qnorm(BCI)* SD[rownames(SD)=="B_t",][Y,2]  
+    BY  <- SD1[rownames(SD1)=="B_t",][Y,1] + qnorm(BCI)* SD1[rownames(SD1)=="B_t",][Y,2]  
     #browser()
     
     #Apply the 40:10 rule to F ...
@@ -783,10 +783,12 @@ PT4010tmb<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, deltaTACLimUp=0.9,
 #  browser()
   if (shouldLogPerformance(pset))
   {
-    plots <- c()
+    plots <- reportPlots(report=Report, sdsummary=summary(SD), tmbList = tmbList)
 
     logPerformance(pset, Report, newTAC, plots)
   }
+
+  rm(SD, Report, obj)
 
   return (list(TAEbyF=pset$prevTACE$TAEbyF,TAC=newTAC))
 }
@@ -939,14 +941,14 @@ if(convergeAttempt==10){
 msy <- exp(Report$log_MSY)
     k   <- Report$k
     Y   <- length(Report$B_t)
-    SD <- summary(SD)
+    SD1 <- summary(SD)
     
     # Current biomass point estimate
     BY  <- Report$B_t[Y]  
     # Current biomass probably simplistic lower confidence bound
     # might be associated with rare 1 in 500 error ...
     # BCI <- 0.5   # 0.25 = lower 25th assuming normal
-    # BY  <- SD[rownames(SD)=="B_t",][Y,1] + qnorm(BCI)* SD[rownames(SD)=="B_t",][Y,2]  
+    # BY  <- SD1[rownames(SD1)=="B_t",][Y,1] + qnorm(BCI)* SD1[rownames(SD1)=="B_t",][Y,2]  
 
     BTmp    <- seq(1, k, k/100)
     prodTmp <- ((Report$shape+1)/Report$shape)*Report$r*BTmp*(1-(BTmp/k)^Report$shape) 
@@ -1014,10 +1016,12 @@ msy <- exp(Report$log_MSY)
   #  browser()
   if (shouldLogPerformance(pset))
   {
-    plots <- c()
+    plots <- reportPlots(report=Report, sdsummary=summary(SD), tmbList = tmbList)
     
     logPerformance(pset, Report, newTAC, plots)
   }
+
+  rm(SD, report, obj)
 
   if(is.na(newTAC)){browser()}
   return (list(TAEbyF=pset$prevTACE$TAEbyF,TAC=newTAC))
@@ -1294,7 +1298,7 @@ PTBoB0Targ<-function(pset, BLower=0.1,BUpper=0.4,BoB0Targ=0.34, deltaTACLimUp=0.
       print("PT projection tuning error check")
       Plot_FnProj(report=Report2, reportProj=ReportProj, sdsummary=summary(SD), sdsummaryProj = summary(SDProj), tmbList = tmbList, OMMSY=pset$MSY)
       #browser()
-    }  
+    }
   } # fit the PT model
   
   
@@ -1336,10 +1340,12 @@ PTBoB0Targ<-function(pset, BLower=0.1,BUpper=0.4,BoB0Targ=0.34, deltaTACLimUp=0.
   #print(c("newTAC 2",newTAC))
   if (shouldLogPerformance(pset))
   {
-    plots <- reportPlots(report=Report2, sdsummary=summary(SD), tmbList = tmbList, OMMSY=pset$MSY)
+    plots <- reportPlots(report=Report2, sdsummary=summary(SD), tmbList = tmbList)
     
     logPerformance(pset, ReportProj, newTAC, plots)
   }
+
+  rm(SD, report1, report2, obj1, obj2, SDProj, ReportProj, objProj)
 
   if(is.na(newTAC)){browser()}
   return (list(TAEbyF=pset$prevTACE$TAEbyF,TAC=newTAC))
@@ -1484,11 +1490,11 @@ Plot_FnProj = function( report, reportProj, sdsummary, sdsummaryProj, tmbList, O
 
 #------------------------------------------------------------------------------
 
-reportPlots <- function(report, sdsummary, tmbList, OMMSY)
+reportPlots <- function(report, sdsummary, tmbList)
 {
-  Y <- length(report$B_t)
+  Y    <- length(report$B_t)
   data <- tmbList$Data
-#browser()
+
   # Biomass
   biomass_serr  <- as.double(sdsummary[which(rownames(sdsummary)=="B_t"), "Std. Error"]) / 1000
   biomass       <- as.double(report$B_t) / 1000
@@ -1497,38 +1503,51 @@ reportPlots <- function(report, sdsummary, tmbList, OMMSY)
   biomass_cpue  <- as.double(data$I_t / report$q) / 1000
   biomass_data  <- data.frame(t=1:Y, B_t=biomass, lower=biomass_lower, upper=biomass_upper, B_cpue=biomass_cpue)
   biomass_plot  <- ggplot(data=biomass_data, aes(x=t, y=B_t)) + 
-                     geom_line(colour="DarkBlue", size=2, alpha=0.9) +
-                     geom_point(color="black", shape=18, size=6, mapping=aes(x=t, y=B_cpue)) + 
-                     geom_ribbon(data=biomass_data, aes(x=t, ymin=lower, ymax=upper), alpha=0.1)
+                     geom_line(colour="DarkBlue", size=2, alpha=0.5) +
+                     geom_point(color="black", shape=1, size=5, mapping=aes(x=t, y=B_cpue)) + 
+                     geom_ribbon(data=biomass_data, aes(x=t, ymin=lower, ymax=upper), alpha=0.07) + 
+                     ggtitle("Catch Biomass") + 
+                     theme_bw()
 
   # Depletion
-  #matplot( cbind(report$B_t/report$k,report$Depletion_t), type="l", ylim=c(-.4,1.5), ylab="", xlab="year", main="B/K + Prod devs")
-#  plot(report$Depletion_t, type="l", ylim=c(-.4,1.5), ylab="", xlab="year", main="B/K & Prod devs")
-#  Mat = cbind( report$Depletion_t, sdsummary[which(rownames(sdsummary)=="Depletion_t"),"Std. Error"])
-#  polygon( x=c(1:Y,Y:1), y=c(Mat[,1]+Mat[,2],rev(Mat[,1]-Mat[,2])), col=rgb(1,0,0,0.2), border=NA)
-#
-#  Mat2 = cbind(report$recDev, sdsummary[which(rownames(sdsummary)=="recDev"),"Std. Error"])
-#  polygon( x=c(1:Y,Y:1), y=c(Mat2[,1]+Mat2[,2],rev(Mat2[,1]-Mat2[,2])), col=rgb(0,0,1,0.2), border=NA)
-#  
-#  lines(report$recDev)
-#  abline(h=0., lty=2)
-#  abline(h=1., lty=2)
-  
-  # Catch
-#  plot(1:Y, data$c_t/1000, type="l", ylab="", xlab="year", main="Catch")
-  
-  #production function
-#  B   <- seq(0.01, report$k, report$k/100)
-#  RG1 <- ((report$shape+1)/report$shape)*report$r*B*(1-(abs(B/report$k))^report$shape) 
-#  BMSYoK <- floor(100*B[RG1==max(RG1)]/report$k)
-#  msy <- floor(exp(report$log_MSY)/1000)
-#  k   <- floor(report$k/1000)
-#  msyok  <- floor(1000*msy/k)/10
-#  OMMSY  <- floor(OMMSY/1000)
-#  plot(B/1000,RG1/1000, type='l', cex.main=0.7,
-#       main = "MSY: " %&% msy %&% "    k: " %&% k %&% "  OM-MSY: " %&% OMMSY
-#           %&% "\nBMSY/K: " %&% BMSYoK %&% "%  MSY/k: " %&% msyok %&% "%")
+  depletion       <- as.double(report$Depletion_t)
+  depletion_serr  <- as.double(sdsummary[which(rownames(sdsummary)=="Depletion_t"), "Std. Error"])
+  depletion_lower <- depletion - depletion_serr
+  depletion_upper <- depletion + depletion_serr
+  depletion_data  <- data.frame(t=1:Y, depletion_t=depletion, lower=depletion_lower, upper=depletion_upper)
+  depletion_plot  <- ggplot(data=depletion_data, aes(x=t, y=depletion_t)) + 
+                       geom_line(colour="DarkBlue", size=2, alpha=0.5) +
+                       geom_ribbon(data=depletion_data, aes(x=t, ymin=lower, ymax=upper), alpha=0.07) + 
+                       ggtitle("Depletion") + 
+                       theme_bw()
 
-  return (biomass_plot)
+  # Recruitment deviations
+  recDev       <- as.double(report$recDev)
+  recDev_serr  <- as.double(sdsummary[which(rownames(sdsummary)=="recDev"), "Std. Error"])
+  recDev_lower <- recDev - recDev_serr
+  recDev_upper <- recDev + recDev_serr
+  recDev_data  <- data.frame(t=1:Y, recDev_t=recDev, lower=recDev_lower, upper=recDev_upper)
+  recDev_plot  <- ggplot(data=recDev_data, aes(x=t, y=recDev_t)) + 
+                    geom_line(colour="DarkBlue", size=2, alpha=0.5) +
+                    geom_ribbon(data=recDev_data, aes(x=t, ymin=lower, ymax=upper), alpha=0.07) + 
+                    ggtitle("Recuitment Deviations") + 
+                    theme_bw()
+
+  #production function
+  B         <- seq(0.01, as.double(report$k), as.double(report$k) / 100)
+  RG1       <- as.double((report$shape + 1)/ report$shape) * report$r * B * (1.0 - (abs(B / report$k)) ^ report$shape)
+  BMSYoK    <- as.double(floor(100 * B[RG1==max(RG1)] / report$k))
+  msy       <- as.double(floor(exp(report$log_MSY) / 1000))
+  k         <- as.double(floor(report$k / 1000))
+  msyok     <- as.double(floor(1000 * msy / k) / 10)
+  Title     <- paste("MSY:", msy, " k:", k, "BMSY/K: ", BMSYoK, "%  MSY/k:", msyok, "%")
+  prod_data <- data.frame(B=B / 1000, RG1=RG1 / 1000)
+
+  prod_plot <- ggplot(data=prod_data, aes(x=B, y=RG1)) + 
+                 geom_line(colour="DarkBlue", size=2, alpha=0.5) +
+                 ggtitle(Title) + 
+                 theme_bw()
+
+  return (list(biomass_plot=biomass_plot, depletion_plot=depletion_plot, recDev_plot=recDev_plot, prod_plot=prod_plot))
 }
 

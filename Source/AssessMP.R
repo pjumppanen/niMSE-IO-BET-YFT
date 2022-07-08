@@ -7,6 +7,20 @@
 
 require(keep)
 
+
+# -----------------------------------------------------------------------------
+# named cache for the loaded compiled MP libraries. We require this because 
+# when run in a shiny context because of dangling pointers left by TMB if the
+# library is unloaded it crashes the R session. To avoid this we never unload
+# the library but we need to keep track of when it is loaded so we don't load
+# multiple times which would result in the previous instance being unloaded. 
+# Hopefully TMB does not have memory leaks as this could potentially result in
+# memory exhaustion if that is the case.
+# -----------------------------------------------------------------------------
+MP_cache         <- rlang::new_environment()
+MP_cache$sources <- list()
+
+
 # -----------------------------------------------------------------------------
 # assessMP
 # -----------------------------------------------------------------------------
@@ -50,30 +64,36 @@ assessMP <- function(MP_Name, MP_SourcePath, CatchAndCPUEcsv, MP_Interval, theta
   
   if (!is.null(BSysProject))
   {
-    BSysProject <- make(BSysProject)
+    # check to see if it has been loaded before
+    if (!(MP_SourcePath %in% names(MP_cache$sources)))
+    {
+      MP_cache$sources[[MP_SourcePath]] = MP_SourcePath
 
-    loadLibrary(BSysProject)
+      BSysProject <- make(BSysProject)
+
+      loadLibrary(BSysProject)
+    }
   }
 
   CatchAndCPUE <- read.csv(CatchAndCPUEcsv)
   Names        <- names(CatchAndCPUE)
 
   # Check for y column
-  if (!any(Names == "y"))
+  if (!any(Names == "Year"))
   {
-    stop("y Column missing (year)")
+    stop("Year Column missing (year)")
   }
 
-  # Check for Cobs column
-  if (!any(Names == "Cobs"))
+  # Check for Catch column
+  if (!any(Names == "Catch"))
   {
-    stop("Cobs Column missing (observed catch)")
+    stop("Catch Column missing (observed catch)")
   }
 
-  # Check for Cobs column
-  if (!any(Names == "Iobs"))
+  # Check for CPUE column
+  if (!any(Names == "CPUE"))
   {
-    stop("Iobs Column missing (observed CPUE)")
+    stop("CPUE Column missing (observed CPUE)")
   }
 
   # Check for TAC column
@@ -83,13 +103,13 @@ assessMP <- function(MP_Name, MP_SourcePath, CatchAndCPUEcsv, MP_Interval, theta
   }
 
   # Check for ascending contiguous years
-  MinYear <- min(CatchAndCPUE$y)
-  MaxYear <- max(CatchAndCPUE$y)
+  MinYear <- min(CatchAndCPUE$Year)
+  MaxYear <- max(CatchAndCPUE$Year)
   y       <- MinYear
 
-  for (idx in 1:length(CatchAndCPUE$y))
+  for (idx in 1:length(CatchAndCPUE$Year))
   {
-    if (CatchAndCPUE$y[idx] != y)
+    if (CatchAndCPUE$Year[idx] != y)
     {
       stop("y must be in contiguous ascending years")
     }
@@ -124,8 +144,8 @@ assessMP <- function(MP_Name, MP_SourcePath, CatchAndCPUEcsv, MP_Interval, theta
   TACE                      <- list(TAEbyF=TAE, TAC=LastTAC)
 
   pset <- list(y=y - MinYear + 1,
-              Cobs=CatchAndCPUE$Cobs,
-              Iobs=CatchAndCPUE$Iobs,
+              Cobs=CatchAndCPUE$Catch,
+              Iobs=CatchAndCPUE$CPUE,
               tune=theta,
               MSY=NA,
               prevTACE = TACE,
@@ -134,11 +154,6 @@ assessMP <- function(MP_Name, MP_SourcePath, CatchAndCPUEcsv, MP_Interval, theta
 
   # Call MP with pset set of data
   TACE <- MP(pset)
-
-#  if (!is.null(BSysProject))
-#  {
-#    unloadLibrary(BSysProject)
-#  }
 
   return (MP_environment)
 }

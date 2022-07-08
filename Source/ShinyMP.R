@@ -32,8 +32,8 @@ ui <- fluidPage(
       fileInput("file", 
                 h3("Catch, CPUE and TAC file"),
                 accept = c("text/csv",
-                           "text/comma-separated-values,text/plain",
-                           ".csv")),
+                          "text/comma-separated-values,text/plain",
+                          ".csv")),
       textOutput("dummy"),
       tags$head(tags$script('
                             var PageWidth  = 0;
@@ -58,15 +58,30 @@ ui <- fluidPage(
     # Main panel for outputs
     mainPanel(
       tabsetPanel(
-          tabPanel("Recommendation",
-            plotOutput(outputId = "cobsPlot", inline=TRUE),
-            plotOutput(outputId = "iobsPlot", inline=TRUE),
-            htmlOutput("TAC")
-          ),
-          tabPanel("Model Fit",
-            plotOutput(outputId = "biomassPlot", inline=TRUE)
-          )
+        tabPanel("Recommendation",
+          plotOutput(outputId = "cobsPlot", inline=TRUE),
+          plotOutput(outputId = "iobsPlot", inline=TRUE),
+          htmlOutput("TAC")
         ),
+        tabPanel("Pella-Tomlinson Model Diagnostics",
+          fluidRow(
+            column(6, 
+              plotOutput(outputId = "biomassPlot", inline=TRUE)
+            ),
+            column(6, 
+              plotOutput(outputId = "depletionPlot", inline=TRUE)
+            )
+          ),
+          fluidRow(
+            column(6, 
+              plotOutput(outputId = "recDevPlot", inline=TRUE)
+            ),
+            column(6, 
+              plotOutput(outputId = "prodPlot", inline=TRUE)
+            )
+          )
+        )
+      ),
       width=9
     )
   )
@@ -87,22 +102,22 @@ server <- function(input, output)
     CatchAndCPUE <- read.csv(input$file$datapath, header = TRUE)
     Names        <- names(CatchAndCPUE)
 
-    # Check for y column
-    if (!any(Names == "y"))
+    # Check for Year column
+    if (!any(Names == "Year"))
     {
-      return("y Column missing (year)")
+      return("Year Column missing (year)")
     }
 
-    # Check for Cobs column
-    if (!any(Names == "Cobs"))
+    # Check for Catch column
+    if (!any(Names == "Catch"))
     {
-      return("Cobs Column missing (observed catch)")
+      return("Catch Column missing (observed catch)")
     }
 
-    # Check for Cobs column
-    if (!any(Names == "Iobs"))
+    # Check for CPUE column
+    if (!any(Names == "CPUE"))
     {
-      return("Iobs Column missing (observed CPUE)")
+      return("CPUE Column missing (observed CPUE)")
     }
 
     # Check for TAC column
@@ -112,15 +127,15 @@ server <- function(input, output)
     }
 
     # Check for ascending contiguous years
-    MinYear <- min(CatchAndCPUE$y)
-    MaxYear <- max(CatchAndCPUE$y)
+    MinYear <- min(CatchAndCPUE$Year)
+    MaxYear <- max(CatchAndCPUE$Year)
     y       <- MinYear
 
-    for (idx in 1:length(CatchAndCPUE$y))
+    for (idx in 1:length(CatchAndCPUE$Year))
     {
-      if (CatchAndCPUE$y[idx] != y)
+      if (CatchAndCPUE$Year[idx] != y)
       {
-        return("y must be in contiguous ascending years")
+        return("Year must be in contiguous ascending years")
       }
 
       y <- y + 1
@@ -142,26 +157,30 @@ server <- function(input, output)
 
   graphWidth <- reactive({
     input$PageWidth * 0.5
-    })
+  })
+
+  graphWidth2 <- reactive({
+    input$PageWidth * 0.25
+  })
 
   graphHeight <- reactive({
     input$PageHeight * 0.35
-    })
+  })
 
   output$dummy <- reactive({
     if (!is.null(input$file))
     {
       Data      <- data()
-      TAC_point <- data.frame(y=max(Data$CE$y) + 1, Cobs=Data$TAC, Label="TAC")
-      colors    <- c("Cobs"="darkblue", "TAC"="darkgrey")
+      TAC_point <- data.frame(Year=max(Data$CE$Year) + 1, Catch=Data$TAC, Label="TAC")
+      colors    <- c("Catch"="darkblue", "CPUE"="blueviolet", "TAC"="darkcyan")
 
       output$cobsPlot <- renderPlot({
-        ggplot(Data$CE, aes(x=y, y=Cobs)) +
-          geom_line(mapping=aes(x=y, y=Cobs, color="Cobs"), size=2, alpha=0.9) +
-          geom_line(mapping=aes(x=y, y=TAC, color="TAC"), size=2, alpha=0.9) +
-          geom_point(data=TAC_point, color="black", shape=5, size=6, mapping=aes(x=y, y=Cobs)) + 
-          geom_text(data=TAC_point, color="black", size=5, nudge_x=2.5, mapping=aes(x=y, y=Cobs, label=Label)) + 
-          labs(x="Year", y="Catch", color="Legend") +
+        ggplot(Data$CE, aes(x=Year, y=Catch)) +
+          geom_line(mapping=aes(x=Year, y=Catch, color="Catch"), alpha=0.5, size=2) +
+          geom_line(mapping=aes(x=Year, y=TAC, color="TAC"), alpha=0.5, size=2) +
+          geom_point(data=TAC_point, color="black", shape=5, size=6, mapping=aes(x=Year, y=Catch)) + 
+          geom_text(data=TAC_point, color="black", size=5, nudge_x=2.5, mapping=aes(x=Year, y=Catch, label=Label)) + 
+          labs(x="Year", y="Catch", color="") +
           scale_color_manual(values=colors) + 
           theme_bw()
         },
@@ -169,19 +188,37 @@ server <- function(input, output)
         height=graphHeight)
 
       output$iobsPlot <- renderPlot({
-          ggplot(Data$CE, aes(x=y, y=Iobs)) +
-          geom_line( color="darkred", size=2, alpha=0.9) +
-          theme_bw() +
-          xlab("Year") + 
-          ylab("CPUE")
+          ggplot(Data$CE, aes(x=Year, y=CPUE)) +
+          geom_line(mapping=aes(x=Year, y=CPUE, color="CPUE"), alpha=0.5, size=2) +
+          labs(x="Year", y="CPUE", color="") +
+          scale_color_manual(values=colors) + 
+          theme_bw()
         },
         width=graphWidth,
         height=graphHeight)
 
       output$biomassPlot <- renderPlot({
-          Data$plots
+          Data$plots[["biomass_plot"]]
         },
-        width=graphWidth,
+        width=graphWidth2,
+        height=graphHeight)
+
+      output$depletionPlot <- renderPlot({
+          Data$plots[["depletion_plot"]]
+        },
+        width=graphWidth2,
+        height=graphHeight)
+
+      output$recDevPlot <- renderPlot({
+          Data$plots[["recDev_plot"]]
+        },
+        width=graphWidth2,
+        height=graphHeight)
+
+      output$prodPlot <- renderPlot({
+          Data$plots[["prod_plot"]]
+        },
+        width=graphWidth2,
         height=graphHeight)
 
       output$TAC <- renderUI({
@@ -190,7 +227,7 @@ server <- function(input, output)
     }
 
     return ("")
-    })
+  })
 }
 
 # Run the app ----
