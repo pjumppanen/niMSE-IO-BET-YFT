@@ -1,5 +1,17 @@
 library(shiny)
 
+# MP name, tuning objective, tuning parameter
+# "PT41F.t15.tmb","B2",3.718027
+# "PT41F.t15.tmb","B3",3.405858
+# "PTBoB0Targ.t15","B2",1.218814
+# "PTBoB0Targ.t15","B3",1.295104
+
+MP_SourcePath <- "./MPs/PTTMB/MPs_TMBMSY_tidied.R"
+MP_Name       <- "PT41F.t15.tmb"
+TuningObj     <- "B2"
+MP_theta      <- 3.718027
+MP_Interval   <- 1
+
 # Define UI ----
 ui <- fluidPage(
 
