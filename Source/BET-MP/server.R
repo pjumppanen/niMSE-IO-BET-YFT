@@ -84,7 +84,7 @@ server <- function(input, output)
     )
 
     CatchAndCPUE <- read.csv(input$file$datapath, header = TRUE)
-    results      <- assessMP(MP_Name, MP_SourcePath, input$file$datapath, MP_Interval, MP_theta)
+    results      <- assessMP(MP_Name, MP_SourcePath, input$file$datapath, MP_Interval, MP_theta, Build=FALSE)
 
     return (list(CE=CatchAndCPUE, TAC=results$TAC, B=results$B, Depletion=results$Depletion, q=results$q, plots=results$plots))
   })

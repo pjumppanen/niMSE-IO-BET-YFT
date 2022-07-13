@@ -52,7 +52,7 @@ MP_cache$sources <- list()
 # print(results$q)
 #
 # -----------------------------------------------------------------------------
-assessMP <- function(MP_Name, MP_SourcePath, CatchAndCPUEcsv, MP_Interval, theta)
+assessMP <- function(MP_Name, MP_SourcePath, CatchAndCPUEcsv, MP_Interval, theta, Build=TRUE)
 {
   # source the MP
   source(MP_SourcePath)
@@ -69,7 +69,10 @@ assessMP <- function(MP_Name, MP_SourcePath, CatchAndCPUEcsv, MP_Interval, theta
     {
       MP_cache$sources[[MP_SourcePath]] = MP_SourcePath
 
-      BSysProject <- make(BSysProject)
+      if (Build)
+      {
+        BSysProject <- make(BSysProject)
+      }
 
       loadLibrary(BSysProject)
     }

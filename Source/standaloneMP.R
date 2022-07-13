@@ -37,7 +37,7 @@ theta <- subset(tpar,MP == MP_Name & tuning == tunobj)$par
 
 # call to test it
 
-results <- assessMP(MP_Name, MP_SourcePath, CatchAndCPUEcsv, MP_Interval, theta)
+results <- assessMP(MP_Name, MP_SourcePath, CatchAndCPUEcsv, MP_Interval, theta, Build=TRUE)
 
 # results in the environment results.
 
