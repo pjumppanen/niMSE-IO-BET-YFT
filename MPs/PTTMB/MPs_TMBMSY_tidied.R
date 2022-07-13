@@ -17,8 +17,8 @@ library(TMB)
 library(BuildSys) # xxx part of PJ MP format change
 
 # Assumed that working folder is root of niMSE-IO-BET-YFT.
-ProjectPTBoB0Targ <- new("BSysProject", WorkingFolder="./MPs/PTTMB/PTBoB0Targ", Debug=FALSE, CXXFLAGS=c("-fno-aggressive-loop-optimizations"))
-ProjectPT41F      <- new("BSysProject", WorkingFolder="./MPs/PTTMB/PT41F", Debug=FALSE, CXXFLAGS=c("-fno-aggressive-loop-optimizations"))
+ProjectPTBoB0Targ <- new("BSysProject", WorkingFolder="./MPs/PTTMB/PTBoB0Targ", Debug=FALSE, CXXFLAGS=c("-std=c++11", "-fno-aggressive-loop-optimizations"))
+ProjectPT41F      <- new("BSysProject", WorkingFolder="./MPs/PTTMB/PT41F", Debug=FALSE, CXXFLAGS=c("-std=c++11", "-fno-aggressive-loop-optimizations"))
 
 #------------------------------------------------------------------------------
 # Pella-Tomlinson type MP with internal projection to calculate the TAC required 
