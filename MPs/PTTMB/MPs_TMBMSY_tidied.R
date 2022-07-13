@@ -15,10 +15,11 @@
 
 library(TMB)
 library(BuildSys) # xxx part of PJ MP format change
+library(ggplot2)
 
 # Assumed that working folder is root of niMSE-IO-BET-YFT.
-ProjectPTBoB0Targ <- new("BSysProject", WorkingFolder="./MPs/PTTMB/PTBoB0Targ", Debug=FALSE, CXXFLAGS=c("-std=c++11", "-fno-aggressive-loop-optimizations"))
-ProjectPT41F      <- new("BSysProject", WorkingFolder="./MPs/PTTMB/PT41F", Debug=FALSE, CXXFLAGS=c("-std=c++11", "-fno-aggressive-loop-optimizations"))
+ProjectPTBoB0Targ <- new("BSysProject", WorkingFolder="./MPs/PTTMB/PTBoB0Targ", Debug=FALSE, CXXFLAGS=c("-std=gnu11", "-fno-aggressive-loop-optimizations"))
+ProjectPT41F      <- new("BSysProject", WorkingFolder="./MPs/PTTMB/PT41F", Debug=FALSE, CXXFLAGS=c("-std=gnu11", "-fno-aggressive-loop-optimizations"))
 
 #------------------------------------------------------------------------------
 # Pella-Tomlinson type MP with internal projection to calculate the TAC required 
@@ -1345,7 +1346,7 @@ PTBoB0Targ<-function(pset, BLower=0.1,BUpper=0.4,BoB0Targ=0.34, deltaTACLimUp=0.
     logPerformance(pset, ReportProj, newTAC, plots)
   }
 
-  rm(SD, report1, report2, obj1, obj2, SDProj, ReportProj, objProj)
+  rm(SD, obj1, obj2, SDProj, ReportProj, objProj)
 
   if(is.na(newTAC)){browser()}
   return (list(TAEbyF=pset$prevTACE$TAEbyF,TAC=newTAC))
