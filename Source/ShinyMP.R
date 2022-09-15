@@ -1,6 +1,7 @@
 library(keep)
 library(shiny)
 library(ggplot2)
+library(reshape2)
 
 # MP name, tuning objective, tuning parameter
 # "PT41F.t15.tmb","B2",3.718027
@@ -170,7 +171,7 @@ server <- function(input, output)
           data_melt <- reshape2::melt(data[, c("Year", "Catch", "TAC", "Recommended TAC")], id.vars='Year', value.name='Catch')
           colors    <- c("Catch"="#00345D", "TAC"="#00A9CE", "Recommended TAC"="#000080")
           shapes    <- c("Catch"=NA,        "TAC"=NA,        "Recommended TAC"=1)
-          types     <- c("Catch"=1,         "TAC"=1,         "Recommended TAC"=NA)
+          types     <- c("Catch"=1,         "TAC"=1,         "Recommended TAC"=0)
 
           ggplot(data_melt, aes(x=Year, y=Catch, linetype=variable, color=variable, shape=variable)) +
             geom_line(size=2) +
