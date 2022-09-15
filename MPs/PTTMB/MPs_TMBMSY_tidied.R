@@ -1493,8 +1493,22 @@ Plot_FnProj = function( report, reportProj, sdsummary, sdsummaryProj, tmbList, O
 
 reportPlots <- function(report, sdsummary, tmbList)
 {
-  Y    <- length(report$B_t)
-  data <- tmbList$Data
+  Y       <- length(report$B_t)
+  data    <- tmbList$Data
+  colors  <- c("Catch"="#001D34", "TAC"="#00A9CE")
+
+  # CPUE
+  cpue_serr  <- as.double(sdsummary[which(rownames(sdsummary)=="B_t"), "Std. Error"]) * report$q
+  cpue       <- as.double(report$B_t * report$q)
+  cpue_lower <- cpue - cpue_serr
+  cpue_upper <- cpue + cpue_serr
+  cpue_data  <- data.frame(t=1:Y, cpue_t=cpue, lower=cpue_lower, upper=cpue_upper, cpue=data$I_t)
+  cpue_plot  <- ggplot(data=cpue_data, aes(x=t, y=cpue_t)) + 
+                       geom_line(colour=colors[1], size=2, alpha=0.5) +
+                       geom_point(color="black", shape=1, size=5, mapping=aes(x=t, y=cpue)) + 
+                       geom_ribbon(data=cpue_data, aes(x=t, ymin=lower, ymax=upper), alpha=0.07) + 
+                       ggtitle("CPUE") + 
+                       theme_bw()
 
   # Biomass
   biomass_serr  <- as.double(sdsummary[which(rownames(sdsummary)=="B_t"), "Std. Error"]) / 1000
@@ -1504,10 +1518,10 @@ reportPlots <- function(report, sdsummary, tmbList)
   biomass_cpue  <- as.double(data$I_t / report$q) / 1000
   biomass_data  <- data.frame(t=1:Y, B_t=biomass, lower=biomass_lower, upper=biomass_upper, B_cpue=biomass_cpue)
   biomass_plot  <- ggplot(data=biomass_data, aes(x=t, y=B_t)) + 
-                     geom_line(colour="DarkBlue", size=2, alpha=0.5) +
+                     geom_line(colour=colors[1], size=2, alpha=0.5) +
                      geom_point(color="black", shape=1, size=5, mapping=aes(x=t, y=B_cpue)) + 
                      geom_ribbon(data=biomass_data, aes(x=t, ymin=lower, ymax=upper), alpha=0.07) + 
-                     ggtitle("Catch Biomass") + 
+                     ggtitle("Biomass") + 
                      theme_bw()
 
   # Depletion
@@ -1517,7 +1531,7 @@ reportPlots <- function(report, sdsummary, tmbList)
   depletion_upper <- depletion + depletion_serr
   depletion_data  <- data.frame(t=1:Y, depletion_t=depletion, lower=depletion_lower, upper=depletion_upper)
   depletion_plot  <- ggplot(data=depletion_data, aes(x=t, y=depletion_t)) + 
-                       geom_line(colour="DarkBlue", size=2, alpha=0.5) +
+                       geom_line(colour=colors[1], size=2, alpha=0.5) +
                        geom_ribbon(data=depletion_data, aes(x=t, ymin=lower, ymax=upper), alpha=0.07) + 
                        ggtitle("Depletion") + 
                        theme_bw()
@@ -1529,12 +1543,12 @@ reportPlots <- function(report, sdsummary, tmbList)
   recDev_upper <- recDev + recDev_serr
   recDev_data  <- data.frame(t=1:Y, recDev_t=recDev, lower=recDev_lower, upper=recDev_upper)
   recDev_plot  <- ggplot(data=recDev_data, aes(x=t, y=recDev_t)) + 
-                    geom_line(colour="DarkBlue", size=2, alpha=0.5) +
+                    geom_line(colour=colors[1], size=2, alpha=0.5) +
                     geom_ribbon(data=recDev_data, aes(x=t, ymin=lower, ymax=upper), alpha=0.07) + 
                     ggtitle("Recuitment Deviations") + 
                     theme_bw()
 
-  #production function
+  # Production function
   B         <- seq(0.01, as.double(report$k), as.double(report$k) / 100)
   RG1       <- as.double((report$shape + 1)/ report$shape) * report$r * B * (1.0 - (abs(B / report$k)) ^ report$shape)
   BMSYoK    <- as.double(floor(100 * B[RG1==max(RG1)] / report$k))
@@ -1545,10 +1559,10 @@ reportPlots <- function(report, sdsummary, tmbList)
   prod_data <- data.frame(B=B / 1000, RG1=RG1 / 1000)
 
   prod_plot <- ggplot(data=prod_data, aes(x=B, y=RG1)) + 
-                 geom_line(colour="DarkBlue", size=2, alpha=0.5) +
+                 geom_line(colour=colors[1], size=2, alpha=0.5) +
                  ggtitle(Title) + 
                  theme_bw()
 
-  return (list(biomass_plot=biomass_plot, depletion_plot=depletion_plot, recDev_plot=recDev_plot, prod_plot=prod_plot))
+  return (list(cpue_plot=cpue_plot, biomass_plot=biomass_plot, depletion_plot=depletion_plot, recDev_plot=recDev_plot, prod_plot=prod_plot))
 }
 
