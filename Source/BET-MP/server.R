@@ -101,66 +101,64 @@ server <- function(input, output)
     input$PageHeight * 0.35
   })
 
+  graphHeight2 <- reactive({
+    input$PageHeight * 0.70
+  })
+
   output$dummy <- reactive({
     if (!is.null(input$file))
     {
-      Data      <- data()
-      TAC_point <- data.frame(Year=max(Data$CE$Year) + 1, Catch=Data$TAC, Label="TAC")
-      colors    <- c("Catch"="darkblue", "CPUE"="blueviolet", "TAC"="darkcyan")
+      Data <- data()
 
       output$cobsPlot <- renderPlot({
-        ggplot(Data$CE, aes(x=Year, y=Catch)) +
-          geom_line(mapping=aes(x=Year, y=Catch, color="Catch"), alpha=0.5, size=2) +
-          geom_line(mapping=aes(x=Year, y=TAC, color="TAC"), alpha=0.5, size=2) +
-          geom_point(data=TAC_point, color="black", shape=5, size=6, mapping=aes(x=Year, y=Catch)) + 
-          geom_text(data=TAC_point, color="black", size=5, nudge_x=2.5, mapping=aes(x=Year, y=Catch, label=Label)) + 
-          labs(x="Year", y="Catch", color="") +
-          scale_color_manual(values=colors) + 
-          theme_bw()
+          data <- Data$CE
+          data <- rbind(data, list(Year=max(data$Year) + 1, CPUE=NA, Catch=NA, TAC=NA))
+
+          RecommendedTAC                          <- rep(NA, nrow(data))
+          RecommendedTAC[length(RecommendedTAC)]  <- Data$TAC
+          data                                    <- cbind(data, "Recommended TAC"=RecommendedTAC)
+
+          data_melt <- reshape2::melt(data[, c("Year", "Catch", "TAC", "Recommended TAC")], id.vars='Year', value.name='Catch')
+          colors    <- c("Catch"="#00345D", "TAC"="#00A9CE", "Recommended TAC"="#000080")
+          shapes    <- c("Catch"=NA,        "TAC"=NA,        "Recommended TAC"=1)
+          types     <- c("Catch"=1,         "TAC"=1,         "Recommended TAC"=NA)
+
+          ggplot(data_melt, aes(x=Year, y=Catch, linetype=variable, color=variable, shape=variable)) +
+            geom_line(size=2) +
+            geom_point(size=6) + 
+            scale_linetype_manual(values=types) + 
+            scale_shape_manual(values=shapes) + 
+            scale_color_manual(values=colors) + 
+            theme_bw() + 
+            theme(legend.title=element_blank())
         },
         width=graphWidth,
         height=graphHeight)
 
       output$iobsPlot <- renderPlot({
-          ggplot(Data$CE, aes(x=Year, y=CPUE)) +
-          geom_line(mapping=aes(x=Year, y=CPUE, color="CPUE"), alpha=0.5, size=2) +
-          labs(x="Year", y="CPUE", color="") +
-          scale_color_manual(values=colors) + 
-          theme_bw()
+          data_melt <- reshape2::melt(Data$CE[, c("Year", "CPUE")], id.vars='Year', value.name='CPUE')
+          colors    <- c("CPUE"="#00345D")
+
+          ggplot(data_melt, aes(x=Year, y=CPUE, color=variable)) +
+            geom_line(size=2) +
+            scale_color_manual(values=colors) + 
+            theme_bw() + 
+            theme(legend.title=element_blank())
         },
         width=graphWidth,
         height=graphHeight)
 
-      output$biomassPlot <- renderPlot({
-          Data$plots[["biomass_plot"]]
+      output$cpuePlot <- renderPlot({
+          Data$plots[["cpue_plot"]]
         },
-        width=graphWidth2,
-        height=graphHeight)
-
-      output$depletionPlot <- renderPlot({
-          Data$plots[["depletion_plot"]]
-        },
-        width=graphWidth2,
-        height=graphHeight)
-
-      output$recDevPlot <- renderPlot({
-          Data$plots[["recDev_plot"]]
-        },
-        width=graphWidth2,
-        height=graphHeight)
-
-      output$prodPlot <- renderPlot({
-          Data$plots[["prod_plot"]]
-        },
-        width=graphWidth2,
-        height=graphHeight)
+        width=graphWidth,
+        height=graphHeight2)
 
       output$TAC <- renderUI({
-        HTML(sprintf("<b>Recommended TAC:</b> %3g", Data$TAC))
+        HTML(sprintf("<H3>Recommended TAC: %3g</H3>", Data$TAC))
       })
     }
 
     return ("")
   })
 }
-

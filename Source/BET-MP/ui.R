@@ -22,8 +22,6 @@ ui <- fluidPage(
   sidebarLayout(
     # Sidebar panel for inputs
     sidebarPanel(
-      p(strong("MP:"), MP_Name),
-      p(strong("Tuning Objective:"), TuningObj),
       fileInput("file", 
                 h3("Catch, CPUE and TAC file"),
                 accept = c("text/csv",
@@ -54,27 +52,12 @@ ui <- fluidPage(
     mainPanel(
       tabsetPanel(
         tabPanel("Recommendation",
+          htmlOutput("TAC"),
           plotOutput(outputId = "cobsPlot", inline=TRUE),
-          plotOutput(outputId = "iobsPlot", inline=TRUE),
-          htmlOutput("TAC")
+          plotOutput(outputId = "iobsPlot", inline=TRUE)
         ),
-        tabPanel("Pella-Tomlinson Model Diagnostics",
-          fluidRow(
-            column(6, 
-              plotOutput(outputId = "biomassPlot", inline=TRUE)
-            ),
-            column(6, 
-              plotOutput(outputId = "depletionPlot", inline=TRUE)
-            )
-          ),
-          fluidRow(
-            column(6, 
-              plotOutput(outputId = "recDevPlot", inline=TRUE)
-            ),
-            column(6, 
-              plotOutput(outputId = "prodPlot", inline=TRUE)
-            )
-          )
+        tabPanel("Model Diagnostics",
+          plotOutput(outputId = "cpuePlot", inline=TRUE)
         )
       ),
       width=9
