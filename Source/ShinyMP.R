@@ -139,19 +139,23 @@ server <- function(input, output)
     return (list(CE=CatchAndCPUE, TAC=results$TAC, B=results$B, Depletion=results$Depletion, q=results$q, plots=results$plots))
   })
 
-  graphWidth <- reactive({
-    input$PageWidth * 0.5
+  graphWidthCatch <- reactive({
+    input$PageWidth * 0.5 + 58
   })
 
-  graphWidth2 <- reactive({
-    input$PageWidth * 0.25
+  graphWidthCPUE <- reactive({
+    input$PageWidth * 0.5
   })
 
   graphHeight <- reactive({
     input$PageHeight * 0.35
   })
 
-  graphHeight2 <- reactive({
+  graphWidthDiag <- reactive({
+    input$PageWidth * 0.5
+  })
+
+  graphHeightDiag <- reactive({
     input$PageHeight * 0.70
   })
 
@@ -179,10 +183,11 @@ server <- function(input, output)
             scale_linetype_manual(values=types) + 
             scale_shape_manual(values=shapes) + 
             scale_color_manual(values=colors) + 
+            scale_y_continuous(limits=c(0, NA)) + 
             theme_bw() + 
             theme(legend.title=element_blank())
         },
-        width=graphWidth,
+        width=graphWidthCatch,
         height=graphHeight)
 
       output$iobsPlot <- renderPlot({
@@ -192,20 +197,21 @@ server <- function(input, output)
           ggplot(data_melt, aes(x=Year, y=CPUE, color=variable)) +
             geom_line(size=2) +
             scale_color_manual(values=colors) + 
+            scale_y_continuous(limits=c(0, NA)) + 
             theme_bw() + 
             theme(legend.title=element_blank())
         },
-        width=graphWidth,
+        width=graphWidthCPUE,
         height=graphHeight)
 
       output$cpuePlot <- renderPlot({
           Data$plots[["cpue_plot"]]
         },
-        width=graphWidth,
-        height=graphHeight2)
+        width=graphWidthDiag,
+        height=graphHeightDiag)
 
       output$TAC <- renderUI({
-        HTML(sprintf("<H3>Recommended TAC: %3g</H3>", Data$TAC))
+        HTML(sprintf("<H3>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Recommended TAC: %3g</H3><BR>", Data$TAC))
       })
     }
 
