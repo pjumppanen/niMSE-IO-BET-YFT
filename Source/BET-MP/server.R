@@ -91,15 +91,15 @@ server <- function(input, output)
   })
 
   graphWidthCatch <- reactive({
-    input$PageWidth * 0.5 + 58
+    input$PageWidth * 0.43 + 58
   })
 
   graphWidthCPUE <- reactive({
-    input$PageWidth * 0.5
+    input$PageWidth * 0.43
   })
 
   graphHeight <- reactive({
-    input$PageHeight * 0.35
+    input$PageHeight * 0.33
   })
 
   graphWidthDiag <- reactive({
@@ -162,7 +162,7 @@ server <- function(input, output)
         height=graphHeightDiag)
 
       output$TAC <- renderUI({
-        HTML(sprintf("<H3>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Recommended TAC: %3g</H3><BR>", Data$TAC))
+        HTML(sprintf("<H3 class='well' style='background-color:#001a76;border-color:#000f43;color:#fff;'>Recommended TAC: %3g</H3>", Data$TAC))
       })
     }
 
