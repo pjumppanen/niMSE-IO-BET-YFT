@@ -607,6 +607,20 @@ logPerformance <- function(pset, Report, TAC, plots=NA)
     pset$MP_environment$Depletion  <- c(pset$MP_environment$Depletion, as.double(Report$Depletion_t[length(Report$Depletion_t)]))
     pset$MP_environment$q          <- c(pset$MP_environment$q, as.double(Report$q[length(Report$q)]))
     pset$MP_environment$plots      <- plots
+
+    pset$MP_environment$ModelData  <- list(
+      B_t         = as.double(Report$B_t),
+      Bpred_t     = as.double(Report$Bpred_t),
+      recDev      = as.double(Report$recDev),
+      msy         = exp(as.double(Report$log_MSY)),
+      k           = as.double(Report$k),
+      r           = as.double(Report$r),
+      shape       = as.double(Report$shape),
+      q           = as.double(Report$q),
+      Depletion_t = as.double(Report$Depletion_t),
+      log_sigmaI  = as.double(Report$log_sigmaI), 
+      log_sigmaP  = as.double(Report$log_sigmaP)
+    )
   }
 }
 
