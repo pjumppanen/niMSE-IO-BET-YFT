@@ -594,7 +594,7 @@ shouldLogPerformance <- function(pset)
 #------------------------------------------------------------------------------
 # Function for logging MP performance data
 #------------------------------------------------------------------------------
-logPerformance <- function(pset, Report, TAC, plots=NA)
+logPerformance <- function(pset, Report, TAC, BY, plots=NA)
 {
   if (!is.null(pset$MP_environment)                  & 
       exists("TAC",       envir=pset$MP_environment) &
@@ -609,6 +609,7 @@ logPerformance <- function(pset, Report, TAC, plots=NA)
     pset$MP_environment$plots      <- plots
 
     pset$MP_environment$ModelData  <- list(
+      BY          = as.double(BY),
       B_t         = as.double(Report$B_t),
       Bpred_t     = as.double(Report$Bpred_t),
       recDev      = as.double(Report$recDev),
@@ -749,7 +750,7 @@ PT4010tmb<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, deltaTACLimUp=0.9,
     #BY  <- Report$B_t[Y]  
     # Current biomass probably simplistic lower confidence bound
     BCI <- 0.4   # 0.25 = lower 25th assuming normal
-    BY  <- SD1[rownames(SD1)=="B_t",][Y,1] + qnorm(BCI)* SD1[rownames(SD1)=="B_t",][Y,2]  
+    BY  <- SD1[rownames(SD1)=="B_t",][Y,1] + qnorm(BCI)* SD1[rownames(SD1)=="B_t",][Y,2]
     #browser()
     
     #Apply the 40:10 rule to F ...
@@ -800,7 +801,7 @@ PT4010tmb<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, deltaTACLimUp=0.9,
   {
     plots <- reportPlots(report=Report, sdsummary=summary(SD), tmbList = tmbList)
 
-    logPerformance(pset, Report, newTAC, plots)
+    logPerformance(pset, Report, newTAC, BY, plots)
   }
 
   rm(SD, Report, obj)
@@ -1033,7 +1034,7 @@ msy <- exp(Report$log_MSY)
   {
     plots <- reportPlots(report=Report, sdsummary=summary(SD), tmbList = tmbList)
     
-    logPerformance(pset, Report, newTAC, plots)
+    logPerformance(pset, Report, newTAC, BY, plots)
   }
 
   rm(SD, report, obj)
@@ -1357,7 +1358,7 @@ PTBoB0Targ<-function(pset, BLower=0.1,BUpper=0.4,BoB0Targ=0.34, deltaTACLimUp=0.
   {
     plots <- reportPlots(report=Report2, sdsummary=summary(SD), tmbList = tmbList)
     
-    logPerformance(pset, ReportProj, newTAC, plots)
+    logPerformance(pset, ReportProj, newTAC, Report$B_t[Y], plots)
   }
 
   rm(SD, obj1, obj2, SDProj, ReportProj, objProj)
