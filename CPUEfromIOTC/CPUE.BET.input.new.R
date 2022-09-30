@@ -286,15 +286,15 @@ assessmentCPUE <- function(wdCPUE, exportFileName, MPDatFile, IsSeasonal=FALSE)
 
 
 # Assumes in R we have change directory to the folder containing this script file
-wdCPUE          <- "./IOTC-2019-WPTT21-DATA13a-CPUE_BET_YFT_joint/BET/"
+wdCPUE          <- "./IOTC_InputData/BET/2022/"
 
 # the disaggregated CPUE data files for the OM grid
-exportFileName          <- "./BETOMcpue2022.dat"
-seasonalExportFileName  <- "./BETOMcpue2022seasonal.dat"
+exportFileName          <- "./BETOMcpue2022.csv"
+seasonalExportFileName  <- "./BETOMcpue2022seasonal.csv"
 
 # annualized aggregate data for the MP to use
-MPDatFile               <- "./BETMPcpue2022.dat"
-seasonalMPDatFile       <- "./BETMPcpue2022seasonal.dat"
+MPDatFile               <- "./BETMPcpue2022.csv"
+seasonalMPDatFile       <- "./BETMPcpue2022seasonal.csv"
 
 assessmentCPUE(wdCPUE, exportFileName, MPDatFile, IsSeasonal=FALSE)
 assessmentCPUE(wdCPUE, seasonalExportFileName, seasonalMPDatFile, IsSeasonal=TRUE)
