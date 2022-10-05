@@ -53,8 +53,7 @@ ui <- fluidPage(
       tabsetPanel(
         tabPanel("Recommendation",
           htmlOutput("TAC"),
-          plotOutput(outputId = "cobsPlot", inline=TRUE),
-          plotOutput(outputId = "iobsPlot", inline=TRUE)
+          plotOutput(outputId = "cobsPlot", inline=TRUE)
         ),
         tabPanel("Model Diagnostics",
           plotOutput(outputId = "cpuePlot", inline=TRUE)

@@ -1503,11 +1503,14 @@ reportPlots <- function(report, sdsummary, tmbList)
   cpue_lower <- cpue - cpue_serr
   cpue_upper <- cpue + cpue_serr
   cpue_data  <- data.frame(t=1:Y, cpue_t=cpue, lower=cpue_lower, upper=cpue_upper, cpue=data$I_t)
+
   cpue_plot  <- ggplot(data=cpue_data, aes(x=t, y=cpue_t)) + 
                        geom_line(colour=colors[1], size=2, alpha=0.5) +
                        geom_point(color="black", shape=1, size=5, mapping=aes(x=t, y=cpue)) + 
                        geom_ribbon(data=cpue_data, aes(x=t, ymin=lower, ymax=upper), alpha=0.07) + 
-                       ggtitle("CPUE") + 
+      ggtitle("CPUE") +
+      xlab('\n Year') +
+      ylab('CPUE\n ') +      
                        theme_bw()
 
   # Biomass
