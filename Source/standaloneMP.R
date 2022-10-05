@@ -21,27 +21,19 @@ CatchAndCPUEcsv <- "./Source/mpdata.csv"
 MP_SourcePath   <- "./MPs/PTTMB/MPs_TMBMSY_tidied.R"
 
 # name of MP being tested
+MP_Name <- "PT41F.t15.tmb"
 
-#MP_Name <- "PT41F.t15.tmb"
-MP_Name <- "PTBoB0Targ.t15"
-
-# tuning objective 
-
-#tunobj <- "B2"
-tunobj <- "B3"
-
-# get tuning parameter
-
-tpar <- read.csv("./Source/tuning_params.csv",header=T)
-theta <- subset(tpar,MP == MP_Name & tuning == tunobj)$par
+# tuning parameter
+theta <- 3.718027
 
 # call to test it
-
-results <- assessMP(MP_Name, MP_SourcePath, CatchAndCPUEcsv, MP_Interval, theta, Build=TRUE)
+results <- assessMP(MP_Name, MP_SourcePath, CatchAndCPUEcsv, MP_Interval, theta, Build=FALSE)
 
 # results in the environment results.
-
 print(results$TAC)
 print(results$B)
 print(results$Depletion)
 print(results$q)
+
+# Data from the Model fitting process
+results$ModelData
