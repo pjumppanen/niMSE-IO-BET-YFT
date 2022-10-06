@@ -2,6 +2,7 @@ library(keep)
 library(shiny)
 library(ggplot2)
 library(reshape2)
+library(patchwork)
 
 # MP name, tuning objective, tuning parameter
 # "PT41F.t15.tmb","B2",3.718027
@@ -59,8 +60,7 @@ ui <- fluidPage(
       tabsetPanel(
         tabPanel("Recommendation",
           htmlOutput("TAC"),
-          plotOutput(outputId = "cobsPlot", inline=TRUE),
-          plotOutput(outputId = "iobsPlot", inline=TRUE)
+          plotOutput(outputId = "cobsPlot", inline=TRUE)
         ),
         tabPanel("Model Diagnostics",
           plotOutput(outputId = "cpuePlot", inline=TRUE)
@@ -148,7 +148,7 @@ server <- function(input, output)
   })
 
   graphHeight <- reactive({
-    input$PageHeight * 0.33
+    input$PageHeight * 0.66
   })
 
   graphWidthDiag <- reactive({
@@ -177,15 +177,30 @@ server <- function(input, output)
           shapes    <- c("Catch"=NA,        "TAC"=NA,        "Recommended TAC"=1)
           types     <- c("Catch"=1,         "TAC"=1,         "Recommended TAC"=0)
 
-          ggplot(data_melt, aes(x=Year, y=Catch, linetype=variable, color=variable, shape=variable)) +
+          g1  <- ggplot(data_melt, aes(x=Year, y=Catch/1000, linetype=variable, color=variable, shape=variable)) +
             geom_line(size=2) +
             geom_point(size=6) + 
             scale_linetype_manual(values=types) + 
             scale_shape_manual(values=shapes) + 
             scale_color_manual(values=colors) + 
-            scale_y_continuous(limits=c(0, NA)) + 
+              scale_y_continuous(limits=c(0, 1.2*max(data_melt$Catch/1000)), expand=c(0, 0)) +
+              xlab('') + 
+              ylab('Catch (x 1000)\n ') + 
             theme_bw() + 
-            theme(legend.title=element_blank())
+              theme(legend.title=element_blank())
+
+          data_melt <- reshape2::melt(Data$CE[, c("Year", "CPUE")], id.vars='Year', value.name='CPUE')
+          colors    <- c("CPUE"="#00345D")
+
+          g2  <-  ggplot(data_melt, aes(x=Year, y=CPUE, color=variable)) +
+            geom_line(size=2) +
+            scale_color_manual(values=colors) + 
+            scale_y_continuous(limits=c(0, NA)) + 
+              theme_bw() +
+              xlab(' \n Year') + 
+            theme(legend.title=element_blank())          
+
+          g1 + g2 + plot_layout(ncol=1)
         },
         width=graphWidthCatch,
         height=graphHeight)
@@ -197,7 +212,9 @@ server <- function(input, output)
           ggplot(data_melt, aes(x=Year, y=CPUE, color=variable)) +
             geom_line(size=2) +
             scale_color_manual(values=colors) + 
-            scale_y_continuous(limits=c(0, NA)) + 
+              scale_y_continuous(limits=c(0, NA)) +
+              xlab(' \n Year') + 
+              ylab('CPUE \n ') + 
             theme_bw() + 
             theme(legend.title=element_blank())
         },
