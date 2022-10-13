@@ -6,6 +6,8 @@
 
 # new file containing the testing code
 
+library(patchwork)
+
 source("./Source/AssessMP.R")
 
 # number of years between MP runs
@@ -37,3 +39,6 @@ print(results$q)
 
 # Data from the Model fitting process
 results$ModelData
+
+# plot the likelihood profiles
+results$plots$profiles[[1]] + results$plots$profiles[[2]] + results$plots$profiles[[3]] + plot_layout(ncol=2)
