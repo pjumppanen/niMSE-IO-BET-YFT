@@ -799,7 +799,7 @@ PT4010tmb<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, deltaTACLimUp=0.9,
 #  browser()
   if (shouldLogPerformance(pset))
   {
-    plots <- reportPlots(report=Report, sdsummary=summary(SD), tmbList = tmbList)
+    plots <- reportPlots(report=Report, sdsummary=summary(SD), tmbList = tmbList, firstYr=pset$firstYr, obj=obj)
 
     logPerformance(pset, Report, newTAC, BY, plots)
   }
@@ -1032,7 +1032,7 @@ msy <- exp(Report$log_MSY)
   #  browser()
   if (shouldLogPerformance(pset))
   {
-    plots <- reportPlots(report=Report, sdsummary=summary(SD), tmbList = tmbList)
+    plots <- reportPlots(report=Report, sdsummary=summary(SD), tmbList = tmbList, firstYr=pset$firstYr, obj=obj)
     
     logPerformance(pset, Report, newTAC, BY, plots)
   }
@@ -1356,7 +1356,7 @@ PTBoB0Targ<-function(pset, BLower=0.1,BUpper=0.4,BoB0Targ=0.34, deltaTACLimUp=0.
   #print(c("newTAC 2",newTAC))
   if (shouldLogPerformance(pset))
   {
-    plots <- reportPlots(report=Report2, sdsummary=summary(SD), tmbList = tmbList)
+    plots <- reportPlots(report=Report2, sdsummary=summary(SD), tmbList = tmbList, firstYr=pset$firstYr, obj=obj)
     
     logPerformance(pset, ReportProj, newTAC, Report$B_t[Y], plots)
   }
@@ -1506,9 +1506,9 @@ Plot_FnProj = function( report, reportProj, sdsummary, sdsummaryProj, tmbList, O
 
 #------------------------------------------------------------------------------
 
-reportPlots <- function(report, sdsummary, tmbList)
+reportPlots <- function(report, sdsummary, tmbList, firstYr, obj=NULL)
 {
-  Y       <- length(report$B_t)
+  Y       <- firstYr - 1 + (1:length(report$B_t))
   data    <- tmbList$Data
   colors  <- c("Catch"="#001D34", "TAC"="#00A9CE")
 
@@ -1517,7 +1517,7 @@ reportPlots <- function(report, sdsummary, tmbList)
   cpue       <- as.double(report$B_t * report$q)
   cpue_lower <- cpue - cpue_serr
   cpue_upper <- cpue + cpue_serr
-  cpue_data  <- data.frame(t=1:Y, cpue_t=cpue, lower=cpue_lower, upper=cpue_upper, cpue=data$I_t)
+  cpue_data  <- data.frame(t=Y, cpue_t=cpue, lower=cpue_lower, upper=cpue_upper, cpue=data$I_t)
 
   cpue_plot  <- ggplot(data=cpue_data, aes(x=t, y=cpue_t)) + 
                        geom_line(colour=colors[1], size=2, alpha=0.5) +
@@ -1534,7 +1534,7 @@ reportPlots <- function(report, sdsummary, tmbList)
   biomass_lower <- biomass - biomass_serr
   biomass_upper <- biomass + biomass_serr
   biomass_cpue  <- as.double(data$I_t / report$q) / 1000
-  biomass_data  <- data.frame(t=1:Y, B_t=biomass, lower=biomass_lower, upper=biomass_upper, B_cpue=biomass_cpue)
+  biomass_data  <- data.frame(t=Y, B_t=biomass, lower=biomass_lower, upper=biomass_upper, B_cpue=biomass_cpue)
   biomass_plot  <- ggplot(data=biomass_data, aes(x=t, y=B_t)) + 
                      geom_line(colour=colors[1], size=2, alpha=0.5) +
                      geom_point(color="black", shape=1, size=5, mapping=aes(x=t, y=B_cpue)) + 
@@ -1547,7 +1547,7 @@ reportPlots <- function(report, sdsummary, tmbList)
   depletion_serr  <- as.double(sdsummary[which(rownames(sdsummary)=="Depletion_t"), "Std. Error"])
   depletion_lower <- depletion - depletion_serr
   depletion_upper <- depletion + depletion_serr
-  depletion_data  <- data.frame(t=1:Y, depletion_t=depletion, lower=depletion_lower, upper=depletion_upper)
+  depletion_data  <- data.frame(t=Y, depletion_t=depletion, lower=depletion_lower, upper=depletion_upper)
   depletion_plot  <- ggplot(data=depletion_data, aes(x=t, y=depletion_t)) + 
                        geom_line(colour=colors[1], size=2, alpha=0.5) +
                        geom_ribbon(data=depletion_data, aes(x=t, ymin=lower, ymax=upper), alpha=0.07) + 
@@ -1559,7 +1559,7 @@ reportPlots <- function(report, sdsummary, tmbList)
   recDev_serr  <- as.double(sdsummary[which(rownames(sdsummary)=="recDev"), "Std. Error"])
   recDev_lower <- recDev - recDev_serr
   recDev_upper <- recDev + recDev_serr
-  recDev_data  <- data.frame(t=1:Y, recDev_t=recDev, lower=recDev_lower, upper=recDev_upper)
+  recDev_data  <- data.frame(t=Y, recDev_t=recDev, lower=recDev_lower, upper=recDev_upper)
   recDev_plot  <- ggplot(data=recDev_data, aes(x=t, y=recDev_t)) + 
                     geom_line(colour=colors[1], size=2, alpha=0.5) +
                     geom_ribbon(data=recDev_data, aes(x=t, ymin=lower, ymax=upper), alpha=0.07) + 
@@ -1581,6 +1581,32 @@ reportPlots <- function(report, sdsummary, tmbList)
                  ggtitle(Title) + 
                  theme_bw()
 
-  return (list(cpue_plot=cpue_plot, biomass_plot=biomass_plot, depletion_plot=depletion_plot, recDev_plot=recDev_plot, prod_plot=prod_plot))
+  plots <- list(cpue_plot=cpue_plot, biomass_plot=biomass_plot, depletion_plot=depletion_plot, recDev_plot=recDev_plot, prod_plot=prod_plot)
+
+  if (!is.null(obj))                 
+  {
+    profile_plots <- list()
+    bestNames     <- names(obj$env$last.par.best)
+    params        <- unique(bestNames)
+
+    for (param in params)
+    {
+      if (sum(param == bestNames) == 1)
+      {
+        profile   <- tmbprofile(obj, param)
+        prof_data <- data.frame(x=as.double(profile[[param]]), value=profile$value)
+        prof_plot <- ggplot(data=prof_data, aes(x=x, y=value)) + 
+                    geom_line(colour=colors[1], size=2, alpha=0.5) + 
+                    xlab(param) + 
+                    theme_bw()
+
+        profile_plots[[param]] <- prof_plot
+      }
+    }
+
+    plots[["profiles"]] <- profile_plots
+  }
+
+  return (plots)
 }
 

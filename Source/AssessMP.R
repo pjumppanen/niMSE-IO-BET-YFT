@@ -146,14 +146,15 @@ assessMP <- function(MP_Name, MP_SourcePath, CatchAndCPUEcsv, MP_Interval, theta
   TAE                       <- karray(rep(0, nfleets), dim=c(nfleets))
   TACE                      <- list(TAEbyF=TAE, TAC=LastTAC)
 
-  pset <- list(y=y - MinYear + 1,
-              Cobs=CatchAndCPUE$Catch,
-              Iobs=CatchAndCPUE$CPUE,
-              tune=theta,
-              MSY=NA,
-              prevTACE = TACE,
-              interval=MP_Interval,
-              MP_environment=MP_environment)
+  pset <- list(y              = y - MinYear + 1,
+               firstYr        = MinYear,
+               Cobs           = CatchAndCPUE$Catch,
+               Iobs           = CatchAndCPUE$CPUE,
+               tune           = theta,
+               MSY            = NA,
+               prevTACE       = TACE,
+               interval       = MP_Interval,
+               MP_environment = MP_environment)
 
   # Call MP with pset set of data
   TACE <- MP(pset)
