@@ -29,7 +29,7 @@ MP_Name <- "PT41F.t15.tmb"
 theta <- 3.718027
 
 # call to test it
-results <- assessMP(MP_Name, MP_SourcePath, CatchAndCPUEcsv, MP_Interval, theta, Build=FALSE)
+results <- assessMP(MP_Name, MP_SourcePath, CatchAndCPUEcsv, MP_Interval, theta, Build=FALSE, calcLikelihoodProfiles=TRUE)
 
 # results in the environment results.
 print(results$TAC)

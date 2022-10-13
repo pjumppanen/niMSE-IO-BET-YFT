@@ -799,7 +799,8 @@ PT4010tmb<-function(pset, BLower=0.1,BUpper=0.4,CMaxProp=1.0, deltaTACLimUp=0.9,
 #  browser()
   if (shouldLogPerformance(pset))
   {
-    plots <- reportPlots(report=Report, sdsummary=summary(SD), tmbList = tmbList, firstYr=pset$firstYr, obj=obj)
+    tmbObj <- if (!is.null(pset$MP_environment$calcLikelihoodProfiles) && pset$MP_environment$calcLikelihoodProfiles) obj else NULL
+    plots  <- reportPlots(report=Report, sdsummary=summary(SD), tmbList = tmbList, firstYr=pset$firstYr, obj=tmbObj)
 
     logPerformance(pset, Report, newTAC, BY, plots)
   }
@@ -1032,7 +1033,8 @@ msy <- exp(Report$log_MSY)
   #  browser()
   if (shouldLogPerformance(pset))
   {
-    plots <- reportPlots(report=Report, sdsummary=summary(SD), tmbList = tmbList, firstYr=pset$firstYr, obj=obj)
+    tmbObj <- if (!is.null(pset$MP_environment$calcLikelihoodProfiles) && pset$MP_environment$calcLikelihoodProfiles) obj else NULL
+    plots  <- reportPlots(report=Report, sdsummary=summary(SD), tmbList = tmbList, firstYr=pset$firstYr, obj=tmbObj)
     
     logPerformance(pset, Report, newTAC, BY, plots)
   }
@@ -1356,7 +1358,8 @@ PTBoB0Targ<-function(pset, BLower=0.1,BUpper=0.4,BoB0Targ=0.34, deltaTACLimUp=0.
   #print(c("newTAC 2",newTAC))
   if (shouldLogPerformance(pset))
   {
-    plots <- reportPlots(report=Report2, sdsummary=summary(SD), tmbList = tmbList, firstYr=pset$firstYr, obj=obj)
+    tmbObj <- if (!is.null(pset$MP_environment$calcLikelihoodProfiles) && pset$MP_environment$calcLikelihoodProfiles) obj else NULL
+    plots  <- reportPlots(report=Report2, sdsummary=summary(SD), tmbList = tmbList, firstYr=pset$firstYr, obj=tmbObj)
     
     logPerformance(pset, ReportProj, newTAC, Report$B_t[Y], plots)
   }

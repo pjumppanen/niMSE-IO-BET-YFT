@@ -52,7 +52,7 @@ MP_cache$sources <- list()
 # print(results$q)
 #
 # -----------------------------------------------------------------------------
-assessMP <- function(MP_Name, MP_SourcePath, CatchAndCPUEcsv, MP_Interval, theta, Build=TRUE)
+assessMP <- function(MP_Name, MP_SourcePath, CatchAndCPUEcsv, MP_Interval, theta, Build=TRUE, calcLikelihoodProfiles=FALSE)
 {
   # source the MP
   source(MP_SourcePath)
@@ -135,16 +135,17 @@ assessMP <- function(MP_Name, MP_SourcePath, CatchAndCPUEcsv, MP_Interval, theta
   }
 
   # Evaluate selected MP over all available MP years
-  nfleets                   <- 1
-  y                         <- MaxYear
-  MP_environment            <- rlang::new_environment()
-  MP_environment$TAC        <- c()
-  MP_environment$B          <- c()
-  MP_environment$Depletion  <- c()
-  MP_environment$q          <- c()
-  MP_environment$plots      <- c()
-  TAE                       <- karray(rep(0, nfleets), dim=c(nfleets))
-  TACE                      <- list(TAEbyF=TAE, TAC=LastTAC)
+  nfleets                               <- 1
+  y                                     <- MaxYear
+  MP_environment                        <- rlang::new_environment()
+  MP_environment$TAC                    <- c()
+  MP_environment$B                      <- c()
+  MP_environment$Depletion              <- c()
+  MP_environment$q                      <- c()
+  MP_environment$plots                  <- c()
+  MP_environment$calcLikelihoodProfiles <- calcLikelihoodProfiles
+  TAE                                   <- karray(rep(0, nfleets), dim=c(nfleets))
+  TACE                                  <- list(TAEbyF=TAE, TAC=LastTAC)
 
   pset <- list(y              = y - MinYear + 1,
                firstYr        = MinYear,
