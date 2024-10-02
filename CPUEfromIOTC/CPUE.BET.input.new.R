@@ -159,7 +159,9 @@ assessmentCPUE <- function(wdCPUE, exportFileName, MPDatFile, IsSeasonal=FALSE)
 
   plot(MPdat$yr, MPdat$cpue, type='b')
 
-  write.table(MPdat, file=MPDatFile, row.names=F)
+  csvdata           <- MPdat
+  colnames(csvdata) <- c("Year", "CPUE")
+  write.csv(csvdata, file=MPDatFile, row.names=F)
 
   #add 1% q trend, stock synthesis model run as annual but with a year equal to a month (because it didn't support seasons) 
   fraction           <- exp(log(0.99) / 4)
@@ -294,7 +296,7 @@ assessmentCPUE <- function(wdCPUE, exportFileName, MPDatFile, IsSeasonal=FALSE)
   }
 
   #output data file for OMgrid
-  write.table(data, file=exportFileName)
+  write.csv(data, file=exportFileName)
 }
 
 
