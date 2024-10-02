@@ -55,6 +55,9 @@ assessmentCPUE <- function(wdCPUE, exportFileName, MPDatFile, IsSeasonal=FALSE)
   CPUE_Data <- read.csv(file = wdCPUE %&% "IOTC_BET_JointCPUE_submitted.csv", header=T,as.is=T)
   CPUE_Data <- cbind(CPUE_Data, yr=as.integer(floor(CPUE_Data$YrQtr)), q=(CPUE_Data$YrQtr - floor(CPUE_Data$YrQtr)))
 
+  quarters <- as.numeric(levels(factor(CPUE_Data$q)))
+  num_quarters <- length(quarters)
+
   if (IsSeasonal == FALSE)
   {
     #re-normalize temperate cpue by season and use single series (unlike assessment) 
@@ -66,10 +69,10 @@ assessmentCPUE <- function(wdCPUE, exportFileName, MPDatFile, IsSeasonal=FALSE)
     names(R34)[2] <- "pr"
 
     #identify years with values for all seasons 
-    allSeasYrs  <- as.numeric(names(table(R34$yr)[table(R34$yr) == 4]))
+    allSeasYrs  <- as.numeric(names(table(R34$yr)[table(R34$yr) == num_quarters]))
     R34renorm   <- R34
 
-    for (q in c(0.0, 0.25, 0.5, 0.75))
+    for (q in quarters)
     {
       R34renorm[R34$q == q, 'pr'] <- R34[R34$q == q, 'pr'] / mean(R34[R34$q == q & R34$yr %in% allSeasYrs, 'pr'])
     }
@@ -144,7 +147,10 @@ assessmentCPUE <- function(wdCPUE, exportFileName, MPDatFile, IsSeasonal=FALSE)
   #annualized, aggregated data for MP to use 
   MPdat           <- as.data.frame(cbind(data$yr, data$pr_7994_m8))
   colnames(MPdat) <- c("yr", "cpue")
-  keepYrs         <- table(MPdat$yr) == 16 #only retain cpue observations with no non-mssing values (4 areas X 4 seasons) 
+
+  num_areas       <- length(levels(factor(data$AssessmentArea)))
+  entries_per_yr  <- num_areas * num_quarters
+  keepYrs         <- table(MPdat$yr) == entries_per_yr #only retain cpue observations with no non-mssing values (num_areas X num_quarters) 
   keepYrs         <- names(keepYrs)[keepYrs]
   MPdat           <- MPdat[MPdat$yr %in% keepYrs,]
   MPdat           <- aggregate(MPdat$cpue, FUN=sum, by=list(MPdat$yr))
@@ -155,10 +161,11 @@ assessmentCPUE <- function(wdCPUE, exportFileName, MPDatFile, IsSeasonal=FALSE)
 
   write.table(MPdat, file=MPDatFile, row.names=F)
 
-  #add 1% q trend
-  data$pr_7594_m8_q1 <- data$pr_7594_m8 / (0.9975 ^ (max(data$ssYr) - (data$ssYr)))
-  data$pr_7994_m8_q1 <- data$pr_7994_m8 / (0.9975 ^ (max(data$ssYr) - (data$ssYr)))
-  data$pr_8000_m8_q1 <- data$pr_8000_m8 / (0.9975 ^ (max(data$ssYr) - (data$ssYr)))
+  #add 1% q trend, stock synthesis model run as annual but with a year equal to a month (because it didn't support seasons) 
+  fraction           <- exp(log(0.99) / 4)
+  data$pr_7594_m8_q1 <- data$pr_7594_m8 / (fraction ^ (max(data$ssYr) - (data$ssYr)))
+  data$pr_7994_m8_q1 <- data$pr_7994_m8 / (fraction ^ (max(data$ssYr) - (data$ssYr)))
+  data$pr_8000_m8_q1 <- data$pr_8000_m8 / (fraction ^ (max(data$ssYr) - (data$ssYr)))
 
   # tropical cluster not recommended for 2019 (because CPUE group did not run the analysis, and the issue of MSE CPUE uncertainty to be reviewed in new CPUE group ToR)
   # these values use the tropical cluster, but did not do the discards, and are included only for curiousity
@@ -225,6 +232,8 @@ assessmentCPUE <- function(wdCPUE, exportFileName, MPDatFile, IsSeasonal=FALSE)
   par(mfrow=c(3,2))
 
   #compare standardization method
+  ymax <- max(data$pr_7994_m8)
+
   for (ia in c(4,1,2,3))
   {
     plotDat1 <- cbind(data$YrQtr[data$AssessmentAreaName == ia & data$yr > 1972], data$pr_7994_m8[data$AssessmentAreaName      == ia & data$yr > 1972])
@@ -235,13 +244,15 @@ assessmentCPUE <- function(wdCPUE, exportFileName, MPDatFile, IsSeasonal=FALSE)
       plot(1, xaxt="n", yaxt="n", bty="n", pch="", ylab="", xlab="", main="", sub="")
     }
     
-    plot(plotDat1, type='l', main="Region " %&% regionLab[ia], col=2, ylab="area-weighted CPUE", xlab="", ylim=c(0,2), yaxs='i')
+    plot(plotDat1, type='l', main="Region " %&% regionLab[ia], col=2, ylab="area-weighted CPUE", xlab="", ylim=c(0,ymax), yaxs='i')
     #  lines(plotDat2, col=1)
   }
 
   par(mfrow=c(3,2))
 
   #compare q trend assumption
+  ymax <- max(data$pr_7994_m8_q1)
+
   for (ia in c(4,1,2,3))
   {
     plotDat1 <- cbind(data$YrQtr[data$AssessmentAreaName == ia & data$yr > 1972], data$pr_7994_m8[data$AssessmentAreaName    == ia & data$yr > 1972])
@@ -252,13 +263,15 @@ assessmentCPUE <- function(wdCPUE, exportFileName, MPDatFile, IsSeasonal=FALSE)
       plot(1, xaxt="n", yaxt="n", bty="n", pch="", ylab="", xlab="", main="", sub="")
     }
     
-    plot(plotDat1, type='l',main="Region " %&% regionLab[ia], col=1, ylab="area-weighted CPUE", xlab="", ylim=c(0,2), yaxs='i')
+    plot(plotDat1, type='l',main="Region " %&% regionLab[ia], col=1, ylab="area-weighted CPUE", xlab="", ylim=c(0,ymax), yaxs='i')
     lines(plotDat3, col=2, lty=2)
   }
 
   par(mfrow=c(3,2))
 
   #compare area weighting assumptions
+  ymax <- max(c(max(data$pr_7994_m8),max(data$pr_7594_m8),max(data$pr_8000_m8)))
+
   for (ia in c(4,1,2,3))
   {
     plotDat1     <- cbind(data$YrQtr[data$AssessmentAreaName == ia & data$yr > 1972], data$pr_7994_m8[data$AssessmentAreaName == ia & data$yr > 1972])
@@ -275,7 +288,7 @@ assessmentCPUE <- function(wdCPUE, exportFileName, MPDatFile, IsSeasonal=FALSE)
       plot(1, xaxt="n", yaxt="n", bty="n", pch="", ylab="", xlab="", main="", sub="")
     }
     
-    plot(plotDat3, type='l', main="Region " %&% regionLab[ia], col=3, ylab="area-weighted CPUE", xlab="", ylim=c(0,1.1), yaxs='i', lwd=3)
+    plot(plotDat3, type='l', main="Region " %&% regionLab[ia], col=3, ylab="area-weighted CPUE", xlab="", ylim=c(0,ymax), yaxs='i', lwd=3)
     lines(plotDat2, col=2, lwd=2)
     lines(plotDat1, col=1)
   }
@@ -286,15 +299,15 @@ assessmentCPUE <- function(wdCPUE, exportFileName, MPDatFile, IsSeasonal=FALSE)
 
 
 # Assumes in R we have change directory to the folder containing this script file
-wdCPUE          <- "./IOTC_InputData/BET/2022/"
+wdCPUE          <- "./IOTC_InputData/BET/2023/"
 
 # the disaggregated CPUE data files for the OM grid
-exportFileName          <- "./BETOMcpue2022.csv"
-seasonalExportFileName  <- "./BETOMcpue2022seasonal.csv"
+exportFileName          <- "./BETOMcpue2023.csv"
+seasonalExportFileName  <- "./BETOMcpue2023seasonal.csv"
 
 # annualized aggregate data for the MP to use
-MPDatFile               <- "./BETMPcpue2022.csv"
-seasonalMPDatFile       <- "./BETMPcpue2022seasonal.csv"
+MPDatFile               <- "./BETMPcpue2023.csv"
+seasonalMPDatFile       <- "./BETMPcpue2023seasonal.csv"
 
 assessmentCPUE(wdCPUE, exportFileName, MPDatFile, IsSeasonal=FALSE)
 assessmentCPUE(wdCPUE, seasonalExportFileName, seasonalMPDatFile, IsSeasonal=TRUE)
