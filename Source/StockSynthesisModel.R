@@ -32,7 +32,7 @@ setMethod("initialize", "StockSynthesisModel",
         {
           coeffLevels <- as.numeric(levels(factor(ssMod$movement[[paste("age", age, sep="")]])))
 
-          if ((length(coeffLevels) == 2) && (coeffLevels == c(0, 1)))
+          if ((length(coeffLevels) == 2) && identical(coeffLevels, c(0, 1)))
           {
             # Remember SS has 0 based age and we have 1
             juvenileAge <- age + 1
